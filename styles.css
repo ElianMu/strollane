@@ -1108,3 +1108,13 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 .explore-tooltip small{margin-left:4px;color:var(--g9d)}
 .score-with-swatch{display:flex;align-items:center;gap:8px;color:var(--text)}.score-with-swatch b{font:inherit;color:var(--text)}
 .score-swatch{display:inline-block;width:14px;height:28px;border-radius:4px;box-shadow:0 0 0 1px var(--line-strong)}.score-swatch.na{background:repeating-linear-gradient(45deg,#56585a 0 4px,transparent 4px 8px)!important}
+
+/* Free-position bottom sheets (mobile-ui.js + bottom-sheet.js). The sheet element has exactly its visible height,
+   so each scroller is the remaining flex space: min-height:0 lets it shrink with the sheet, and its last section
+   can always be scrolled above the home indicator (the sheet's own padding-bottom). overscroll-behavior keeps a
+   scroll that reaches the end inside the sheet instead of moving the page or the map. Only the handle drags. */
+@media(max-width:740px){
+ .left-panel .panel-scroll,.right-panel .right-scroll,.explore-sheet .explore-sheet-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ .left-panel>.sheet-handle,.right-panel>.sheet-handle,.explore-sheet>.sheet-handle{touch-action:none;user-select:none;-webkit-user-select:none}
+ body[data-msheet$="-half"] .map-workspace .map-actions,body[data-msheet$="-custom"] .map-workspace .map-actions{bottom:min(calc(var(--msheet-h,50vh) + 12px),calc(100% - 170px))}
+}

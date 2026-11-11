@@ -1,8 +1,8 @@
 'use strict';
 
 /** Mobile shell for the phone breakpoint (<=740px): Natural-Language-first home,
-    map-first layout, and the existing bottom sheets (collapsed / half / full,
-    drag + tap, one sheet open at a time) driven by ONE view state:
+    map-first layout, and the existing bottom sheets (free-position drag from the handle,
+    tap to toggle, one sheet open at a time; geometry in bottom-sheet.js) driven by ONE view state:
 
       body[data-mview] = home | typing | busy | plan | customize | results | urban | layers
       (live navigation is body.nav-mode, owned by nav-ui.js — it overrides all of these)
@@ -16,8 +16,6 @@
     (>740px) are untouched: this script no-ops there. **/
 (function () {
   const BREAKPOINT = '(max-width: 740px)';
-  const PEEK_PX = 64;      // visible strip when "collapsed" — the drag handle + label
-  const HALF_FRACTION = 0.5; // fraction of viewport height visible when "half"
   const PANEL_IDS = { left: 'leftPanel', right: 'rightPanel', explore: 'exploreSheet' };
   const PANEL_SELECTOR = '.left-panel,.right-panel,.explore-sheet';
   // The sample request that ships pre-filled in #intentText for the desktop page.
@@ -48,6 +46,8 @@
     handle.innerHTML = `<span class="sheet-grip" aria-hidden="true"></span><button type="button" class="sheet-toggle">${label}</button>`;
     panel.insertBefore(handle, panel.firstChild);
     handle.addEventListener('pointerdown', onHandlePointerDown);
+    sheetScroller(panel)?.addEventListener('scroll', rememberScroll, { passive: true });
+    panel.addEventListener('transitionend', (e) => { if (e.target === panel && e.propertyName === 'height') restoreScroll(panel); });
     handle.querySelector('.sheet-toggle').addEventListener('click', () => {
       if (Date.now() < suppressClickUntil) return;
       const which = whichFor(panel);
@@ -55,57 +55,140 @@
     });
   }
 
-  function sheetTotalHeight(panel) {
-    return panel.getBoundingClientRect().height || Math.round(window.innerHeight * 0.88);
+  /* Sheet geometry. A sheet's position is its visible height; the sheet element gets exactly that height
+     (bottom-anchored), so its scroller always ends at the bottom of the screen and all of its content — down to
+     the last section — scrolls into view at any height. A drag rests exactly where it is released (no snap
+     points); the named levels are only where the app opens a sheet. Rules: bottom-sheet.js. */
+  const sheetHeights = new WeakMap();   // panel -> { h, frac } of its current resting height
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const EASE = 'cubic-bezier(.22,.61,.36,1)';
+
+  /** The sheet's CSS maximum (below the header, safe areas included), measured without its inline height. */
+  function sheetMaxHeight(panel) {
+    const prev = panel.style.height; panel.style.height = '';
+    const h = panel.offsetHeight; panel.style.height = prev;
+    return h || Math.round(window.innerHeight * 0.88);
   }
-  function pxForLevel(panel, level) {
-    const total = sheetTotalHeight(panel);
-    if (level === 'hidden') return total + 40;
-    if (level === 'collapsed') return Math.max(0, total - PEEK_PX);
-    if (level === 'half') return Math.max(0, total - Math.round(window.innerHeight * HALF_FRACTION));
-    return 0; // full
+  function sheetGeom(panel) {
+    return { maxH: sheetMaxHeight(panel), viewportH: window.innerHeight,
+             safeBottom: parseFloat(getComputedStyle(panel).paddingBottom) || 0 };
   }
-  function applyTransform(panel, px) { panel.style.transform = `translateY(${Math.max(0, px)}px)`; }
+  /* Content scroll position across sheet resizes. Growing a sheet until its content fits forces the browser to
+     clamp scrollTop to 0; the position the user scrolled to is remembered and restored as soon as the sheet is
+     small enough again, so resizing never loses the reader's place. Scroll events caused by our own resizes
+     are ignored; only the user's own scrolling updates the memory. */
+  const SCROLLER_SELECTOR = '.panel-scroll, .right-scroll, .explore-sheet-scroll';
+  const scrollMemory = new WeakMap();
+  let ignoreScrollUntil = 0;
+  const sheetScroller = (panel) => panel.querySelector(SCROLLER_SELECTOR);
+  function rememberScroll(e) { if (Date.now() >= ignoreScrollUntil) scrollMemory.set(e.currentTarget, e.currentTarget.scrollTop); }
+  function restoreScroll(panel) {
+    const sc = sheetScroller(panel); if (!sc || !scrollMemory.has(sc)) return;
+    const want = Math.min(scrollMemory.get(sc), Math.max(0, sc.scrollHeight - sc.clientHeight));
+    if (Math.abs(sc.scrollTop - want) > 0.5) { ignoreScrollUntil = Date.now() + 150; sc.scrollTop = want; }
+  }
+  function setSheetHeight(panel, h) {
+    ignoreScrollUntil = Date.now() + 150;
+    panel.style.height = `${h}px`;
+    restoreScroll(panel);
+  }
+  function publishSheetHeight(h) { document.documentElement.style.setProperty('--msheet-h', `${Math.max(0, Math.round(h))}px`); }
   // A hidden sheet is pushed down by its OWN height (+40px), not by a pixel value measured once: a pixel offset
   // taken at load went stale when the viewport later grew (rotation, Safari toolbars, the iOS Home Screen
   // viewport settling), leaving the top of every "hidden" sheet visible as a dark band at the bottom.
   function hideTransform(panel) { panel.style.transform = 'translateY(calc(100% + 40px))'; }
 
-  function setLevel(which, level) {
+  /** Rest an open sheet at height h. From hidden it slides in with a transform only (its height is set while it
+      is still off screen); between two open heights the height itself animates. */
+  function placeSheet(panel, h, geom, animate) {
+    const fromHidden = !panel.dataset.level || panel.dataset.level === 'hidden';
+    const motion = animate && !reduceMotion.matches;
+    if (fromHidden) {
+      panel.style.transition = 'none';
+      setSheetHeight(panel, h);
+      if (motion) { void panel.offsetHeight; panel.style.transition = `transform .28s ${EASE}`; }
+    } else {
+      panel.style.transition = motion ? `height .28s ${EASE}, transform .28s ${EASE}` : 'none';
+      setSheetHeight(panel, h);
+    }
+    panel.style.transform = 'translateY(0)';
+    sheetHeights.set(panel, { h, frac: geom.maxH ? h / geom.maxH : 1 });
+    publishSheetHeight(h);
+  }
+
+  function syncSheetState() {
+    for (const w of Object.keys(PANEL_IDS)) {
+      const p = panelFor(w); if (!p) continue;
+      const btn = p.querySelector('.sheet-toggle'); if (btn) btn.setAttribute('aria-expanded', String(p.dataset.level === 'full'));
+    }
+    document.body.dataset.msheet = active ? `${active}-${panelFor(active).dataset.level}` : 'none';
+    if (!active) publishSheetHeight(0);
+  }
+
+  /** level: hidden | collapsed | half | full (where the app opens a sheet) or custom (keep the user's own
+      position, re-fitted to the current viewport — used after rotation / Safari toolbar changes). */
+  function setLevel(which, level, opts = {}) {
     if (!mq.matches) return;
     const panel = panelFor(which);
     if (!panel) return;
-    // Placing a sheet that was not on screen (first layout, or back from the tablet layout after a rotation)
-    // must not animate it across the screen; only closing an open sheet slides.
-    const instant = level === 'hidden' && (!panel.dataset.level || panel.dataset.level === 'hidden');
-    panel.dataset.level = level;
-    panel.style.transition = instant ? 'none' : '';
-    if (level === 'hidden') hideTransform(panel); else applyTransform(panel, pxForLevel(panel, level));
-    if (instant) requestAnimationFrame(() => { if (panel.dataset.level === 'hidden') panel.style.transition = ''; });
+    const animate = opts.animate !== false;
+    if (level === 'hidden') {
+      // Placing a sheet that was not on screen (first layout, or back from the tablet layout after a rotation)
+      // must not animate it across the screen; only closing an open sheet slides.
+      const instant = !panel.dataset.level || panel.dataset.level === 'hidden';
+      panel.style.transition = instant || !animate || reduceMotion.matches ? 'none' : `transform .28s ${EASE}`;
+      hideTransform(panel);
+      panel.dataset.level = 'hidden';
+    } else {
+      const geom = sheetGeom(panel), b = BottomSheet.bounds(geom);
+      const saved = sheetHeights.get(panel);
+      const h = level === 'custom'
+        ? BottomSheet.clamp(Math.round((saved ? saved.frac : BottomSheet.HALF_FRACTION) * geom.maxH), b.min, b.max)
+        : BottomSheet.presetHeight(level, geom);
+      placeSheet(panel, h, geom, animate);
+      panel.dataset.level = level === 'custom' ? BottomSheet.levelFor(h, geom) : level;
+    }
     const open = level !== 'hidden';
     panel.inert = !open; panel.setAttribute('aria-hidden', String(!open));
-    const btn = panel.querySelector('.sheet-toggle'); if (btn) btn.setAttribute('aria-expanded', String(level === 'full'));
     active = open ? which : (active === which ? null : active);
     // One sheet at a time: opening one hides every other one.
     if (open) {
       for (const other of Object.keys(PANEL_IDS)) {
         if (other === which) continue;
         const o = panelFor(other);
-        if (o && o.dataset.level !== 'hidden') { o.dataset.level = 'hidden'; hideTransform(o); o.inert = true; o.setAttribute('aria-hidden', 'true'); }
+        if (o && o.dataset.level !== 'hidden') {
+          o.style.transition = reduceMotion.matches ? 'none' : `transform .28s ${EASE}`;
+          o.dataset.level = 'hidden'; hideTransform(o); o.inert = true; o.setAttribute('aria-hidden', 'true');
+        }
       }
     }
-    document.body.dataset.msheet = active ? `${active}-${panelFor(active).dataset.level}` : 'none';
+    syncSheetState();
   }
 
   const TAP_SLOP = 8, TAP_MS = 350;
 
+  function restingHeight(panel) {
+    const saved = sheetHeights.get(panel);
+    if (saved && panel.dataset.level && panel.dataset.level !== 'hidden') return saved.h;
+    return Math.max(0, window.innerHeight - panel.getBoundingClientRect().top);
+  }
+  // Only the handle drags the sheet (touch-action:none there); a swipe inside the content scrolls the content.
+  // The sheet's own height follows the finger (one update per frame), so the scroller always matches what is on
+  // screen; below the peek strip (a swipe-away in progress) the sheet keeps its minimum height and slides down.
+  function showDragHeight(d) {
+    const min = BottomSheet.bounds(d.geom).min;
+    setSheetHeight(d.panel, Math.max(d.h, Math.min(min, d.geom.maxH)));
+    d.panel.style.transform = d.h < min ? `translateY(${min - d.h}px)` : 'translateY(0)';
+    publishSheetHeight(d.h);
+  }
   function onHandlePointerDown(e) {
     const panel = e.currentTarget.closest(PANEL_SELECTOR);
     if (!panel || !mq.matches) return;
     if (e.target.closest('button') && e.target.closest('.m-sheet-bar')) return;
-    const current = parseFloat((panel.style.transform.match(/-?\d+(\.\d+)?/) || [0])[0]) || pxForLevel(panel, panel.dataset.level || 'collapsed');
-    dragState = { panel, startY: e.clientY, startPx: current, startT: Date.now(), moved: false };
+    const geom = sheetGeom(panel);
+    const startH = BottomSheet.clamp(restingHeight(panel), 0, geom.maxH);
     panel.style.transition = 'none';
+    dragState = { panel, geom, startY: e.clientY, startH, h: startH, startT: Date.now(), moved: false, raf: 0 };
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
     e.currentTarget.addEventListener('pointermove', onHandlePointerMove);
     e.currentTarget.addEventListener('pointerup', onHandlePointerUp, { once: true });
@@ -115,29 +198,41 @@
     if (!dragState) return;
     const dy = e.clientY - dragState.startY;
     if (Math.abs(dy) > TAP_SLOP) dragState.moved = true;
-    applyTransform(dragState.panel, Math.max(0, dragState.startPx + dy));
+    dragState.h = BottomSheet.dragHeight(dragState.startH, dy, dragState.geom);
+    if (!dragState.raf) dragState.raf = requestAnimationFrame(() => {
+      if (!dragState) return;
+      dragState.raf = 0;
+      showDragHeight(dragState);
+    });
   }
   function onHandlePointerUp(e) {
     e.currentTarget.removeEventListener('pointermove', onHandlePointerMove);
     if (!dragState) return;
-    const { panel, moved, startT } = dragState; dragState = null;
-    panel.style.transition = '';
+    const { panel, geom, startH, startT, moved, raf } = dragState;
+    const h = dragState.h; dragState = null; cancelAnimationFrame(raf);
     const which = whichFor(panel);
     suppressClickUntil = Date.now() + 400; // the button's own `click` follows right after — ignore it, we already acted
     if (!moved && Date.now() - startT < TAP_MS) {
-      // A tap on the handle (not a drag): toggle half <-> full.
+      // A tap on the handle (not a drag): back to the resting height, then toggle full <-> half.
+      setSheetHeight(panel, startH); panel.style.transform = 'translateY(0)';
       setLevel(which, panel.dataset.level === 'full' ? 'half' : 'full');
       return;
     }
-    const total = sheetTotalHeight(panel);
-    const visible = total - ((parseFloat((panel.style.transform.match(/-?\d+(\.\d+)?/) || [0])[0])) || 0);
-    // Snap to whichever of the four resting levels is closest to where the drag ended.
-    const targets = { hidden: 0, collapsed: PEEK_PX, half: Math.round(window.innerHeight * HALF_FRACTION), full: total };
-    let best = 'collapsed', bestDist = Infinity;
-    for (const level in targets) { const d = Math.abs(visible - targets[level]); if (d < bestDist) { bestDist = d; best = level; } }
-    setLevel(which, best);
-    // Swiping a view's own sheet fully away is the same as pressing its Back.
-    if (best === 'hidden') onSheetDismissed(which);
+    const r = BottomSheet.release(h, geom);
+    if (r.dismiss) {
+      // Swiping a view's own sheet fully away is the same as pressing its Back.
+      setLevel(which, 'hidden');
+      onSheetDismissed(which);
+      return;
+    }
+    // Rest exactly where it was released.
+    panel.style.transition = 'none';
+    setSheetHeight(panel, r.height);
+    panel.style.transform = 'translateY(0)';
+    sheetHeights.set(panel, { h: r.height, frac: r.height / geom.maxH });
+    publishSheetHeight(r.height);
+    panel.dataset.level = BottomSheet.levelFor(r.height, geom);
+    syncSheetState();
   }
 
   /* ------------------------------------------------------------------ */
@@ -663,12 +758,12 @@
       if (!document.body.classList.contains('nav-mode') && document.body.dataset.wasNav === '1') { delete document.body.dataset.wasNav; setView(baseView()); }
       else if (document.body.classList.contains('nav-mode')) { document.body.dataset.wasNav = '1'; for (const w of Object.keys(PANEL_IDS)) setLevel(w, 'hidden'); }
     }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    window.addEventListener('resize', () => { if (mq.matches && active) setLevel(active, panelFor(active).dataset.level); });
+    window.addEventListener('resize', () => { if (mq.matches && active) refitActiveSheet(); });
     // iOS (Safari tab and Home Screen app) can change the visible area without a normal resize: rotation,
     // returning from the background (pageshow), the keyboard closing (visualViewport). MapLibre must
     // re-measure its canvas or it keeps the old size and leaves an unpainted band.
     let resizeRaf = 0;
-    const remeasure = () => { cancelAnimationFrame(resizeRaf); resizeRaf = requestAnimationFrame(() => { try { if (typeof state !== 'undefined' && state.map) state.map.resize(); } catch (_) {} if (mq.matches && active) setLevel(active, panelFor(active).dataset.level); }); };
+    const remeasure = () => { cancelAnimationFrame(resizeRaf); resizeRaf = requestAnimationFrame(() => { try { if (typeof state !== 'undefined' && state.map) state.map.resize(); } catch (_) {} if (mq.matches && active) refitActiveSheet(); }); };
     window.addEventListener('orientationchange', () => setTimeout(remeasure, 250));
     window.addEventListener('pageshow', remeasure);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) remeasure(); });
@@ -733,11 +828,17 @@
     document.addEventListener('focusin', (e) => { if (mq.matches && e.target.matches?.(TEXT_FIELD)) revealField(e.target); });
     document.addEventListener('focusout', () => setTimeout(updateKeyboard, 60));
   }
+  /** The visible area changed (rotation, Safari toolbars, Home Screen viewport): keep the open sheet at the
+      same share of the available height, clamped to the new bounds — never jump to a preset. */
+  function refitActiveSheet() {
+    const panel = panelFor(active); if (!panel || dragState) return;
+    setLevel(active, 'custom', { animate: false });
+  }
   function unwire() {
     if (!wired) return; wired = false;
     for (const which of Object.keys(PANEL_IDS)) {
       const panel = panelFor(which); if (!panel) continue;
-      panel.style.transform = ''; panel.style.transition = ''; delete panel.dataset.level;
+      panel.style.transform = ''; panel.style.transition = ''; panel.style.height = ''; delete panel.dataset.level;
       panel.inert = false; panel.removeAttribute('aria-hidden');
     }
     delete $('leftPanel').dataset.lp;
