@@ -12,9 +12,9 @@ const EXPLORE_VIEWS=[
 // Full Manhattan first; the Midtown pilot is used only if the Manhattan build is missing (and is labelled as such).
 const DIMENSION_AREAS=['manhattan','midtown'];
 const exploreMap={data:null,loading:null,active:false,view:2,opacity:.9,hover:null,selected:null,collapsed:false,thumbs:false,labels:[],stops:null,manifest:null,base:null,details:null,detailsLoading:null,no2:null};
-// Sequential green ramps that follow the map theme: lightness always runs toward the strongest contrast with the
-// basemap, so high scores stand out (light theme: light → dark green; dark theme: dark → bright green).
-const EXPLORE_RAMPS={light:['#dcefcf','#a3d48c','#5fa862','#2b7a44','#0f4a2b'],dark:['#163b2c','#1e6140','#2f8f4f','#73c463','#cdf58f']},EXPLORE_NA='#56585a';
+// Blue → cyan → yellow ramps (blue = low, yellow = high), one per map theme; the dark-theme ramp is brighter at
+// the low end so low scores stay visible on the dark basemap. Keep in sync with .explore-ramp i in styles.css.
+const EXPLORE_RAMPS={light:['#1f5c9e','#2b94d1','#54c3d0','#a9da84','#f5d64a'],dark:['#2a6fb3','#34a0de','#5cccd6','#b5e08a','#ffdf55']},EXPLORE_NA='#56585a';
 const exploreRampColors=()=>EXPLORE_RAMPS[document.documentElement.dataset.mapTheme==='dark'?'dark':'light'];
 const exploreView=()=>EXPLORE_VIEWS[exploreMap.view];
 // Dimension scores are already percentiles, so fixed stops; Overall is a mean that clusters near 50, so its stops follow its own quantiles.
