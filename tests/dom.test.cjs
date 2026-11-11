@@ -104,6 +104,8 @@ const run=s=>vm.runInContext(s,context);
   if(url.startsWith('./data/layers/')||url.startsWith('./data/places/')){const f=path.join(root,url.slice(2));return fs.existsSync(f)?resp(fs.readFileSync(f,'utf8')):resp('<!DOCTYPE html><title>404</title>',404,'text/html');}
   if(url.endsWith('/api/navigation/progress'))return resp({state:'off_route',distance_from_route_m:82,remaining_m:700,remaining_min:9,reroute_recommended:true});
   throw new Error('Network intentionally blocked in DOM test')};
+ // No preset ends any more (start = GPS or the request, destination optional): this fixture walk sets its own.
+ run("state.start='bryant';state.end='columbia';$('searchStart').value='Bryant Park';$('searchEnd').value='Columbia University'");
  run("planner.weights.Nature=90;planner.origins.Nature='manual';planner.directions.Nature='high';setBudget(72);planner.maxDetourPct=25");
  await run('generateRoutes()');
  const req=calls.find(c=>c.url.endsWith('/api/routes')).body;

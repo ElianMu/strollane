@@ -458,6 +458,8 @@
     const clarified = Boolean(lastMsg && /has not been recalculated/.test(lastMsg));
     if (hasRoutes() && !clarified) { confirmStart(); showStatus(null); setView('results'); return; }
     setView('home');
+    // No start could be found (location refused / outside Manhattan, none named): offer the ways to give one.
+    if (clarified && !getPlace('start')) { askForStart(lastSubmitted, lastMsg.replace(/\s*The displayed previous route has not been recalculated\.?/, '')); return; }
     const reason = lastMsg || (toastNow && toastNow !== toastBefore ? toastNow : '') || 'No route was calculated. Check the start and destination, then try again.';
     showStatus(reason, clarified ? 'clarify' : 'error');
   }
@@ -466,25 +468,23 @@
     for (const kind of ['start', 'end']) {
       if (kind === 'end' && typeof journey !== 'undefined' && journey.endMode !== 'fixed') continue;
       const typed = $(kind === 'start' ? 'searchStart' : 'searchEnd').value.trim(), chosen = getPlace(kind);
-      if (typed !== chosen?.name) { toast(`Search and choose a ${kind === 'start' ? 'starting point' : 'destination'} result first, or use a preset.`); return false; }
+      // an empty box is fine (start = my location, no destination = a recommended walk); a typed, unchosen one is not
+      if (typed !== (chosen?.name || '')) { toast(`Search and choose a ${kind === 'start' ? 'starting point' : 'destination'} result first, or clear the box.`); return false; }
     }
     return true;
   }
   // Starting point (§4.4): 1) a start named in the request, 2) a start the user chose this session,
-  // 3) the user's own location — asked for once on load (app.js autoLocateStart), used when it is inside Manhattan,
-  // 4) otherwise ask. The page ships with a preset start (Bryant Park) that the user never chose; it is never used
-  // silently — the user confirms it, picks GPS, or picks a place.
+  // 3) the user's own location — asked for once on load (app.js autoLocateStart) and again when a walk is
+  // planned without a start (app.js ensurePlanStart), used when it is inside Manhattan, 4) otherwise ask.
+  // There is no preset start or destination.
   let startConfirmed = false;
-  const REQUEST_NAMES_START = /\bstart(?:ing)?\s+(?:at|from|in|near)\b|\bbegin(?:ning)?\s+(?:at|from)\b|\bleav(?:e|ing)\s+from\b|\bfrom\s+(?:my\s+(?:hotel|location)|here|[A-Z0-9])|\bnear\s+me\b|从|出发|起点/;
   function confirmStart() { startConfirmed = true; }
-  function askForStart(text) {
-    const a = getPlace('start');
+  function askForStart(text, reason) {
     const el = $('mStatus'); el.className = 'm-status clarify'; el.innerHTML = '';
     const msg = document.createElement('span');
-    msg.textContent = `Where should this walk start? Your request doesn't name a start, and ${a?.name || 'no place'} is only the preset.`;
+    msg.textContent = reason || 'Where should this walk start? Allow location access, or name a start ("from Union Square …").';
     const acts = document.createElement('span'); acts.className = 'm-status-actions';
     const mk = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', fn); acts.appendChild(b); };
-    if (a) mk(`Start at ${a.name}`, () => { confirmStart(); showStatus(null); createFromText(); });
     mk('◎ Use my location', async () => {
       showStatus('Waiting for location permission…', 'busy');
       $('gpsStart').click(); // the existing GPS flow: asks permission, never invents a position
@@ -500,8 +500,7 @@
   function createFromText() {
     const text = ($('intentText').value || '').trim();
     if (!text) { showStatus('Describe the walk you want — for example “a quiet 45-minute walk with interesting architecture”.', 'hint'); $('intentText').focus(); return; }
-    // A map-picked point or a real GPS fix is itself an explicit choice; the untouched preset is not.
-    if (!startConfirmed && !['gps', 'custom'].includes(state.start) && !hasRoutes() && !REQUEST_NAMES_START.test(text)) { setView('home'); askForStart(text); return; }
+    // No start yet is fine: handlePlan takes the start the request names, otherwise the user's location.
     lastSubmitted = text;
     $('intentText').blur();
     runPlan(() => handlePlan(text, hasRoutes()));
@@ -512,7 +511,12 @@
     const text = ($('intentText').value || '').trim();
     if (text && text !== lastSubmitted) { createFromText(); return; } // an unsent request is still the user's intent
     if (!placesConfirmed()) return;
-    runPlan(() => (typeof journeyMode === 'function' && journeyMode() ? planJourney(false) : generateRoutes(null, false)));
+    runPlan(async () => {
+      const problem = await ensurePlanStart();
+      if (problem) { appendChat('assistant', problem + ' The displayed previous route has not been recalculated.'); return; }
+      const rec = prepareRecommendedWalk(''); if (rec) appendChat('assistant', rec); // FROM only: recommend a walk
+      return typeof journeyMode === 'function' && journeyMode() ? planJourney(false) : generateRoutes(null, false);
+    });
   }
 
   /* ------------------------------------------------------------------ */
