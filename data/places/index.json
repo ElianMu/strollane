@@ -1,0 +1,289 @@
+{
+ "built_at": "2026-10-24T02:52:24+00:00",
+ "osm_timestamp": "2026-10-24T02:49:35Z",
+ "coverage": "Within 150 m of the routable pedestrian graph (osm-walk-20261023-99602011): Manhattan",
+ "network_version": "osm-walk-20261023-99602011",
+ "categories": [
+  {
+   "id": "hotels",
+   "label": "Hotels & accommodation",
+   "count": 473,
+   "merged_duplicates": 7,
+   "records_with_conflicts": 1,
+   "missing": {
+    "addr": 47,
+    "web": 92,
+    "hours": 452
+   }
+  },
+  {
+   "id": "museums",
+   "label": "Museums & galleries",
+   "count": 365,
+   "merged_duplicates": 10,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 54,
+    "web": 57,
+    "hours": 133
+   }
+  },
+  {
+   "id": "attractions",
+   "label": "Famous attractions & viewpoints",
+   "count": 228,
+   "merged_duplicates": 1,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 190,
+    "web": 120,
+    "hours": 213
+   }
+  },
+  {
+   "id": "historic",
+   "label": "Historic places",
+   "count": 390,
+   "merged_duplicates": 41,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 355,
+    "web": 319,
+    "hours": 387
+   }
+  },
+  {
+   "id": "parks",
+   "label": "Parks & gardens",
+   "count": 526,
+   "merged_duplicates": 1,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 418,
+    "web": 281,
+    "hours": 471
+   }
+  },
+  {
+   "id": "cafes",
+   "label": "Cafés & coffee",
+   "count": 2210,
+   "merged_duplicates": 9,
+   "records_with_conflicts": 2,
+   "missing": {
+    "addr": 328,
+    "web": 1503,
+    "hours": 1482
+   }
+  },
+  {
+   "id": "bakeries",
+   "label": "Bakeries & desserts",
+   "count": 857,
+   "merged_duplicates": 6,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 97,
+    "web": 655,
+    "hours": 641
+   }
+  },
+  {
+   "id": "restaurants",
+   "label": "Restaurants",
+   "count": 12505,
+   "merged_duplicates": 117,
+   "records_with_conflicts": 5,
+   "missing": {
+    "addr": 1150,
+    "web": 9461,
+    "hours": 9574
+   }
+  },
+  {
+   "id": "bars",
+   "label": "Bars & pubs",
+   "count": 884,
+   "merged_duplicates": 2,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 201,
+    "web": 363,
+    "hours": 406
+   }
+  },
+  {
+   "id": "culture",
+   "label": "Theatres, libraries & landmarks of worship",
+   "count": 434,
+   "merged_duplicates": 3,
+   "records_with_conflicts": 1,
+   "missing": {
+    "addr": 62,
+    "web": 85,
+    "hours": 380
+   }
+  },
+  {
+   "id": "shopping",
+   "label": "Shopping",
+   "count": 278,
+   "merged_duplicates": 4,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 89,
+    "web": 149,
+    "hours": 145
+   }
+  },
+  {
+   "id": "pharmacies",
+   "label": "Pharmacies",
+   "count": 327,
+   "merged_duplicates": 1,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 66,
+    "web": 173,
+    "hours": 113
+   }
+  },
+  {
+   "id": "groceries",
+   "label": "Groceries & convenience",
+   "count": 1012,
+   "merged_duplicates": 2,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 207,
+    "web": 772,
+    "hours": 608
+   }
+  },
+  {
+   "id": "health",
+   "label": "Hospitals & clinics",
+   "count": 231,
+   "merged_duplicates": 5,
+   "records_with_conflicts": 2,
+   "missing": {
+    "addr": 30,
+    "web": 62,
+    "hours": 107
+   }
+  },
+  {
+   "id": "banks",
+   "label": "Banks & ATMs",
+   "count": 532,
+   "merged_duplicates": 6,
+   "records_with_conflicts": 2,
+   "missing": {
+    "addr": 237,
+    "web": 300,
+    "hours": 200
+   }
+  },
+  {
+   "id": "restrooms",
+   "label": "Public restrooms",
+   "count": 419,
+   "merged_duplicates": 3,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 407,
+    "web": 368,
+    "hours": 199
+   }
+  },
+  {
+   "id": "luggage",
+   "label": "Luggage storage",
+   "count": 1,
+   "merged_duplicates": 0,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 0,
+    "web": 0,
+    "hours": 1
+   }
+  },
+  {
+   "id": "historic_lpc",
+   "label": "NYC designated individual landmarks",
+   "count": 921,
+   "merged_duplicates": 5,
+   "records_with_conflicts": 0,
+   "missing": {
+    "addr": 0,
+    "web": 921,
+    "hours": 921
+   },
+   "linked_to_osm": 217
+  }
+ ],
+ "sources": {
+  "osm": "OpenStreetMap contributors via Overpass API (ODbL); names, tags and hours as mapped, not verified by STREETWISE",
+  "lpc": "NYC Landmarks Preservation Commission individual landmarks (NYC Open Data)",
+  "nyc_restrooms": "NYC Open Data Public Restrooms (i7jb-7jku), status as published",
+  "wikidata": "Wikidata API sitelink counts (CC0)",
+  "dof_hotels": "NYC Department of Finance Hotels Properties Citywide (tjus-cn27): hotel-class tax lots",
+  "dohmh": "NYC DOHMH Restaurant Inspection Results (43nn-pn8j): permit, cuisine, phone, grade, last inspection, closure — not reviews"
+ },
+ "fields": {
+  "sub": "source tag",
+  "web": "website",
+  "menu": "website:menu (official menu link if mapped)",
+  "hours": "opening_hours (OSM syntax)",
+  "cid": "canonical place ID (stable across sources)",
+  "pids": "provider IDs merged into this record",
+  "snap": "metres to the walkable access point on the pedestrian graph",
+  "q": "data quality: complete | partial | minimal",
+  "conf": "fields that disagree between merged provider records",
+  "lpc": "linked NYC LPC landmark ID",
+  "status": "operational status as known: listed (in source; not verified open today)",
+  "upd": "source data timestamp",
+  "chk": "when STREETWISE built this record",
+  "wd": "Wikidata ID",
+  "sl": "Wikidata sitelink count (Wikipedia language editions etc.): notability signal",
+  "drink": "drink:* tags (community-mapped, not menu verification)",
+  "diet": "diet:* tags"
+ },
+ "dropped_outside_routing_coverage": 4968,
+ "inspections": {
+  "available": true,
+  "manhattan_permits": 12215,
+  "linked_to_osm": 3326,
+  "added_from_dohmh": 8856,
+  "closed_by_dohmh": 35
+ },
+ "hotel_lots": {
+  "available": true,
+  "lots": 780,
+  "hotels_matched": 273
+ },
+ "permit_link_repair": {
+  "method": "same source snapshots; unambiguous names AND exact normalized address AND <60 m; uncertain records retained separately",
+  "repaired_at": "2026-10-24T22:12:23+00:00",
+  "permit_source_sha256": "38eaa1fba28140695442701b070afa426ab4f792e9ca29c91e35666d3eb64a75",
+  "source_record_counts": {
+   "restaurants": 10919,
+   "cafes": 2001,
+   "bakeries": 713,
+   "bars": 884
+  },
+  "result_record_counts": {
+   "restaurants": 12505,
+   "cafes": 2210,
+   "bakeries": 857,
+   "bars": 884
+  },
+  "summary": {
+   "available": true,
+   "manhattan_permits": 12215,
+   "linked_to_osm": 3326,
+   "added_from_dohmh": 8856,
+   "closed_by_dohmh": 35
+  }
+ }
+}
