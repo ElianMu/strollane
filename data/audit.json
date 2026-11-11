@@ -1,0 +1,372 @@
+{
+ "built_at": "2026-10-24T22:18:53+00:00",
+ "datasets": 125,
+ "connected": 97,
+ "records": 2695498,
+ "presets": [
+  {
+   "key": "bryant",
+   "name": "Bryant Park",
+   "matched": "Bryant Park",
+   "matched_id": "osm:way/22727025",
+   "offset_m": 33
+  },
+  {
+   "key": "carnegie",
+   "name": "Carnegie Hall",
+   "matched": "Carnegie Hall",
+   "matched_id": "lpc:LP-00278",
+   "offset_m": 11
+  },
+  {
+   "key": "times",
+   "name": "Times Square",
+   "matched": "Times Square",
+   "matched_id": "osm:way/702540318",
+   "offset_m": 93
+  },
+  {
+   "key": "rock",
+   "name": "Rockefeller Center",
+   "matched": "Rockefeller Center",
+   "matched_id": "osm:node/4236846689",
+   "offset_m": 18
+  },
+  {
+   "key": "nypl",
+   "name": "New York Public Library",
+   "matched": "New York Public Library, Astor, Lenox and Tilden Foundations",
+   "matched_id": "lpc:LP-00246",
+   "offset_m": 59
+  },
+  {
+   "key": "stpatrick",
+   "name": "St. Patrick\u2019s Cathedral",
+   "matched": null,
+   "matched_id": null,
+   "offset_m": null
+  },
+  {
+   "key": "radio",
+   "name": "Radio City Music Hall",
+   "matched": "Radio City Music Hall",
+   "matched_id": "dohmh:41071308",
+   "offset_m": 39
+  },
+  {
+   "key": "moma",
+   "name": "Museum of Modern Art",
+   "matched": null,
+   "matched_id": null,
+   "offset_m": null
+  },
+  {
+   "key": "grand",
+   "name": "Grand Central Terminal",
+   "matched": "Grand Central Terminal",
+   "matched_id": "lpc:LP-00266",
+   "offset_m": 8
+  },
+  {
+   "key": "battery",
+   "name": "The Battery",
+   "matched": null,
+   "matched_id": null,
+   "offset_m": null
+  },
+  {
+   "key": "wall",
+   "name": "Wall Street",
+   "matched": "Wall Street Bordealix",
+   "matched_id": "dohmh:50191904",
+   "offset_m": 230
+  },
+  {
+   "key": "washington",
+   "name": "Washington Square Park",
+   "matched": "Washington Square Park",
+   "matched_id": "osm:way/22899302",
+   "offset_m": 27
+  },
+  {
+   "key": "union",
+   "name": "Union Square",
+   "matched": "Union Square Park",
+   "matched_id": "osm:relation/7095444",
+   "offset_m": 17
+  },
+  {
+   "key": "columbus",
+   "name": "Columbus Circle",
+   "matched": "Columbus Circle",
+   "matched_id": "osm:way/109269254",
+   "offset_m": 3
+  },
+  {
+   "key": "met",
+   "name": "The Metropolitan Museum",
+   "matched": "The Metropolitan Museum of Art",
+   "matched_id": "osm:relation/3698894",
+   "offset_m": 18
+  },
+  {
+   "key": "columbia",
+   "name": "Columbia University",
+   "matched": "Columbia University Bookstore",
+   "matched_id": "osm:node/625842823",
+   "offset_m": 63
+  },
+  {
+   "key": "apollo",
+   "name": "Apollo Theater",
+   "matched": "Apollo Theater",
+   "matched_id": "osm:way/271798914",
+   "offset_m": 25
+  },
+  {
+   "key": "fort",
+   "name": "Fort Tryon Park",
+   "matched": "Fort Tryon Park",
+   "matched_id": "osm:relation/5625630",
+   "offset_m": 212
+  }
+ ],
+ "placeholder_flags": [],
+ "unreferenced_data_files": [
+  "route-verification.json",
+  "validation.json",
+  "route-validation.json"
+ ],
+ "agent_tools": {
+  "search_places / autocomplete": {
+   "implementation": "places.js searchPlaces (Photon + NYC GeoSearch, live)",
+   "status": "wired (call site found)"
+  },
+  "discover places (POI index)": {
+   "implementation": "journey.js discoverPlaces \u2192 data/places/*.json",
+   "status": "wired (call site found)"
+  },
+  "verify_menu_item": {
+   "implementation": "POST /api/menu/verify (routing/menu.py)",
+   "status": "wired (call site found)"
+  },
+  "calculate_walking_route": {
+   "implementation": "POST /api/routes, /api/itinerary",
+   "status": "wired (call site found)"
+  },
+  "validate_route": {
+   "implementation": "routing/validation.py on every route",
+   "status": "wired (call site found)"
+  },
+  "turn-by-turn maneuvers": {
+   "implementation": "routing/maneuvers.py",
+   "status": "wired (call site found)"
+  },
+  "find along route (detours)": {
+   "implementation": "POST /api/detours",
+   "status": "wired (call site found)"
+  },
+  "weather context": {
+   "implementation": "weather.js (Open-Meteo, NWS)",
+   "status": "wired (call site found)"
+  }
+ },
+ "provider_access": {
+  "google_places": false,
+  "yelp_fusion": false,
+  "foursquare": false,
+  "booking_demand": false,
+  "expedia_rapid": false,
+  "openai": false
+ },
+ "tourism_quality": {
+  "category_records": 22593,
+  "distinct_provider_records": 22593,
+  "duplicate_provider_record_ids": 0,
+  "distinct_canonical_ids": 22376,
+  "linked_records_sharing_canonical_id": 217,
+  "records_with_source_conflicts": 13,
+  "categories": {
+   "hotels": {
+    "records": 473,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 47,
+     "web": 92,
+     "hours": 452
+    },
+    "duplicate_ids": 0
+   },
+   "museums": {
+    "records": 365,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 54,
+     "web": 57,
+     "hours": 133
+    },
+    "duplicate_ids": 0
+   },
+   "attractions": {
+    "records": 228,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 190,
+     "web": 120,
+     "hours": 213
+    },
+    "duplicate_ids": 0
+   },
+   "historic": {
+    "records": 390,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 355,
+     "web": 319,
+     "hours": 387
+    },
+    "duplicate_ids": 0
+   },
+   "parks": {
+    "records": 526,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 418,
+     "web": 281,
+     "hours": 471
+    },
+    "duplicate_ids": 0
+   },
+   "cafes": {
+    "records": 2210,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 328,
+     "web": 1503,
+     "hours": 1482
+    },
+    "duplicate_ids": 0
+   },
+   "bakeries": {
+    "records": 857,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 97,
+     "web": 655,
+     "hours": 641
+    },
+    "duplicate_ids": 0
+   },
+   "restaurants": {
+    "records": 12505,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 1150,
+     "web": 9461,
+     "hours": 9574
+    },
+    "duplicate_ids": 0
+   },
+   "bars": {
+    "records": 884,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 201,
+     "web": 363,
+     "hours": 406
+    },
+    "duplicate_ids": 0
+   },
+   "culture": {
+    "records": 434,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 62,
+     "web": 85,
+     "hours": 380
+    },
+    "duplicate_ids": 0
+   },
+   "shopping": {
+    "records": 278,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 89,
+     "web": 149,
+     "hours": 145
+    },
+    "duplicate_ids": 0
+   },
+   "pharmacies": {
+    "records": 327,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 66,
+     "web": 173,
+     "hours": 113
+    },
+    "duplicate_ids": 0
+   },
+   "groceries": {
+    "records": 1012,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 207,
+     "web": 772,
+     "hours": 608
+    },
+    "duplicate_ids": 0
+   },
+   "health": {
+    "records": 231,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 30,
+     "web": 62,
+     "hours": 107
+    },
+    "duplicate_ids": 0
+   },
+   "banks": {
+    "records": 532,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 237,
+     "web": 300,
+     "hours": 200
+    },
+    "duplicate_ids": 0
+   },
+   "restrooms": {
+    "records": 419,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 407,
+     "web": 368,
+     "hours": 199
+    },
+    "duplicate_ids": 0
+   },
+   "luggage": {
+    "records": 1,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 0,
+     "web": 0,
+     "hours": 1
+    },
+    "duplicate_ids": 0
+   },
+   "historic_lpc": {
+    "records": 921,
+    "invalid_coordinates": 0,
+    "missing_fields": {
+     "addr": 0,
+     "web": 921,
+     "hours": 921
+    },
+    "duplicate_ids": 0
+   }
+  }
+ }
+}

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <!-- iOS Home Screen app: mark it before first layout so the full-viewport rule in styles.css applies from the start
+       (record the viewport iOS gave at launch for the layout diagnostics). -->
+  <script>if(navigator.standalone===true){document.documentElement.classList.add('ios-standalone');}var t='light';try{if(localStorage.getItem('strollane.mapTheme')==='dark')t='dark';}catch(e){}document.documentElement.dataset.mapTheme=t;document.querySelector('meta[name="theme-color"]').setAttribute('content',t==='light'?'#FFFFFF':'#0B0B0B');window.__strollaneLaunchViewport=[window.innerWidth,window.innerHeight];</script>
+  <meta name="description" content="Strollane: personalized Manhattan city walks — real pedestrian routing, 12 walking-experience dimensions and live NYC urban data in an early interactive prototype." />
+  <title>STROLLANE · NYC | Personalized City Walks</title>
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Strollane" />
+  <meta property="og:title" content="STROLLANE · NYC | Personalized City Walks" />
+  <meta property="og:description" content="Personalized Manhattan city walks: real pedestrian routing, 12 walking-experience dimensions and live NYC urban data." />
+  <meta property="og:image" content="./icon-512.png?v=2" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="STROLLANE · NYC | Personalized City Walks" />
+  <meta name="twitter:description" content="Personalized Manhattan city walks: real pedestrian routing, 12 walking-experience dimensions and live NYC urban data." />
+  <meta name="twitter:image" content="./icon-512.png?v=2" />
+  <link rel="icon" href="./favicon.svg?v=3" type="image/svg+xml" />
+  <link rel="icon" href="./favicon-32x32.png?v=3" sizes="32x32" type="image/png" />
+  <link rel="icon" href="./favicon-16x16.png?v=3" sizes="16x16" type="image/png" />
+  <link rel="shortcut icon" href="./favicon.ico?v=2" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="./site.webmanifest?v=2" />
+  <meta name="apple-mobile-web-app-title" content="Strollane" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <!-- No apple-mobile-web-app-status-bar-style: the default (opaque) status bar sits above the page and takes the
+       page colour (and theme-color, which app.js keeps in step with the light/dark theme). black-translucent drew the
+       page under the bar, and iOS 26+ lays its own scrim over that area — the grey band in light mode. iOS reads this
+       setting when the icon is added: an existing Home Screen icon must be removed and added again. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
+  <link rel="stylesheet" href="./styles.css?v=61" />
+</head>
+<body>
+<div class="site-shell">
+  <header class="topbar">
+    <div class="brand-zone"><svg class="brand-glyph brand-mark" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7.6 11.7 13.2"/><path d="M12.8 8.7 14.7 11.1 16.6 12.1"/><path d="M12.6 8.8 10.6 10.9 9.2 12.8"/><path d="M11.7 13.2 13.7 16.6 14.5 20.6"/><path d="M11.7 13.2 10.4 17.1 7.9 19.8"/></g><circle cx="14" cy="4" r="2.15" fill="currentColor"/></svg><div class="brand-name" aria-label="STROLLANE · NYC">STROLLANE<span class="brand-sep" aria-hidden="true">·</span><span class="brand-city">NYC</span></div></div>
+        <div class="top-actions"><span id="topWeather" class="top-weather"><span class="tiny-sun">☁</span> Weather loading…</span><button id="openInfo" class="icon-button" title="About the prototype" aria-label="About"><span>i</span></button><button id="openKepler" class="kepler-btn"><span class="kepler-mark">◈</span> Kepler studio <span>↗</span></button><details class="mobile-more" id="mobileMore"><summary class="icon-button" title="Menu" aria-label="Menu"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary><div class="mobile-more-body"><button type="button" data-mview-go="plan"><span>Plan walk</span><small>Start &amp; destination</small></button><button type="button" data-mview-go="customize"><span>Customize walk</span><small>Time &amp; 12 dimensions</small></button><button type="button" data-mview-go="urban"><span>Explore urban data</span><small>NYC GIS layers</small></button><button type="button" data-mview-go="layers"><span>Map layers</span><small>Weather &amp; legend</small></button><div class="menu-segment" role="group" aria-label="Map style"><span>Map</span><button type="button" data-map-theme="dark" aria-pressed="false">Dark</button><button type="button" data-map-theme="light" aria-pressed="true">Light</button></div><button type="button" data-more-proxy="mapReset"><span>Reset map view</span><small>Back to Manhattan</small></button><button type="button" data-more-proxy="toggleLegend"><span>Data legend</span><small>Show or hide</small></button><hr><button type="button" data-more-proxy="toggleData"><span>Data sources</span><small>Status &amp; coverage</small></button><button type="button" data-more-proxy="openInfo"><span>About</span><small>This prototype</small></button><button type="button" data-more-proxy="openKepler"><span>Export to Kepler</span><small>GIS data</small></button></div></details></div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="left-panel" id="leftPanel">
+      <div class="panel-scroll">
+        <div class="m-sheet-bar m-only" id="mSheetBar"><button type="button" class="m-back" id="mSheetBack" aria-label="Back">←</button><strong id="mSheetTitle">Plan walk</strong><button type="button" class="m-sheet-alt" id="mSheetAlt">⚙ Prefs</button><button type="button" class="m-sheet-go" id="mSheetGo">Find routes →</button></div>
+        <div class="lp-nl">
+        <div class="section-overline">01 / HOW DO YOU WANT TO WALK?</div>
+        <div class="intro-row"><div><h1>Find your <em>kind</em><br>of walk.</h1><p>Not just the shortest way. Your way through the city.</p></div><span class="intro-star">✳</span></div>
+        <p class="field-description">Describe the walk in your own words, or tap a few chips. From and To fill in from your sentence.</p>
+        <div class="voice-row"><button type="button" class="mic-btn" data-mic="intentText" aria-pressed="false" aria-label="Speak your request"><svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></button><select id="voiceLang" aria-label="Voice language"><option value="en-US">EN</option><option value="zh-CN">中文</option></select><span id="voiceStatus" class="voice-status">Voice or text — you can edit the transcript.</span></div>
+        <textarea id="intentText" class="intent-box" rows="3" spellcheck="false" placeholder="I’d like a greener, quieter walk with interesting architecture.">I'd like a greener, quieter walk with interesting architecture.</textarea>
+        <div id="deskChips" class="quick-prefs d-only" role="group" aria-label="Quick preferences"></div>
+        <button id="generateRoutes" class="primary-cta"><span id="ctaLabel">Plan My Walk</span><span class="cta-arrow">↗</span></button>
+        <div id="interpretMode" class="interpret-mode" aria-live="polite">Checking AI interpretation service…</div>
+        <div class="line-divider"></div>
+        </div>
+        <div class="lp-plan">
+        <div class="section-overline">02 / FROM &amp; TO</div>
+        <div class="field-group journey-fields">
+          <div class="field-top"><label for="searchStart">FROM</label><button id="gpsStart" class="mini-text-button" title="Requires permission">◎ Use GPS</button></div>
+          <div class="search-place"><span class="place-dot start"></span><input id="searchStart" aria-label="Search starting point or address" placeholder="Search address or landmark" autocomplete="off"><button id="pickStart" class="pick-pin" title="Pick start from map" aria-label="Pick start on map">⌖</button></div>
+          <select id="startSelect" class="preset-select" aria-label="Or quick-pick a popular start"><option value="bryant">Bryant Park · selected</option><option value="times">Times Square</option><option value="rock">Rockefeller Center</option><option value="grand">Grand Central Terminal</option><option value="battery">The Battery</option><option value="wall">Wall Street</option><option value="washington">Washington Square Park</option><option value="union">Union Square</option><option value="columbus">Columbus Circle</option><option value="met">The Metropolitan Museum</option><option value="columbia">Columbia University · W 116th St · selected</option><option value="apollo">Apollo Theater</option><option value="fort">Fort Tryon Park</option><option value="custom">Custom map / address point</option><option value="gps">My current location</option></select>
+          <button type="button" class="swap-ends swap-inline" aria-label="Swap start and destination"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v15m0 0-3.5-3.5M8 19l3.5-3.5M16 20V5m0 0-3.5 3.5M16 5l3.5 3.5"/></svg><span>Swap</span></button>
+          <div class="stops-box" id="stopsBox">
+            <div class="field-top"><label for="addStopSearch">STOPS <small>optional · in order</small></label><span class="small-count" id="stopsCount"></span></div>
+            <div id="stopList" class="stop-list"></div>
+            <div class="search-place"><span class="place-dot stop"></span><input id="addStopSearch" aria-label="Add a stop" autocomplete="off"></div>
+          </div>
+          <div class="field-top"><label for="searchEnd">TO</label><span>⌖ PICK ON MAP</span></div>
+          <div class="end-modes" role="group" aria-label="Where the walk ends"><button type="button" data-end-mode="fixed" aria-pressed="true">Destination</button><button type="button" data-end-mode="open" aria-pressed="false">Discover for me</button><button type="button" data-end-mode="round" aria-pressed="false">Back to start</button><button type="button" data-end-mode="hotel" aria-pressed="false">Back to hotel</button></div>
+          <div id="endFixedBox">
+          <div class="search-place"><span class="place-dot end"></span><input id="searchEnd" aria-label="Search destination or address" placeholder="Search address or landmark" autocomplete="off"><button id="pickEnd" class="pick-pin" title="Pick destination on map" aria-label="Pick destination on map">⌖</button></div>
+          <select id="endSelect" class="preset-select" aria-label="Or quick-pick a popular destination"><option value="columbia">Columbia University · W 116th St · selected</option><option value="rock">Rockefeller Center</option><option value="carnegie">Carnegie Hall</option><option value="times">Times Square</option><option value="bryant">Bryant Park</option><option value="grand">Grand Central Terminal</option><option value="battery">The Battery</option><option value="wall">Wall Street</option><option value="washington">Washington Square Park</option><option value="union">Union Square</option><option value="columbus">Columbus Circle</option><option value="met">The Metropolitan Museum</option><option value="apollo">Apollo Theater</option><option value="fort">Fort Tryon Park</option><option value="custom">Custom map / address point</option></select>
+          </div>
+          <details class="hotel-box" id="hotelBox"><summary>My hotel · <span id="hotelName">not set</span></summary>
+            <div class="search-place"><span class="place-dot hotel"></span><input id="hotelSearch" aria-label="Search your hotel" autocomplete="off"></div>
+            <div class="hotel-actions"><button type="button" class="mini-outline" id="hotelAsStart">Start here</button><button type="button" class="mini-outline" id="hotelReturn">Return here</button><button type="button" class="mini-outline" id="hotelNearby">Explore nearby</button></div>
+            <label class="constraint-check"><input type="checkbox" id="rememberHotel"> Remember on this device <small>stored only in this browser</small></label>
+            <p class="custom-help">Hotel search shows real places from map data. No live room availability, prices or booking.</p>
+          </details>
+        </div>
+
+        </div>
+        <section class="journey-section lp-plan" aria-label="Journey stops">
+          <div class="section-row"><div class="section-overline">DISCOVERY</div><span class="small-count" id="journeyCount"></span></div>
+          <div id="journeyStops" class="journey-stops"></div>
+          <button type="button" class="mini-text-button" id="journeyReset">Clear journey</button>
+        </section>
+
+        <div class="lp-custom">
+        <div class="m-only quick-prefs-wrap"><div class="section-overline">QUICK PREFERENCES</div><div id="quickPrefs" class="quick-prefs" role="group" aria-label="Quick preferences"></div><p class="field-description" id="quickPrefsNote">Each chip sets an existing experience dimension (or adds a café stop through the journey planner). Nothing is claimed until routes are computed.</p></div>
+        <div class="line-divider"></div>
+        <div class="section-row"><div class="section-overline">03 / YOUR WALKING PREFERENCES</div><span id="preferenceSource" class="small-count">NOT INTERPRETED</span></div>
+        <p class="field-description">Strollane turns your words into priorities; unmentioned dimensions stay neutral.</p>
+        <div id="preferenceSummary" class="preference-summary"><span class="status-empty">✧ Your interpreted priorities appear here after planning.</span></div>
+        <button id="expandDimensions" class="expand-button" aria-expanded="false" aria-controls="dimensionsPanel">Fine-tune (12 dimensions) <span id="dimensionChevron">⌄</span></button>
+        <div id="dimensionsPanel" class="hidden">
+          <div class="dimension-head"><span>EXPERIENCE DIMENSION</span><span>PREFERENCE</span></div>
+          <div id="dimensionGrid" class="dimension-list"></div>
+          <button id="adjustPreferences" class="mini-outline" aria-pressed="false">✎ Adjust preferences</button>
+          <p class="preference-note">Weights indicate user preference (0–100), not objective city quality. Default 50 = not expressed. Only available comparable raw proxies influence experimental candidate ranking; 12D validated scores are pending.</p>
+        </div>
+
+        <div class="line-divider"></div>
+        <button type="button" id="walkOptionsToggle" class="walk-options-toggle d-only" aria-expanded="false" aria-controls="walkOptions"><span class="section-overline">04 / WALK OPTIONS</span><span id="walkOptionsSummary" class="walk-options-summary">Up to 100 min · stairs allowed</span><span class="walk-options-chev" aria-hidden="true">⌄</span></button>
+        <div id="walkOptions" class="walk-options">
+        <div class="section-row"><label for="timeRange" class="section-overline m-only">04 / WALKING CONSTRAINTS</label><span id="timeValue" class="range-value">100 MIN</span></div>
+        <div class="field-description">MAX WALKING TIME · A HARD LIMIT</div>
+        <div class="budget-chips" role="group" aria-label="Quick walking time"><button type="button" data-walk-min="60">60</button><button type="button" data-walk-min="100" aria-pressed="true">100</button><button type="button" data-walk-min="120">120</button><button type="button" data-walk-min="150">150</button><button type="button" data-walk-min="custom">Custom</button></div>
+        <input id="timeRange" type="range" min="10" max="150" value="100" step="1" aria-label="Maximum walking time" />
+        <div class="range-labels"><span>10 MIN</span><span id="timeRangeMax">150 MIN</span></div><label class="custom-limit">Custom maximum (minutes) <input type="number" id="customTime" min="10" step="1" value="100" inputmode="numeric" aria-label="Custom maximum walking time in whole minutes, at least 10" aria-describedby="customTimeHelp"></label><p id="customTimeHelp" class="custom-help">Default 100 min. Type any whole number of minutes (10 or more); the slider extends to match.</p>
+        <div class="section-row budget-row"><span class="field-description">MAX WALKING DISTANCE · HARD LIMIT</span><span id="distValue" class="range-value">NOT SET</span></div>
+        <div class="budget-chips" role="group" aria-label="Walking distance limit"><button type="button" data-walk-km="none" aria-pressed="true">Not set</button><button type="button" data-walk-km="2">2 km</button><button type="button" data-walk-km="5">5 km</button><button type="button" data-walk-km="8">8 km</button><button type="button" data-walk-km="10">10 km</button><button type="button" data-walk-km="custom">Custom</button><span class="unit-toggle"><button type="button" data-dist-unit="km" aria-pressed="true">km</button><button type="button" data-dist-unit="mi">mi</button></span></div>
+        <label class="custom-limit">Custom distance <input type="number" id="customDist" min="0.1" step="0.1" inputmode="decimal" aria-label="Custom maximum walking distance"></label>
+        <label class="custom-limit">Total outing (walking + visits, optional, minutes) <input type="number" id="outingMin" min="10" step="5" inputmode="numeric" placeholder="not set" aria-label="Total outing duration in minutes"></label><label class="custom-limit">Maximum detour over shortest candidate (%) <input type="number" id="maxDetourPct" min="0" max="100" step="5" value="25" aria-label="Maximum detour percentage"></label>
+        <label class="constraint-check"><input id="avoidDetours" type="checkbox" checked> Avoid excessive detours <small>≤ 25% longer than baseline</small></label>
+        <label class="constraint-check"><input id="stepFree" type="checkbox"> Step-free access <small>verified pedestrian-access data required</small></label>
+        <label class="constraint-check"><input id="avoidStairs" type="checkbox"> Avoid stairs <small>excludes OpenStreetMap steps from routing</small></label>
+        <p id="constraintWarning" class="constraint-warning hidden">⚠ Step-free access needs verified curb-ramp and elevator data, which is not connected. Recommendations are blocked while this constraint is on.</p>
+        </div>
+        </div>
+
+        <section id="conversationSection" class="conversation-section hidden" aria-label="Strollane conversation">
+          <div class="line-divider"></div>
+          <div class="section-row"><div class="section-overline" id="conversationLabel">05 / REFINE YOUR WALK</div><span class="small-count" id="conversationCount">CONVERSATION</span></div>
+          <div class="m-only" id="mRefineQuickSlot"></div>
+          <p class="field-description">Ask for changes. New route results and the map are recomputed when possible.</p>
+          <div id="chatHistory" class="chat-history" role="log" aria-live="polite"></div>
+          <form id="chatForm" class="chat-form"><button type="button" class="mic-btn" data-mic="chatInput" aria-pressed="false" aria-label="Speak a follow-up"><svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></button><textarea id="chatInput" rows="2" placeholder="Make it quieter, even if it takes five more minutes…" aria-label="Follow-up route instructions"></textarea><button id="chatSend" type="submit" aria-label="Send instruction">↗</button></form>
+          <div class="chat-hint">Enter to send · Shift + Enter for a new line</div>
+        </section>
+
+      </div>
+      <div class="side-bottom"><span class="online-mark"></span><span id="sourceStatus">CONNECTING TO NYC DATA…</span><button id="toggleData" class="source-action">DATA ↗</button></div>
+    </aside>
+
+    <main class="map-workspace" id="mapWorkspace">
+      <div id="map" role="application" aria-label="Interactive map of Manhattan with NYC Street Centerline data"></div>
+      <section id="mComposer" class="m-composer m-only" aria-label="Describe your walk">
+        <div class="m-composer-full">
+          <label class="m-composer-q" for="intentText">How would you like to explore New York?</label>
+          <div id="mComposerSlot" class="m-composer-slot"></div>
+          <div class="m-composer-row"><span id="mMicSlot" class="m-mic-slot"></span><button type="button" id="mCreate" class="m-create">Create My Walk <span aria-hidden="true">→</span></button></div>
+          <div class="m-route-ends"><button type="button" id="mContext" class="m-context" aria-label="Start and destination — open Plan walk"><span class="m-ft"><span class="m-ft-row"><span class="place-dot start" aria-hidden="true"></span><span class="m-ft-k">From</span><span id="mContextFrom" class="m-ft-v">…</span></span><span id="mContextStops" class="m-ft-stops"></span><span class="m-ft-row"><span class="place-dot end" aria-hidden="true"></span><span class="m-ft-k">To</span><span id="mContextTo" class="m-ft-v">…</span></span></span><span id="mContextText" class="sr-only">From …</span><span class="m-context-edit" aria-hidden="true">Edit</span></button><button type="button" class="m-swap swap-ends" aria-label="Swap start and destination"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v15m0 0-3.5-3.5M8 19l3.5-3.5M16 20V5m0 0-3.5 3.5M16 5l3.5 3.5"/></svg></button></div>
+          <div id="mStatus" class="m-status hidden" role="status" aria-live="polite"></div>
+        </div>
+        <div class="m-composer-compact"><button type="button" id="mCompactEdit" class="m-compact-edit" aria-label="Edit your walk request"><span class="m-compact-spark">✦</span><span id="mCompactText">Your walk</span></button><button type="button" id="mNewWalk" class="m-compact-new" aria-label="Start a new walk">New</button></div>
+      </section>
+      <button type="button" id="mViewExit" class="m-view-exit m-only" aria-label="Back to map">← Map</button>
+      <div id="mapFallback" class="map-fallback" aria-live="polite"><div class="fallback-loader"></div><h2>Connecting to the city</h2><p>Loading the Manhattan basemap and official NYC street-centerline data.</p></div>
+      <div class="map-mode-control" role="group" aria-label="Map mode"><button id="modeNavigate" aria-pressed="true">Navigate</button><button id="modeExplore" aria-pressed="false">Explore Urban Data</button></div>
+      <details class="experience-controls"><summary>Street evidence ▾</summary><label for="experienceDimension">Dimension</label><select id="experienceDimension"></select><label for="experienceView">Display</label><select id="experienceView"><option value="evidence">Street evidence · raw units</option><option value="raw">Original points / polygons</option><option value="score">Validated score · 0–100</option></select><div class="experience-checks"><label><input id="layerExperience" type="checkbox" checked> Experience</label><label><input id="layerCoverage" type="checkbox" checked> Coverage</label></div><button id="analyzeView">Analyze current view</button><button id="exportExperience">Export sections to Kepler.gl</button><p id="experienceStatus" role="status">Scores require calibration. Unknown ≠ zero.</p></details>
+      <details class="wx-panel" id="wxPanel"><summary id="wxPill" class="wx-pill" aria-label="Weather status"><span class="wx-ico">·</span><span>Weather…</span></summary><div id="wxBody" class="wx-body"></div></details>
+      <section id="explorePanel" class="explore-panel hidden" aria-label="Manhattan street experience map">
+        <div class="explore-head"><div class="explore-heading"><div class="explore-eyebrow" id="exploreScope">STREET SEGMENTS · LOADING</div><strong id="exploreTitle">Nature</strong></div><button id="exploreThumbsToggle" class="explore-collapse" aria-pressed="false" title="Show all 13 maps side by side" aria-label="Show all 13 small maps">▦</button><button id="exploreCollapse" class="explore-collapse" aria-expanded="true" title="Collapse panel" aria-label="Collapse panel">–</button></div>
+        <div class="explore-ramp"><span id="exploreRampLow">0</span><i></i><span id="exploreRampHigh">100</span><span class="ramp-na"><s></s>N/A</span></div>
+        <div id="exploreBody" class="explore-body">
+          <div class="explore-tools"><input id="exploreSearch" type="search" placeholder="Search dimensions…" aria-label="Search dimensions"><button type="button" id="exploreReset" class="mini-outline">Reset view</button></div>
+          <div id="exploreChips" class="explore-chips" role="radiogroup" aria-label="Map dimension"></div>
+          <div id="exploreGrid" class="explore-grid hidden" aria-label="13 maps side by side"></div>
+          <p id="exploreMetric" class="explore-metric"></p>
+          <div id="exploreAnalytics" class="explore-analytics"></div>
+          <label class="explore-opacity">Line opacity <input id="exploreOpacity" type="range" min="20" max="100" value="90" aria-label="Street line opacity"></label>
+          <p id="exploreStatus" class="explore-note" role="status">Loading computed 12-dimension street data…</p>
+        </div>
+      </section>
+      <div id="exploreTooltip" class="explore-tooltip hidden" role="tooltip"></div>
+      <aside id="exploreInspector" class="explore-inspector hidden" aria-label="Street Segment Inspector" aria-live="polite"></aside>
+      <div id="selectedRouteSummary" class="selected-route-summary" aria-live="polite">Choose a journey to compare real walking routes.</div>
+      <details class="map-layer-switch urban-layers" id="urbanLayers"><summary class="map-layer-head">Urban Data Layers <span id="urbanActiveCount" class="urban-count"></span> ▾</summary>
+        <div class="urban-body">
+          <p class="urban-lede">Explore real NYC data along your route</p>
+          <input id="urbanSearch" class="urban-search" type="search" placeholder="Search urban datasets…" aria-label="Search urban datasets">
+          <div class="urban-head"><span id="urbanActiveTitle">ACTIVE DATASETS</span><span><button type="button" id="urbanAllOn" class="urban-clear">All on</button> <button type="button" id="urbanAllOff" class="urban-clear">All off</button> <button type="button" id="urbanSettings" class="urban-clear" aria-pressed="false">Opacity</button></span></div>
+          <div class="urban-scope" role="radiogroup" aria-label="Display scope"><label><input type="radio" name="urbanScope" value="route" checked> Along selected route</label><label><input type="radio" name="urbanScope" value="view"> Current map view</label></div>
+          <label class="urban-distance">Route corridor <select id="urbanCorridor" aria-label="Route display corridor"><option value="50">50 m</option><option value="100" selected>100 m</option><option value="200">200 m</option><option value="500">500 m</option></select><small>display only — never changes scores</small></label>
+          <div class="urban-themes"><label>Building theme <select id="buildingTheme" aria-label="Building fill theme"></select></label><label>Environment theme <select id="envTheme" aria-label="Environmental surface theme"></select></label></div>
+          <div id="urbanCats" class="urban-dims"><p class="urban-note">Open to load the dataset catalog.</p></div>
+          <div class="urban-section"><div class="urban-head">NAVIGATION OVERLAYS</div>
+            <div class="layer-chips"><label class="switch-chip"><input type="checkbox" id="layerRoutes" checked><span class="chip-square routes"></span> Alternative routes</label><label class="switch-chip"><input type="checkbox" id="layerPOIs" checked><span class="chip-square poi-chip"></span> Route POIs</label><label class="switch-chip"><input type="checkbox" id="layerRoads" checked><span class="chip-square roads"></span> Street base (LION)</label><button id="retryStreets" class="switch-chip" title="Retry incomplete Manhattan data loading">↻ Streets</button></div>
+            <p class="urban-note">The selected route and start / destination always stay on top. Your location appears only after you allow GPS.</p></div>
+        </div></details>
+      <section id="udLegend" class="ud-legend" aria-label="Map legend"><button type="button" id="udLegendToggle" class="ud-legend-head" aria-expanded="true">Legend</button><div class="lg-body"></div></section>
+      <aside id="urbanInspector" class="explore-inspector urban-inspector hidden" aria-label="Urban feature inspector" aria-live="polite"></aside>
+      <section id="navOverlay" class="nav-overlay hidden" aria-label="Live navigation" aria-live="polite">
+        <div class="nav-top">
+          <div class="nav-arrow" id="navArrow"></div>
+          <div class="nav-main"><div class="nav-dist" id="navDist"></div><div class="nav-instr" id="navInstr">Starting…</div><div class="nav-then" id="navThen"></div><div class="nav-place hidden" id="navPlace" aria-live="polite"></div><div class="nav-conf" id="navConf"></div></div>
+        </div>
+        <div id="navStatus" class="nav-status hidden"></div>
+        <button type="button" id="navRetry" class="nav-pill hidden">Retry</button>
+        <div id="navStopActions" class="nav-stop hidden"><strong id="navStopName"></strong><small id="navStopVisit"></small>
+          <div><button type="button" class="nav-pill primary" id="navContinue">Continue to next stop</button><button type="button" class="nav-pill" id="navSkip">Skip optional stop</button></div></div>
+        <div id="navArrived" class="nav-stop hidden"><strong>You have arrived</strong><small>Walk complete.</small><div><button type="button" class="nav-pill primary" id="navArrivedDone">End navigation</button></div></div>
+        <button type="button" id="navRecenter" class="nav-recenter">◎ Recenter</button>
+        <div class="nav-bottom">
+          <div class="nav-stats"><strong id="navRemain">—</strong><span id="navTime">—</span><small id="navStop"></small></div>
+          <div class="nav-buttons"><button type="button" class="nav-pill nav-ar" id="navAr" aria-pressed="false" title="Camera view with directions placed by the phone compass (error 10–20°)">AR · compass</button><button type="button" class="nav-pill" id="navVoice" aria-pressed="true">Voice on</button><button type="button" class="nav-pill" id="navPause">Pause</button>
+            <details class="nav-more"><summary class="nav-pill">More</summary><div class="nav-more-body"><button type="button" class="nav-pill" id="navRepeat">Repeat</button>
+            <select id="navLang" aria-label="Voice language"><option value="en">EN</option><option value="zh">中文</option></select><button type="button" class="nav-pill" id="navUnits">m</button>
+            <button type="button" class="nav-pill" id="navMode">North up</button></div></details><button type="button" class="nav-pill danger" id="navExit">Exit</button></div>
+          <small id="navHeadingNote" class="nav-note"></small>
+        </div>
+      </section>
+      <div id="navChoice" class="nav-choice hidden" role="dialog" aria-modal="true"></div>
+      <div class="map-actions"><button id="mapLocate" title="Locate me" aria-label="Locate me"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4 4.5 10.6l6.8 2.1 2.1 6.8z"/></svg></button><button id="toggleLegend" title="Toggle legend" aria-label="Toggle legend" aria-pressed="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.6" cy="7" r=".9"/><circle cx="4.6" cy="12" r=".9"/><circle cx="4.6" cy="17" r=".9"/></svg></button><button id="mapReset" title="Reset map view" aria-label="Reset map view"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button id="mapThemeBtn" class="d-only" title="Light or dark map" aria-label="Switch map style" data-map-theme-toggle><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5" class="ring"/><path d="M12 4.5v15a7.5 7.5 0 0 0 0-15z" class="fill"/></svg></button><button id="mUrbanBtn" class="m-only" title="Explore Urban Data" aria-label="Explore Urban Data"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 8.5 4.6-8.5 4.6-8.5-4.6z"/><path d="m3.5 12.3 8.5 4.6 8.5-4.6"/><path d="m3.5 16.3 8.5 4.6 8.5-4.6"/></svg></button></div>
+      <div id="pickNotice" class="pick-notice hidden">Click anywhere on the map to set a point. <button id="cancelPick">CANCEL</button></div>
+      <div class="map-legend"><div class="legend-title"><span id="legendDot" class="legend-dot"></span><span id="legendTitle">MANHATTAN STREET NETWORK</span></div><p id="legendSubtitle">Official NYC centerlines (Manhattan borough filter); walkability not confirmed.</p><div id="legend-scale" class="legend-scale hidden"><span><i style="background:#365c64"></i>Lower</span><span><i style="background:#37bfc8"></i>Mid</span><span><i style="background:#d8f365"></i>Higher</span></div></div>
+      <div class="map-footer"><span>© OpenStreetMap · CARTO basemap</span><span class="map-verified">● Manhattan-wide street geometries / Experimental layers</span><span id="mapCoords">40.758° N · 73.984° W</span></div>
+      <div class="mobile-bottom"><button id="mobilePlan" class="mobile-bottom-btn">☷ Plan</button><button id="mobileResults" class="mobile-bottom-btn">◈ Results</button></div>
+    </main>
+
+    <aside class="right-panel" id="rightPanel">
+      <div class="right-scroll">
+        <div class="right-head"><div><div class="section-overline">YOUR WALK</div><h2>Choose how it <span>feels.</span></h2></div><span class="results-symbol">↗</span></div>
+        <section id="cityWalk" class="city-walk hidden" aria-live="polite"></section>
+        <div class="section-row"><div class="section-overline">YOUR WALK OPTIONS</div><span class="small-count" id="routeCount"></span></div>
+        <div class="route-cards" id="routeCards"><div class="empty-route"><strong>No walks yet</strong><p>Describe how you want to walk, or tap a few chips.</p></div></div>
+        <button type="button" id="routeMore" class="route-more hidden" aria-expanded="false">More routes</button>
+        <div class="route-dots hidden" id="routeDots" aria-hidden="true"></div>
+        <button type="button" id="navStart" class="primary-cta nav-start hidden"><span>➤ Start Navigation</span><span class="cta-arrow">↗</span></button>
+        <button type="button" id="routePreviewBtn" class="route-preview-btn hidden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18l6-12 4 7 3-4 5 9z"/></svg><span>3D map preview</span></button>
+        <div class="m-only m-route-fromto" id="mRouteFromTo"></div>
+        <div class="m-only" id="mRefineSlot"></div>
+        <div class="subtle-divider"></div>
+        <div class="section-row"><div class="section-overline">ALONG THIS WALK</div><span id="poiCount" class="small-count">0 VERIFIED</span></div>
+        <div id="alongWalk" class="along-walk hidden" aria-live="polite"></div>
+        <div id="poiList" class="poi-list"><p class="status-empty">Choose a walk to see the places along it.</p></div>
+        <div class="subtle-divider"></div>
+        <div id="refineQuick">
+        <div class="section-overline">REFINE YOUR WALK</div>
+        <div class="refine-actions"><button type="button" data-refine="nature">More Nature</button><button type="button" data-refine="quiet">Quieter Streets</button><button type="button" data-refine="architecture">More Architecture</button><button type="button" data-refine="shorter">Shorter Walk</button></div>
+        <p class="field-description">Each action updates state and requests fresh pedestrian candidate routes. A preference without evidence will not be claimed as achieved.</p>
+        </div>
+        <div class="subtle-divider"></div>
+        <!-- Everything the engine computed stays here, unchanged: scores, the ranking formula, coverage, weather,
+             urban data, OSM edges and raw street evidence — for researchers, one tap away from the walk options. -->
+        <details class="tech-details" id="techDetails"><summary><span>Technical details</span><small>Scores, ranking, data and edges</small></summary>
+        <div class="context-row"><div class="context-card"><span class="context-label">LIVE WEATHER</span><strong id="weatherMain">—</strong><span id="weatherMeta">Awaiting forecast</span></div><div class="context-card"><span class="context-label">GPS STATUS</span><strong id="gpsMain">OFF</strong><span id="gpsMeta">Location unavailable</span></div></div>
+        <p class="context-updated" id="contextUpdated">Weather observation time: unavailable</p>
+        <div class="section-overline">RANKING</div>
+        <div id="rankingStatus" class="ranking-status">No route data yet.</div>
+        <p class="route-footnote" id="routeTechNote"></p>
+        <div id="routeValidation" class="route-validation hidden" aria-live="polite"></div>
+        <div class="subtle-divider"></div>
+        <div class="section-overline">WHY THIS ROUTE?</div><div class="why-box" id="whyRoute">Generate routes to see evidence-grounded reasons.</div>
+        <div class="subtle-divider"></div>
+        <div class="section-row"><div class="section-overline">WEATHER &amp; YOUR WALK</div><span id="wxRouteStatus" class="small-count"></span></div>
+        <div id="wxRoute" class="wx-route"><p class="soft-copy">Loading the forecast…</p></div>
+        <div class="subtle-divider"></div>
+        <div class="section-row"><div class="section-overline">ROUTE URBAN DATA</div><span id="routeUrbanCorridor" class="small-count"></span></div>
+        <div id="routeUrbanData" class="route-urban"><p class="soft-copy">Select a route to see the real city data around it.</p></div>
+        <div class="subtle-divider"></div>
+        <div class="section-row"><div class="section-overline">ROUTE EDGES</div><span id="edgeCount" class="small-count">0</span></div>
+        <details class="route-edges"><summary>Ordered OSM pedestrian edges</summary><div id="routeEdgeList" class="edge-list"><p class="soft-copy">Select a route to list the OSM pedestrian edges it uses, in order.</p></div></details>
+        <div class="subtle-divider"></div>
+        <div class="section-row"><div class="section-overline">EXPERIENCE PROFILE</div><span id="profileMode" class="small-count">NOT AVAILABLE</span></div>
+        <div class="profile-toggle" role="group" aria-label="Experience profile display"><button id="profileSelected" aria-pressed="true" type="button">Selected route</button><button id="profileCompare" aria-pressed="false" type="button">Compare routes</button></div>
+        <div class="profile-chart" id="profileChart"><div class="chart-empty"><p>Validated dimension scores will appear only when a documented calibration method is available.</p></div></div>
+        <div class="chart-annotation" id="chartNote">Dimension Score ≠ Preference Weight. Missing is not zero.</div>
+        <p class="soft-copy">Places along the walk: named OpenStreetMap POIs within 100 m of the selected route. Walk names and descriptions compare the 12 experience scores of the routes shown (ranks within Manhattan); a difference under 5 points is called similar. Photos: the Wikidata image of each listed place within 50 m of the route, loaded by your browser from Wikimedia Commons (free licences only; author and licence shown on each photo).</p>
+        <details class="research-details"><summary>RESEARCH / RAW STREET EVIDENCE</summary>
+          <div id="segmentDetail" class="segment-detail"><p class="soft-copy">Click a street segment to inspect its recorded attributes.</p></div><button id="clearSelection" class="mini-text-button" type="button">Clear selected street</button>
+        </details>
+        <details class="research-details"><summary>CONVERSATION LOG (FULL)</summary><div id="chatLog" class="chat-history chat-log" role="log"></div></details>
+        <button type="button" id="openMethodology" class="method-button">DATA &amp; METHODOLOGY ↗</button>
+        </details>
+      </div>
+      <div class="right-bottom"><button id="exportKepler" class="export-button"><span>◈</span> Export GIS data for Kepler.gl <span>↗</span></button></div>
+    </aside>
+
+    <aside class="explore-sheet" id="exploreSheet" aria-label="Explore Urban Data">
+      <div class="explore-sheet-scroll"></div>
+    </aside>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="modalOverlay" class="modal-overlay hidden"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button id="closeModal" class="modal-close" title="Close">✕</button><div class="section-overline">PROJECT NOTES / TRANSPARENCY</div><h2 id="modalTitle">What is real, and what's next.</h2><div id="modalContent"></div></div></div>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
+<script src="./experience-core.js?v=28"></script>
+<script src="./api-config.js?v=28"></script>
+<script src="./weather.js?v=28"></script>
+<script src="./places.js?v=29"></script>
+<script src="./opening-hours.js?v=28"></script>
+<script src="./app.js?v=44"></script>
+<script src="./route-story.js?v=2"></script>
+<script src="./route-photos.js?v=3"></script>
+<script src="./route-client.js?v=33"></script>
+<script src="./weather-ui.js?v=28"></script>
+<script src="./journey.js?v=34"></script>
+<script src="./journey-ui.js?v=31"></script>
+<script src="./voice.js?v=28"></script>
+<script src="./nav-engine.js?v=30"></script>
+<script src="./nav-ui.js?v=35"></script>
+<script src="./ar-nav.js?v=3"></script>
+<script src="./route-preview.js?v=4"></script>
+<script src="./urban-geo.js?v=28"></script>
+<script src="./urban-style.js?v=33"></script>
+<script src="./urban-layers.js?v=34"></script>
+<script src="./explore-map.js?v=30"></script>
+<script src="./explore-analytics.js?v=30"></script>
+<script src="./center-map.js?v=31"></script>
+<script src="./mobile-ui.js?v=28"></script>
+<script src="./pwa-register.js?v=2"></script>
+</body>
+</html>
