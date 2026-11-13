@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
-  <link rel="stylesheet" href="./styles.css?v=66" />
+  <link rel="stylesheet" href="./styles.css?v=67" />
 </head>
 <body>
 <div class="site-shell">
@@ -155,6 +155,8 @@
       </section>
       <button type="button" id="mViewExit" class="m-view-exit m-only" aria-label="Back to map">← Map</button>
       <div id="mapFallback" class="map-fallback" aria-live="polite"><div class="fallback-loader"></div><h2>Connecting to the city</h2><p>Loading the Manhattan basemap and official NYC street-centerline data.</p></div>
+      <button type="button" id="toggleLeftPanel" class="panel-toggle panel-toggle-left d-only" aria-controls="leftPanel" aria-expanded="true" aria-label="Hide planning panel" title="Hide planning panel">‹</button>
+      <button type="button" id="toggleRightPanel" class="panel-toggle panel-toggle-right d-only" aria-controls="rightPanel" aria-expanded="true" aria-label="Hide walk panel" title="Hide walk panel">›</button>
       <div class="map-mode-control" role="group" aria-label="Map mode"><button id="modeNavigate" aria-pressed="true">Navigate</button><button id="modeExplore" aria-pressed="false">Explore Urban Data</button></div>
       <details class="experience-controls"><summary>Street evidence ▾</summary><label for="experienceDimension">Dimension</label><select id="experienceDimension"></select><label for="experienceView">Display</label><select id="experienceView"><option value="evidence">Street evidence · raw units</option><option value="raw">Original points / polygons</option><option value="score">Validated score · 0–100</option></select><div class="experience-checks"><label><input id="layerExperience" type="checkbox" checked> Experience</label><label><input id="layerCoverage" type="checkbox" checked> Coverage</label></div><button id="analyzeView">Analyze current view</button><button id="exportExperience">Export sections to Kepler.gl</button><p id="experienceStatus" role="status">Scores require calibration. Unknown ≠ zero.</p></details>
       <details class="wx-panel" id="wxPanel"><summary id="wxPill" class="wx-pill" aria-label="Weather status"><span class="wx-ico">·</span><span>Weather…</span></summary><div id="wxBody" class="wx-body"></div></details>
@@ -292,7 +294,7 @@
 <script src="./app.js?v=47"></script>
 <script src="./route-story.js?v=2"></script>
 <script src="./route-photos.js?v=3"></script>
-<script src="./route-client.js?v=36"></script>
+<script src="./route-client.js?v=37"></script>
 <script src="./walk-presets.js?v=2"></script>
 <script src="./weather-ui.js?v=28"></script>
 <script src="./journey.js?v=36"></script>
@@ -305,7 +307,8 @@
 <script src="./urban-geo.js?v=28"></script>
 <script src="./urban-style.js?v=33"></script>
 <script src="./urban-layers.js?v=34"></script>
-<script src="./explore-map.js?v=31"></script>
+<script src="./side-panels.js?v=1"></script>
+<script src="./explore-map.js?v=32"></script>
 <script src="./explore-analytics.js?v=30"></script>
 <script src="./center-map.js?v=31"></script>
 <script src="./bottom-sheet.js?v=1"></script>
