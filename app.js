@@ -845,7 +845,7 @@ function setupControls(){
   $('customTime').addEventListener('blur',commitCustomTime);
   $('customTime').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commitCustomTime();}});
   $('maxDetourPct').addEventListener('change',e=>{const v=Number(e.target.value);if(Number.isFinite(v)&&v>=0&&v<=100){planner.maxDetourPct=v;updateRoutesUI()}else{toast('Choose a detour limit from 0 to 100%.');renderPreferenceSummary()}});
-  $('generateRoutes').addEventListener('click',()=>handlePlan($('intentText').value,false));
+  $('generateRoutes').addEventListener('click',()=>typeof isWalkPresetRequest==='function'&&isWalkPresetRequest($('intentText').value)?planFromWalkPresets():handlePlan($('intentText').value,false));
   // Desktop: the walk limits fold into one line ("Up to 100 min · stairs allowed"); the controls are unchanged inside.
   const walkSummary=()=>{const el=$('walkOptionsSummary');if(!el)return;const unit=state.distUnit==='mi'?'mi':'km',km=state.maxKm;
     el.textContent=[`Up to ${state.budget} min`,km!=null?`${unit==='mi'?Math.round(km/1.609344*10)/10:km} ${unit}`:null,planner.constraints.avoidStairs?'avoiding stairs':'stairs allowed',planner.constraints.stepFree?'step-free':null].filter(Boolean).join(' · ');};

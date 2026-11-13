@@ -38,7 +38,7 @@ from routing.engine import DIMENSIONS, RoutingError, get_planner, overlap  # noq
 WEIGHT = 80                     # mobile-ui.js QUICK_WEIGHT
 CONSTRAINTS = {'max_minutes': 100, 'max_detour_pct': 25, 'avoid_detours': True}   # the app's defaults
 CLAIM_POINTS = 5                # route-story.js STORY.MORE: below this the app says "similar", not "greener"
-PRESETS = {'Green Walk': 'Nature', 'Quiet Walk': 'Quiet & Relax'}                 # walk presets offered in the UI
+PRESETS = {'Nature': 'Nature', 'Quiet & Relax': 'Quiet & Relax'}                   # dimensions broken down by trip length in the report
 BUCKETS = (('short (< 1.5 km)', 0, 1500), ('medium (1.5–3 km)', 1500, 3000), ('long (≥ 3 km)', 3000, 10 ** 9))
 
 

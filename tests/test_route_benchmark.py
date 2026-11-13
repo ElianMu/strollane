@@ -60,6 +60,15 @@ class RouteBenchmark(unittest.TestCase):
         self.assertEqual(sum(x['runs'] for x in s['by_length'].values()), s['all']['runs'])
         self.assertLessEqual(s['all']['gain_at_least_claim'], s['all']['scored'])
 
+    def test_priority_pills_follow_the_committed_benchmark_order(self):
+        """walk-presets.js lists the 12 dimensions by mean gain in benchmarks/route_benchmark.json, strongest first."""
+        import re
+        src = (ROOT / 'walk-presets.js').read_text()
+        order = re.findall(r"'([^']+)'", re.search(r'WALK_PRESET_ORDER = \[(.*?)\];', src, re.S).group(1))
+        self.assertEqual(sorted(order), sorted(DIMENSIONS), 'exactly the 12 registered dimensions')
+        by_dim = json.loads((ROOT / 'benchmarks' / 'route_benchmark.json').read_text())['summary']['by_dimension']
+        self.assertEqual(order, sorted(DIMENSIONS, key=lambda d: -by_dim[d]['mean_gain']), 'rerun the benchmark or reorder the pills')
+
     def test_summary_survives_unscored_runs(self):
         self.assertEqual(rb.summarise([{'dimension': 'Nature', 'error': 'x'}]), {'runs': 1, 'scored': 0})
 
