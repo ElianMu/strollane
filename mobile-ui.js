@@ -460,6 +460,8 @@
     if (hasRoutes() && !clarified) { confirmStart(); showStatus(null); setView('results'); return; }
     setView('home');
     // No start could be found (location refused / outside Manhattan, none named): offer the ways to give one.
+    // "I can't plan for …" (a request no dataset measures) is an answer, not a question about the start
+    if (lastMsg && /^I can’t plan for/.test(lastMsg)) { showStatus(lastMsg.replace(/\s*The displayed previous route has not been recalculated\.?/, ''), 'clarify'); return; }
     if (clarified && !getPlace('start')) { askForStart(lastSubmitted, lastMsg.replace(/\s*The displayed previous route has not been recalculated\.?/, '')); return; }
     const reason = lastMsg || (toastNow && toastNow !== toastBefore ? toastNow : '') || 'No route was calculated. Check the start and destination, then try again.';
     showStatus(reason, clarified ? 'clarify' : 'error');

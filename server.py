@@ -83,6 +83,7 @@ For an explicitly shortest route set constraints.avoidDetours=true and max_detou
   - Find a hotel near Central Park with two beds and a budget of $250 per night: hotel=null, origin=null, interests=[], requirements search_anchor=Central Park,beds=2,hotel_budget_per_night_usd=250.
   - Recommend tiramisu with good reviews within my walking budget: interests=[], food=[category restaurants,item tiramisu,required true], requirements ratings_required=true, every monetary field null.
   Never output coordinates, addresses, menus, fetched prices, ratings or opening hours. STROLLANE data tools provide those facts.
+"unsupported": null unless part of the request asks to route by something NO STROLLANE data measures. What exists: the 12 dimensions above (street trees and parks, 311 noise complaints and roadway width, landmarks, cultural venues, sidewalk area, places to eat and shop, mapped viewpoints and public art, intersections, pedestrian injury crashes, distance from highways, subway access), waterfront proximity, reported-complaint (crime) density, today's heat, and visits to real places in the journey categories. Anything else that would need its own measurement is unsupported: for example dog waste, litter or cleanliness, smells, street lighting, how crowded a street is right now, live events, Wi-Fi, celebrity sightings, a particular architectural style, the colour of buildings, sunset or skyline views from a specific street. For each such part (at most 3) return an object with "request" (the user's own words for that part, short), "reason" (one sentence saying which measurement is missing; never claim the data exists) and "nearest_dimension" (the canonical name of a dimension that is a genuine partial proxy, or null when none is). Do NOT add a preference pair, journey entry or any other change for an unsupported part, and do not put it in clarification: the app tells the user it cannot do that part and offers the nearest dimension. Supported parts of the same message are still interpreted normally. Ordinary subjective words that an existing dimension is built for (quieter, greener, more scenic, lively, safer crossings) are supported, not unsupported.
 "clarification": null unless user intent is materially ambiguous or contradictory (for example asks for both a strict 10-minute cap and a 30-minute minimum, or asks for inaccessible route when step-free is required). If ambiguous, write one short question here, do not infer changes.
 Food requests alone do not imply a Scenic, Architecture or Nature preference. An along-the-route food request is a POI requirement, not a request for scenic routing.
 Preserve current state: omit unmentioned dimensions from preferences; set unmentioned constraint values to null. Time and accessibility are hard constraints, not dimension scores. Do not claim quiet or step-free conditions are validated.
@@ -91,7 +92,7 @@ Preserve current state: omit unmentioned dimensions from preferences; set unment
 def validate_interpretation(doc):
     if not isinstance(doc, dict):
         raise ValueError('LLM must return a JSON object')
-    allowed = {'weights', 'directions', 'time_minutes', 'time_delta_minutes', 'max_detour_percent', 'constraints', 'clarification', 'weather', 'journey', 'crime', 'waterfront'}
+    allowed = {'weights', 'directions', 'time_minutes', 'time_delta_minutes', 'max_detour_percent', 'constraints', 'clarification', 'weather', 'journey', 'crime', 'waterfront', 'unsupported'}
     if set(doc) - allowed:
         raise ValueError('Unrecognized output keys')
     weights = doc.get('weights', {})
@@ -123,6 +124,12 @@ def validate_interpretation(doc):
     if doc.get('weather') not in (None, 'ask', 'cooler', 'consider'):
         raise ValueError('Invalid weather intent')
     journey = validate_journey(doc.get('journey'))
+    # Parts of the request no dataset measures: validated against the contract, passed through, never turned into weights.
+    unsupported = doc.get('unsupported') or []
+    from interpretation_contract import COMMON as _COMMON
+    validate_contract(unsupported, _COMMON['unsupported'], 'unsupported')
+    if any(not u['request'].strip() or not u['reason'].strip() for u in unsupported):
+        raise ValueError('Unsupported entries need the request and a reason')
     clarification = doc.get('clarification')
     if clarification is not None and (not isinstance(clarification, str) or len(clarification) > 300):
         raise ValueError('Invalid clarification')
@@ -145,7 +152,8 @@ def validate_interpretation(doc):
         water_value={'mode':'clear'} if water_value['mode']=='clear' else {'mode':'set',**waterfront.validate({k:v for k,v in water_value.items() if k!='mode'})}
     return {'weights':weights, 'directions':{k:dirs.get(k, 'high') for k in weights}, 'crime':crime_value, 'waterfront':water_value,
             'time_minutes':absolute,'time_delta_minutes':delta,'max_detour_percent':detour,
-            'constraints':constraints,'clarification':clarification,'weather':doc.get('weather'),'journey':journey}
+            'constraints':constraints,'clarification':clarification,'weather':doc.get('weather'),'journey':journey,
+            'unsupported':unsupported}
 
 JOURNEY_ENUMS = {'interests': {'famous', 'museums', 'historic', 'parks', 'shopping', 'culture'},
                  'services': {'pharmacies', 'groceries', 'health', 'banks', 'restrooms', 'luggage'}}
