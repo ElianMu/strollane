@@ -1118,3 +1118,45 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
  .left-panel>.sheet-handle,.right-panel>.sheet-handle,.explore-sheet>.sheet-handle{touch-action:none;user-select:none;-webkit-user-select:none}
  body[data-msheet$="-half"] .map-workspace .map-actions,body[data-msheet$="-custom"] .map-workspace .map-actions{bottom:min(calc(var(--msheet-h,50vh) + 12px),calc(100% - 170px))}
 }
+
+/* ---- Walk presets (walk-presets.js) and "What these scores measure" (route-client.js) --------------------------
+   Theme variables only (tests/test_theme_tokens.py). Presets are plain buttons: title, one line, the indicators the
+   router's score is built from, and an arrow. Two side by side; they wrap to one column in a narrow panel. */
+.intro-audience{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--text-secondary)}
+.walk-presets-label{margin-top:16px}
+.walk-presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 4px}
+.walk-preset{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:64px;padding:10px 30px 10px 12px;text-align:left;border:1px solid var(--border-strong);border-radius:var(--r-md);background:var(--bg-card);color:var(--text-primary)}
+.walk-preset:hover{background:var(--bg-hover)}
+.walk-preset[aria-pressed=true]{border-color:var(--accent);background:var(--bg-active)}
+.walk-preset strong{font-family:var(--font-display);font-weight:400;font-size:19px;line-height:1.1;letter-spacing:0}
+.walk-preset-blurb{font-size:11.5px;line-height:1.35;color:var(--text-secondary)}
+.walk-preset small{font-size:9.5px;line-height:1.35;color:var(--text-tertiary)}
+.walk-preset-go{position:absolute;right:11px;top:10px;font-size:15px;line-height:1;color:var(--text-secondary)}
+.why-measures{margin-top:12px;padding-top:10px;border-top:1px solid var(--divider)}
+.why-measures-title{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:6px}
+.why-dim{margin:0 0 10px}
+.why-dim-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;margin-bottom:2px}
+.why-dim-head strong{color:var(--text-primary)}
+.why-dim-head span{color:var(--text-secondary)}
+.why-dim ul{margin:4px 0 0;padding-left:16px}
+.why-dim li{margin:0 0 4px;font-size:10.5px;line-height:1.5}
+.why-dim li i{display:block;font-style:normal;color:var(--text-tertiary);font-size:9.5px}
+@media(max-width:740px){
+ .m-walk-presets{grid-template-columns:1fr 1fr;gap:7px;margin:0 0 8px}
+ .m-walk-presets .walk-preset{min-height:56px;padding:8px 24px 8px 10px;gap:2px}
+ .m-walk-presets .walk-preset strong{font-size:17px}
+ .m-walk-presets .walk-preset-blurb{font-size:11px}
+ .m-walk-presets .walk-preset small{display:none}
+ .m-walk-presets .walk-preset-go{right:8px;top:8px}
+ body[data-mview="typing"] .m-walk-presets,body[data-mview="busy"] .m-walk-presets{display:none}
+}
+/* Short phones (iPhone SE class): the request card must leave the map at least half the screen
+   (tests/mobile-v2/iphone-shell.js), so presets shrink to one line there — title and arrow; the description stays
+   in the button's accessible label. */
+@media(max-width:740px) and (max-height:700px){
+ .m-walk-presets{margin:0 0 6px}
+ .m-walk-presets .walk-preset{min-height:34px;padding:6px 24px 6px 10px;justify-content:center}
+ .m-walk-presets .walk-preset strong{font-size:16px}
+ .m-walk-presets .walk-preset-blurb{display:none}
+ .m-walk-presets .walk-preset-go{top:9px}
+}

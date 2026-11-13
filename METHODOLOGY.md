@@ -1,5 +1,67 @@
 # Spatial evidence methodology / 空间证据方法
 
+> **Read this first (updated 2026-11-13).** Everything below "Scope and truthfulness" describes the original **Midtown
+> pilot "Street evidence" layer** (`experience-core.js`, `data/pilot.json`): two raw proxies, 75 m buffers, scores NULL.
+> That layer still exists in Navigate → *Street evidence*, and the text is accurate **for that layer only**. It is no
+> longer how routes are ranked or how the Explore map is coloured. Current scoring is described in the next three
+> sections, in `README.md`, `ARCHITECTURE.md` and `DIMENSIONS_MAP_MODE_REPORT.md`.
+
+## Two score builds (known inconsistency)
+
+The 12 dimensions have the same names and order everywhere, but two builds of their street scores are in use:
+
+| | Routes (ranking, Why this route, route cards) | Explore Urban Data map |
+|---|---|---|
+| Build | `sw-score-46f39c1c97`, data 2026-10-23 | `strollane-12x24-v1`, built 2026-11-10 |
+| Code | `scripts/streetwise_indicators.py` → `data/manhattan-streets.json` → `data/pedestrian/edge-scores.json.gz` | `scripts/dimensions/` → `data/dimensions/manhattan/` |
+| Scored indicators | 15 | 20 computed (24 specified; canopy and impervious rasters not connected) |
+
+The map build adds five indicators: seat access and ramp coverage (Spatial Comfort), waterfront access (Scenic & Visual),
+route directness (Walkability) and crime-report proximity (Access & Safety). Compared segment by segment over the same
+10,533 LION segments (2026-11-13), the two builds agree closely on eight dimensions and differ on four:
+
+| Dimension | Spearman ρ between builds | Segments differing by more than 20 points |
+|---|---|---|
+| Spatial Comfort | 0.71 | 40 % (routes build: N/A on 1,145 segments) |
+| Scenic & Visual | 0.74 | 36 % |
+| Walkability | 0.79 | 26 % |
+| Access & Safety | 0.90 | 14 % |
+| Nature | 0.95 | 2 % |
+| Architecture | 0.99 | 3 % |
+| Culture, Quiet & Relax, Urban Vibrancy, Food & Retail, Environment, Transit Connectivity | 1.00 | 0 % |
+
+Consequence: a street's score on the Explore map can differ from the score the router used for it. Route explanations
+therefore always quote the routes build (`data/pedestrian/score-indicators.json`, shown only when its `score_version`
+equals the route's). Unifying the two builds changes route results and is a pending decision; it has not been done.
+
+## What the route scores are, and are not
+
+Each scored indicator is a 0–100 percentile rank among Manhattan street segments ("lower is better" indicators
+reversed); a dimension score is the equal-weight mean of its available indicators; a route score is the length-weighted
+mean over the OSM edges the route uses. These are **relative ranks of proxies computed from public records**. They are
+not calibrated measurements and have not been validated against how people experience a walk.
+
+Proxy limits that matter for the walk presets:
+
+- **Nature** (Green Walk): density of inventory tree points within 30 m and share of samples beside NYC Parks land.
+  Not canopy cover and not shade.
+- **Quiet & Relax** (Quiet Walk): 311 noise-complaint intensity over the last 12 months and roadway width. Complaints
+  depend on who calls 311; neither indicator is a sound level.
+- **Scenic & Visual**: proximity to OSM viewpoints, public art, fountains, memorials and monuments. It does not measure
+  whether a street looks nice, which is why there is no "Scenic" preset.
+- **Urban Vibrancy**: POI diversity × quantity. At the 36 Manhattan DOT pedestrian-count locations its rank correlation
+  with observed people per hour is −0.022 (`data/dimensions/manhattan/manifest.json`; the locations are mostly busy
+  retail corridors, so the range is restricted). It is not offered as a "lively" preset.
+
+## Benchmark and validation status
+
+- **Route benchmark** (`benchmarks/route_benchmark.py`, results in `benchmarks/ROUTE_BENCHMARK.md`): shortest route vs
+  the preference route vs the next candidate for 19 fixed trips × 12 single-dimension preferences. It reports gains,
+  detours, overlap and "same as shortest" as they come out, and asserts nothing about which route is better. It shows
+  whether the engine moves its own metric, not whether a walker notices.
+- **User validation**: not done. `RESEARCH_PROTOCOL.md` describes the planned before/after-walk study. No user
+  feedback has been collected and none is simulated anywhere in this repository.
+
 ## Scope and truthfulness
 
 Two calculated raw proxies; zero research-calibrated 0–100 experience scores. The 12 `*_score` properties are always NULL in this release. Candidate match (0–100) is a separate relative comparison among requested routes; it is not an urban quality score. User sliders are importance, never environmental measurements.
