@@ -1128,6 +1128,11 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 .walk-pill{flex:none;min-height:26px;padding:0 9px;border:1px solid var(--border-strong);border-radius:999px;background:transparent;color:var(--text-primary);font-size:11.5px;font-weight:600;white-space:nowrap}
 .walk-pill:hover{border-color:var(--text-secondary)}
 .walk-pill[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.rc-basis{display:block;margin-top:6px;text-align:left}
+.rc-basis-row{display:block;font-size:11px;line-height:1.4;color:var(--text-secondary)}
+.rc-basis-row+.rc-basis-row{margin-top:4px}
+.rc-basis-row b{color:var(--text-primary);font-weight:600}
+.rc-basis-row i{display:block;font-style:normal;font-size:10px;color:var(--text-tertiary)}
 .why-measures{margin-top:12px;padding-top:10px;border-top:1px solid var(--divider)}
 .why-measures-title{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:6px}
 .why-dim{margin:0 0 10px}

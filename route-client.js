@@ -130,12 +130,13 @@ function renderRouteCards(){
   x.shortLabel=extra?'':(st.short||'');
   const chips=(st.highlights||[]).map(h=>`<span>${esc(h)}</span>`).join('');
   const heat=weatherActive&&r.weather?`<span class="rc-note">Weather: ${Math.round(r.weather.heat_exposure_share*100)}% of this walk in the sun (tree-cover proxy)</span>`:'';
-  return `<article class="route-card${selected?' selected':''}${!feasible?' over-budget':''}${extra?' extra':''}${extra&&!routeStory.showAll&&!selected?' hidden':''}" data-route="${esc(x.id)}"><button type="button" class="route-pick" data-pick="${esc(x.id)}" aria-pressed="${selected}">${st.tag?`<span class="rc-tag">${esc(st.tag)}</span>`:''}<strong class="rc-name">${esc(st.name||r.route_name)}</strong>${st.sentence?`<span class="rc-sentence">${esc(st.sentence)}</span>`:''}<span class="rc-row"><span class="rc-col"><span class="rc-meta"><strong>${(r.distance_m/1000).toFixed(1)} km</strong><span>${Math.ceil(r.estimated_duration_min)} min</span></span>${chips?`<span class="rc-chips">${chips}</span>`:''}</span>${extra?'':storyPreviewSvg(r,shownRaw)}</span>${st.why?`<span class="rc-why">${esc(st.why)}</span>`:''}${st.note?`<span class="rc-note warn">${esc(st.note)}</span>`:''}${heat}</button>${extra?'':cardPhotos(r,st,shownRaw,usedPhotos)}${routeCardDetails(r)}</article>`;
+  return `<article class="route-card${selected?' selected':''}${!feasible?' over-budget':''}${extra?' extra':''}${extra&&!routeStory.showAll&&!selected?' hidden':''}" data-route="${esc(x.id)}"><button type="button" class="route-pick" data-pick="${esc(x.id)}" aria-pressed="${selected}">${st.tag?`<span class="rc-tag">${esc(st.tag)}</span>`:''}<strong class="rc-name">${esc(st.name||r.route_name)}</strong>${st.sentence?`<span class="rc-sentence">${esc(st.sentence)}</span>`:''}<span class="rc-row"><span class="rc-col"><span class="rc-meta"><strong>${(r.distance_m/1000).toFixed(1)} km</strong><span>${Math.ceil(r.estimated_duration_min)} min</span></span>${chips?`<span class="rc-chips">${chips}</span>`:''}</span>${extra?'':storyPreviewSvg(r,shownRaw)}</span>${st.why?`<span class="rc-why">${esc(st.why)}</span>`:''}${selected?cardBasis(r):''}${st.note?`<span class="rc-note warn">${esc(st.note)}</span>`:''}${heat}</button>${extra?'':cardPhotos(r,st,shownRaw,usedPhotos)}${routeCardDetails(r)}</article>`;
  }).join('');
  root.querySelectorAll('[data-pick]').forEach(el=>el.addEventListener('click',()=>selectRoute(el.dataset.pick)));
  if(more){const n=story.extra.length;more.classList.toggle('hidden',!n);more.textContent=routeStory.showAll?'Fewer routes':`More routes (${n})`;more.setAttribute('aria-expanded',String(routeStory.showAll));}
- const tech=$('routeTechNote');if(tech)tech.textContent=`Routes are computed on the OSM pedestrian graph (${planner.routeResponse?.network_version||''}) and ranked by personalized utility = weighted experience − detour penalty. Experience scores are relative ranks within Manhattan (${planner.routeResponse?.score_version||''}), shared with Explore Urban Data. ${constraintSummary()}`;
+ const tech=$('routeTechNote');if(tech)tech.textContent=`Routes are computed on the OSM pedestrian graph (${planner.routeResponse?.network_version||''}) and ranked by personalized utility = weighted experience − detour penalty. Experience scores are relative ranks within Manhattan (${planner.routeResponse?.score_version||''}); the Explore Urban Data map uses a newer score build with more indicators (see METHODOLOGY.md). ${constraintSummary()}`;
  renderAlongWalk();
+ if(!scoreBasis.doc&&!scoreBasis.failed)loadScoreBasis().then(d=>{if(d&&state.routes.length)renderRouteCards();}); // then cardBasis() can name the indicators
  if(typeof photosLoad==='function'){const sel=routes.find(x=>x.id===state.activeRoute);const want=[...shownRaw,...(sel?[sel.raw]:[])].flatMap(r=>(storyPlacesNear(r)||[]).slice(0,10));photosLoad(want,()=>renderRouteCards());}
  if(typeof renderNavStart==='function')renderNavStart();
 }
@@ -194,6 +195,23 @@ const WHY_SIMILAR=5; // same threshold as route-story.js STORY.MORE: smaller dif
 function whyWindow(doc,source){
  const w=doc.windows||{};
  return source==='noise'&&w.noise_from?` · records since ${w.noise_from}`:source==='collisions'&&w.collisions_from?` · records since ${w.collisions_from}`:source==='trees'&&w.trees_inventory_updated?` · inventory updated ${w.trees_inventory_updated}`:'';
+}
+/** The numbers behind the card's "why" sentence, on the SELECTED card: for the visitor's top priorities (two at most),
+    this route's score next to the shortest route's, and what that score is measured by. Same sources and the same
+    version check as whyMeasures(); '' when nothing was prioritised or the definitions file does not match this build. */
+function cardBasis(r){
+ const doc=scoreBasis.doc,ps=r.personalized_score;
+ if(!doc||doc.score_version!==r.score_version||!ps?.preferences_expressed)return'';
+ const dims=Object.entries(ps.components).filter(([d,c])=>doc.dimensions[d]&&c.weight>50&&r.dimension_scores[d]!=null).sort((a,b)=>b[1].weight-a[1].weight).slice(0,2);
+ if(!dims.length)return'';
+ const shortest=state.routes.map(y=>y.raw).find(y=>y.objective==='shortest');
+ const rows=dims.map(([d,c])=>{
+  const v=r.dimension_scores[d],sv=shortest&&shortest!==r?shortest.dimension_scores[d]:null;
+  const versus=shortest===r?' · shortest route':sv!=null?` · shortest route ${scoreText(sv)}`:'';
+  const by=doc.dimensions[d].filter(i=>i.role==='up'||i.role==='down').map(i=>i.label+(i.role==='down'?' (less is better)':'')).join(' · ');
+  return `<span class="rc-basis-row"><b>${esc(dimLabel(d))} ${scoreText(v)}</b>${esc(versus)}${c.direction==='low'?' · you asked for less':''}<i>Measured by: ${esc(by)}</i></span>`;
+ }).join('');
+ return `<span class="rc-basis" aria-label="What this is based on">${rows}</span>`;
 }
 /** For each of the user's priorities: this route vs the shortest route, and the indicators that score is made of. */
 function whyMeasures(r){

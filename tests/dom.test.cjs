@@ -135,8 +135,18 @@ const run=s=>vm.runInContext(s,context);
  const fxShortest=fixture.routes.find(r=>r.objective==='shortest');
  if(fxShortest&&fxShortest!==best)assert(why.textContent.includes(`shortest route ${fxShortest.dimension_scores.Nature}`)&&why.textContent.includes(`${best.detour_percentage}% longer`),'compares with the real shortest candidate');
  assert(why.textContent.includes('not observations of how this walk feels')&&why.textContent.includes(basis.score_version));
+ // The numbers behind the card's "why" sentence, on the selected card (not only inside Technical details):
+ // priority score, the shortest route's score, and the indicators it is measured by.
+ run('renderRouteCards()');
+ const basisEls=[...w.document.querySelectorAll('.route-card .rc-basis')];assert.equal(basisEls.length,1,'only the selected card carries the numbers');
+ const basisEl=basisEls[0];assert.equal(basisEl.closest('.route-card').dataset.route,best.route_id);
+ assert(basisEl.textContent.includes(`${best.dimension_scores.Nature}`)&&basisEl.textContent.includes('Measured by:'));
+ assert(basisEl.textContent.includes(basis.dimensions.Nature.find(x=>x.role==='up').label));
+ if(fxShortest&&fxShortest!==best)assert(basisEl.textContent.includes(`shortest route ${fxShortest.dimension_scores.Nature}`));
+ assert(basisEl.querySelectorAll('.rc-basis-row').length<=2,'two priorities at most on a card');
  w.BASIS_OLD={...basis,score_version:'sw-score-other'};run('scoreBasis.doc=BASIS_OLD;updateWhyRoute()');
  assert(!w.document.querySelector('#whyRoute .why-measures'),'definitions from a different score build are never shown');
+ run('renderRouteCards()');assert(!w.document.querySelector('.rc-basis'),'nor on the cards');
  run('scoreBasis.doc=BASIS;updateWhyRoute()');
  // Sleeping API host (api-config.js): planning waits for /api/status, says so once, and a timeout reads as words.
  {const keepFetch=w.fetch;let n=0,notes=[];
