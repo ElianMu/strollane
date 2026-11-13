@@ -138,29 +138,47 @@ const run=s=>vm.runInContext(s,context);
  w.BASIS_OLD={...basis,score_version:'sw-score-other'};run('scoreBasis.doc=BASIS_OLD;updateWhyRoute()');
  assert(!w.document.querySelector('#whyRoute .why-measures'),'definitions from a different score build are never shown');
  run('scoreBasis.doc=BASIS;updateWhyRoute()');
+ // Sleeping API host (api-config.js): planning waits for /api/status, says so once, and a timeout reads as words.
+ {const keepFetch=w.fetch;let n=0,notes=[];
+  w.fetch=async(url)=>{if(!String(url).endsWith('/api/status'))throw new Error('unexpected '+url);n++;if(n<3)throw new Error('asleep');return {ok:true,json:async()=>({})};};
+  w.NOTE=t=>notes.push(t);
+  assert.equal(await w.eval('streetwiseAwake(NOTE,5000,5)'),true);assert.equal(n,0,'same-origin page: no extra request, the server that sent the page is the API');
+  run('streetwiseHost.remote=true;streetwiseHost.awakeAt=0');
+  assert.equal(await w.eval('streetwiseAwake(NOTE,5000,5)'),true);assert.equal(n,3,'kept asking until the host answered');
+  assert.equal(notes.length,1,'the visitor is told once');assert(/Waking the route server/.test(notes[0]));assert.equal(run('streetwiseHost.waking'),false);
+  await w.eval('streetwiseAwake(NOTE,5000,5)');assert.equal(n,3,'a host that just answered is not asked again');
+  run('streetwiseHost.awakeAt=0');w.fetch=async()=>{throw new Error('asleep');};
+  let gaveUp=null;try{await w.eval('streetwiseAwake(null,40,5)');}catch(e){gaveUp=e.message;}
+  assert(/not answering right now/.test(gaveUp||''),'gives up in plain words after the wait limit');
+  assert(/took too long to answer/.test(run("streetwiseErrorText(Object.assign(new Error('signal timed out'),{name:'TimeoutError'}))")));
+  assert.equal(run("streetwiseErrorText(new Error('Start is outside walking-route coverage'))"),'Start is outside walking-route coverage','other errors pass through unchanged');
+  run('streetwiseHost.remote=false;streetwiseHost.awakeAt=0');w.fetch=keepFetch;}
  // Walk priorities: one row of the 12 EXISTING dimensions. A pill only sets its dimension to the chips' weight (80)
  // or back to not-expressed; no new dimension, names and count untouched; the request box shows the choice in words.
  run('renderWalkPresets()');
  const presetRoots=[...w.document.querySelectorAll('[data-walk-presets]')];assert.equal(presetRoots.length,2,'desktop panel + phone request card');
+ // looked up by dataset, not by an attribute selector: jsdom 27 (the version CI installs) returns null for a quoted
+ // attribute value containing "&", which real browsers accept
+ const pillFor=dim=>[...presetRoots[0].querySelectorAll('.walk-pill')].find(b=>b.dataset.dim===dim);
  const dimNames=run('DIMENSIONS.map(d=>d.name).join("|")').split('|');assert.equal(dimNames.length,12);
  for(const r of presetRoots){const pills=[...r.querySelectorAll('.walk-pill')].map(b=>b.dataset.dim);assert.equal(pills.length,12);assert.deepEqual([...pills].sort(),[...dimNames].sort(),'exactly the 12 registered dimensions, none invented or renamed');}
  assert.equal(run('WALK_PRESET_ORDER.slice(0,4).join("|")'),'Spatial Comfort|Access & Safety|Nature|Quiet & Relax','benchmark order, strongest first');
- const naturePill=presetRoots[0].querySelector('.walk-pill[data-dim="Nature"]');
+ const naturePill=pillFor('Nature');
  assert(naturePill.title.includes(basis.dimensions.Nature.find(x=>x.role==='up').label),'tooltip names the indicators from the router definitions file');
  const box=w.document.querySelector('#intentText');box.value=box.defaultValue;
  const savedPrefs=run('JSON.stringify([planner.weights,planner.origins,planner.directions])');
  run("for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';planner.directions[d.name]='high';}renderWalkPresets()");
- presetRoots[0].querySelector('.walk-pill[data-dim="Nature"]').click();
+ pillFor('Nature').click();
  assert.equal(run("planner.weights['Nature']"),80);assert.equal(run("planner.origins['Nature']"),'manual');assert.equal(run("planner.directions['Nature']"),'high');
  assert.equal(box.value,'Prioritise: Nature.','the sample sentence is replaced by the choice in words');assert(run('isWalkPresetRequest(document.querySelector("#intentText").value)'));
- presetRoots[0].querySelector('.walk-pill[data-dim="Quiet & Relax"]').click();
+ pillFor('Quiet & Relax').click();
  assert.equal(run("planner.weights['Quiet & Relax']"),80);assert.equal(run("planner.weights['Nature']"),80,'priorities combine');
  assert.equal(box.value,'Prioritise: Nature, Quiet & Relax.');
  for(const r of presetRoots)assert.deepEqual([...r.querySelectorAll('.walk-pill[aria-pressed=true]')].map(b=>b.dataset.dim),['Nature','Quiet & Relax'],'both rows mirror planner state');
- box.value='Take me past bookshops';presetRoots[0].querySelector('.walk-pill[data-dim="Culture"]').click();
+ box.value='Take me past bookshops';pillFor('Culture').click();
  assert.equal(box.value,'Take me past bookshops','words the visitor typed are never overwritten');assert(!run('isWalkPresetRequest(document.querySelector("#intentText").value)'),'typed text still goes through interpretation');
  assert.equal(run("planner.weights['Culture']"),80);
- for(const d of ['Nature','Quiet & Relax','Culture'])presetRoots[0].querySelector(`.walk-pill[data-dim="${d}"]`).click();
+ for(const d of ['Nature','Quiet & Relax','Culture'])pillFor(d).click();
  assert.equal(run("['Nature','Quiet & Relax','Culture'].every(d=>planner.weights[d]===50&&planner.origins[d]==='default')"),true,'tapping again returns a dimension to not-expressed');
  assert.equal(run('walkPresetRequest()'),'');assert.equal(run('DIMENSIONS.length'),12);assert.equal(run('toggleWalkPreset("Hidden gems")'),false);
  box.value=box.defaultValue;w.SAVED=savedPrefs;run('{const [a,b,c]=JSON.parse(SAVED);Object.assign(planner.weights,a);Object.assign(planner.origins,b);Object.assign(planner.directions,c);renderWalkPresets();}');
