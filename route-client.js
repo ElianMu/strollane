@@ -67,6 +67,7 @@ async function generateRoutes(userText=null,isFollowUp=false){
   resetRoutes(true);renderRouteCards();
   if(location.protocol==='file:')throw new Error('The routing engine runs in server.py; start it and open http://127.0.0.1:8080.');
   const request=buildRouteRequest(a,b);
+  await streetwiseAwake(t=>{$('ctaLabel').textContent='Waking the route server…';$('rankingStatus').textContent=t;});if(run!==planner.runId)return;$('ctaLabel').textContent='Planning your walk…';
   const res=await streetwiseFetch('/api/routes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request),signal:AbortSignal.timeout(30000)});
   const json=await res.json().catch(()=>({}));
   if(run!==planner.runId)return;
@@ -86,7 +87,7 @@ async function generateRoutes(userText=null,isFollowUp=false){
  }catch(err){
   if(run!==planner.runId)return;
   const restored=restoreRoutes(kept);
-  const failure=`No route: ${err.message} No route was fabricated.${restored?' Your previous route is still shown and unchanged.':''}`;
+  const failure=`No route: ${streetwiseErrorText(err)} No route was fabricated.${restored?' Your previous route is still shown and unchanged.':''}`;
   if(!restored)planner.lastExplanation=failure;
   $('rankingStatus').textContent=failure;appendChat('assistant',failure);toast(failure);
  }finally{state.routingBusy=false;$('generateRoutes').disabled=false;$('chatSend').disabled=false;$('ctaLabel').textContent='Plan My Walk';renderRouteCards()}

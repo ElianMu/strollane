@@ -495,6 +495,7 @@ async function planJourney(isFollowUp=false){
  try{
   var kept=isFollowUp?snapshotRoutes():null;
   resetRoutes(true);renderRouteCards();
+  await streetwiseAwake(t=>{$('ctaLabel').textContent='Waking the route server…';$('rankingStatus').textContent=t;});if(run!==planner.runId)return;$('ctaLabel').textContent='Finding places & routing…';
   const req=await itineraryRequest();
   const res=await streetwiseFetch('/api/itinerary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req),signal:AbortSignal.timeout(45000)});
   const json=await res.json().catch(()=>({}));if(run!==planner.runId)return;
@@ -510,7 +511,7 @@ async function planJourney(isFollowUp=false){
  }catch(err){
   if(run!==planner.runId)return;resetRoutes(true);renderRouteCards();
   const restored=restoreRoutes(kept);
-  const msg=`Could not build the walk: ${err.message}${restored?' Your previous route is still shown and unchanged.':''}`;$('rankingStatus').textContent=msg;appendChat('assistant',msg);toast(msg);
+  const msg=`Could not build the walk: ${streetwiseErrorText(err)}${restored?' Your previous route is still shown and unchanged.':''}`;$('rankingStatus').textContent=msg;appendChat('assistant',msg);toast(msg);
  }finally{if(run===planner.runId){state.routingBusy=false;$('generateRoutes').disabled=false;$('chatSend').disabled=false;$('ctaLabel').textContent='Plan My Walk';}}
 }
 function itinerarySummaryText(it){
