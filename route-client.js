@@ -180,6 +180,37 @@ function independentComparisonRows(){
  }
  return rows.join('');
 }
+// --- What the scores measure: the router's real indicator definitions (data/pedestrian/score-indicators.json) ---
+/* A static copy of the indicator definitions behind the 12 route scores (scripts/build_score_indicators.py). Shown only
+   when its score_version equals the route's, so the words can never describe a different scoring build. Every number
+   in this block is a field of the /api/routes response; every label, method and source is copied from that file. */
+const scoreBasis={doc:null,loading:null,failed:false};
+function loadScoreBasis(){
+ if(scoreBasis.doc||scoreBasis.failed)return Promise.resolve(scoreBasis.doc);
+ return scoreBasis.loading||(scoreBasis.loading=fetch('./data/pedestrian/score-indicators.json').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(d=>(scoreBasis.doc=d)).catch(()=>{scoreBasis.failed=true;return null;}));
+}
+const WHY_SIMILAR=5; // same threshold as route-story.js STORY.MORE: smaller differences are not described as better
+function whyWindow(doc,source){
+ const w=doc.windows||{};
+ return source==='noise'&&w.noise_from?` · records since ${w.noise_from}`:source==='collisions'&&w.collisions_from?` · records since ${w.collisions_from}`:source==='trees'&&w.trees_inventory_updated?` · inventory updated ${w.trees_inventory_updated}`:'';
+}
+/** For each of the user's priorities: this route vs the shortest route, and the indicators that score is made of. */
+function whyMeasures(r){
+ const doc=scoreBasis.doc;
+ if(!doc||doc.score_version!==r.score_version)return'';
+ const dims=Object.entries(r.personalized_score.components).filter(([d])=>r.personalized_score.preferences_expressed&&doc.dimensions[d]).sort((a,b)=>b[1].weight-a[1].weight).slice(0,4);
+ if(!dims.length)return'';
+ const shortest=state.routes.map(y=>y.raw).find(y=>y.objective==='shortest');
+ const blocks=dims.map(([d,c])=>{
+  const v=r.dimension_scores[d],cov=r.data_coverage.by_dimension[d],sv=shortest&&shortest!==r?shortest.dimension_scores[d]:null;
+  let versus='';
+  if(shortest===r)versus=' · this is the shortest route';
+  else if(v!=null&&sv!=null){const diff=Math.round(v-sv);versus=` · shortest route ${scoreText(sv)} (${diff>0?'+':''}${diff}${Math.abs(diff)<WHY_SIMILAR?', similar':''}) · ${r.detour_percentage}% longer`;}
+  const inds=doc.dimensions[d].filter(i=>i.role==='up'||i.role==='down').map(i=>`<li><b>${esc(i.label)}</b>${i.role==='down'?' (lower ranks higher)':''}: ${esc(i.method)}. <i>${esc(doc.source_labels[i.source]||i.source)}${esc(whyWindow(doc,i.source))}</i></li>`).join('');
+  return `<div class="why-dim"><div class="why-dim-head"><strong>${esc(dimLabel(d))}${c.direction==='low'?' · you asked for less':''}</strong><span>this route ${scoreText(v)}${esc(versus)}</span></div><small>${Math.round(cov*100)}% of this route's length has this score${cov<.6?' — low coverage, treated as close to neutral':''}. The score is the mean rank of:</small><ul>${inds}</ul></div>`;
+ }).join('');
+ return `<div class="why-measures"><div class="why-measures-title">What these scores measure</div>${blocks}<small>${esc(doc.value_note)} They are computed from the records listed above (retrieved ${esc(doc.data_version)}): proxies for how a street may feel, not observations of how this walk feels. Score build ${esc(doc.score_version)}.</small></div>`;
+}
 function updateWhyRoute(){
  const x=state.routes.find(r=>r.id===state.activeRoute),root=$('whyRoute');
  if(!x){root.textContent=planner.constraints.stepFree?'Step-free access cannot be verified, so no route is recommended.':planner.routeResponse?planner.lastExplanation:'No selected route yet.';if(typeof renderWeatherRoute==='function')renderWeatherRoute();return}
@@ -187,7 +218,8 @@ function updateWhyRoute(){
  const crimeMetric=x.raw.independent_metrics?.crime;
  const crimeInfo=crimeMetric?`<div class="data-pair"><span>Historical reported complaints</span><span>${crimeMetric.count} within ${crimeMetric.corridor_m} m</span></div><div class="data-pair"><span>Reports per route km</span><span>${crimeMetric.reported_incidents_per_route_km}</span></div><small>${esc(crimeMetric.from)} – ${esc(crimeMetric.to_exclusive)} (end exclusive). ${esc((crimeMetric.law_categories||[]).join(' + '))}. Approximate NYPD historical locations; no population denominator or present personal-risk prediction. <a href="${esc(crimeMetric.source_urls[0])}" target="_blank" rel="noopener">NYPD source</a></small>`:'';
  const parts=Object.entries(p.components).sort((a,b)=>b[1].weight-a[1].weight).slice(0,6).map(([d,c])=>`<div class="data-pair"><span>${esc(dimLabel(d))} · weight ${c.weight}${c.direction==='low'?' · less':''}</span><span>${scoreText(c.route_score)} → fit ${c.adjusted_fit}</span></div>`).join('');
- root.innerHTML=`<p>${esc(x.raw.ranking_explanation)}</p>${crimeInfo}${parts}${p.weather_adjustment!=null?`<div class="data-pair"><span>Weather (heat) adjustment</span><span>−${p.weather_adjustment}</span></div>`:''}<small>${esc(p.formula)}. ${p.preferences_expressed?'Weights come from your request.':'No preference expressed yet, so all 12 dimensions count equally.'}</small>`;
+ root.innerHTML=`<p>${esc(x.raw.ranking_explanation)}</p>${crimeInfo}${parts}${p.weather_adjustment!=null?`<div class="data-pair"><span>Weather (heat) adjustment</span><span>−${p.weather_adjustment}</span></div>`:''}<small>${esc(p.formula)}. ${p.preferences_expressed?'Weights come from your request.':'No preference expressed yet, so all 12 dimensions count equally.'}</small>${whyMeasures(x.raw)}`;
+ if(!scoreBasis.doc&&!scoreBasis.failed)loadScoreBasis().then(d=>{if(d&&state.activeRoute===x.id)updateWhyRoute();});
  if(typeof renderWeatherRoute==='function'){renderWeatherRoute();renderWeatherPanel();}
 }
 // --- Route edges: list in Route Intelligence and clickable on the map -------------------------------------

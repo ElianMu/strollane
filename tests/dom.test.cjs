@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.
 const dom=new JSDOM(html,{runScripts:'outside-only',url:'http://localhost:8080'}),w=dom.window;
 w.fetch=async()=>{throw new Error('Network intentionally blocked in DOM test')};w.HTMLElement.prototype.scrollIntoView=function(){};w.AbortSignal.timeout=()=>new w.AbortController().signal;
 const vm=require('vm'),context=dom.getInternalVMContext();
-for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','route-client.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','explore-map.js','explore-analytics.js','center-map.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','explore-map.js','explore-analytics.js','center-map.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 const run=s=>vm.runInContext(s,context);
 (async()=>{
  // flatMapBounds: a pitch-independent query box, checked against a real map.getBounds() reading captured live
@@ -122,6 +122,37 @@ const run=s=>vm.runInContext(s,context);
  const rows=[...w.document.querySelectorAll('#profileChart .experience-row')];assert.equal(rows.length,12);
  run('DIMENSIONS').forEach((d,i)=>assert.equal(rows[i].querySelector('strong').textContent,best.dimension_scores[d.name]==null?'N/A':String(best.dimension_scores[d.name])));
  assert(w.document.querySelector('#whyRoute').textContent.includes(String(best.personalized_score.utility)));
+ // "What these scores measure": the router's own indicator definitions (static file), shown only for the user's
+ // priorities and only when the file's score_version equals the route's. Numbers come from the route response.
+ assert(!w.document.querySelector('#whyRoute .why-measures'),'no indicator text before the definitions file has loaded (network is blocked here)');
+ const basis=JSON.parse(fs.readFileSync(path.join(root,'data/pedestrian/score-indicators.json')));assert.equal(basis.score_version,best.score_version);
+ w.BASIS=basis;run('scoreBasis.doc=BASIS;scoreBasis.failed=false;updateWhyRoute()');
+ const why=w.document.querySelector('#whyRoute .why-measures');assert(why,'indicator block rendered');
+ assert.equal(why.querySelectorAll('.why-dim').length,1,'only the expressed priority (Nature) is explained');
+ for(const i of basis.dimensions.Nature.filter(x=>x.role==='up'||x.role==='down'))assert(why.textContent.includes(i.label)&&why.textContent.includes(basis.source_labels[i.source]),`names ${i.key} and its source`);
+ assert(!why.textContent.includes(basis.dimensions.Nature.find(x=>x.role==='context').label),'context-only indicators are not presented as part of the score');
+ assert(why.textContent.includes(`this route ${best.dimension_scores.Nature}`));
+ const fxShortest=fixture.routes.find(r=>r.objective==='shortest');
+ if(fxShortest&&fxShortest!==best)assert(why.textContent.includes(`shortest route ${fxShortest.dimension_scores.Nature}`)&&why.textContent.includes(`${best.detour_percentage}% longer`),'compares with the real shortest candidate');
+ assert(why.textContent.includes('not observations of how this walk feels')&&why.textContent.includes(basis.score_version));
+ w.BASIS_OLD={...basis,score_version:'sw-score-other'};run('scoreBasis.doc=BASIS_OLD;updateWhyRoute()');
+ assert(!w.document.querySelector('#whyRoute .why-measures'),'definitions from a different score build are never shown');
+ run('scoreBasis.doc=BASIS;updateWhyRoute()');
+ // Walk presets: ready-made walks that only set an EXISTING dimension to the chips' weight (80). No new dimension,
+ // no Scenic preset (its score is proximity to mapped features, not how a street looks), names and count untouched.
+ run('renderWalkPresets()');
+ const presetRoots=[...w.document.querySelectorAll('[data-walk-presets]')];assert.equal(presetRoots.length,2,'desktop panel + phone request card');
+ for(const r of presetRoots)assert.deepEqual([...r.querySelectorAll('.walk-preset')].map(b=>b.dataset.preset),['green','quiet']);
+ assert.equal(run('WALK_PRESETS.map(p=>p.dim).join("|")'),'Nature|Quiet & Relax');assert(run('WALK_PRESETS.every(p=>DIMENSIONS.some(d=>d.name===p.dim))'));
+ assert(presetRoots[0].textContent.includes(basis.dimensions.Nature.find(x=>x.role==='up').label),'the "Based on" line is read from the router definitions file');
+ run("planner.weights['Culture']=65;planner.origins['Culture']='manual'");
+ run("applyWalkPreset('green')");assert.equal(run("planner.weights['Nature']"),80);assert.equal(run("planner.origins['Nature']"),'manual');assert.equal(run("planner.directions['Nature']"),'high');
+ run("applyWalkPreset('quiet')");assert.equal(run("planner.weights['Quiet & Relax']"),80);
+ assert.equal(run("planner.weights['Nature']"),50,'switching presets returns the previous preset dimension to not-expressed');assert.equal(run("planner.origins['Nature']"),'default');
+ assert.equal(run("planner.weights['Culture']"),65,'a preference the user set themselves is left alone');
+ assert.deepEqual([...presetRoots[0].querySelectorAll('.walk-preset[aria-pressed=true]')].map(b=>b.dataset.preset),['quiet']);
+ assert.equal(run('DIMENSIONS.length'),12);assert.equal(run('applyWalkPreset("scenic")'),null);
+ run("planner.weights['Quiet & Relax']=50;planner.origins['Quiet & Relax']='default';planner.weights['Culture']=50;planner.origins['Culture']='default';walkPresets.active=null;renderWalkPresets()");
  // Ordered edges: listed in order, geometry continuous, distance = sum of traversed edge lengths.
  assert.equal(w.document.querySelectorAll('#routeEdgeList .edge-row').length,best.ordered_edge_ids.length);
  assert.deepEqual(best.edges.map(e=>e.edge_id),best.ordered_edge_ids);

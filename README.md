@@ -4,6 +4,15 @@
 
 Routes are computed by `routing/engine.py` on the Manhattan OSM pedestrian graph and scored with the same 12 experience scores Explore shows, transferred to OSM edges through a LION–OSM match table. Scores are relative ranks within Manhattan, not calibrated measurements.
 
+## Walk presets, route explanation and benchmark / 体验预设、路线解释与基准测试
+
+- **Walk presets** (`walk-presets.js`): *Green Walk* and *Quiet Walk* cards on the first screen (desktop panel and phone request card). One tap sets an existing dimension (Nature / Quiet & Relax) to 80, the same weight the quick-preference chips use, and plans through the existing manual path: no typing and no AI call. No new dimension, score or weight is introduced; chips, sliders and the text box stay in sync. There is no "Scenic" preset because the Scenic & Visual score measures proximity to mapped features, not how a street looks.
+- **Why this route → What these scores measure** (`route-client.js`): for each of the user's priorities, the selected route's score next to the shortest route's, the detour, the coverage, and the indicators that score is the mean of, with source and time window. Text comes from `data/pedestrian/score-indicators.json` (`python3 scripts/build_score_indicators.py`, a verbatim copy of the routes build's indicator definitions) and is shown only when its `score_version` equals the route's.
+- **Route benchmark**: `python3 benchmarks/route_benchmark.py` runs 19 fixed trips × 12 single-dimension preferences on the real engine and writes `benchmarks/route_benchmark.json` and `benchmarks/ROUTE_BENCHMARK.md` (shortest vs preference vs next candidate: distance, detour, score, coverage, overlap, QA status). It never assumes the preference route is better. Tests: `tests/test_route_benchmark.py`, `tests/test_score_indicators.py`.
+- **Two score builds** (routes vs Explore map) and proxy limits: `METHODOLOGY.md`. **User validation plan** (not yet run): `RESEARCH_PROTOCOL.md`.
+
+预设只是把现有维度的偏好权重设为 80 并走原有的手动规划流程，不新增维度、不改评分；路线解释中的指标文字逐字取自路线评分所用的定义文件；基准测试不预设偏好路线更好；用户验证尚未开展。
+
 ## Run / 运行
 
 1. 需要 **Python 3.11 或更高版本**（`routing/engine.py` 用到 `hashlib.file_digest`；CI 用 3.12）。macOS 自带的 `python3` 通常是 3.9，请先从 python.org 或 `brew install python@3.12` 安装新版本。`python3 --version` 可查看。

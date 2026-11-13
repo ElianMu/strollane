@@ -511,13 +511,23 @@
     const text = ($('intentText').value || '').trim();
     if (text && text !== lastSubmitted) { createFromText(); return; } // an unsent request is still the user's intent
     if (!placesConfirmed()) return;
-    runPlan(async () => {
-      const problem = await ensurePlanStart();
-      if (problem) { appendChat('assistant', problem + ' The displayed previous route has not been recalculated.'); return; }
-      const rec = prepareRecommendedWalk(''); if (rec) appendChat('assistant', rec); // FROM only: recommend a walk
-      return typeof journeyMode === 'function' && journeyMode() ? planJourney(false) : generateRoutes(null, false);
-    });
+    runPlan(planManual);
   }
+  async function planManual() {
+    const problem = await ensurePlanStart();
+    if (problem) { appendChat('assistant', problem + ' The displayed previous route has not been recalculated.'); return; }
+    const rec = prepareRecommendedWalk(''); if (rec) appendChat('assistant', rec); // FROM only: recommend a walk
+    return typeof journeyMode === 'function' && journeyMode() ? planJourney(false) : generateRoutes(null, false);
+  }
+  /** Walk presets (walk-presets.js): plan from the preferences just set, through Path B — the request box (now showing
+      the preset's own words) is not sent to the Agent. Returns false on the desktop layout, which plans by itself. */
+  window.strollanePlanFromPrefs = (label) => {
+    if (!mq.matches) return false;
+    if (label) lastSubmitted = label;
+    $('intentText').blur();
+    if (!placesConfirmed()) return Promise.resolve();
+    return runPlan(planManual) || Promise.resolve();
+  };
 
   /* ------------------------------------------------------------------ */
   /* Quick preferences (Customize) — verified mappings only            */
