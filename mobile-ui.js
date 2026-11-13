@@ -503,6 +503,9 @@
     // No start yet is fine: handlePlan takes the start the request names, otherwise the user's location.
     lastSubmitted = text;
     $('intentText').blur();
+    // The box holds exactly the sentence the priority pills wrote: those preferences are already set, so plan
+    // through Path B with them instead of asking the Agent to re-read its own words.
+    if (typeof isWalkPresetRequest === 'function' && isWalkPresetRequest(text)) { if (placesConfirmed()) runPlan(planManual); return; }
     runPlan(() => handlePlan(text, hasRoutes()));
   }
   /** Path B — manual FROM / TO: same validation and the same routing calls, no text required. */
@@ -519,15 +522,9 @@
     const rec = prepareRecommendedWalk(''); if (rec) appendChat('assistant', rec); // FROM only: recommend a walk
     return typeof journeyMode === 'function' && journeyMode() ? planJourney(false) : generateRoutes(null, false);
   }
-  /** Walk presets (walk-presets.js): plan from the preferences just set, through Path B — the request box (now showing
-      the preset's own words) is not sent to the Agent. Returns false on the desktop layout, which plans by itself. */
-  window.strollanePlanFromPrefs = (label) => {
-    if (!mq.matches) return false;
-    if (label) lastSubmitted = label;
-    $('intentText').blur();
-    if (!placesConfirmed()) return Promise.resolve();
-    return runPlan(planManual) || Promise.resolve();
-  };
+  /** Walk priorities (walk-presets.js): the request box now shows the pills' own sentence, which is already applied
+      to the preferences — so "Create My Walk" plans through Path B instead of sending it to the Agent. */
+  window.strollaneMarkSubmitted = (text) => { lastSubmitted = text || ''; };
 
   /* ------------------------------------------------------------------ */
   /* Quick preferences (Customize) — verified mappings only            */
@@ -557,6 +554,7 @@
       if (!root) continue;
       root.innerHTML = '';
       for (const q of QUICK_DIMS) {
+        if (root.id === 'deskChips' && document.querySelector('.lp-nl [data-walk-presets]')) break; // desktop: all 12 are in the priorities row
         if (!DIMENSIONS.some((d) => d.name === q.dim)) continue; // registry check: never offer a dimension that does not exist
         const on = planner.origins[q.dim] !== 'default' && planner.weights[q.dim] >= 70 && planner.directions[q.dim] !== 'low';
         root.appendChild(chip(q.label, on, `Sets the ${q.dim} dimension to ${QUICK_WEIGHT}`, () => toggleDim(q.dim, !on)));

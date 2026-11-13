@@ -9805,7 +9805,7 @@
    "gain_points": 7
   }
  ],
- "generated_at": "2026-11-13T05:57:21Z",
+ "generated_at": "2026-11-13T13:45:34Z",
  "summary": {
   "all": {
    "runs": 228,
@@ -10037,7 +10037,7 @@
    }
   },
   "presets_by_length": {
-   "Green Walk": {
+   "Nature": {
     "short (< 1.5 km)": {
      "runs": 6,
      "scored": 6,
@@ -10081,7 +10081,7 @@
      "blocking_issues": 0
     }
    },
-   "Quiet Walk": {
+   "Quiet & Relax": {
     "short (< 1.5 km)": {
      "runs": 6,
      "scored": 6,

@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
-  <link rel="stylesheet" href="./styles.css?v=64" />
+  <link rel="stylesheet" href="./styles.css?v=65" />
 </head>
 <body>
 <div class="site-shell">
@@ -50,9 +50,9 @@
         <div class="lp-nl">
         <div class="section-overline">01 / HOW DO YOU WANT TO WALK?</div>
         <div class="intro-row"><div><h1>Find your <em>kind</em><br>of walk.</h1><p>Not just the shortest way. Your way through the city.</p><p class="intro-audience">For getting to know Manhattan on foot — if you are new here, visiting, or exploring a neighbourhood you don’t know yet.</p></div><span class="intro-star">✳</span></div>
-        <div class="section-overline walk-presets-label">START WITH A WALK</div>
-        <div class="walk-presets" data-walk-presets role="group" aria-label="Ready-made walks"></div>
-        <p class="field-description">Or describe the walk in your own words and tap a few chips. From and To fill in from your sentence.</p>
+        <div class="section-overline walk-presets-label">WHAT MATTERS ON THIS WALK</div>
+        <div class="walk-presets" data-walk-presets role="group" aria-label="Walk priorities"></div>
+        <p class="field-description">Or describe the walk in your own words. From and To fill in from your sentence.</p>
         <div class="voice-row"><button type="button" class="mic-btn" data-mic="intentText" aria-pressed="false" aria-label="Speak your request"><svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></button><select id="voiceLang" aria-label="Voice language"><option value="en-US">EN</option><option value="zh-CN">中文</option></select><span id="voiceStatus" class="voice-status">Voice or text — you can edit the transcript.</span></div>
         <textarea id="intentText" class="intent-box" rows="3" spellcheck="false" placeholder="I’d like a greener, quieter walk with interesting architecture.">I'd like a greener, quieter walk with interesting architecture.</textarea>
         <div id="deskChips" class="quick-prefs d-only" role="group" aria-label="Quick preferences"></div>
@@ -145,7 +145,7 @@
       <section id="mComposer" class="m-composer m-only" aria-label="Describe your walk">
         <div class="m-composer-full">
           <label class="m-composer-q" for="intentText">How would you like to explore New York?</label>
-          <div class="walk-presets m-walk-presets" data-walk-presets role="group" aria-label="Ready-made walks"></div>
+          <div class="walk-presets m-walk-presets" data-walk-presets role="group" aria-label="Walk priorities"></div>
           <div id="mComposerSlot" class="m-composer-slot"></div>
           <div class="m-composer-row"><span id="mMicSlot" class="m-mic-slot"></span><button type="button" id="mCreate" class="m-create">Create My Walk <span aria-hidden="true">→</span></button></div>
           <div class="m-route-ends"><button type="button" id="mContext" class="m-context" aria-label="Start and destination — open Plan walk"><span class="m-ft"><span class="m-ft-row"><span class="place-dot start" aria-hidden="true"></span><span class="m-ft-k">From</span><span id="mContextFrom" class="m-ft-v">…</span></span><span id="mContextStops" class="m-ft-stops"></span><span class="m-ft-row"><span class="place-dot end" aria-hidden="true"></span><span class="m-ft-k">To</span><span id="mContextTo" class="m-ft-v">…</span></span></span><span id="mContextText" class="sr-only">From …</span><span class="m-context-edit" aria-hidden="true">Edit</span></button><button type="button" class="m-swap swap-ends" aria-label="Swap start and destination"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v15m0 0-3.5-3.5M8 19l3.5-3.5M16 20V5m0 0-3.5 3.5M16 5l3.5 3.5"/></svg></button></div>
@@ -289,11 +289,11 @@
 <script src="./weather.js?v=28"></script>
 <script src="./places.js?v=29"></script>
 <script src="./opening-hours.js?v=28"></script>
-<script src="./app.js?v=46"></script>
+<script src="./app.js?v=47"></script>
 <script src="./route-story.js?v=2"></script>
 <script src="./route-photos.js?v=3"></script>
 <script src="./route-client.js?v=34"></script>
-<script src="./walk-presets.js?v=1"></script>
+<script src="./walk-presets.js?v=2"></script>
 <script src="./weather-ui.js?v=28"></script>
 <script src="./journey.js?v=35"></script>
 <script src="./journey-ui.js?v=31"></script>
@@ -309,7 +309,7 @@
 <script src="./explore-analytics.js?v=30"></script>
 <script src="./center-map.js?v=31"></script>
 <script src="./bottom-sheet.js?v=1"></script>
-<script src="./mobile-ui.js?v=31"></script>
+<script src="./mobile-ui.js?v=32"></script>
 <script src="./pwa-register.js?v=2"></script>
 </body>
 </html>

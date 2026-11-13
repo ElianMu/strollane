@@ -14,9 +14,9 @@ nice?", "survey people as they use this") and the one this study answers.
 
 1. **Understanding** — after reading *Why this route?*, can a participant say what the recommendation is based on?
 2. **Trust before walking** — would they choose the recommended route over the shortest one, and why or why not?
-3. **Match after walking** — did the walk feel the way the preset promised, and which stretches did or did not?
+3. **Match after walking** — did the walk feel the way the chosen priority promised, and which stretches did or did not?
 4. **Proxy validity** — does the perceived difference between two routes go in the same direction as the score
-   difference, for Nature (Green Walk) and Quiet & Relax (Quiet Walk)?
+   difference, starting with Nature and Quiet & Relax?
 5. **Audience** — which of the hypothesised groups (new to NYC, visiting, exploring an unfamiliar neighbourhood)
    actually wants this, and for what kind of walk?
 
@@ -25,8 +25,8 @@ nice?", "survey people as they use this") and the one this study answers.
 - **Participants**: 8–12 for a first round, recruited by hypothesised group. Record only: group, how long in NYC
   (banded), how often they walk for leisure (banded).
 - **Trips**: use trips from `benchmarks/od_pairs.json` in the medium and long buckets, where the benchmark shows the
-  preset actually changes the route. Short trips mostly return the shortest path and cannot test anything.
-- **Comparison**: each participant walks **two routes for the same trip**: the shortest route and the preset route,
+  priority actually changes the route. Short trips mostly return the shortest path and cannot test anything.
+- **Comparison**: each participant walks **two routes for the same trip**: the shortest route and the priority route,
   in counterbalanced order, **without being told which is which** until the end. Walking only the recommended route
   cannot separate "the route is green" from "I was told it is green".
 - **Conditions to record** (they change perceived quiet and greenery): date, start time, weather, season/leaf state.
@@ -36,7 +36,7 @@ nice?", "survey people as they use this") and the one this study answers.
 
 Five-point scales (1 = not at all, 5 = very) unless noted. Keep both parts under three minutes.
 
-**Before walking** (after choosing a preset and seeing the routes)
+**Before walking** (after choosing a priority and seeing the routes)
 
 | # | Question | 中文 |
 |---|---|---|
@@ -87,7 +87,7 @@ Five-point scales (1 = not at all, 5 = very) unless noted. Keep both parts under
 The site is static (GitHub Pages) with a stateless API, so there is nowhere to store responses today.
 
 1. **External form (recommended first)** — a Google Form or Qualtrics survey. An optional "Tell us how this walk felt"
-   link on the route card can pre-fill `route_signature`, `score_version`, preset and trip id as URL parameters. No
+   link on the route card can pre-fill `route_signature`, `score_version`, chosen priorities and trip id as URL parameters. No
    backend change, no personal data sent by the app. Not implemented yet: it needs the form to exist first.
 2. **Paper or interview** — for the first 8–12 people this is enough and gives better free-text answers.
 3. **Own endpoint** — a `POST /api/feedback` writing to a small store. Only worth building if a larger second round
