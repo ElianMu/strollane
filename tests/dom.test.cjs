@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.
 const dom=new JSDOM(html,{runScripts:'outside-only',url:'http://localhost:8080'}),w=dom.window;
 w.fetch=async()=>{throw new Error('Network intentionally blocked in DOM test')};w.HTMLElement.prototype.scrollIntoView=function(){};w.AbortSignal.timeout=()=>new w.AbortController().signal;
 const vm=require('vm'),context=dom.getInternalVMContext();
-for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','explore-map.js','explore-analytics.js','center-map.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 const run=s=>vm.runInContext(s,context);
 (async()=>{
  // flatMapBounds: a pitch-independent query box, checked against a real map.getBounds() reading captured live
@@ -47,6 +47,39 @@ const run=s=>vm.runInContext(s,context);
  run('selectExploreView(0)');run(`selectExploreSegment(${JSON.stringify(seg.id)})`);await tick();await tick();const insp=()=>w.document.querySelector('#exploreInspector');
  assert(!insp().classList.contains('hidden'));assert(insp().textContent.includes(seg.id));assert(insp().textContent.includes('Length'));
  assert(insp().textContent.includes('Overall (available dimensions) · Dimension Score'));assert.equal(insp().querySelectorAll('.explore-row').length,12);assert(insp().textContent.includes(`${seg.coverage} of 12 dimensions`));
+ // Three levels: Summary always visible; the 12 dimension rows are buttons that switch the map dimension while the
+ // segment stays selected; Methodology is a closed <details> that still holds every original sentence.
+ assert(insp().querySelector('.inspector-summary [data-k=dimension-score]')&&insp().querySelector('.inspector-summary [data-k=segment-id]'));
+ {const m=insp().querySelector('details.inspector-method');assert(m&&!m.open,'methodology is collapsed by default');
+  assert(m.textContent.includes('Method')&&m.textContent.includes('Overall = mean of the available dimension scores')&&m.textContent.includes('Data & version')&&m.textContent.includes('NYC LION physical ID')&&m.textContent.includes('never counted as 0'),'no methodology text was dropped');
+  const row3=insp().querySelectorAll('button.explore-row')[2];assert.equal(row3.dataset.view,'3');row3.click();await tick();await tick();
+  assert.equal(run('exploreMap.view'),3);assert.equal(run('exploreMap.selected'),seg.id,'the segment stays selected');assert(insp().textContent.includes(seg.id));
+  insp().querySelector('#inspectorNext').click();await tick();assert.equal(run('exploreMap.view'),4);
+  insp().querySelector('#inspectorPrev').click();insp().querySelector('#inspectorPrev').click();await tick();await tick();assert.equal(run('exploreMap.view'),2);
+  run('exploreStep(-2)');assert.equal(run('exploreMap.view'),0,'stepping wraps through Overall');run('exploreStep(-1)');assert.equal(run('exploreMap.view'),12);
+  // a single dimension: compact indicator rows; each indicator's method, notes and source sit in its own closed details
+  run('selectExploreView(2)');await tick();await tick();
+  const inds=[...insp().querySelectorAll('.indicator')];assert(inds.length>=2);
+  for(const el of inds){const more=el.querySelector('details.indicator-more');assert(more&&!more.open);assert(more.textContent.includes('Source:'),'source kept');assert(el.querySelector('[data-k=raw]')&&!more.contains(el.querySelector('[data-k=raw]')),'values stay outside the collapsed part');}
+  assert(insp().querySelector('.indicator.computed .indicator-bar b'),'a computed, scored indicator shows its normalized bar');
+  assert(!insp().querySelector('.indicator.unavailable .indicator-bar'),'no bar is drawn for a value that is N/A');
+  const m2=insp().querySelector('details.inspector-method');assert(m2.textContent.includes('Score method')&&m2.textContent.includes('Data & version'));
+  m2.open=true;m2.dispatchEvent(new w.Event('toggle'));run('selectExploreView(3)');await tick();await tick();assert(insp().querySelector('details.inspector-method').open,'an opened Methodology stays open while exploring');
+  insp().querySelector('details.inspector-method').open=false;insp().querySelector('details.inspector-method').dispatchEvent(new w.Event('toggle'));
+  // Esc closes the inspector (existing behaviour, still works with the new header)
+  w.document.body.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(run('exploreMap.selected'),null);assert(insp().classList.contains('hidden'));
+  run('selectExploreView(0)');run(`selectExploreSegment(${JSON.stringify(seg.id)})`);await tick();await tick();}
+ // Side panels (desktop): Explore hides both, leaving restores what the visitor had; the tabs work in either mode.
+ {const cl=w.document.body.classList,L=w.document.querySelector('#toggleLeftPanel'),R=w.document.querySelector('#toggleRightPanel');
+  assert(run('exploreMap.active')&&cl.contains('left-collapsed')&&cl.contains('right-collapsed'),'Explore gives the width to the map');
+  assert.equal(L.getAttribute('aria-expanded'),'false');assert.equal(L.getAttribute('aria-label'),'Show planning panel');
+  L.click();assert(!cl.contains('left-collapsed')&&cl.contains('right-collapsed'),'a panel can be brought back while exploring');assert.equal(L.getAttribute('aria-expanded'),'true');L.click();
+  run('setExploreMode(false)');assert(!cl.contains('left-collapsed')&&!cl.contains('right-collapsed'),'leaving Explore restores both panels');
+  R.click();assert(cl.contains('right-collapsed'));assert.equal(R.getAttribute('aria-label'),'Show walk panel');
+  run('setExploreMode(true)');assert(cl.contains('left-collapsed')&&cl.contains('right-collapsed'));
+  run('setExploreMode(false)');assert(!cl.contains('left-collapsed')&&cl.contains('right-collapsed'),'restores exactly the earlier choice, not a default');
+  R.click();assert(!cl.contains('right-collapsed'));
+  run('setExploreMode(true)');await tick();}
  // Every view binds the intended score property and updates the inspector.
  for(let i=0;i<13;i++){
   run(`selectExploreView(${i})`);await tick();
@@ -135,6 +168,11 @@ const run=s=>vm.runInContext(s,context);
  const fxShortest=fixture.routes.find(r=>r.objective==='shortest');
  if(fxShortest&&fxShortest!==best)assert(why.textContent.includes(`shortest route ${fxShortest.dimension_scores.Nature}`)&&why.textContent.includes(`${best.detour_percentage}% longer`),'compares with the real shortest candidate');
  assert(why.textContent.includes('not observations of how this walk feels')&&why.textContent.includes(basis.score_version));
+ // A hidden walk panel comes back when new walks arrive (they are shown there), but not while exploring.
+ {const cl=w.document.body.classList,keep=run('JSON.stringify([exploreMap.active,sidePanels.left,sidePanels.right,state.activeRoute])');
+  run("exploreMap.active=false;setSidePanel('right',true);applyRouteResponse(planner.routeResponse)");assert(!cl.contains('right-collapsed'),'new walks reveal the walk panel');
+  run("exploreMap.active=true;setSidePanel('right',true);applyRouteResponse(planner.routeResponse)");assert(cl.contains('right-collapsed'),'Explore keeps the map wide');
+  w.KEEP=keep;run("{const [a,l,r,id]=JSON.parse(KEEP);exploreMap.active=a;sidePanels.left=l;sidePanels.right=r;applySidePanels();state.activeRoute=id;}");}
  // The numbers behind the card's "why" sentence, on the selected card (not only inside Technical details):
  // priority score, the shortest route's score, and the indicators it is measured by.
  run('renderRouteCards()');

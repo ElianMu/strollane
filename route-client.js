@@ -37,6 +37,8 @@ function validateIndependentResponse(preferences,json){
  }
 }
 function applyRouteResponse(json){
+ // new walks are shown in the walk panel: if the visitor had hidden it (side-panels.js), bring it back once
+ if(typeof sidePanels!=='undefined'&&sidePanels.right&&!(typeof exploreMap!=='undefined'&&exploreMap.active))setSidePanel('right',false);
  planner.routeResponse=json;state.routes=json.routes.map(adaptRoute);
  planner.weatherSignature=typeof weatherWindow==='function'?WEATHER.signature(weatherWindow(state.budget)):undefined;
  const best=json.routes.find(r=>r.recommended);

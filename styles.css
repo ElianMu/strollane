@@ -1149,3 +1149,40 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
  .m-walk-presets .walk-pill{min-height:36px;padding:0 13px;font-size:13px}
  body[data-mview="typing"] .m-walk-presets,body[data-mview="busy"] .m-walk-presets{display:none}
 }
+
+/* ---- Side panel tabs (side-panels.js) and the three-level street inspector (explore-map.js) --------------------
+   Desktop only: from 741 px up. On phones the panels are bottom sheets and these rules do not apply. */
+.panel-toggle{position:absolute;z-index:7;top:50%;transform:translateY(-50%);width:16px;height:52px;padding:0;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-secondary);font-size:13px;line-height:1;display:grid;place-items:center}
+.panel-toggle:hover{color:var(--text-primary);border-color:var(--text-secondary)}
+.panel-toggle-left{left:0;border-left:0;border-radius:0 8px 8px 0}
+.panel-toggle-right{right:0;border-right:0;border-radius:8px 0 0 8px}
+@media(min-width:741px){
+ body.left-collapsed .left-panel,body.right-collapsed .right-panel{display:none}
+}
+@media(min-width:1321px){
+ body.left-collapsed .app-layout{grid-template-columns:minmax(350px,1fr) minmax(302px,335px)}
+ body.right-collapsed .app-layout{grid-template-columns:minmax(370px,395px) minmax(350px,1fr)}
+ body.left-collapsed.right-collapsed .app-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(min-width:1061px) and (max-width:1320px){
+ body.left-collapsed .app-layout{grid-template-columns:minmax(320px,1fr) 304px}
+ body.right-collapsed .app-layout{grid-template-columns:337px minmax(320px,1fr)}
+ body.left-collapsed.right-collapsed .app-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(min-width:741px) and (max-width:1060px){
+ body.left-collapsed .app-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:740px){.panel-toggle{display:none}}
+.inspector-actions{display:flex;gap:4px;flex:none}
+.inspector-summary{margin-top:10px}
+.inspector-summary .inspector-ids{margin:8px 0 0}
+.explore-inspector button.explore-row{width:100%;padding:2px 0;border:0;background:transparent;text-align:left;font:inherit;font-size:10px;cursor:pointer;border-radius:4px}
+.explore-inspector button.explore-row:hover{background:var(--bg-hover);color:var(--text-primary)}
+.indicator-bar{display:block;height:4px;margin:4px 0 2px;border-radius:2px;background:var(--divider);overflow:hidden}
+.indicator-bar b{display:block;height:100%;background:var(--accent)}
+.indicator-more{margin-top:4px}
+.indicator-more>summary,.inspector-method>summary{cursor:pointer;color:var(--text-secondary);font-size:10px;list-style-position:inside}
+.indicator-more>summary:hover,.inspector-method>summary:hover{color:var(--text-primary)}
+.indicator-more[open]>summary{margin-bottom:3px}
+.inspector-method{margin-top:12px;padding-top:9px;border-top:1px solid var(--divider)}
+.inspector-method>summary{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase}
