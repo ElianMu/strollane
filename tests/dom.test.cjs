@@ -138,6 +138,21 @@ const run=s=>vm.runInContext(s,context);
  w.BASIS_OLD={...basis,score_version:'sw-score-other'};run('scoreBasis.doc=BASIS_OLD;updateWhyRoute()');
  assert(!w.document.querySelector('#whyRoute .why-measures'),'definitions from a different score build are never shown');
  run('scoreBasis.doc=BASIS;updateWhyRoute()');
+ // Sleeping API host (api-config.js): planning waits for /api/status, says so once, and a timeout reads as words.
+ {const keepFetch=w.fetch;let n=0,notes=[];
+  w.fetch=async(url)=>{if(!String(url).endsWith('/api/status'))throw new Error('unexpected '+url);n++;if(n<3)throw new Error('asleep');return {ok:true,json:async()=>({})};};
+  w.NOTE=t=>notes.push(t);
+  assert.equal(await w.eval('streetwiseAwake(NOTE,5000,5)'),true);assert.equal(n,0,'same-origin page: no extra request, the server that sent the page is the API');
+  run('streetwiseHost.remote=true;streetwiseHost.awakeAt=0');
+  assert.equal(await w.eval('streetwiseAwake(NOTE,5000,5)'),true);assert.equal(n,3,'kept asking until the host answered');
+  assert.equal(notes.length,1,'the visitor is told once');assert(/Waking the route server/.test(notes[0]));assert.equal(run('streetwiseHost.waking'),false);
+  await w.eval('streetwiseAwake(NOTE,5000,5)');assert.equal(n,3,'a host that just answered is not asked again');
+  run('streetwiseHost.awakeAt=0');w.fetch=async()=>{throw new Error('asleep');};
+  let gaveUp=null;try{await w.eval('streetwiseAwake(null,40,5)');}catch(e){gaveUp=e.message;}
+  assert(/not answering right now/.test(gaveUp||''),'gives up in plain words after the wait limit');
+  assert(/took too long to answer/.test(run("streetwiseErrorText(Object.assign(new Error('signal timed out'),{name:'TimeoutError'}))")));
+  assert.equal(run("streetwiseErrorText(new Error('Start is outside walking-route coverage'))"),'Start is outside walking-route coverage','other errors pass through unchanged');
+  run('streetwiseHost.remote=false;streetwiseHost.awakeAt=0');w.fetch=keepFetch;}
  // Walk priorities: one row of the 12 EXISTING dimensions. A pill only sets its dimension to the chips' weight (80)
  // or back to not-expressed; no new dimension, names and count untouched; the request box shows the choice in words.
  run('renderWalkPresets()');
