@@ -4,14 +4,14 @@
 
 Routes are computed by `routing/engine.py` on the Manhattan OSM pedestrian graph and scored with the same 12 experience scores Explore shows, transferred to OSM edges through a LION–OSM match table. Scores are relative ranks within Manhattan, not calibrated measurements.
 
-## Walk presets, route explanation and benchmark / 体验预设、路线解释与基准测试
+## Walk priorities, route explanation and benchmark / 步行偏好入口、路线解释与基准测试
 
-- **Walk presets** (`walk-presets.js`): *Green Walk* and *Quiet Walk* cards on the first screen (desktop panel and phone request card). One tap sets an existing dimension (Nature / Quiet & Relax) to 80, the same weight the quick-preference chips use, and plans through the existing manual path: no typing and no AI call. No new dimension, score or weight is introduced; chips, sliders and the text box stay in sync. There is no "Scenic" preset because the Scenic & Visual score measures proximity to mapped features, not how a street looks.
+- **Walk priorities** (`walk-presets.js`): one row of the 12 experience dimensions on the first screen (a single sideways-scrolling row in the phone request card, about 42 px; a compact wrapped row in the desktop panel), ordered by mean gain in the route benchmark. A pill sets that existing dimension to 80, the same weight the quick-preference chips use, or back to not-expressed; several can be on. The request box shows the choice in words, and when it holds exactly that sentence, *Create My Walk* / *Plan My Walk* plans through the existing manual path with no AI call. No new dimension, score or weight; sliders, chips and the text box stay in sync. On desktop the five dimension chips under the box moved into this row (*Coffee stop* stays).
 - **Why this route → What these scores measure** (`route-client.js`): for each of the user's priorities, the selected route's score next to the shortest route's, the detour, the coverage, and the indicators that score is the mean of, with source and time window. Text comes from `data/pedestrian/score-indicators.json` (`python3 scripts/build_score_indicators.py`, a verbatim copy of the routes build's indicator definitions) and is shown only when its `score_version` equals the route's.
 - **Route benchmark**: `python3 benchmarks/route_benchmark.py` runs 19 fixed trips × 12 single-dimension preferences on the real engine and writes `benchmarks/route_benchmark.json` and `benchmarks/ROUTE_BENCHMARK.md` (shortest vs preference vs next candidate: distance, detour, score, coverage, overlap, QA status). It never assumes the preference route is better. Tests: `tests/test_route_benchmark.py`, `tests/test_score_indicators.py`.
 - **Two score builds** (routes vs Explore map) and proxy limits: `METHODOLOGY.md`. **User validation plan** (not yet run): `RESEARCH_PROTOCOL.md`.
 
-预设只是把现有维度的偏好权重设为 80 并走原有的手动规划流程，不新增维度、不改评分；路线解释中的指标文字逐字取自路线评分所用的定义文件；基准测试不预设偏好路线更好；用户验证尚未开展。
+首屏一行列出全部 12 个维度（按基准测试效果排序），点选只是把该维度的偏好权重设为 80 并走原有的手动规划流程，不新增维度、不改评分；路线解释中的指标文字逐字取自路线评分所用的定义文件；基准测试不预设偏好路线更好；用户验证尚未开展。
 
 ## Run / 运行
 

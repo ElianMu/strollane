@@ -41,17 +41,22 @@ reversed); a dimension score is the equal-weight mean of its available indicator
 mean over the OSM edges the route uses. These are **relative ranks of proxies computed from public records**. They are
 not calibrated measurements and have not been validated against how people experience a walk.
 
-Proxy limits that matter for the walk presets:
+All 12 dimensions are offered as walk priorities on the first screen (`walk-presets.js`), ordered by their effect in
+the route benchmark. Proxy limits a reader should know for each name:
 
-- **Nature** (Green Walk): density of inventory tree points within 30 m and share of samples beside NYC Parks land.
-  Not canopy cover and not shade.
-- **Quiet & Relax** (Quiet Walk): 311 noise-complaint intensity over the last 12 months and roadway width. Complaints
-  depend on who calls 311; neither indicator is a sound level.
+- **Nature**: density of inventory tree points within 30 m and share of samples beside NYC Parks land. Not canopy
+  cover and not shade.
+- **Quiet & Relax**: 311 noise-complaint intensity over the last 12 months and roadway width. Complaints depend on who
+  calls 311; neither indicator is a sound level.
 - **Scenic & Visual**: proximity to OSM viewpoints, public art, fountains, memorials and monuments. It does not measure
-  whether a street looks nice, which is why there is no "Scenic" preset.
+  whether a street looks nice.
 - **Urban Vibrancy**: POI diversity × quantity. At the 36 Manhattan DOT pedestrian-count locations its rank correlation
   with observed people per hour is −0.022 (`data/dimensions/manhattan/manifest.json`; the locations are mostly busy
-  retail corridors, so the range is restricted). It is not offered as a "lively" preset.
+  retail corridors, so the range is restricted). It is not evidence of how lively a street is.
+- **Access & Safety**: in the routes build, injury-crash density only. It is not a measure of personal safety.
+- **Spatial Comfort**: in the routes build, sidewalk-area share only, available on 72.9 % of routable length.
+
+*Why this route?* states the indicators behind every priority the visitor picked, so these limits are visible in use.
 
 ## Benchmark and validation status
 
