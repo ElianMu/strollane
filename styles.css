@@ -1186,3 +1186,10 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 .indicator-more[open]>summary{margin-bottom:3px}
 .inspector-method{margin-top:12px;padding-top:9px;border-top:1px solid var(--divider)}
 .inspector-method>summary{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase}
+
+/* Street photos along the walk (street-photos.js): Mapillary, CC BY-SA, date and author on every photo */
+.street-photos{margin-top:10px}
+.street-photos-title{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-secondary)}
+.street-photos .along-photos{margin-top:6px}
+.street-photos .rp-photo a{display:block}
+.street-photos small{display:block;margin-top:4px;font-size:9.5px;line-height:1.4;color:var(--text-tertiary)}
