@@ -188,7 +188,7 @@ def validate_journey(j):
     return out
 
 # Per-client rate limits (requests per rolling minute). Render puts the client address in X-Forwarded-For.
-RATE_LIMITS = {'interpret': 12, 'menu': 10, 'itinerary': 30, 'routes': 60, 'recommend': 6, 'places': 60, 'ratings': 20, 'agent': 3}
+RATE_LIMITS = {'interpret': 12, 'menu': 10, 'itinerary': 30, 'routes': 60, 'recommend': 6, 'places': 60, 'ratings': 20, 'agent': 3, 'photos': 20}
 RATE_MAX_CLIENTS = 5000
 _rate, _rate_lock = {}, threading.Lock()
 # Reverse proxies in front of this server that append the caller's address to X-Forwarded-For.
@@ -616,7 +616,7 @@ class Handler(SimpleHTTPRequestHandler):
         return True
 
     def do_POST(self):
-        bucket = {'/api/menu/verify': 'menu', '/api/itinerary': 'itinerary', '/api/routes': 'routes', '/api/detours': 'itinerary',
+        bucket = {'/api/menu/verify': 'menu', '/api/itinerary': 'itinerary', '/api/routes': 'routes', '/api/detours': 'itinerary', '/api/street-photos': 'photos',
                   '/api/interpret': 'interpret', '/api/recommend/food': 'recommend', '/api/agent/food-stop': 'agent'}.get(self.path)
         if bucket and not rate_ok(self, bucket):
             self.send_json(429, {'error': f'Too many requests; limit {RATE_LIMITS[bucket]} per minute.'})
@@ -634,6 +634,14 @@ class Handler(SimpleHTTPRequestHandler):
             if heavy: HEAVY_REQUESTS.release()
 
     def post_admitted(self):
+        if self.path == '/api/street-photos':
+            # Mapillary photos taken within 25 m of points along a route. The token stays on this host (MAPILLARY_TOKEN).
+            try:
+                import street_photos
+                self.send_json(200, street_photos.along_route(read_json(self, 400000).get('coordinates')))
+            except (ValueError, TypeError, AttributeError, json.JSONDecodeError) as e:
+                self.send_json(400, {'error': str(e)})
+            return
         if self.path == '/api/itinerary':
             try:
                 doc = read_json(self, 120000)

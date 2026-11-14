@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.
 const dom=new JSDOM(html,{runScripts:'outside-only',url:'http://localhost:8080'}),w=dom.window;
 w.fetch=async()=>{throw new Error('Network intentionally blocked in DOM test')};w.HTMLElement.prototype.scrollIntoView=function(){};w.AbortSignal.timeout=()=>new w.AbortController().signal;
 const vm=require('vm'),context=dom.getInternalVMContext();
-for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','street-photos.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 const run=s=>vm.runInContext(s,context);
 (async()=>{
  // flatMapBounds: a pitch-independent query box, checked against a real map.getBounds() reading captured live
@@ -168,6 +168,27 @@ const run=s=>vm.runInContext(s,context);
  const fxShortest=fixture.routes.find(r=>r.objective==='shortest');
  if(fxShortest&&fxShortest!==best)assert(why.textContent.includes(`shortest route ${fxShortest.dimension_scores.Nature}`)&&why.textContent.includes(`${best.detour_percentage}% longer`),'compares with the real shortest candidate');
  assert(why.textContent.includes('not observations of how this walk feels')&&why.textContent.includes(basis.score_version));
+ // Street photos (street-photos.js): only well-formed Mapillary records from our own API host are shown, each with how
+ // far into the walk it is, the month it was taken, its author and a link; nothing when the host has no token.
+ {const good={thumb:'https://example.invalid/a.jpg',page:'https://www.mapillary.com/app/?pKey=11',captured_on:'2024-06-10',at_m:420,distance_m:8.2,username:'walker',image_id:'11',looks_along_walk:true};
+  const clean=d=>run('streetPhotoClean')(d);
+  assert.equal(clean({configured:false,photos:[good]}).length,0,'no token on the host: nothing');assert.equal(clean(null).length,0);assert.equal(clean({configured:true}).length,0);
+  assert.equal(clean({configured:true,radius_m:25,photos:[good,{...good,thumb:'http://insecure/a.jpg'},{...good,thumb:'javascript:alert(1)'},{...good,page:'https://evil.invalid/x'},{...good,captured_on:'last year'},{...good,distance_m:60},{...good,at_m:'far'},null]}).length,1,'malformed, insecure, undated or too-distant records are dropped');
+  const calls0=[];const keepFetch=w.fetch;
+  w.fetch=async(url,opt)=>{url=String(url);if(!url.endsWith('/api/street-photos'))return keepFetch(url,opt);calls0.push(JSON.parse(opt.body));return {ok:true,json:async()=>({configured:true,radius_m:25,attribution:'Images from Mapillary, CC BY-SA',photos:[good,{...good,image_id:'12',page:'https://www.mapillary.com/app/?pKey=12',at_m:1310,captured_on:'2019-03-02',username:null}]})};};
+  run('streetPhotos.cache.clear();renderAlongWalk()');await new Promise(r=>setTimeout(r,20));
+  assert.equal(calls0.length,1,'asked once for the selected route');assert.deepEqual(calls0[0].coordinates,best.geometry.coordinates,'sends only the route line');
+  run('renderAlongWalk();renderAlongWalk()');await new Promise(r=>setTimeout(r,10));assert.equal(calls0.length,1,'not asked again');
+  const sp=w.document.querySelector('#alongWalk .street-photos');assert(sp,'street photos shown under Along this walk');
+  const figs=[...sp.querySelectorAll('figure')];assert.equal(figs.length,2);
+  assert(figs[0].textContent.includes('0.42 km · Jun 2024')&&figs[0].textContent.includes('© walker · Mapillary'));
+  assert(figs[1].textContent.includes('1.3 km · Mar 2019')&&figs[1].textContent.includes('Mapillary'));
+  assert.equal(figs[0].querySelector('a').getAttribute('href'),'https://www.mapillary.com/app/?pKey=11');assert.equal(figs[0].querySelector('img').getAttribute('referrerpolicy'),'no-referrer');
+  assert(sp.textContent.includes('within 25 m')&&sp.textContent.includes('Images from Mapillary, CC BY-SA')&&sp.textContent.includes('may not match today'));
+  // an older API host (no such endpoint) or a failure: nothing shown, nothing thrown
+  w.fetch=async(url,opt)=>String(url).endsWith('/api/street-photos')?({ok:false,status:404,json:async()=>({})}):keepFetch(url,opt);
+  run('streetPhotos.cache.clear();renderAlongWalk()');await new Promise(r=>setTimeout(r,20));assert(!w.document.querySelector('#alongWalk .street-photos'));
+  w.fetch=keepFetch;}
  // A hidden walk panel comes back when new walks arrive (they are shown there), but not while exploring.
  {const cl=w.document.body.classList,keep=run('JSON.stringify([exploreMap.active,sidePanels.left,sidePanels.right,state.activeRoute])');
   run("exploreMap.active=false;setSidePanel('right',true);applyRouteResponse(planner.routeResponse)");assert(!cl.contains('right-collapsed'),'new walks reveal the walk panel');

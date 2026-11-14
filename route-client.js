@@ -158,7 +158,9 @@ function renderAlongWalk(){
  const box=$('alongWalk');if(!box)return;
  const x=state.routes.find(r=>r.id===state.activeRoute),lines=x&&typeof storyStretches==='function'?storyStretches(x.raw):[];
  const photos=x&&typeof photosFor==='function'?photosFor((storyPlacesNear(x.raw)||[]).slice(0,10)).slice(0,6):[];
- box.innerHTML=lines.map(l=>`<p>${esc(l)}</p>`).join('')+(photos.length?photoFigures(photos,'along-photos'):'');box.classList.toggle('hidden',!lines.length&&!photos.length);
+ const street=x&&typeof streetPhotoFigures==='function'?streetPhotoFigures(x.raw):'';
+ if(x&&typeof streetPhotosLoad==='function')streetPhotosLoad(x.raw,()=>{if(state.activeRoute===x.id)renderAlongWalk();}); // street-photos.js: asks once per route
+ box.innerHTML=lines.map(l=>`<p>${esc(l)}</p>`).join('')+street+(photos.length?photoFigures(photos,'along-photos'):'');box.classList.toggle('hidden',!lines.length&&!photos.length&&!street);
 }
 function profileRows(r){
  return DIMENSIONS.map((d,i)=>{const v=r.dimension_scores[d.name],c=r.data_coverage.by_dimension[d.name],pref=planner.origins[d.name]!=='default';
