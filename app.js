@@ -255,7 +255,17 @@ async function interpretIntent(q){
   // Tourist / multi-stop intent: the LLM's structured `journey`, or the labelled local parser when no LLM is configured.
   if(mode!=='llm'&&typeof localJourney==='function'){await warmNameIndex().catch(()=>{});data.journey=localJourney(input);}
   if(typeof data?.clarification==='string'&&data.clarification.trim())return {changes:[],clarification:data.clarification.trim()};
-  return {changes:applyInterpretation(data,mode),clarification:null,journey:data.journey||null};
+  // parts of the request no dataset measures (interpretation_contract.py "unsupported"): passed through, never applied
+  const unsupported=(Array.isArray(data.unsupported)?data.unsupported:[]).filter(u=>u&&typeof u.request==='string'&&u.request.trim()&&typeof u.reason==='string').slice(0,3);
+  return {changes:applyInterpretation(data,mode),clarification:null,journey:data.journey||null,unsupported};
+}
+/** Say plainly what cannot be planned for and why, with the nearest dimension that does exist (only a registered one). */
+function unsupportedText(list){
+  return list.map(u=>{
+    const known=u.nearest_dimension&&DIMENSIONS.some(d=>d.name===u.nearest_dimension),has=known&&planner.origins[u.nearest_dimension]!=='default';
+    const near=!known?'':has?` The closest thing I can plan for is ${dimLabel(u.nearest_dimension)}, which is already one of your priorities.`:` The closest thing I can plan for is ${dimLabel(u.nearest_dimension)}; pick it if that helps.`;
+    return `I can’t plan for “${u.request.trim()}”: ${u.reason.trim().replace(/[.。]?$/,'.')}${near}`;
+  }).join(' ');
 }
 async function checkInterpreter(){
   if(location.protocol==='file:'){$('interpretMode').textContent='LOCAL PREVIEW · Start server.py with an API key for genuine LLM understanding';return}
@@ -670,6 +680,13 @@ async function handlePlan(text,isFollowUp=false){
   planner.parsing=true;$('generateRoutes').disabled=true;$('chatSend').disabled=true;
   appendChat('user',q);
   try{const result=await interpretIntent(q);if(result.clarification){$('rankingStatus').textContent='Clarification needed. The displayed previous route has not been recalculated.';appendChat('assistant',result.clarification+' The displayed previous route has not been recalculated.');return;}
+    if(result.unsupported?.length){
+      const said=unsupportedText(result.unsupported);
+      // nothing else was asked: do not plan a walk that would look like an answer to a request we cannot measure
+      if(!result.changes.length&&!(result.journey&&typeof journeyIntentPresent==='function'&&journeyIntentPresent(result.journey))){
+        $('rankingStatus').textContent=said+' Nothing was changed.';appendChat('assistant',said+' Nothing was changed. The displayed previous route has not been recalculated.');return;}
+      appendChat('assistant',said+' The rest of your request is planned as usual.');toast(said);
+    }
     if(planner.weatherIntent==='ask'&&state.routes.length){if(weatherContext.status!=='ok')await loadWeather();appendChat('assistant',weatherAnswer());return;}
     if(typeof applyJourney==='function'&&result.journey){
       const jc=await applyJourney(result.journey);

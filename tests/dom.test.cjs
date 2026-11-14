@@ -448,6 +448,24 @@ const run=s=>vm.runInContext(s,context);
  assert(w.document.querySelector('#interpretMode').textContent.includes('AI VERIFIED'),'A failed status probe must not permanently force local preview');
  assert.equal(run("planner.weights['Scenic & Visual']"),90);
  assert.equal(ai.journey.food[0].item,'coffee');
+ // A request no dataset measures (the critique's "as much dog poop as possible"): the AI names it in `unsupported`;
+ // the app says so in plain words, changes no preference and sends no planning request. A reply without the field
+ // (older server) behaves exactly as before (covered by the call above).
+ {const before=run('JSON.stringify([planner.weights,planner.origins])'),seen=[];
+  w.fetch=async(url)=>{url=String(url);seen.push(url);return url.endsWith('/api/interpret')?({ok:true,json:async()=>({weights:{},directions:{},constraints:{},journey:null,clarification:null,unsupported:[{request:'as much dog poop as possible',reason:'No dataset in STROLLANE measures dog waste',nearest_dimension:null}]})}):initialFetch(url);};
+  const r1=await run("interpretIntent('a walk with as much dog poop as possible')");
+  assert.equal(r1.unsupported.length,1);assert.equal(r1.changes.length,0);assert.equal(run('JSON.stringify([planner.weights,planner.origins])'),before,'no preference is invented for it');
+  const said=run('unsupportedText')(r1.unsupported);assert.equal(said,'I can’t plan for “as much dog poop as possible”: No dataset in STROLLANE measures dog waste.');
+  seen.length=0;const chatN=run('planner.conversations.length');
+  await run("handlePlan('a walk with as much dog poop as possible',true)");
+  assert(!seen.some(u=>u.endsWith('/api/routes')||u.endsWith('/api/itinerary')),'nothing is planned for a request that cannot be measured');
+  const last=run('planner.conversations.at(-1).content');assert(run('planner.conversations.length')>chatN&&last.startsWith('I can’t plan for “as much dog poop as possible”')&&last.includes('Nothing was changed'));
+  // the nearest dimension is offered only when it is a registered one; an invented name is ignored
+  assert(run('unsupportedText')([{request:'nice smells',reason:'No dataset measures smells.',nearest_dimension:'Nature'}]).includes('The closest thing I can plan for is Nature'));
+  assert(!run('unsupportedText')([{request:'nice smells',reason:'No dataset measures smells.',nearest_dimension:'Aroma'}]).includes('closest'));
+  // malformed entries from a server are dropped, not shown
+  w.fetch=async(url)=>String(url).endsWith('/api/interpret')?({ok:true,json:async()=>({weights:{},constraints:{},journey:null,unsupported:[{request:'',reason:'x'},{reason:'y'},null,'z']})}):initialFetch(url);
+  assert.equal((await run("interpretIntent('anything')")).unsupported.length,0);}
  run('planner.llmConnected=true');
  w.fetch=async(url)=>String(url).endsWith('/api/interpret')?({ok:false,status:502,json:async()=>({reason:{stage:'upstream_http',code:'invalid_api_key',detail:'internal diagnostic keys: weights directions'}})}):initialFetch(url);
  await run("interpretIntent('greener walk')");
