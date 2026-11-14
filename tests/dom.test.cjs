@@ -228,10 +228,10 @@ const run=s=>vm.runInContext(s,context);
  const presetRoots=[...w.document.querySelectorAll('[data-walk-presets]')];assert.equal(presetRoots.length,2,'desktop panel + phone request card');
  // looked up by dataset, not by an attribute selector: jsdom 27 (the version CI installs) returns null for a quoted
  // attribute value containing "&", which real browsers accept
- const pillFor=dim=>[...presetRoots[0].querySelectorAll('.walk-pill')].find(b=>b.dataset.dim===dim);
+ const pillFor=dim=>[...presetRoots[0].querySelectorAll('.walk-pill[data-dim]')].find(b=>b.dataset.dim===dim);
  const dimNames=run('DIMENSIONS.map(d=>d.name).join("|")').split('|');assert.equal(dimNames.length,12);
- for(const r of presetRoots){const pills=[...r.querySelectorAll('.walk-pill')].map(b=>b.dataset.dim);assert.equal(pills.length,12);assert.deepEqual([...pills].sort(),[...dimNames].sort(),'exactly the 12 registered dimensions, none invented or renamed');}
- assert.equal(run('WALK_PRESET_ORDER.slice(0,4).join("|")'),'Spatial Comfort|Access & Safety|Nature|Quiet & Relax','benchmark order, strongest first');
+ for(const r of presetRoots){const pills=[...r.querySelectorAll('.walk-pill[data-dim]')].map(b=>b.dataset.dim);assert.equal(pills.length,12);assert.deepEqual([...pills].sort(),[...dimNames].sort(),'exactly the 12 registered dimensions, none invented or renamed');}
+ assert.equal(run('WALK_PRESET_ORDER.slice(0,4).join("|")'),'Nature|Quiet & Relax|Architecture|Spatial Comfort','three featured for the lead audience, then benchmark order');
  const naturePill=pillFor('Nature');
  assert(naturePill.title.includes(basis.dimensions.Nature.find(x=>x.role==='up').label),'tooltip names the indicators from the router definitions file');
  const box=w.document.querySelector('#intentText');box.value=box.defaultValue;
@@ -243,12 +243,45 @@ const run=s=>vm.runInContext(s,context);
  pillFor('Quiet & Relax').click();
  assert.equal(run("planner.weights['Quiet & Relax']"),80);assert.equal(run("planner.weights['Nature']"),80,'priorities combine');
  assert.equal(box.value,'Prioritise: Nature, Quiet & Relax.');
- for(const r of presetRoots)assert.deepEqual([...r.querySelectorAll('.walk-pill[aria-pressed=true]')].map(b=>b.dataset.dim),['Nature','Quiet & Relax'],'both rows mirror planner state');
+ for(const r of presetRoots)assert.deepEqual([...r.querySelectorAll('.walk-pill[data-dim][aria-pressed=true]')].map(b=>b.dataset.dim),['Nature','Quiet & Relax'],'both rows mirror planner state');
  box.value='Take me past bookshops';pillFor('Culture').click();
  assert.equal(box.value,'Take me past bookshops','words the visitor typed are never overwritten');assert(!run('isWalkPresetRequest(document.querySelector("#intentText").value)'),'typed text still goes through interpretation');
  assert.equal(run("planner.weights['Culture']"),80);
  for(const d of ['Nature','Quiet & Relax','Culture'])pillFor(d).click();
  assert.equal(run("['Nature','Quiet & Relax','Culture'].every(d=>planner.weights[d]===50&&planner.origins[d]==='default')"),true,'tapping again returns a dimension to not-expressed');
+ // Walk activities: three one-tap starting points for the lead audience. Each is only a bundle of existing dimensions
+ // at the pills' weight; it adds no dimension and no route of its own, and a later pill change dissolves it.
+ {const acts=()=>[...presetRoots[0].querySelectorAll('.walk-activity')],act=k=>acts().find(b=>b.dataset.activity===k);
+  assert.deepEqual(acts().map(b=>b.dataset.activity),['neighbourhood','nicer-way','with-a-point']);
+  assert(run('WALK_ACTIVITIES.every(a=>a.dims.every(d=>DIMENSIONS.some(x=>x.name===d)))'),'activities use registered dimensions only');
+  assert(presetRoots[0].firstElementChild.classList.contains('walk-activity'),'activities lead the row');
+  run("for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';}walkPresets.activity=null;renderWalkPresets()");box.value='';
+  run("planner.weights['Culture']=65;planner.origins['Culture']='manual'");   // a slider the visitor moved themselves
+  pillFor('Walkability').click();                                             // a pill chosen before the activity
+  const endMode=run('journey.endMode');run("journey.endMode='round'");           // returning to the start: the activity says so
+  act('neighbourhood').click();
+  assert.equal(run('walkActivity().key'),'neighbourhood');
+  assert.equal(run("['Nature','Quiet & Relax','Architecture'].every(d=>planner.weights[d]===80&&planner.origins[d]==='manual')"),true);
+  assert.equal(run("planner.weights['Walkability']"),50,'pills chosen before the activity are released');
+  assert.equal(run("planner.weights['Culture']"),65,'a weight the visitor set by slider is left alone');
+  assert.equal(box.value,'Get to know a neighbourhood: a loop from here, favouring Nature, Quiet & Relax, Architecture.');
+  assert(run('isWalkPresetRequest(document.querySelector("#intentText").value)'),'planned without an AI call');
+  assert(/around|\bloop\b/.test(box.value)&&run('ROUND_TRIP_RE.test(document.querySelector("#intentText").value)'),'"a loop" is what the existing recommender reads as coming back to the start');
+  assert.equal(act('neighbourhood').getAttribute('aria-pressed'),'true');
+  run("journey.endMode='open'");run('syncWalkPresetRequest()');assert.equal(box.value,'Get to know a neighbourhood: favouring Nature, Quiet & Relax, Architecture.','an open-ended walk the visitor chose is not called a loop');
+  run(`journey.endMode=${JSON.stringify(endMode)}`);
+  if(run('walkHasDestination()')){run('syncWalkPresetRequest()');assert.equal(box.value,'Get to know a neighbourhood: favouring Nature, Quiet & Relax, Architecture.','with a destination chosen it is a walk there, not a loop');}
+  act('nicer-way').click();
+  assert.equal(run('walkActivity().key'),'nicer-way');assert.equal(run("planner.weights['Architecture']"),50,'switching activity releases the previous one');
+  assert.equal(run("['Quiet & Relax','Nature','Spatial Comfort'].every(d=>planner.weights[d]===80)"),true);
+  assert.equal(box.value,'Take the nicer way: favouring Quiet & Relax, Nature, Comfort.');
+  pillFor('Culture').click();                                                 // 65 → pill toggles it on at 80
+  assert.equal(run('walkActivity()'),null,'changing a pill turns the activity back into plain priorities');
+  assert(box.value.startsWith('Prioritise: '));assert.equal(acts().filter(b=>b.getAttribute('aria-pressed')==='true').length,0);
+  act('with-a-point').click();assert.equal(box.value,'A walk with a point: favouring Culture, Food & Retail.');
+  act('with-a-point').click();assert.equal(run('walkActivity()'),null);assert.equal(run("planner.weights['Culture']"),50,'tapping the active activity again clears it');
+  assert.equal(run('chooseWalkActivity("moonwalk")'),false);assert.equal(run('DIMENSIONS.length'),12);
+  run("for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';planner.directions[d.name]='high';}walkPresets.activity=null;renderWalkPresets()");box.value=box.defaultValue;}
  assert.equal(run('walkPresetRequest()'),'');assert.equal(run('DIMENSIONS.length'),12);assert.equal(run('toggleWalkPreset("Hidden gems")'),false);
  box.value=box.defaultValue;w.SAVED=savedPrefs;run('{const [a,b,c]=JSON.parse(SAVED);Object.assign(planner.weights,a);Object.assign(planner.origins,b);Object.assign(planner.directions,c);renderWalkPresets();}');
  // Ordered edges: listed in order, geometry continuous, distance = sum of traversed edge lengths.

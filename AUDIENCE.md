@@ -31,6 +31,14 @@ Why this group, on the evidence available:
 | Take the nicer way | Between two places they already go (home, campus, a park), accepting a modest detour | Quiet & Relax, Nature, Spatial Comfort |
 | A walk with a point | A walk that passes a few places worth knowing (parks, museums, a café) | Culture, Food & Retail, plus the journey stops |
 
+In the app these three are the first three buttons of the walk-priorities row (`walk-presets.js`, `WALK_ACTIVITIES`).
+Each button only switches on the dimensions in its row above at the same weight a single pill sets (80); it adds no
+dimension, score or route. Walk length is not a new setting either: with no destination the existing recommender
+(`journey.js`, `prepareRecommendedWalk`) proposes a walk past real places, 60 minutes for a loop and 75 minutes
+open-ended; with a destination the router goes there along streets ranked by those dimensions. The three dimensions of
+the first use case (Nature, Quiet & Relax, Architecture) are also the first three pills; the other nine follow in
+benchmark order and none is removed.
+
 ## Secondary audience: residents who walk for leisure
 
 Same product, different entry: they mostly use "take the nicer way" between familiar places. Nothing extra is built

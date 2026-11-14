@@ -508,7 +508,7 @@
     $('intentText').blur();
     // The box holds exactly the sentence the priority pills wrote: those preferences are already set, so plan
     // through Path B with them instead of asking the Agent to re-read its own words.
-    if (typeof isWalkPresetRequest === 'function' && isWalkPresetRequest(text)) { if (placesConfirmed()) runPlan(planManual); return; }
+    if (typeof isWalkPresetRequest === 'function' && isWalkPresetRequest(text)) { if (placesConfirmed()) runPlan(() => planManual(text)); return; }
     runPlan(() => handlePlan(text, hasRoutes()));
   }
   /** Path B — manual FROM / TO: same validation and the same routing calls, no text required. */
@@ -517,12 +517,12 @@
     const text = ($('intentText').value || '').trim();
     if (text && text !== lastSubmitted) { createFromText(); return; } // an unsent request is still the user's intent
     if (!placesConfirmed()) return;
-    runPlan(planManual);
+    runPlan(() => planManual(typeof isWalkPresetRequest === 'function' && isWalkPresetRequest(text) ? text : ''));
   }
-  async function planManual() {
+  async function planManual(request = '') {   // `request`: the pills' own sentence, so "a loop" is honoured
     const problem = await ensurePlanStart();
     if (problem) { appendChat('assistant', problem + ' The displayed previous route has not been recalculated.'); return; }
-    const rec = prepareRecommendedWalk(''); if (rec) appendChat('assistant', rec); // FROM only: recommend a walk
+    const rec = prepareRecommendedWalk(request); if (rec) appendChat('assistant', rec); // FROM only: recommend a walk
     return typeof journeyMode === 'function' && journeyMode() ? planJourney(false) : generateRoutes(null, false);
   }
   /** Walk priorities (walk-presets.js): the request box now shows the pills' own sentence, which is already applied

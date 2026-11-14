@@ -61,13 +61,20 @@ class RouteBenchmark(unittest.TestCase):
         self.assertLessEqual(s['all']['gain_at_least_claim'], s['all']['scored'])
 
     def test_priority_pills_follow_the_committed_benchmark_order(self):
-        """walk-presets.js lists the 12 dimensions by mean gain in benchmarks/route_benchmark.json, strongest first."""
+        """walk-presets.js: three dimensions featured for the lead audience, then the other nine by mean gain in
+        benchmarks/route_benchmark.json, strongest first."""
         import re
         src = (ROOT / 'walk-presets.js').read_text()
-        order = re.findall(r"'([^']+)'", re.search(r'WALK_PRESET_ORDER = \[(.*?)\];', src, re.S).group(1))
-        self.assertEqual(sorted(order), sorted(DIMENSIONS), 'exactly the 12 registered dimensions')
+        names = lambda block: re.findall(r"'([^']+)'", block)
+        featured = names(re.search(r'WALK_FEATURED = \[(.*?)\];', src, re.S).group(1))
+        rest = names(re.search(r'WALK_PRESET_ORDER = \[\.\.\.WALK_FEATURED,(.*?)\];', src, re.S).group(1))
+        self.assertEqual(featured, ['Nature', 'Quiet & Relax', 'Architecture'])
+        self.assertEqual(sorted(featured + rest), sorted(DIMENSIONS), 'exactly the 12 registered dimensions, each once')
         by_dim = json.loads((ROOT / 'benchmarks' / 'route_benchmark.json').read_text())['summary']['by_dimension']
-        self.assertEqual(order, sorted(DIMENSIONS, key=lambda d: -by_dim[d]['mean_gain']), 'rerun the benchmark or reorder the pills')
+        self.assertEqual(rest, sorted((d for d in DIMENSIONS if d not in featured), key=lambda d: -by_dim[d]['mean_gain']),
+                         'rerun the benchmark or reorder the pills')
+        for block in re.findall(r"dims: \[(.*?)\]", src):
+            self.assertTrue(set(names(block)) <= set(DIMENSIONS), 'an activity may only bundle registered dimensions')
 
     def test_summary_survives_unscored_runs(self):
         self.assertEqual(rb.summarise([{'dimension': 'Nature', 'error': 'x'}]), {'runs': 1, 'scored': 0})
