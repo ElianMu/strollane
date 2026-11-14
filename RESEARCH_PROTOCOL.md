@@ -17,12 +17,13 @@ nice?", "survey people as they use this") and the one this study answers.
 3. **Match after walking** — did the walk feel the way the chosen priority promised, and which stretches did or did not?
 4. **Proxy validity** — does the perceived difference between two routes go in the same direction as the score
    difference, starting with Nature and Quiet & Relax?
-5. **Audience** — which of the hypothesised groups (new to NYC, visiting, exploring an unfamiliar neighbourhood)
-   actually wants this, and for what kind of walk?
+5. **Audience** — does the lead audience chosen in `AUDIENCE.md` (people new to New York) actually want this, and for
+   which of its three use cases? Do long-time residents respond differently?
 
 ## 3. Design
 
-- **Participants**: 8–12 for a first round, recruited by hypothesised group. Record only: group, how long in NYC
+- **Participants**: 8–12 for a first round. Recruit mainly from the lead audience in `AUDIENCE.md` (people in their
+  first year in New York), plus two or three long-time residents as a comparison. Record only: group, how long in NYC
   (banded), how often they walk for leisure (banded).
 - **Trips**: use trips from `benchmarks/od_pairs.json` in the medium and long buckets, where the benchmark shows the
   priority actually changes the route. Short trips mostly return the shortest path and cannot test anything.
