@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.
 const dom=new JSDOM(html,{runScripts:'outside-only',url:'http://localhost:8080'}),w=dom.window;
 w.fetch=async()=>{throw new Error('Network intentionally blocked in DOM test')};w.HTMLElement.prototype.scrollIntoView=function(){};w.AbortSignal.timeout=()=>new w.AbortController().signal;
 const vm=require('vm'),context=dom.getInternalVMContext();
-for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','street-photos.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','street-photos.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js','share-link.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 const run=s=>vm.runInContext(s,context);
 (async()=>{
  // flatMapBounds: a pitch-independent query box, checked against a real map.getBounds() reading captured live
@@ -561,5 +561,31 @@ const run=s=>vm.runInContext(s,context);
   run("planner.poiStatus='0 OSM records';renderPOIs()");assert.equal(w.document.querySelector('#poiCount').textContent,'0 NEAR ROUTE','a real answer of none is still reported');
   run('planner.poiStatus=__kp[0];planner.routePois=__kp[1];renderPOIs()');}
  assert(/loadRoutePOIs\(run\)/.test(fs.readFileSync(path.join(__dirname,'..','journey.js'),'utf8')),'recommended walks look up nearby places too');
+ // --- Share this walk (share-link.js): the link carries the request only; it is validated like any outside input ---
+ {const saved=run('JSON.stringify([planner.weights,planner.origins,planner.directions,state.budget,journey.endMode])'),keepS=run('[state.start,state.customStart,state.end,state.customEnd]');w.__ks=keepS;
+  run("for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';planner.directions[d.name]='high';}");
+  run("setEndMode('fixed');setJourneyPlace('start',{id:'t:a',name:'Bryant Park',lat:40.753612,lon:-73.983233});setJourneyPlace('end',{id:'t:b',name:'Rockefeller & Co <b>',lat:40.7587,lon:-73.9787});");
+  run("planner.weights['Nature']=80;planner.origins['Nature']='manual';planner.weights['Urban Vibrancy']=90;planner.origins['Urban Vibrancy']='manual';planner.directions['Urban Vibrancy']='low';setBudget(45)");
+  const url=run("shareLinkEncode(shareLinkState(),'https://example.test/app/')"),hash=url.slice(url.indexOf('#'));
+  assert(url.startsWith('https://example.test/app/#walk?'),'the request lives in the fragment, which is not sent to a server');
+  assert(/from=40\.7536%2C-73\.9832/.test(url)&&!/753612/.test(url),'coordinates rounded to 4 decimals');
+  assert(!/geometry|score|route_id/.test(url),'no route or score travels in the link');
+  w.__h=hash;const st=run('shareLinkParse(__h)');
+  assert.deepEqual(JSON.parse(JSON.stringify(st)),{from:{lat:40.7536,lon:-73.9832,name:'Bryant Park'},to:{lat:40.7587,lon:-73.9787,name:'Rockefeller & Co b'},end:'fixed',prefs:[{i:run("DIMENSIONS.findIndex(d=>d.name==='Nature')"),w:80,low:false},{i:run("DIMENSIONS.findIndex(d=>d.name==='Urban Vibrancy')"),w:90,low:true}].sort((a,b)=>a.i-b.i),minutes:45});
+  // applying it reproduces the request exactly
+  run("for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';planner.directions[d.name]='high';}setBudget(72);state.start=null;state.end=null;");
+  run('shareLinkApply(shareLinkParse(__h))');
+  assert.equal(run("planner.weights['Nature']+'|'+planner.origins['Nature']+'|'+planner.weights['Urban Vibrancy']+'|'+planner.directions['Urban Vibrancy']+'|'+state.budget"),'80|manual|90|low|45');
+  assert.equal(run("getPlace('start').lat+','+getPlace('end').lon+','+getPlace('start').source"),'40.7536,-73.9787,Shared link');
+  assert.equal(run("DIMENSIONS.filter(d=>planner.origins[d.name]!=='default').length"),2,'only the shared priorities are set');
+  // a loop has no destination; round-trips through the link too
+  run("setEndMode('round')");const loop=run("shareLinkEncode(shareLinkState(),'x')");assert(/end=round/.test(loop)&&!/[?&]to=/.test(loop));
+  w.__l=loop.slice(loop.indexOf('#'));assert.equal(run('shareLinkParse(__l).end'),'round');assert.equal(run('shareLinkParse(__l).to'),null);
+  run("setEndMode('hotel')");assert.equal(run('shareLinkState()'),null,'"back to my hotel" is not shared');run("setEndMode('fixed')");
+  // rejected whole, never half-applied: outside Manhattan, unknown dimension, out-of-range weight, repeated dimension, bad minutes, no start
+  for(const bad of ['#walk?from=41.9000,-73.9832&to=40.7587,-73.9787','#walk?from=40.7536,-73.9832&to=40.7587,-73.9787&p=12.80','#walk?from=40.7536,-73.9832&to=40.7587,-73.9787&p=1.101','#walk?from=40.7536,-73.9832&to=40.7587,-73.9787&p=1.80,1.60','#walk?from=40.7536,-73.9832&to=40.7587,-73.9787&min=abc','#walk?to=40.7587,-73.9787','#walk?from=40.7536,-73.9832&end=hotel','#walk?from=40.7536,-73.9832','#other','#walk?from=javascript:alert(1)&to=40.7587,-73.9787']){w.__b=bad;assert.equal(run('shareLinkParse(__b)'),null,bad);}
+  w.__kc=run('planner.crime');run('planner.crime=null');assert(!run('shareLinkOmits()').includes('the crime-report preference'));run("planner.crime={mode:'set'}");assert(run('shareLinkOmits()').includes('the crime-report preference'),'what the link leaves out is said');run('planner.crime=__kc');
+  assert(w.document.querySelector('#shareWalk'),'Share button present');
+  w.__sv=JSON.parse(saved);run('Object.assign(planner.weights,__sv[0]);Object.assign(planner.origins,__sv[1]);Object.assign(planner.directions,__sv[2]);setBudget(__sv[3]);setEndMode(__sv[4]);[state.start,state.customStart,state.end,state.customEnd]=__ks;');}
  console.log('DOM PASS: navigation gate (route check + maneuvers), AI Discover My Walk (multi-turn state kept, real POI index, itinerary request + rendering, menu status honest, find vs add, hotel confirmation), weather offline → weather:null + honest status, weather intents, engine weather record shown as computed, walking-time default/sync/validation/API, urban data catalog (10 dataset categories, statuses, search), along-route counts = brute-force reference, route switch keeps layers, route urban data summary, feature inspector, segment evidence (matched/unmatched), static JSON errors, mode, 13 Map Mode views on computed GIS data, segment inspector (single + overall, indicator N/A, NO₂ context), 12 names, real pilot, routing-engine request/response adapter, 12 route scores, ordered continuous edges, route-edge inspector, route switching/compare, infeasible + step-free blocking, GPS progress + off-route replan, GPS error states, slider replanning. No browser/WebGL claims.');dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});
