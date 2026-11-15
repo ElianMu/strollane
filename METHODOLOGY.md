@@ -1,38 +1,42 @@
 # Spatial evidence methodology / 空间证据方法
 
-> **Read this first (updated 2026-11-13).** Everything below "Scope and truthfulness" describes the original **Midtown
+> **Read this first (updated 2026-11-14).** Everything below "Scope and truthfulness" describes the original **Midtown
 > pilot "Street evidence" layer** (`experience-core.js`, `data/pilot.json`): two raw proxies, 75 m buffers, scores NULL.
 > That layer still exists in Navigate → *Street evidence*, and the text is accurate **for that layer only**. It is no
 > longer how routes are ranked or how the Explore map is coloured. Current scoring is described in the next three
 > sections, in `README.md`, `ARCHITECTURE.md` and `DIMENSIONS_MAP_MODE_REPORT.md`.
 
-## Two score builds (known inconsistency)
+## One score build for routes and the Explore map (since 2026-11-14)
 
-The 12 dimensions have the same names and order everywhere, but two builds of their street scores are in use:
+Routes and the Explore Urban Data map now use the same street scores: build `strollane-12x24-v1+bb10da45e2`
+(`scripts/dimensions/` → `data/dimensions/manhattan/`, 20 computed indicators of 24 specified; the canopy and
+impervious-surface rasters are not connected, so those two indicators stay N/A). `scripts/transfer_dimension_scores.py`
+puts those street scores on the routing edges (`data/pedestrian/edge-scores.json.gz`), using the existing street-to-edge
+matching unchanged. The 12 dimensions, their names, order, definitions and the equal-weight rule are unchanged.
 
-| | Routes (ranking, Why this route, route cards) | Explore Urban Data map |
-|---|---|---|
-| Build | `sw-score-46f39c1c97`, data 2026-10-23 | `strollane-12x24-v1`, built 2026-11-10 |
-| Code | `scripts/streetwise_indicators.py` → `data/manhattan-streets.json` → `data/pedestrian/edge-scores.json.gz` | `scripts/dimensions/` → `data/dimensions/manhattan/` |
-| Scored indicators | 15 | 20 computed (24 specified; canopy and impervious rasters not connected) |
+Until 2026-11-14 routes used an earlier build (`sw-score-46f39c1c97`, 15 indicators, `scripts/streetwise_indicators.py`).
+Compared with it, the unified build adds five indicators: walking distance to seating and ramp coverage (Spatial
+Comfort), walking distance to waterfront (Scenic & Visual), walking-network detour (Walkability) and crime-report
+proximity (Access & Safety). Share of scored routing edges whose score moved by more than 20 points at the switch:
+Spatial Comfort 37 %, Scenic & Visual 19 %, Walkability 13 %, Access & Safety 7 %, Architecture and Nature about 1 %,
+the other six 0 %. The route benchmark was rerun on the unified scores (`benchmarks/ROUTE_BENCHMARK.md`): mean gain
++8.4 points for a 3.9 % mean detour (before: +9.5 and 4.3 %); the largest change is Spatial Comfort, +5.8 instead of
++14.2, because with three indicators instead of one there is less to gain by detouring.
 
-The map build adds five indicators: seat access and ramp coverage (Spatial Comfort), waterfront access (Scenic & Visual),
-route directness (Walkability) and crime-report proximity (Access & Safety). Compared segment by segment over the same
-10,533 LION segments (2026-11-13), the two builds agree closely on eight dimensions and differ on four:
+**Known limit of the unification.** 27.3 % of routable length is not a street segment but a crossing, park path, bridge
+or unmatched street, scored from raw values measured directly on the OSM geometry on 2026-10-23. The five added
+indicators were never measured on those edges, and the source data is needed to measure them, so there they are
+absent (not estimated, not borrowed from a nearby street) and the dimension is the mean of the indicators that were
+measured. Share of routable length whose score rests on fewer indicators than the street definition: Quiet & Relax
+30 % (roadway width is not recorded for paths and some streets), Spatial Comfort 8 %, Scenic & Visual 27 %,
+Walkability 27 %, Access & Safety 27 %. Spatial Comfort is N/A on park paths (coverage 75.5 % of routable
+length). These shares are written by the transfer into the `indicator_basis` field of the edge-score metadata, and
+*Why this route?* states them. Measuring the five indicators on those edges needs a rebuild with the source downloads.
 
-| Dimension | Spearman ρ between builds | Segments differing by more than 20 points |
-|---|---|---|
-| Spatial Comfort | 0.71 | 40 % (routes build: N/A on 1,145 segments) |
-| Scenic & Visual | 0.74 | 36 % |
-| Walkability | 0.79 | 26 % |
-| Access & Safety | 0.90 | 14 % |
-| Nature | 0.95 | 2 % |
-| Architecture | 0.99 | 3 % |
-| Culture, Quiet & Relax, Urban Vibrancy, Food & Retail, Environment, Transit Connectivity | 1.00 | 0 % |
-
-Consequence: a street's score on the Explore map can differ from the score the router used for it. Route explanations
-therefore always quote the routes build (`data/pedestrian/score-indicators.json`, shown only when its `score_version`
-equals the route's). Unifying the two builds changes route results and is a pending decision; it has not been done.
+The transfer was checked against the earlier file: recomputing the earlier edge scores from the earlier street scores
+with the same code reproduces 395,828 of 397,680 values exactly; 1,852 differ by 1 point (the matching table stores
+overlap lengths to 0.1 m) and none by more (`python3 scripts/transfer_dimension_scores.py --verify-previous`, run on
+the earlier file).
 
 ## What the route scores are, and are not
 
@@ -53,8 +57,10 @@ the route benchmark. Proxy limits a reader should know for each name:
 - **Urban Vibrancy**: POI diversity × quantity. At the 36 Manhattan DOT pedestrian-count locations its rank correlation
   with observed people per hour is −0.022 (`data/dimensions/manhattan/manifest.json`; the locations are mostly busy
   retail corridors, so the range is restricted). It is not evidence of how lively a street is.
-- **Access & Safety**: in the routes build, injury-crash density only. It is not a measure of personal safety.
-- **Spatial Comfort**: in the routes build, sidewalk-area share only, available on 72.9 % of routable length.
+- **Access & Safety**: pedestrian-injury crash intensity and proximity of reported felonies and misdemeanours. Reports
+  depend on reporting and policing; it is not a measure of personal safety.
+- **Spatial Comfort**: mapped sidewalk share, walking distance to public seating and curb-ramp coverage. It does not
+  measure crowding, shade or surface quality.
 
 *Why this route?* states the indicators behind every priority the visitor picked, so these limits are visible in use.
 

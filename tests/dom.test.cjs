@@ -231,7 +231,7 @@ const run=s=>vm.runInContext(s,context);
  const pillFor=dim=>[...presetRoots[0].querySelectorAll('.walk-pill[data-dim]')].find(b=>b.dataset.dim===dim);
  const dimNames=run('DIMENSIONS.map(d=>d.name).join("|")').split('|');assert.equal(dimNames.length,12);
  for(const r of presetRoots){const pills=[...r.querySelectorAll('.walk-pill[data-dim]')].map(b=>b.dataset.dim);assert.equal(pills.length,12);assert.deepEqual([...pills].sort(),[...dimNames].sort(),'exactly the 12 registered dimensions, none invented or renamed');}
- assert.equal(run('WALK_PRESET_ORDER.slice(0,4).join("|")'),'Nature|Quiet & Relax|Architecture|Spatial Comfort','three featured for the lead audience, then benchmark order');
+ assert.equal(run('WALK_PRESET_ORDER.slice(0,4).join("|")'),'Nature|Quiet & Relax|Architecture|Access & Safety','three featured for the lead audience, then benchmark order');
  const naturePill=pillFor('Nature');
  assert(naturePill.title.includes(basis.dimensions.Nature.find(x=>x.role==='up').label),'tooltip names the indicators from the router definitions file');
  const box=w.document.querySelector('#intentText');box.value=box.defaultValue;

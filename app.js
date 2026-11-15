@@ -28,10 +28,9 @@ const PLACES = {
   apollo:{name:'Apollo Theater',lon:-73.9501,lat:40.8100},
   fort:{name:'Fort Tryon Park',lon:-73.9319,lat:40.8638}
 };
-// The 12 experience dimensions. ROUTES use the street scores in data/manhattan-streets.json, transferred to OSM
-// pedestrian edges (data/pedestrian/edge-scores.json.gz; score build "sw-score-…", scripts/streetwise_indicators.py).
-// The EXPLORE map reads a newer build with more indicators (data/dimensions/<area>/, "strollane-12x24-v1",
-// scripts/dimensions/). Same 12 names and order, two score builds: see METHODOLOGY.md "Two score builds".
+// The 12 experience dimensions. ROUTES and the EXPLORE map use one build of the street scores
+// (data/dimensions/<area>/, "strollane-12x24-v1", scripts/dimensions/), transferred to the OSM pedestrian edges by
+// scripts/transfer_dimension_scores.py (data/pedestrian/edge-scores.json.gz). See METHODOLOGY.md "One score build".
 const DIMENSIONS = [
   {name:'Architecture', icon:'▥', status:'measured', desc:'Street rank 0–100, shared with Explore'},
   {name:'Nature', icon:'❧', status:'measured', desc:'Street rank 0–100, shared with Explore'},
