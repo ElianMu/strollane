@@ -198,6 +198,7 @@ function loadScoreBasis(){
 const WHY_SIMILAR=5; // same threshold as route-story.js STORY.MORE: smaller differences are not described as better
 function whyWindow(doc,source){
  const w=doc.windows||{};
+ for(const k of String(source).split('+'))if(typeof w[k]==='string')return` · records ${w[k]}`; // map build: {noise:'2025-10-23 → 2026-10-23 (…)', collisions:'…'}
  return source==='noise'&&w.noise_from?` · records since ${w.noise_from}`:source==='collisions'&&w.collisions_from?` · records since ${w.collisions_from}`:source==='trees'&&w.trees_inventory_updated?` · inventory updated ${w.trees_inventory_updated}`:'';
 }
 /** The numbers behind the card's "why" sentence, on the SELECTED card: for the visitor's top priorities (two at most),

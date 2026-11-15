@@ -292,8 +292,23 @@ class IndexedSegments:
         return json.loads(row[0]) if row else None
 
 
+_map_build = None
+def map_build():
+    """Street scores of the Explore Urban Data map (data/dimensions/manhattan/), the build the router's edge scores are
+    transferred from (scripts/transfer_dimension_scores.py). Loaded once, on the first segment lookup."""
+    global _map_build
+    if _map_build is None:
+        base = ROOT / 'data' / 'dimensions' / 'manhattan'
+        manifest = json.loads((base / 'manifest.json').read_text(encoding='utf-8'))
+        ind = json.loads((base / 'indicators.json').read_text(encoding='utf-8'))
+        props = {f['properties']['id']: f['properties'] for f in json.loads((base / 'segments.geojson').read_text(encoding='utf-8'))['features']}
+        _map_build = (manifest, props, {sid: i for i, sid in enumerate(ind['ids'])}, ind['raw'])
+    return _map_build
+
+
 def street_segment(segment_id):
-    """Street Segment Object (shared data contract) from the Explore Urban Data layer."""
+    """Street Segment Object (shared data contract). Identity and geometry come from the LION street snapshot; scores and
+    sub-indicators come from the build the router is using, so a segment never reports a different score than its routes."""
     global _segments
     if _segments is None:
         from routing.urban_store import manifest
@@ -311,6 +326,22 @@ def street_segment(segment_id):
     if not f:
         return None
     p = f['properties']
+    manifest, props, row, raw = map_build()
+    if segment_id in props and get_planner().net.score_version == manifest['calculation_version']:
+        q, i = props[segment_id], row.get(segment_id)
+        by_key = {x['key']: x for x in manifest['indicators']}
+        return {
+            'segment_id': p['id'], 'source_segment_id': p.get('source_segment_id'), 'lion_part': p.get('lion_part'),
+            'street_name': p['name'], 'geometry': f['geometry'], 'length_m': p['length_m'],
+            'dimension_scores': {d['label']: q[d['prop']] for d in manifest['dimensions']}, 'overall_score': q['overall'],
+            'sub_indicators': {d['label']: [{k: by_key[key][k] for k in ('key', 'label', 'unit', 'method', 'role', 'status')}
+                                            | {'source': '+'.join(by_key[key]['db']), 'value': raw[key][i] if key in raw and i is not None else None}
+                                            for key in d['indicators']] for d in manifest['dimensions']},
+            'data_sources': {k: v['label'] for k, v in manifest['sources'].items()},
+            'data_coverage': {'dimensions_available': q['coverage'], 'of': 12},
+            'score_version': manifest['calculation_version'], 'data_version': get_planner().net.score_meta['data_version'],
+        }
+    # The edge scores were rebuilt from the earlier street snapshot (e.g. a refresh whose transfer step failed): quote that build.
     dims = {d: p[f'd{j}'] for j, d in enumerate(ROUTE_DIMENSIONS)}
     return {
         'segment_id': p['id'], 'source_segment_id': p.get('source_segment_id'), 'lion_part': p.get('lion_part'),
@@ -941,8 +972,9 @@ def refresh_street_data_if_stale():
     print('Street data missing or stale; rebuilding street and edge scores from public sources in the background (about 4 minutes)…')
     def run():
         global _segments
-        # Street scores and OSM edge scores are rebuilt together from the same download, so their versions always agree.
-        for script, args in (('build_manhattan_streets.py', ['--refresh']), ('match_lion_osm.py', [])):
+        # The street snapshot and the edge matching are rebuilt together from the same download; the router's scores are then
+        # transferred again from the Explore map's street scores, so routes and the map keep reporting the same build.
+        for script, args in (('build_manhattan_streets.py', ['--refresh']), ('match_lion_osm.py', []), ('transfer_dimension_scores.py', []), ('build_score_indicators.py', [])):
             result = subprocess.run([sys.executable, str(ROOT / 'scripts' / script), *args], capture_output=True, text=True)
             if result.returncode != 0:
                 print(f'{script} failed; keeping the previous snapshot.\n' + result.stderr[-600:])

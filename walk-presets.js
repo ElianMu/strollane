@@ -18,8 +18,8 @@
 // The three dimensions the lead audience's first use case leans on (AUDIENCE.md) come first; the other nine follow in
 // order of mean gain in the route benchmark (benchmarks/ROUTE_BENCHMARK.md). tests/test_route_benchmark.py checks both.
 const WALK_FEATURED = ['Nature', 'Quiet & Relax', 'Architecture'];
-const WALK_PRESET_ORDER = [...WALK_FEATURED, 'Spatial Comfort', 'Access & Safety', 'Transit Connectivity',
- 'Walkability', 'Food & Retail', 'Culture', 'Environment', 'Urban Vibrancy', 'Scenic & Visual'];
+const WALK_PRESET_ORDER = [...WALK_FEATURED, 'Access & Safety', 'Transit Connectivity', 'Walkability',
+ 'Food & Retail', 'Culture', 'Environment', 'Spatial Comfort', 'Urban Vibrancy', 'Scenic & Visual'];
 /* Walk activities: the three use cases written for the lead audience (AUDIENCE.md), as one-tap starting points.
    An activity is only a named bundle of EXISTING dimensions, each set to the same importance a pill sets (80). It adds
    no dimension, score, weight or route of its own. What kind of walk comes out is decided by machinery that already

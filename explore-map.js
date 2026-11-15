@@ -3,7 +3,8 @@
    output in data/dimensions/<area>/ (scripts/dimensions/build.py): segments.geojson (geometry + dimension scores),
    indicators.json (raw + percentile values, fetched on the first click) and manifest.json (spec, sources, coverage).
    Scores are 0–100 ranks within the comparison area, not calibrated experience scores. Missing = N/A, never 0.
-   Independent from AI Journey: no route data is read or changed here (routes keep using data/manhattan-streets.json). */
+   Independent from AI Journey: no route data is read or changed here. Routes use these same street scores,
+   transferred to the routing edges by scripts/transfer_dimension_scores.py. */
 const DIM_LABELS=['Architecture','Nature','Culture','Quiet & Relax','Spatial Comfort','Urban Vibrancy','Food & Retail','Scenic & Visual','Walkability','Access & Safety','Environment','Transit Connectivity'];
 const EXPLORE_VIEWS=[
  {label:'Overall (available dimensions)',prop:'overall',dim:null},
