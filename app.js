@@ -266,10 +266,28 @@ function unsupportedText(list){
     return `I can’t plan for “${u.request.trim()}”: ${u.reason.trim().replace(/[.。]?$/,'.')}${near}`;
   }).join(' ');
 }
+/* The page (GitHub Pages) and the route server (a separate host) are deployed separately, and on 2026-11-15 the server
+   was found several versions behind with nothing on screen to show it. Each side now names its score build: the page's
+   copy is data/pedestrian/score-indicators.json, the server's is /api/status.score_version. If they differ (or an older
+   server sends none), say so once, in plain words. Nothing is hidden or changed because of it. */
+function versionMismatchText(pageVersion,serverVersion){
+  if(!pageVersion||pageVersion===serverVersion)return '';
+  return `This page and the route server are on different versions (page ${pageVersion}, server ${serverVersion||'older, version not reported'}). Routes still come from the server\u2019s real data, but newer features may be missing until the server is redeployed.`;
+}
+async function checkServerVersion(status){
+  if(typeof loadScoreBasis!=='function')return;
+  const doc=await loadScoreBasis(),text=versionMismatchText(doc&&doc.score_version,status&&status.score_version);
+  let box=document.getElementById('versionNotice');
+  if(!text){if(box)box.remove();return;}
+  if(!box){box=document.createElement('div');box.id='versionNotice';box.className='version-notice';box.setAttribute('role','status');document.body.appendChild(box);}
+  box.innerHTML=`<span>${esc(text)}</span><button type="button" aria-label="Dismiss">×</button>`;
+  box.querySelector('button').addEventListener('click',()=>box.remove());
+}
 async function checkInterpreter(){
   if(location.protocol==='file:'){$('interpretMode').textContent='LOCAL PREVIEW · Start server.py with an API key for genuine LLM understanding';return}
   try{
     const r=await streetwiseFetch('/api/status',{signal:AbortSignal.timeout(2500)});const d=await r.json();planner.llmConfigured=r.ok?Boolean(d.llm):null;planner.llmConnected=Boolean(r.ok&&d.llm);
+    if(r.ok)checkServerVersion(d);
   }catch(_) {planner.llmConnected=false;planner.llmConfigured=null;}
   $('interpretMode').textContent=planner.llmConnected?'✦ AI CONFIGURED · Connection verified when you plan':planner.llmConfigured===false?'◇ LOCAL PREVIEW · AI backend key is missing or invalid':'◇ AI STATUS UNAVAILABLE · Planning will retry the AI service';
 }
@@ -754,8 +772,9 @@ function activePOIs(){
 function polylinePointDistanceM(p,coords){let min=Infinity;for(let i=1;i<coords.length;i++)min=Math.min(min,segmentDistanceM(p,coords[i-1],coords[i]));return min}
 function poiGeojson(){return {type:'FeatureCollection',features:state.display.pois?activePOIs().map(p=>({type:'Feature',properties:{name:p.name,category:poiDimension(p.tags),distance_m:p.distance},geometry:{type:'Point',coordinates:[p.lon,p.lat]}})):[]}}
 function renderPOIs(){
-  const list=activePOIs();$('poiCount').textContent=`${list.length} NEAR ROUTE`;
-  if(!list.length){$('poiList').innerHTML=`<p class="status-empty">${esc(planner.poiStatus==='Not loaded'?'Generate or select a route to discover POIs.':planner.poiStatus||'No named OSM POIs confirmed near route.')}</p>`;return}
+  const list=activePOIs(),pending=planner.poiStatus==='Not loaded'||/^Fetching/.test(planner.poiStatus||'');
+  $('poiCount').textContent=pending?'':`${list.length} NEAR ROUTE`; // a count only once the lookup has answered: "0 near route" before that was not a finding
+  if(!list.length){$('poiList').innerHTML=`<p class="status-empty">${esc(planner.poiStatus==='Not loaded'?(state.routes.length?'Places near this walk have not been looked up yet.':'Generate or select a route to discover POIs.'):planner.poiStatus||'No named OSM POIs confirmed near route.')}</p>`;return}
   $('poiList').innerHTML=`<small>${esc(planner.poiStatus)}</small>`+list.map((p,i)=>`<button class="poi-item" type="button" data-poi="${i}"><span><strong>${esc(p.name)}</strong><small>${esc(poiDimension(p.tags))} · OpenStreetMap</small></span><span class="poi-distance">${p.distance} m ↗</span></button>`).join('');
   $('poiList').querySelectorAll('[data-poi]').forEach(el=>el.addEventListener('click',()=>{
     const p=list[+el.dataset.poi];if(state.mapReady)state.map.flyTo({center:[p.lon,p.lat],zoom:16.4,duration:500});toast(`${p.name} · ${p.distance} m from route geometry`);

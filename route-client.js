@@ -78,6 +78,7 @@ async function generateRoutes(userText=null,isFollowUp=false){
   applyRouteResponse(json);
   const now=state.routes.find(r=>r.id===state.activeRoute)?.raw.ordered_edge_ids.join(',');
   if(previous&&now)planner.lastExplanation+=previous===now?' The recommended path is unchanged: it still ranks best under the updated preferences.':' The recommended path changed after recalculation.';
+  planner.lastExplanation+=shortTripNote(json);
   if(typeof weatherRouteSentence==='function'&&(json.weather_routing?.routing?.active||planner.weatherIntent))planner.lastExplanation+=weatherRouteSentence(json);
   $('rankingStatus').textContent=planner.lastExplanation;
   renderRouteCards();syncMapData();updateProfile();updateWhyRoute();renderRouteEdges();renderPOIs();
@@ -190,6 +191,20 @@ function independentComparisonRows(){
 /* A static copy of the indicator definitions behind the 12 route scores (scripts/build_score_indicators.py). Shown only
    when its score_version equals the route's, so the words can never describe a different scoring build. Every number
    in this block is a field of the /api/routes response; every label, method and source is copied from that file. */
+/* Short trips: in the route benchmark, 29 of 72 runs under 1.5 km returned the shortest route and the mean gain was 4.3
+   points (benchmarks/ROUTE_BENCHMARK.md). When that is what happened here, say it with this response's own numbers
+   rather than presenting a near-identical route as a better walk. Empty string when it does not apply. */
+const SHORT_TRIP_M=1500,SHORT_TRIP_GAIN=2;
+function shortTripNote(json){
+ const dims=DIMENSIONS.map(d=>d.name).filter(n=>planner.origins[n]!=='default');
+ const best=json.routes.find(r=>r.rank===1),shortest=json.routes.find(r=>r.objective==='shortest');
+ if(!dims.length||!best||!shortest||!(json.shortest_distance_m<SHORT_TRIP_M))return '';
+ const metres=Math.round(json.shortest_distance_m/10)*10;
+ if(best.route_id===shortest.route_id)return ` This is a short trip (${metres} m): the shortest route is also the best match for your priorities, so there is no better way to offer.`;
+ const gains=dims.map(n=>{const a=best.dimension_scores[n],b=shortest.dimension_scores[n];if(a==null||b==null)return null;return (planner.directions[n]==='low'?b-a:a-b);}).filter(v=>v!=null);
+ if(!gains.length||Math.max(...gains)>SHORT_TRIP_GAIN)return '';
+ return ` This is a short trip (${metres} m): the best match differs from the shortest route by ${Math.max(0,Math.max(...gains))} point${Math.max(...gains)===1?'':'s'} at most on your priorities, so there is little to gain by going another way.`;
+}
 const scoreBasis={doc:null,loading:null,failed:false};
 function loadScoreBasis(){
  if(scoreBasis.doc||scoreBasis.failed)return Promise.resolve(scoreBasis.doc);

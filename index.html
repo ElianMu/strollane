@@ -34,13 +34,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
-  <link rel="stylesheet" href="./styles.css?v=69" />
+  <link rel="stylesheet" href="./styles.css?v=71" />
 </head>
 <body>
 <div class="site-shell">
   <header class="topbar">
     <div class="brand-zone"><svg class="brand-glyph brand-mark" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7.6 11.7 13.2"/><path d="M12.8 8.7 14.7 11.1 16.6 12.1"/><path d="M12.6 8.8 10.6 10.9 9.2 12.8"/><path d="M11.7 13.2 13.7 16.6 14.5 20.6"/><path d="M11.7 13.2 10.4 17.1 7.9 19.8"/></g><circle cx="14" cy="4" r="2.15" fill="currentColor"/></svg><div class="brand-name" aria-label="STROLLANE · NYC">STROLLANE<span class="brand-sep" aria-hidden="true">·</span><span class="brand-city">NYC</span></div></div>
-        <div class="top-actions"><span id="topWeather" class="top-weather"><span class="tiny-sun">☁</span> Weather loading…</span><button id="openInfo" class="icon-button" title="About the prototype" aria-label="About"><span>i</span></button><button id="openKepler" class="kepler-btn"><span class="kepler-mark">◈</span> Kepler studio <span>↗</span></button><details class="mobile-more" id="mobileMore"><summary class="icon-button" title="Menu" aria-label="Menu"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary><div class="mobile-more-body"><button type="button" data-mview-go="plan"><span>Plan walk</span><small>Start &amp; destination</small></button><button type="button" data-mview-go="customize"><span>Customize walk</span><small>Time &amp; 12 dimensions</small></button><button type="button" data-mview-go="urban"><span>Explore urban data</span><small>NYC GIS layers</small></button><button type="button" data-mview-go="layers"><span>Map layers</span><small>Weather &amp; legend</small></button><div class="menu-segment" role="group" aria-label="Map style"><span>Map</span><button type="button" data-map-theme="dark" aria-pressed="false">Dark</button><button type="button" data-map-theme="light" aria-pressed="true">Light</button></div><button type="button" data-more-proxy="mapReset"><span>Reset map view</span><small>Back to Manhattan</small></button><button type="button" data-more-proxy="toggleLegend"><span>Data legend</span><small>Show or hide</small></button><hr><button type="button" data-more-proxy="toggleData"><span>Data sources</span><small>Status &amp; coverage</small></button><button type="button" data-more-proxy="openInfo"><span>About</span><small>This prototype</small></button><button type="button" data-more-proxy="openKepler"><span>Export to Kepler</span><small>GIS data</small></button></div></details></div>
+        <div class="top-actions"><span id="topWeather" class="top-weather"><span class="tiny-sun">☁</span> Weather loading…</span><button type="button" id="langToggle" class="icon-button lang-toggle" data-lang-toggle aria-pressed="false" aria-label="切换为中文界面"><span data-lang-label>中文</span></button><button id="openInfo" class="icon-button" title="About the prototype" aria-label="About"><span>i</span></button><button id="openKepler" class="kepler-btn"><span class="kepler-mark">◈</span> Kepler studio <span>↗</span></button><details class="mobile-more" id="mobileMore"><summary class="icon-button" title="Menu" aria-label="Menu"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary><div class="mobile-more-body"><button type="button" class="lang-toggle-m" data-lang-toggle aria-pressed="false"><span data-lang-label>中文</span><small>Interface language</small></button><button type="button" data-mview-go="plan"><span>Plan walk</span><small>Start &amp; destination</small></button><button type="button" data-mview-go="customize"><span>Customize walk</span><small>Time &amp; 12 dimensions</small></button><button type="button" data-mview-go="urban"><span>Explore urban data</span><small>NYC GIS layers</small></button><button type="button" data-mview-go="layers"><span>Map layers</span><small>Weather &amp; legend</small></button><div class="menu-segment" role="group" aria-label="Map style"><span>Map</span><button type="button" data-map-theme="dark" aria-pressed="false">Dark</button><button type="button" data-map-theme="light" aria-pressed="true">Light</button></div><button type="button" data-more-proxy="mapReset"><span>Reset map view</span><small>Back to Manhattan</small></button><button type="button" data-more-proxy="toggleLegend"><span>Data legend</span><small>Show or hide</small></button><hr><button type="button" data-more-proxy="toggleData"><span>Data sources</span><small>Status &amp; coverage</small></button><button type="button" data-more-proxy="openInfo"><span>About</span><small>This prototype</small></button><button type="button" data-more-proxy="openKepler"><span>Export to Kepler</span><small>GIS data</small></button></div></details></div>
   </header>
 
   <div class="app-layout">
@@ -229,6 +229,7 @@
         <div class="route-dots hidden" id="routeDots" aria-hidden="true"></div>
         <button type="button" id="navStart" class="primary-cta nav-start hidden"><span>➤ Start Navigation</span><span class="cta-arrow">↗</span></button>
         <button type="button" id="routePreviewBtn" class="route-preview-btn hidden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18l6-12 4 7 3-4 5 9z"/></svg><span>3D map preview</span></button>
+        <button type="button" id="shareWalk" class="route-preview-btn share-walk hidden" title="Copy a link that plans this walk again: start, destination and priorities only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="5" r="2.6"/><circle cx="18" cy="19" r="2.6"/></svg><span>Share this walk</span></button>
         <div class="m-only m-route-fromto" id="mRouteFromTo"></div>
         <div class="m-only" id="mRefineSlot"></div>
         <div class="subtle-divider"></div>
@@ -287,24 +288,25 @@
 <div id="modalOverlay" class="modal-overlay hidden"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button id="closeModal" class="modal-close" title="Close">✕</button><div class="section-overline">PROJECT NOTES / TRANSPARENCY</div><h2 id="modalTitle">What is real, and what's next.</h2><div id="modalContent"></div></div></div>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="./experience-core.js?v=28"></script>
-<script src="./api-config.js?v=29"></script>
+<script src="./api-config.js?v=30"></script>
 <script src="./weather.js?v=28"></script>
 <script src="./places.js?v=29"></script>
 <script src="./opening-hours.js?v=28"></script>
-<script src="./app.js?v=49"></script>
+<script src="./app.js?v=50"></script>
 <script src="./route-story.js?v=2"></script>
 <script src="./route-photos.js?v=3"></script>
 <script src="./street-photos.js?v=1"></script>
-<script src="./route-client.js?v=39"></script>
+<script src="./route-client.js?v=40"></script>
 <script src="./walk-presets.js?v=4"></script>
 <script src="./weather-ui.js?v=28"></script>
-<script src="./journey.js?v=36"></script>
+<script src="./journey.js?v=37"></script>
 <script src="./journey-ui.js?v=31"></script>
 <script src="./voice.js?v=28"></script>
 <script src="./nav-engine.js?v=30"></script>
 <script src="./nav-ui.js?v=35"></script>
 <script src="./ar-nav.js?v=3"></script>
 <script src="./route-preview.js?v=4"></script>
+<script src="./share-link.js?v=1"></script>
 <script src="./urban-geo.js?v=28"></script>
 <script src="./urban-style.js?v=33"></script>
 <script src="./urban-layers.js?v=34"></script>
@@ -314,6 +316,7 @@
 <script src="./center-map.js?v=31"></script>
 <script src="./bottom-sheet.js?v=1"></script>
 <script src="./mobile-ui.js?v=35"></script>
+<script src="./i18n.js?v=1"></script>
 <script src="./pwa-register.js?v=2"></script>
 </body>
 </html>

@@ -1082,8 +1082,8 @@ body[data-mview="typing"] .m-route-ends .m-context{display:flex}
 .rp-photo{margin:0;min-width:0}
 .rp-photo img{display:block;width:100%;height:64px;object-fit:cover;border-radius:var(--r-sm);background:var(--bg-input)}
 .rp-photo figcaption{display:flex;flex-direction:column;gap:1px;margin-top:4px;font-size:10px;line-height:1.3;min-width:0}
-.rp-photo figcaption strong{font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rp-photo figcaption a{color:var(--text-tertiary);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-photo figcaption strong{font-weight:600;color:var(--text-primary);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.rp-photo figcaption a{color:var(--text-tertiary);text-decoration:none;overflow-wrap:anywhere} /* author and licence in full: attribution must stay readable */
 .rp-photo figcaption a:hover{color:var(--text-secondary);text-decoration:underline}
 .along-photos{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:4px;scroll-snap-type:x mandatory}
 .along-photos .rp-photo{flex:0 0 132px;scroll-snap-align:start}
@@ -1196,3 +1196,12 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 .street-photos .along-photos{margin-top:6px}
 .street-photos .rp-photo a{display:block}
 .street-photos small{display:block;margin-top:4px;font-size:9.5px;line-height:1.4;color:var(--text-tertiary)}
+
+/* Page and route server on different versions (app.js checkServerVersion): one quiet, dismissible line */
+.version-notice{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:60;display:flex;align-items:flex-start;gap:10px;max-width:min(560px,calc(100vw - 24px));padding:8px 10px 8px 12px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--bg-panel);color:var(--text-secondary);font-size:11px;line-height:1.45;box-shadow:0 6px 18px color-mix(in srgb,var(--shadow) 40%,transparent)}
+.version-notice button{flex:none;border:0;background:none;color:var(--text-secondary);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+
+/* Interface language switch (i18n.js) */
+.lang-toggle{width:auto;min-width:44px;padding:0 10px;font-size:12px;font-weight:600}
+@media(max-width:740px){.lang-toggle{display:none}} /* on phones the switch is the first item of the menu */
+@media(min-width:741px){.lang-toggle-m{display:none}}
