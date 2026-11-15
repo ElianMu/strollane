@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.
 const dom=new JSDOM(html,{runScripts:'outside-only',url:'http://localhost:8080'}),w=dom.window;
 w.fetch=async()=>{throw new Error('Network intentionally blocked in DOM test')};w.HTMLElement.prototype.scrollIntoView=function(){};w.AbortSignal.timeout=()=>new w.AbortController().signal;
 const vm=require('vm'),context=dom.getInternalVMContext();
-for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','street-photos.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js','share-link.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','street-photos.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js','share-link.js','i18n.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 const run=s=>vm.runInContext(s,context);
 (async()=>{
  // flatMapBounds: a pitch-independent query box, checked against a real map.getBounds() reading captured live
@@ -587,5 +587,31 @@ const run=s=>vm.runInContext(s,context);
   w.__kc=run('planner.crime');run('planner.crime=null');assert(!run('shareLinkOmits()').includes('the crime-report preference'));run("planner.crime={mode:'set'}");assert(run('shareLinkOmits()').includes('the crime-report preference'),'what the link leaves out is said');run('planner.crime=__kc');
   assert(w.document.querySelector('#shareWalk'),'Share button present');
   w.__sv=JSON.parse(saved);run('Object.assign(planner.weights,__sv[0]);Object.assign(planner.origins,__sv[1]);Object.assign(planner.directions,__sv[2]);setBudget(__sv[3]);setEndMode(__sv[4]);[state.start,state.customStart,state.end,state.customEnd]=__ks;');}
+ // --- Chinese interface (i18n.js): display only, reversible, dimension names never replaced ---
+ {const d=w.document,q=s=>d.querySelector(s),redraw="renderPreferenceSummary();if(typeof renderDimensions==='function')renderDimensions();renderWalkPresets();";run(redraw);
+  const before=d.body.textContent,cta=q('#generateRoutes')?.textContent;
+  assert.equal(run('i18n.lang'),'en');assert.equal(q('#langToggle [data-lang-label]').textContent,'中文');
+  assert.equal(Object.keys(run('I18N_DIMENSIONS_ZH')).join('|'),run("DIMENSIONS.map(d=>d.name).join('|')"),'a gloss for each of the 12 registered names, no others');
+  for(const n of run('DIMENSIONS.map(d=>d.name)'))assert(run('I18N_ZH')[n].endsWith(' '+n),'the unchanged English name stays on screen: '+n);
+  const pill=[...d.querySelectorAll('[data-walk-presets] .walk-pill[data-dim]')].find(b=>b.dataset.dim==='Nature'),act=d.querySelector('.walk-activity[data-activity=neighbourhood]');
+  const box=q('#intentText'),typed=box.value;
+  run("setLanguage('zh',false)");
+  assert.equal(d.documentElement.lang,'zh-Hans');assert.equal(q('#langToggle [data-lang-label]').textContent,'EN');
+  assert.equal(pill.dataset.dim,'Nature');assert(/自然 Nature/.test(pill.textContent),'gloss + name, data key untouched');
+  assert(/认识一个街区/.test(act.textContent));assert(d.body.textContent.includes('起点')&&d.body.textContent.includes('分享这条路线'));
+  assert.equal(box.value,typed,'what is typed in the request box is never rewritten');
+  assert.equal(box.getAttribute('placeholder'),run('I18N_ZH')[box.getAttribute('data-i18n-en-placeholder')],'placeholder translated, original kept on the element');
+  // text the app writes later is translated too; built sentences are left in English, whole
+  const probe=d.createElement('p');d.body.appendChild(probe);probe.textContent='More routes';
+  const built=d.createElement('p');d.body.appendChild(built);built.textContent='3 walks to choose from: Greener, Quieter.';
+  await new Promise(r=>setTimeout(r,0));
+  assert.equal(probe.textContent,'更多路线');assert.equal(built.textContent,'3 walks to choose from: Greener, Quieter.');
+  // the planner still works on English keys while Chinese is shown
+  {const nature=()=>[...d.querySelectorAll('[data-walk-presets] .walk-pill[data-dim]')].find(b=>b.dataset.dim==='Nature'&&b.closest('[data-walk-presets]')===pill.closest('[data-walk-presets]'))||pill,was=run("planner.origins['Nature']")+run("planner.weights['Nature']"),keepN=run("[planner.weights['Nature'],planner.origins['Nature'],planner.directions['Nature']]");
+   nature().click();assert.notEqual(run("planner.origins['Nature']")+run("planner.weights['Nature']"),was,'pills work on the English data key while Chinese is shown');assert(/自然 Nature/.test(nature().textContent),'a re-rendered pill is translated again');w.__kn=keepN;run("[planner.weights['Nature'],planner.origins['Nature'],planner.directions['Nature']]=__kn;renderWalkPresets()");}
+  run(redraw);await new Promise(r=>setTimeout(r,0));run("setLanguage('en',false)");probe.remove();built.remove();
+  assert.equal(d.documentElement.lang,'en');assert.equal(d.body.textContent,before,'switching back restores every string exactly');
+  assert.equal(d.querySelectorAll('[data-i18n-en-placeholder],[data-i18n-en-title],[data-i18n-en-aria-label]').length,0);
+  assert.equal(q('#generateRoutes')?.textContent,cta);}
  console.log('DOM PASS: navigation gate (route check + maneuvers), AI Discover My Walk (multi-turn state kept, real POI index, itinerary request + rendering, menu status honest, find vs add, hotel confirmation), weather offline → weather:null + honest status, weather intents, engine weather record shown as computed, walking-time default/sync/validation/API, urban data catalog (10 dataset categories, statuses, search), along-route counts = brute-force reference, route switch keeps layers, route urban data summary, feature inspector, segment evidence (matched/unmatched), static JSON errors, mode, 13 Map Mode views on computed GIS data, segment inspector (single + overall, indicator N/A, NO₂ context), 12 names, real pilot, routing-engine request/response adapter, 12 route scores, ordered continuous edges, route-edge inspector, route switching/compare, infeasible + step-free blocking, GPS progress + off-route replan, GPS error states, slider replanning. No browser/WebGL claims.');dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});

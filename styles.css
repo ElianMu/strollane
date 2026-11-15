@@ -1200,3 +1200,8 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 /* Page and route server on different versions (app.js checkServerVersion): one quiet, dismissible line */
 .version-notice{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:60;display:flex;align-items:flex-start;gap:10px;max-width:min(560px,calc(100vw - 24px));padding:8px 10px 8px 12px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--bg-panel);color:var(--text-secondary);font-size:11px;line-height:1.45;box-shadow:0 6px 18px color-mix(in srgb,var(--shadow) 40%,transparent)}
 .version-notice button{flex:none;border:0;background:none;color:var(--text-secondary);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+
+/* Interface language switch (i18n.js) */
+.lang-toggle{width:auto;min-width:44px;padding:0 10px;font-size:12px;font-weight:600}
+@media(max-width:740px){.lang-toggle{display:none}} /* on phones the switch is the first item of the menu */
+@media(min-width:741px){.lang-toggle-m{display:none}}
