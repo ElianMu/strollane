@@ -309,6 +309,8 @@ class HttpApi(unittest.TestCase):
     def test_existing_endpoint_unchanged(self):
         status, doc = self.call('/api/status')
         self.assertEqual(status, 200); self.assertLessEqual({'llm', 'model'}, set(doc))  # original contract kept; 'features' is additive
+        # additive: the page compares this with its own copy and says so when the server is on an older build
+        self.assertEqual(doc['score_version'], NET.score_version)
 
     def test_routes_edges_segments_progress(self):
         status, doc = self.call('/api/routes', {'origin': pt('bryant'), 'destination': pt('rock'), 'preferences': {'weights': {'Nature': 90}},

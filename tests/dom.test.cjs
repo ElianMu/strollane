@@ -531,5 +531,35 @@ const run=s=>vm.runInContext(s,context);
  // Drain route-summary and menu continuations before destroying their document.
  await run('renderRouteUrbanData()');
  await new Promise(resolve=>setImmediate(resolve));
+ // --- live-site fixes (2026-11-15) ---
+ // Short trips: say so with the response's own numbers; silent when a priority really gains or no priority is set.
+ {w.__mk=(bestN,shortN,dist=480,same=false)=>({shortest_distance_m:dist,routes:[{rank:1,route_id:same?'s':'b',objective:same?'shortest':'experience',dimension_scores:{Nature:bestN}},...(same?[]:[{rank:2,route_id:'s',objective:'shortest',dimension_scores:{Nature:shortN}}])]});
+  const reset="for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';planner.directions[d.name]='high';}";
+  const saved=run('JSON.stringify([planner.weights,planner.origins,planner.directions])');
+  run(reset);assert.equal(run('shortTripNote(__mk(40,39))'),'','no priority chosen: nothing to say');
+  run("planner.weights['Nature']=80;planner.origins['Nature']='manual'");
+  assert.equal(run('shortTripNote(__mk(41,39))'),' This is a short trip (480 m): the best match differs from the shortest route by 2 points at most on your priorities, so there is little to gain by going another way.');
+  assert.equal(run('shortTripNote(__mk(51,41))'),'','a real gain is not talked down');
+  assert.equal(run('shortTripNote(__mk(41,39,2400))'),'','longer trips are not called short');
+  assert.match(run('shortTripNote(__mk(40,40,480,true))'),/the shortest route is also the best match for your priorities, so there is no better way to offer\.$/);
+  assert.equal(run('shortTripNote(__mk(null,39))'),'','N/A is not a zero-point gain');
+  run("planner.directions['Nature']='low'");assert.equal(run('shortTripNote(__mk(30,41))'),'','with "prefer less", a lower score is the gain');
+  w.__sv=JSON.parse(saved);run('Object.assign(planner.weights,__sv[0]);Object.assign(planner.origins,__sv[1]);Object.assign(planner.directions,__sv[2])');}
+ // Page and route server on different versions: one plain sentence, none when they agree.
+ assert.equal(run("versionMismatchText('v2','v2')"),'');assert.equal(run("versionMismatchText(null,'v2')"),'','the page copy did not load: no claim');
+ assert.match(run("versionMismatchText('v2','v1')"),/page v2, server v1\)/);assert.match(run("versionMismatchText('v2',undefined)"),/server older, version not reported\)/);
+ {w.__kb=run('scoreBasis.doc');
+  await run("(async()=>{scoreBasis.doc={score_version:'page-build'};await checkServerVersion({score_version:'old-build'});})()");
+  const box=w.document.querySelector('#versionNotice');assert(box&&/page page-build, server old-build/.test(box.textContent));
+  await run("checkServerVersion({score_version:'page-build'})");assert.equal(w.document.querySelector('#versionNotice'),null,'cleared once they agree');
+  run('scoreBasis.doc=__kb');}
+ // Places near the walk: no "0 NEAR ROUTE" before the lookup has answered, and no "generate a route" while one is on screen.
+ {w.__kp=run('[planner.poiStatus,planner.routePois]');const hadRoutes=run('state.routes.length');
+  run("planner.routePois=[];planner.poiStatus='Not loaded';renderPOIs()");
+  assert.equal(w.document.querySelector('#poiCount').textContent,'');
+  assert.equal(w.document.querySelector('#poiList').textContent,hadRoutes?'Places near this walk have not been looked up yet.':'Generate or select a route to discover POIs.');
+  run("planner.poiStatus='0 OSM records';renderPOIs()");assert.equal(w.document.querySelector('#poiCount').textContent,'0 NEAR ROUTE','a real answer of none is still reported');
+  run('planner.poiStatus=__kp[0];planner.routePois=__kp[1];renderPOIs()');}
+ assert(/loadRoutePOIs\(run\)/.test(fs.readFileSync(path.join(__dirname,'..','journey.js'),'utf8')),'recommended walks look up nearby places too');
  console.log('DOM PASS: navigation gate (route check + maneuvers), AI Discover My Walk (multi-turn state kept, real POI index, itinerary request + rendering, menu status honest, find vs add, hotel confirmation), weather offline → weather:null + honest status, weather intents, engine weather record shown as computed, walking-time default/sync/validation/API, urban data catalog (10 dataset categories, statuses, search), along-route counts = brute-force reference, route switch keeps layers, route urban data summary, feature inspector, segment evidence (matched/unmatched), static JSON errors, mode, 13 Map Mode views on computed GIS data, segment inspector (single + overall, indicator N/A, NO₂ context), 12 names, real pilot, routing-engine request/response adapter, 12 route scores, ordered continuous edges, route-edge inspector, route switching/compare, infeasible + step-free blocking, GPS progress + off-route replan, GPS error states, slider replanning. No browser/WebGL claims.');dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});

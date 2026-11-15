@@ -56,6 +56,10 @@ async function streetwiseAwake(note, maxWaitMs = 90000, pauseMs = 2500) {
   } finally { streetwiseHost.waking = false; }
   throw new Error('The route server is not answering right now. Nothing was changed. Try again in a minute.');
 }
+// Start waking the route server as soon as the page opens, so it is usually up by the time a walk is requested.
+// Silent: no note, and a failure here is ignored (planning checks again and says so in words).
+if (typeof window !== 'undefined' && streetwiseHost.remote) setTimeout(() => { streetwiseAwake(null).catch(() => {}); }, 0);
+
 /** A request that outlived its time limit, said in words a visitor can act on (instead of "signal timed out"). */
 function streetwiseErrorText(err) {
   if (err && (err.name === 'TimeoutError' || /signal timed out|aborted due to timeout/i.test(err.message || ''))) {

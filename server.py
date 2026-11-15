@@ -60,7 +60,7 @@ SYSTEM = f"""You are STROLLANE's structured walking-preference interpreter. Neve
 Waterfront/river proximity is an independent top-level waterfront preference backed by official hydrography. Use mode set,direction high for by/along the river or waterfront; direction low for avoid/away from the waterfront. A later avoidance request REPLACES that previous proximity preference, never adds an opposing second preference. Use mode clear only for explicit removal. Leave unmentioned fields null. Do not translate avoidance of water into avoidance of all Scenic & Visual features; the existing Scenic definition also includes public art and monuments. Hydrography proximity includes mapped lakes/coastal water; it does not guarantee a river promenade or views.
 Crime is an INDEPENDENT historical reported-complaint density preference, never Access & Safety (which measures pedestrian traffic injuries). The top-level crime field is null when unchanged; mode clear only when explicitly removed. For 'very high crime rate' use mode set, direction high, weight 90: respect the requested direction, do not ask whether the user meant avoidance. 'Avoid crime' or 'lower crime density' means direction low. Use dates only when requested (from inclusive, to exclusive); otherwise null uses the actual indexed default period supplied in Current state. Preserve exact offense names from the supplied source taxonomy when requested; otherwise offense_types=[]. Never invent incident counts or personal risk. Crime data is historical, approximate and has no population denominator, so call it reported complaint density, not a crime rate. Crime-only requests need no journey or experience weight.
 Return one JSON object matching the supplied strict schema. All schema properties must exist: use null for unspecified nullable values, empty arrays for no requests, and null in constraints/more entries to preserve unchanged state. Keys:
-"preferences": array of unique mentioned dimensions, each an object with "dimension" (exactly one of {json.dumps(DIMENSIONS)}), "weight" (integer 0..100), and "direction" (high or low). Weight is importance, not a street score. Clear preferences such as more trees, quieter or fewer busy streets should have high importance around 85–95, independently of direction. Fewer busy streets means Urban Vibrancy with high importance and direction low, not a small weight. For example less crowded means Urban Vibrancy with high importance and direction low; quieter means Quiet & Relax direction high. Omit unmentioned dimensions from the array. Never return separate weights/directions maps; the backend derives them from these pairs. Use full canonical names, not UI abbreviations.
+"preferences": array of unique mentioned dimensions, each an object with "dimension" (exactly one of {json.dumps(DIMENSIONS)}), "weight" (integer 0..100), and "direction" (high or low). Weight is importance, not a street score. Clear preferences such as more trees, quieter or fewer busy streets should have high importance around 85–95, independently of direction. Fewer busy streets means Urban Vibrancy with high importance and direction low, not a small weight. For example less crowded means Urban Vibrancy with high importance and direction low; quieter means Quiet & Relax direction high. A kind of place to walk past is not a wish for busier streets: never add Urban Vibrancy because of it. Bookshops, shops and markets mean Food & Retail; galleries, theatres and museums mean Culture. Add Urban Vibrancy direction high only when the user asks for lively, busy or crowded streets. Omit unmentioned dimensions from the array. Never return separate weights/directions maps; the backend derives them from these pairs. Use full canonical names, not UI abbreviations.
 "time_minutes": absolute walking hard cap in whole minutes (at least 10; no upper limit), if explicitly given; otherwise null.
 "time_delta_minutes": signed integer modification to existing walking cap, if user explicitly says 'five more minutes'; otherwise null. Never return both time_minutes and time_delta_minutes non-null.
 For an explicitly shortest route set constraints.avoidDetours=true and max_detour_percent=0. Historic landmarks map to Architecture and/or Culture; waterfront scenery maps to Scenic & Visual, not a new dimension.
@@ -290,6 +290,19 @@ class IndexedSegments:
         from routing.urban_store import connection
         with connection('segments') as db:row=db.execute('SELECT feature FROM segments WHERE id=?',(sid,)).fetchone()
         return json.loads(row[0]) if row else None
+
+
+_served_score_version = None
+def served_score_version():
+    """Score build of the route data this server ships (data/pedestrian/score-indicators.json carries the same version as
+    the edge scores; tests/test_score_indicators.py keeps them equal). Read once; cheap enough for /api/status."""
+    global _served_score_version
+    if _served_score_version is None:
+        try:
+            _served_score_version = json.loads((ROOT / 'data' / 'pedestrian' / 'score-indicators.json').read_text(encoding='utf-8'))['score_version']
+        except (OSError, ValueError, KeyError):
+            _served_score_version = ''
+    return _served_score_version or None
 
 
 _map_build = None
@@ -528,6 +541,7 @@ class Handler(SimpleHTTPRequestHandler):
                                  'diagnostics':{'route_cache':cache,'crime_query_counters':dict(crime_module.STATS), 'capacity': HEAVY_REQUESTS.status(), 'menu_cache': menu_check.cache_status(),
                                                 'geometry': {'packed_bytes': loaded.net.geoms.packed_bytes, 'wgs_cache': loaded.net.geoms.cache_status(), 'xy_cache': loaded.net.gxy.cache_status()} if loaded else {}},
                                  'deployment_commit': os.environ.get('RENDER_GIT_COMMIT'),
+                                 'score_version': served_score_version(),
                                  'interpretation_contract': 'strict-paired-v3-independent',
                                  'features': {'itinerary': True, 'menu_verify': 'official website only (no menu API connected)',
                                               'routing_coverage': 'Manhattan OSM pedestrian graph',
