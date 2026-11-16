@@ -19,6 +19,7 @@ ROLE = {i['key']: i['role'] for i in MANIFEST['indicators']}
 COMPUTED = [[(k, ROLE[k]) for k in d['available_indicators'] if ROLE[k] in ('up', 'down')] for d in MANIFEST['dimensions']]
 REFERENCE = {k: sorted(v for v in IND['raw'][k] if v is not None) for inds in COMPUTED for k, _ in inds}
 NEW_ONLY = {'seat_access_m', 'ramp_coverage', 'waterfront_access_m', 'route_directness', 'crime_k'}
+EXTRA = json.load(gzip.open(ROOT / 'data' / 'pedestrian' / 'direct-edge-indicators.json.gz', 'rt', encoding='utf-8'))  # scripts/measure_direct_edges.py
 
 
 class TransferredScores(unittest.TestCase):
@@ -26,7 +27,7 @@ class TransferredScores(unittest.TestCase):
         direct = [g for g in EDGES['geoms'] if g['src'] == 'direct_osm']
         self.assertTrue(direct)
         for g in direct[::40]:
-            self.assertFalse(NEW_ONLY & set(g['raw']), 'no value may appear for an indicator that was never measured on this edge')
+            self.assertLessEqual(NEW_ONLY & set(g['raw']), set(EXTRA['values']), 'no value may appear for an indicator that was never measured on this edge')
             dims, used = T.direct_scores(g['raw'], COMPUTED, REFERENCE)
             self.assertEqual(dims, g['s'])
             for j, inds in enumerate(COMPUTED):
@@ -59,8 +60,25 @@ class TransferredScores(unittest.TestCase):
         for d, inds in zip(MANIFEST['dimensions'], COMPUTED):
             basis = meta['indicator_basis'][d['key']]
             self.assertEqual(basis['computed_indicators'], [k for k, _ in inds])
-            if NEW_ONLY & {k for k, _ in inds}:
-                self.assertGreater(basis['routable_length_with_fewer'], 0, 'the limit on directly measured edges must be reported, not hidden')
+        self.assertEqual(meta['direct_edge_indicators']['not_measured_on_direct_edges'], ['ramp_coverage'])
+        self.assertGreater(meta['indicator_basis']['spatial_comfort']['routable_length_with_fewer'], 0, 'the limit must be reported, not hidden')
+
+    def test_direct_edge_measurements_are_the_committed_ones(self):
+        """Values measured on the edges themselves: same network, same map build, self-check passed, nothing invented."""
+        self.assertEqual(EXTRA['network_version'], EDGES['metadata']['network_version'])
+        self.assertEqual(EXTRA['map_build'], MANIFEST['calculation_version'])
+        self.assertNotIn('ramp_coverage', EXTRA['values'])
+        self.assertIn('ramp_coverage', EXTRA['not_measured'])
+        for k, vals in EXTRA['values'].items():
+            self.assertIn(k, NEW_ONLY)
+            check = EXTRA['self_check_on_street_segments'][k]
+            self.assertTrue(check['reproduced']); self.assertGreaterEqual(check['within_tolerance'], 0.99)
+            self.assertEqual(len(vals), len(EXTRA['geometry_index']))
+        for n in range(0, len(EXTRA['geometry_index']), 97):
+            g = EDGES['geoms'][EXTRA['geometry_index'][n]]
+            self.assertEqual(g['src'], 'direct_osm')
+            for k, vals in EXTRA['values'].items():
+                self.assertEqual(g['raw'].get(k), vals[n])
 
 
 if __name__ == '__main__':

@@ -25,14 +25,16 @@ Two kinds of edges:
   out 1 point away (0.5 % of values on 2026-11-14); nothing may differ by more.
 
 * Edges measured directly on their OSM geometry (src "direct_osm": crossings, park paths, bridges, unmatched streets).
-  Their raw indicator values were measured on 2026-10-23 with scripts/streetwise_indicators.py from the same source
-  downloads the map build used. Each value takes the percentile it would hold among the map build's street segments
-  (lowest rank for ties, "lower is better" reversed), and a dimension is the equal-weight mean of the indicators
-  available on that edge, which is the map build's own rule. The five indicators that only the map build has (walking
-  distance to seating, ramp coverage, walking distance to waterfront, walking-network detour, crime-report proximity)
-  were never measured on these edges and cannot be measured here without the source data, so they are simply absent
-  there: no value is estimated, borrowed or filled in. `indicator_basis` in the metadata reports, per dimension, how
-  much routable length is scored with every computed indicator and how much with fewer.
+  Their raw indicator values come from two measurements on the edge's own geometry: the 15 indicators of
+  scripts/streetwise_indicators.py (2026-10-23), and four indicators of the map build measured with the map build's
+  own functions by scripts/measure_direct_edges.py (walking distance to seating, walking-network detour, crime-report
+  proximity, walking distance to waterfront). Each value takes the percentile it would hold among the map build's
+  street segments (lowest rank for ties, "lower is better" reversed), and a dimension is the equal-weight mean of the
+  indicators available on that edge, which is the map build's own rule. An indicator that was not measured on an edge
+  is absent there: no value is estimated, borrowed or filled in. That is always the case for ramp coverage, which is
+  defined on the LION end nodes of a street segment and so does not exist for a crossing or a park path.
+  `indicator_basis` in the metadata reports, per dimension, how much routable length is scored with every computed
+  indicator and how much with fewer.
 """
 import argparse
 import bisect
@@ -49,6 +51,7 @@ P = lambda *a: os.path.join(ROOT, 'data', *a)
 GRAPH, MAPPING, SCORES = P('pedestrian', 'manhattan-walk-graph.json.gz'), P('pedestrian', 'street_osm_edge_mapping.csv.gz'), P('pedestrian', 'edge-scores.json.gz')
 MANIFEST, SEGMENTS, INDICATORS = P('dimensions', 'manhattan', 'manifest.json'), P('dimensions', 'manhattan', 'segments.geojson'), P('dimensions', 'manhattan', 'indicators.json')
 LEGACY_STREETS = P('manhattan-streets.json')
+DIRECT_EXTRA = P('pedestrian', 'direct-edge-indicators.json.gz')  # scripts/measure_direct_edges.py
 MIN_LION_SHARE = 0.6  # same threshold as scripts/match_lion_osm.py; only used to cross-check the previous file
 
 # Raw values stored on directly measured edges use the earlier script's units; the map build stores these two as a
@@ -144,6 +147,18 @@ def main():
     computed = [[(k, role[k]) for k in d['available_indicators'] if role[k] in ('up', 'down')] for d in manifest['dimensions']]
     reference = {k: sorted(v for v in ind['raw'][k] if v is not None) for inds in computed for k, _ in inds}
 
+    # Indicators of the map build measured on the directly measured edges themselves (scripts/measure_direct_edges.py).
+    # Used only when they were measured on this network with this map build; otherwise those indicators stay absent.
+    extra, extra_keys = {}, []
+    if os.path.exists(DIRECT_EXTRA):
+        doc = json.load(gzip.open(DIRECT_EXTRA, 'rt', encoding='utf-8'))
+        if doc['network_version'] == graph['metadata']['network_version'] and doc['map_build'] == manifest['calculation_version']:
+            extra_keys = sorted(doc['values'])
+            for n, gi in enumerate(doc['geometry_index']):
+                extra[gi] = {k: doc['values'][k][n] for k in extra_keys}
+        else:
+            print('direct-edge-indicators.json.gz is from another network or map build: ignored. Rerun scripts/measure_direct_edges.py.')
+
     nodes = graph['nodes']
     info = {}
     for u, v, k, gi, rev, length, osmids, tags in graph['edges']:
@@ -163,6 +178,8 @@ def main():
             used = [min((seg_n[sid][j] for sid in overlaps[gi] if seg[sid][j] is not None), default=0) for j in range(12)]
             stats['lion'] += 1
         elif g['src'] == 'direct_osm':
+            if gi in extra:
+                g = {**g, 'raw': {**g['raw'], **extra[gi]}}
             dims, used = direct_scores(g['raw'], computed, reference)
             cov = [1.0 if v is not None else 0.0 for v in dims]
             stats['direct'] += 1
@@ -188,6 +205,8 @@ def main():
             'indicator_basis': {k: {'computed_indicators': [x for x, _ in computed[j]],
                                     'routable_length_with_all': round(full[j] / routable_len, 3),
                                     'routable_length_with_fewer': round(partial[j] / routable_len, 3)} for j, k in enumerate(keys)},
+            'direct_edge_indicators': {'file': 'data/pedestrian/direct-edge-indicators.json.gz', 'indicators': extra_keys,
+                                       'not_measured_on_direct_edges': sorted({k for inds in computed for k, _ in inds} - set(extra_keys) - {k for g in out if g['src'] == 'direct_osm' for k in g['raw']})},
             'street_scores': {'spec_version': manifest['spec_version'], 'calculation_version': manifest['calculation_version'],
                               'built_at': manifest['built_at'], 'segments': manifest['segments'], 'files': 'data/dimensions/manhattan/'},
             'fields': prev['metadata']['fields'],
