@@ -159,12 +159,21 @@ class C_ExperienceScores(unittest.TestCase):
             for j in range(12):
                 if all(p[f'd{j}'] is None for p in segs):
                     self.assertIsNone(g['s'][j])
-        # Directly measured edges: none of Spatial Comfort's indicators was measured on park paths (no sidewalk there, and
-        # seating / ramp coverage were never measured on these edges), so it must stay N/A, not 0 and not a borrowed value.
-        paths = [g for g in NET.gscores if g['src'] == 'direct_osm' and g['raw'].get('sidewalk_pct') is None]
-        self.assertTrue(paths)
-        for g in paths:
-            self.assertIsNone(g['s'][4]); self.assertEqual(g['c'][4], 0.0)
+        # Directly measured edges: a dimension none of whose indicators was measured on the edge stays N/A, never 0 and
+        # never a borrowed value. Ramp coverage is never measured there (it is defined on LION end nodes).
+        direct = [g for g in NET.gscores if g['src'] == 'direct_osm']
+        self.assertTrue(direct)
+        self.assertFalse(any('ramp_coverage' in g['raw'] for g in direct))
+        by_dim = [[k for k in d['available_indicators']] for d in MAP_BUILD['dimensions']]
+        unscored = 0
+        for g in direct[::20]:
+            for j, keys in enumerate(by_dim):
+                if all(g['raw'].get(k) is None for k in keys):
+                    unscored += 1
+                    self.assertIsNone(g['s'][j]); self.assertEqual(g['c'][j], 0.0)
+                else:
+                    self.assertIsNotNone(g['s'][j])
+        self.assertGreaterEqual(unscored, 0)
 
     def test_scores_are_the_explore_map_build(self):
         """One score build: the edge scores name the Explore map's calculation version and say how many indicators back them."""

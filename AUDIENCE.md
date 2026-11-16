@@ -12,8 +12,8 @@ Manhattan neighbourhood on foot.
 Why this group, on the evidence available:
 
 - **The product only pays off on longer, unhurried walks.** In the route benchmark (`benchmarks/ROUTE_BENCHMARK.md`),
-  choosing a priority raised that dimension's route score by 4.3 points on average for trips under 1.5 km, where
-  29 of 72 runs simply returned the shortest route, against 9.7 points for 1.5–3 km and 12.4 points for 3 km
+  choosing a priority raised that dimension's route score by 4.2 points on average for trips under 1.5 km, where
+  32 of 72 runs simply returned the shortest route, against 9.4 points for 1.5–3 km and 12.5 points for 3 km
   and more. Someone going somewhere in a hurry gets nothing from it; someone with 20 minutes or more to spare does.
 - **They do not already know which streets are pleasant.** A long-time resident has their own routes. A newcomer has
   the time and the reason to choose a street by what it is like.

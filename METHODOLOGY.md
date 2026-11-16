@@ -1,6 +1,6 @@
 # Spatial evidence methodology / 空间证据方法
 
-> **Read this first (updated 2026-11-14).** Everything below "Scope and truthfulness" describes the original **Midtown
+> **Read this first (updated 2026-11-15).** Everything below "Scope and truthfulness" describes the original **Midtown
 > pilot "Street evidence" layer** (`experience-core.js`, `data/pilot.json`): two raw proxies, 75 m buffers, scores NULL.
 > That layer still exists in Navigate → *Street evidence*, and the text is accurate **for that layer only**. It is no
 > longer how routes are ranked or how the Explore map is coloured. Current scoring is described in the next three
@@ -23,15 +23,30 @@ the other six 0 %. The route benchmark was rerun on the unified scores (`benchma
 +8.4 points for a 3.9 % mean detour (before: +9.5 and 4.3 %); the largest change is Spatial Comfort, +5.8 instead of
 +14.2, because with three indicators instead of one there is less to gain by detouring.
 
-**Known limit of the unification.** 27.3 % of routable length is not a street segment but a crossing, park path, bridge
-or unmatched street, scored from raw values measured directly on the OSM geometry on 2026-10-23. The five added
-indicators were never measured on those edges, and the source data is needed to measure them, so there they are
-absent (not estimated, not borrowed from a nearby street) and the dimension is the mean of the indicators that were
-measured. Share of routable length whose score rests on fewer indicators than the street definition: Quiet & Relax
-30 % (roadway width is not recorded for paths and some streets), Spatial Comfort 8 %, Scenic & Visual 27 %,
-Walkability 27 %, Access & Safety 27 %. Spatial Comfort is N/A on park paths (coverage 75.5 % of routable
-length). These shares are written by the transfer into the `indicator_basis` field of the edge-score metadata, and
-*Why this route?* states them. Measuring the five indicators on those edges needs a rebuild with the source downloads.
+**Crossings, park paths and bridges (updated 2026-11-15).** 27.3 % of routable length is not a street segment but a
+crossing, park path, bridge or unmatched street, scored from raw values measured directly on the OSM geometry. At the
+unification the five indicators the map build added had not been measured on those edges. Four of them now are, by
+`scripts/measure_direct_edges.py`, which calls the map build's own indicator functions on the edge geometry with source
+snapshots already in this repository: walking distance to seating, walking-network detour, crime-report proximity and
+walking distance to waterfront. Before writing anything the script runs the same code on the 10,533 street segments and
+compares with the values the map build stored; all four were reproduced (within 1 m, 0.01 ratio units or 1 % for
+99.2–99.99 % of segments; the remainder are midpoints that snap to a neighbouring network node because segment
+geometry is read back from rounded GeoJSON coordinates).
+
+The fifth, ramp coverage, is **not** measured there and is left absent: it is defined on the LION end nodes of a
+street segment, and a crossing or a park path has none. No substitute definition was invented.
+
+What changed for routes: Scenic & Visual, Walkability and Access & Safety now rest on all their indicators on
+98.8 % of routable length (before: about 72 %). Spatial Comfort is scored on 98.8 % of routable length (before: 75.5 %),
+because park paths now have walking distance to seating; on 31 % it rests on fewer than its three indicators (no
+sidewalk record on paths, no ramp coverage on directly measured edges). Quiet & Relax still rests on one indicator
+instead of two on 30 % (roadway width is not recorded for paths and some streets). These shares are written by the
+transfer into `indicator_basis` in the edge-score metadata, and *Why this route?* states them.
+
+The benchmark was rerun: mean gain +8.3 points for a 4.0 % mean detour over 228 runs (unification: +8.4 and 3.9 %).
+By dimension the picture moved more: Spatial Comfort +9.7 (was +5.8), Access & Safety +9.0 (was +11.0), Walkability
++6.0 (was +8.0), Scenic & Visual +2.8 (was +4.4). The three that fell were being helped by the gap: with one
+indicator missing on paths and crossings, a detour through them looked better than it measures now.
 
 The transfer was checked against the earlier file: recomputing the earlier edge scores from the earlier street scores
 with the same code reproduces 395,828 of 397,680 values exactly; 1,852 differ by 1 point (the matching table stores
