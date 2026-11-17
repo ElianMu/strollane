@@ -1,11 +1,20 @@
 'use strict';
 
-/** STREETWISE / Manhattan research prototype. All displayed geometry is remote GIS source data or external routing output. **/
+/** STREETWISE / NYC research prototype (walks in Manhattan, Brooklyn and Long Island City). All displayed geometry is remote GIS source data or external routing output. **/
 const $ = (id) => document.getElementById(id);
 const CENTER = [-73.9698, 40.7840];
 // Study-area envelope, not a precise legal borough polygon.
 const MANHATTAN_BOUNDS = [[-74.032, 40.696], [-73.904, 40.883]];
 const BBOX = [MANHATTAN_BOUNDS[0][0], MANHATTAN_BOUNDS[0][1], MANHATTAN_BOUNDS[1][0], MANHATTAN_BOUNDS[1][1]];
+// Walking routes cover Manhattan, Brooklyn and Long Island City (one joined walk network; boxes as in scripts/areas.py).
+// The boxes are a quick check in the page; the routing engine's snap to the walk network is the final word.
+const STUDY_AREAS = [
+  {id: 'manhattan', label: 'Manhattan', box: BBOX},
+  {id: 'brooklyn', label: 'Brooklyn', box: [-74.0420, 40.5700, -73.8330, 40.7395]},
+  {id: 'lic', label: 'Long Island City', box: [-73.9650, 40.7280, -73.9150, 40.7750]},
+];
+const STUDY_BOUNDS = [[-74.042, 40.570], [-73.833, 40.883]];
+const STUDY_AREA_NAME = 'Manhattan, Brooklyn and Long Island City';
 const STREET_PAGE_SIZE = 1750;
 const OVERLAY_PAGE_SIZE = 1600;
 const PLACES = {
@@ -114,7 +123,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&l
 let toastTimer;
 function toast(message){const e=$('toast'); e.textContent=message;e.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove('show'),4800)}
 function setSourceStatus(text,good=false){$('sourceStatus').textContent=text;document.querySelector('.online-mark').style.background=good?'#d8f365':'#eaa873'}
-function latLonInsideManhattanEnvelope(p){return p.lon>BBOX[0]&&p.lon<BBOX[2]&&p.lat>BBOX[1]&&p.lat<BBOX[3]}
+function latLonInsideStudyArea(p){return !!p&&STUDY_AREAS.some(({box:b})=>p.lon>b[0]&&p.lon<b[2]&&p.lat>b[1]&&p.lat<b[3])}
 function getPlace(kind){const id=state[kind]; if(id==='custom')return state[kind==='start'?'customStart':'customEnd']; if(id==='gps')return state.gps; return PLACES[id]||null}
 function featureFC(x){return x && x.type==='FeatureCollection'&&Array.isArray(x.features)}
 function geoDistanceKm(a,b){
@@ -396,7 +405,7 @@ function flatMapBounds(m){
 function visibleEnvelope(){
   if(!state.mapReady)return null;
   const b=flatMapBounds(state.map);
-  const raw=[Math.max(BBOX[0],b.getWest()),Math.max(BBOX[1],b.getSouth()),Math.min(BBOX[2],b.getEast()),Math.min(BBOX[3],b.getNorth())];
+  const [[w,s],[e,n]]=STUDY_BOUNDS,raw=[Math.max(w,b.getWest()),Math.max(s,b.getSouth()),Math.min(e,b.getEast()),Math.min(n,b.getNorth())];
   return raw[0]<raw[2]&&raw[1]<raw[3]?raw:null;
 }
 let overlayMoveTimer=null;
@@ -576,7 +585,7 @@ function setupMap(){
     const m=state.map=new maplibregl.Map({container:'map',style:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',center:CENTER,zoom:10.7,pitch:0,bearing:0,attributionControl:true});
     m.addControl(new maplibregl.NavigationControl({showCompass:true,visualizePitch:true}), 'bottom-right');
     m.on('load',()=>{
-      state.mapReady=true;$('mapFallback').classList.add('hidden');m.fitBounds(MANHATTAN_BOUNDS,{padding:24,duration:0,maxZoom:11.1});
+      state.mapReady=true;$('mapFallback').classList.add('hidden');m.fitBounds(STUDY_BOUNDS,{padding:24,duration:0,maxZoom:11.1});
       try{state.mapTheme=localStorage.getItem('strollane.mapTheme')==='dark'?'dark':'light';}catch(e){state.mapTheme='light';}
       tuneBasemap(m);
       for(const id of ['nyc-roads','nyc-trees','nyc-landmarks','candidate-routes','selected-route','points','route-pois'])m.addSource(id,{type:'geojson',data:emptyFC()});
@@ -655,7 +664,7 @@ function routeBounds(routes,extraMeters=100){
   return [Math.min(...lon)-dx,Math.min(...lat)-dy,Math.max(...lon)+dx,Math.max(...lat)+dy];
 }
 async function fetchOfficialTrees(bbox,maxRecords){
-  const where=`latitude between ${bbox[1]} and ${bbox[3]} AND longitude between ${bbox[0]} and ${bbox[2]} AND borocode='1'`;
+  const where=`latitude between ${bbox[1]} and ${bbox[3]} AND longitude between ${bbox[0]} and ${bbox[2]}`; // every borough's trees in view: the map now spans Manhattan, Brooklyn and Long Island City
   const query=args=>API.trees+'?'+Object.entries(args).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
   const count=await timedJson(query({'$select':'count(*) as n','$where':where}),23000),expected=Number(count[0]?.n);
   if(!Number.isInteger(expected)||expected>maxRecords)throw new Error('Official tree source exceeds bounded scan');
@@ -737,12 +746,12 @@ function locateOnce(timeoutMs=14000){
   });
 }
 /** The walk starts where the request says, otherwise at the user's own location. Returns null when a start is set,
-    or the reason (shown to the user) when it cannot be: location refused / unavailable / outside Manhattan. */
+    or the reason (shown to the user) when it cannot be: location refused / unavailable / outside the routing area. */
 async function ensurePlanStart(){
   if(getPlace('start'))return null;
   const here=state.gps||await locateOnce();
   if(!here)return 'Where should the walk start? Allow location access, or name a start ("from Union Square …").';
-  if(!latLonInsideManhattanEnvelope(here))return 'Your location is outside Manhattan, where walking routes are available. Name a start in Manhattan ("from Union Square …") or pick one.';
+  if(!latLonInsideStudyArea(here))return `Your location is outside ${STUDY_AREA_NAME}, where walking routes are available. Name a start there ("from Union Square …") or pick one.`;
   state.start='gps';$('startSelect').value='gps';$('searchStart').value=here.name;syncMapData();
   document.dispatchEvent(new CustomEvent('strollane:ends-changed',{detail:{kind:'start',source:'gps'}}));
   return null;
@@ -794,7 +803,7 @@ function updateSegmentDetails(){
 
 /** Weather lives in weather.js (one shared context); this keeps the old entry point and passes the GPS position. */
 function loadWeather(force=false){
-  const here=state.gps&&latLonInsideManhattanEnvelope(state.gps)?{lat:state.gps.lat,lon:state.gps.lon}:null;
+  const here=state.gps&&latLonInsideStudyArea(state.gps)?{lat:state.gps.lat,lon:state.gps.lon}:null;
   return refreshWeather(force,here);
 }
 function requestGPS(useAsStart=false,follow=false){
@@ -803,7 +812,7 @@ function requestGPS(useAsStart=false,follow=false){
   $('gpsMain').textContent='REQUESTING';
   const good=(p)=>{
     setGpsPosition(p.coords);
-    if(useAsStart){if(!latLonInsideManhattanEnvelope(state.gps))toast('GPS is outside the Manhattan study envelope. You may explore the map, but routing here targets Manhattan.');else{state.start='gps';$('startSelect').value='gps';$('searchStart').value='My current location';resetRoutes();syncMapData();document.dispatchEvent(new CustomEvent('strollane:ends-changed',{detail:{kind:'start',source:'gps'}}))}}
+    if(useAsStart){if(!latLonInsideStudyArea(state.gps))toast(`GPS is outside the routing area (${STUDY_AREA_NAME}). You may explore the map, but walks can only start there.`);else{state.start='gps';$('startSelect').value='gps';$('searchStart').value='My current location';resetRoutes();syncMapData();document.dispatchEvent(new CustomEvent('strollane:ends-changed',{detail:{kind:'start',source:'gps'}}))}}
     if(state.mapReady)state.map.flyTo({center:[state.gps.lon,state.gps.lat],zoom:15.5,duration:800});
     if(!follow)toast('GPS location acquired. It is not transmitted to our own server.');
     loadWeather();
@@ -814,7 +823,7 @@ function requestGPS(useAsStart=false,follow=false){
 }
 /** Default start = where the user is. Asked once on load (the browser shows its own permission prompt; nothing is
     assumed if it is refused or times out). Used only while the start is still the untouched preset — a start the user
-    picked, or named in the request, always wins — and only inside Manhattan, the area the walking graph covers. */
+    picked, or named in the request, always wins — and only inside Manhattan, Brooklyn or Long Island City, the area the walking graph covers. */
 async function autoLocateStart(){
   if(!navigator.geolocation||(!window.isSecureContext&&!['localhost','127.0.0.1'].includes(location.hostname)))return;
   try{const st=await navigator.permissions?.query({name:'geolocation'});if(st?.state==='denied')return;}catch(e){}
@@ -822,7 +831,7 @@ async function autoLocateStart(){
   navigator.geolocation.getCurrentPosition(p=>{
     setGpsPosition(p.coords);loadWeather();
     if(state.start!==presetStart||state.start==='gps'||state.start==='custom')return; // the user already chose a start
-    if(!latLonInsideManhattanEnvelope(state.gps)){toast('Your location is outside Manhattan, where walking routes are available — name a start in your request ("from Union Square …") or pick one.');return;}
+    if(!latLonInsideStudyArea(state.gps)){toast(`Your location is outside ${STUDY_AREA_NAME}, where walking routes are available — name a start in your request ("from Union Square …") or pick one.`);return;}
     state.start='gps';$('startSelect').value='gps';$('searchStart').value=state.gps.name;
     syncMapData();
     if(state.mapReady)state.map.easeTo({center:[state.gps.lon,state.gps.lat],zoom:Math.max(state.map.getZoom(),14),duration:800});
@@ -896,7 +905,7 @@ function setupControls(){
   $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('chatForm').requestSubmit()}});
   $('gpsStart').addEventListener('click',()=>requestGPS(true));
   $('mapLocate').addEventListener('click',()=>requestGPS(false,true));
-  $('mapReset').addEventListener('click',()=>{if(state.mapReady){state.map.fitBounds(MANHATTAN_BOUNDS,{padding:24,duration:800,maxZoom:11.1})}});
+  $('mapReset').addEventListener('click',()=>{if(state.mapReady){state.map.fitBounds(STUDY_BOUNDS,{padding:24,duration:800,maxZoom:11.1})}});
   $('retryStreets').addEventListener('click',()=>{if(state.loading.streets)return;if(state.dataComplete.streets){toast('All Manhattan street lines are already loaded.');return}loadManhattanStreets()});
   for(const kind of ['start','end'])$(kind==='start'?'pickStart':'pickEnd').addEventListener('click',()=>{
     if(!state.mapReady){toast('Wait for the map to connect.');return}

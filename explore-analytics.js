@@ -49,7 +49,7 @@ async function renderExploreAnalytics(){
   ${histSvg(histogram(viewValues(other)),'#4aa3ff')}
   <p class="ea-note">${esc(other.label)}: ${d2.n.toLocaleString()} segments, median ${f1(d2.median)}. Spearman ρ = ${cor.rho==null?'N/A':cor.rho.toFixed(2)} over ${cor.n.toLocaleString()} segments where both are measured.</p>
   ${datasets?`<h4>Datasets behind ${esc(v.label)}</h4><ul class="ea-sources">${datasets}</ul>`:`<p class="ea-note">Overall = mean of the measured dimensions of each segment (N/A dimensions excluded).</p>`}
-  <p class="ea-note">Scores rank segments within ${esc(exploreMap.manifest?.area_label||"Manhattan")} (0–100 percentiles of measured indicators); they are not calibrated experience measurements. Sources retrieved ${esc(meta.data_version)} · calc ${esc(meta.score_version)}.</p></details>`;
+  <p class="ea-note">Scores rank segments ${exploreMap.manifest?.combined_at?"across Manhattan, Brooklyn and Long Island City together":"within "+esc(exploreMap.manifest?.area_label||"Manhattan")} (0–100 percentiles of measured indicators); they are not calibrated experience measurements. Sources retrieved ${esc(meta.data_version)} · calc ${esc(meta.score_version)}.</p></details>`;
  $('eaDetails').addEventListener('toggle',e=>{exploreStats.open=e.target.open;});
  $('eaCompare').addEventListener('change',e=>{exploreStats.compare=+e.target.value;renderExploreAnalytics();});
 }
@@ -57,5 +57,5 @@ function setupExploreAnalytics(){
  const search=$('exploreSearch');
  search?.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();
   document.querySelectorAll('#exploreChips [data-view]').forEach(b=>{b.classList.toggle('hidden',Boolean(q)&&!b.textContent.toLowerCase().includes(q));});});
- $('exploreReset')?.addEventListener('click',()=>{if(state.mapLayersReady)state.map.fitBounds(MANHATTAN_BOUNDS,{padding:30,duration:600,maxZoom:12});if(typeof selectExploreSegment==='function')selectExploreSegment(null);});
+ $('exploreReset')?.addEventListener('click',()=>{if(state.mapLayersReady)state.map.fitBounds(STUDY_BOUNDS,{padding:30,duration:600,maxZoom:12});if(typeof selectExploreSegment==='function')selectExploreSegment(null);});
 }

@@ -48,7 +48,7 @@ function shareLinkEncode(st, base) {
  return (base || (location.origin + location.pathname)) + SHARE_PREFIX + q.toString();
 }
 
-/** Parse a fragment. Returns the state, or null for anything that is not a complete, valid Manhattan request:
+/** Parse a fragment. Returns the state, or null for anything that is not a complete, valid request inside the routing area (Manhattan, Brooklyn, Long Island City):
     a link is outside input, so every field is checked and nothing is guessed. */
 function shareLinkParse(hash) {
  if (typeof hash !== 'string' || !hash.startsWith(SHARE_PREFIX)) return null;
@@ -57,7 +57,7 @@ function shareLinkParse(hash) {
   const m = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6})$/.exec(q.get(key) || '');
   if (!m) return null;
   const p = {lat: +m[1], lon: +m[2], name: (q.get(key + 'Name') || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 80)};
-  return latLonInsideManhattanEnvelope(p) ? p : null;
+  return latLonInsideStudyArea(p) ? p : null;
  };
  const from = point('from'); if (!from) return null;
  let to = null, end = 'fixed';
@@ -100,7 +100,7 @@ function shareLinkSummary(st) {
 /** Open a shared link: fill the request in and plan it. The route is computed now, by the engine, from these inputs. */
 async function shareLinkOpen(hash) {
  const st = shareLinkParse(hash);
- if (!st) { if (typeof hash === 'string' && hash.startsWith(SHARE_PREFIX)) toast('This shared link is incomplete or outside Manhattan, so nothing was loaded.'); return false; }
+ if (!st) { if (typeof hash === 'string' && hash.startsWith(SHARE_PREFIX)) toast(`This shared link is incomplete or outside ${STUDY_AREA_NAME}, so nothing was loaded.`); return false; }
  shareLinkApply(st);
  const note = shareLinkSummary(st) + (st.to ? ' Planning it now from the same inputs.' : ' Planning it now; a recommended walk depends on which places are open, so it can differ from the sender’s.');
  appendChat('assistant', note); toast(note);
