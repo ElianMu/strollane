@@ -58,6 +58,14 @@ class PackedPolylines(_Polylines):
                 self.coordinates.extend((lon, lat))
             self.offsets.append(len(self.coordinates))
 
+    @classmethod
+    def from_arrays(cls, coordinates, offsets):
+        """Wrap existing coordinate / offset arrays (routing/netpack.py) without copying them."""
+        self = cls.__new__(cls)
+        _Polylines.__init__(self)
+        self.coordinates, self.offsets = coordinates, offsets
+        return self
+
     def __len__(self):
         return len(self.offsets) - 1
 

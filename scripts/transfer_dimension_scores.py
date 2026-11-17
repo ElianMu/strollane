@@ -2,6 +2,7 @@
 """Give the routing edges the SAME 12 dimension scores the Explore Urban Data map shows.
 
 Run: python3 scripts/transfer_dimension_scores.py            (standard library only, no network)
+     then python3 scripts/compile_network.py                 (the router's compact copy; see routing/netpack.py)
 Reads  data/dimensions/manhattan/{manifest,segments,indicators}  the street scores of the Explore map
                                                                  (scripts/dimensions/, build "strollane-12x24-v1")
        data/pedestrian/street_osm_edge_mapping.csv.gz            which street segments each OSM edge runs along, and
