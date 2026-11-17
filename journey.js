@@ -7,7 +7,7 @@
      autocomplete_places / search_places      places.js (Photon + NYC GeoSearch, five boroughs)
      discover_attractions / search_restaurants / search_hotels / search_local_services
                                               data/places/*.json — OpenStreetMap + NYC LPC + NYC restrooms snapshot,
-                                              limited to the walking-route coverage (Manhattan)
+                                              limited to Manhattan for now (Brooklyn and LIC are routable but not yet indexed)
      verify_menu_item                         POST /api/menu/verify (official website only)
      recommend_food                           POST /api/recommend/food (hard filters → menu evidence → detour → explanation)
      get_place_details / get_place_ratings    GET /api/places/<id>, /api/places/<id>/ratings (per provider; blocked without keys)
@@ -333,7 +333,7 @@ async function handleHotelIntent(h){
   if(h.is_mine){
    if(ranked.length===1){setMyHotel(ranked[0]);out.push(`my hotel: ${ranked[0].name}`);}
    else if(ranked.length>1){askChoice(`Which hotel are you staying at? ${ranked.length} real matches${near?` near ${near.name}`:''}:`,ranked,p=>{setMyHotel(p);appendChat('assistant',`My hotel set to ${p.name}. It will be used as start / return point when you ask.`);});out.push('hotel: please confirm which one');}
-   else out.push(`no hotel named “${h.name}” in the Manhattan data — search it under My hotel`);
+   else out.push(`no hotel named “${h.name}” in the hotel data (Manhattan only for now) — search it under My hotel`);
   }else{showFoundPlaces(`Hotels matching “${h.name}”`,ranked);out.push(`${ranked.length} hotels found (not set as yours)`);}
  }else{
   const res=await discoverPlaces(['hotels'],{near:near||getPlace('start'),limit:8,radiusKm:1.5});
@@ -688,7 +688,7 @@ async function applyLiveEnds(text){
   if(!name||normName(name)===normName(liveEnds.last[kind]))continue;
   if(kind==='start'&&LIVE_HERE.test(name)){
    liveEnds.last.start=name;
-   if(state.gps&&latLonInsideManhattanEnvelope(state.gps)){if(state.start!=='gps'){state.start='gps';$('startSelect').value='gps';$('searchStart').value=state.gps.name;syncMapData();document.dispatchEvent(new CustomEvent('strollane:ends-changed',{detail:{kind,source:'text'}}));}}
+   if(state.gps&&latLonInsideStudyArea(state.gps)){if(state.start!=='gps'){state.start='gps';$('startSelect').value='gps';$('searchStart').value=state.gps.name;syncMapData();document.dispatchEvent(new CustomEvent('strollane:ends-changed',{detail:{kind,source:'text'}}));}}
    else if(!state.gps&&typeof requestGPS==='function')requestGPS(true); // "from my location" asks for it (the browser's own prompt)
    continue;
   }

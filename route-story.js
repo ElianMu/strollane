@@ -3,7 +3,7 @@
 
    Nothing here is new data. Every word comes from numbers the engine already returned for these routes
    (the 12 dimension scores, coverage, distance, time, edges and street names) or from the real place index
-   (data/places/*.json records that carry a Wikidata ID). Scores are ranks within Manhattan (0–100), so the
+   (data/places/*.json records that carry a Wikidata ID). Scores are ranks across Manhattan, Brooklyn and Long Island City together (0–100), so the
    wording is always comparative ("greener than the fastest way"), never absolute ("green"). A claim is made only
    when both routes have that dimension measured on ≥ 60 % of their length, and only beyond a 5-point difference.
 
@@ -222,7 +222,7 @@ function storyBuild(routes) {
     const main = Object.entries(storyStreets(r)).sort((a, b) => b[1] - a[1])[0];
     const parts = [];
     if (main && main[1] > 150) parts.push(`Mostly along ${main[0]}.`);
-    if (order.length) parts.push(`${storyCap(storyJoin(order.map((t) => STORY_WORDS[t.d].more)))} than a typical Manhattan street.`);
+    if (order.length) parts.push(`${storyCap(storyJoin(order.map((t) => STORY_WORDS[t.d].more)))} than a typical street in Manhattan, Brooklyn and LIC.`);
     return parts.join(' ') || null;
    }
    if (isFastest) {
@@ -267,7 +267,7 @@ function storyBuild(routes) {
      const trails = others.every((o) => { const x = storyScore(o, a.dim); return x != null && (a.low ? v - x : x - v) >= STORY.MORE; });
      return trails ? `${a.low ? w.more : w.less} than the others` : `similar ${w.noun} to the others`;
     }
-    return v >= STORY.TYPICAL ? `${w.more} than a typical Manhattan street` : v <= 100 - STORY.TYPICAL ? `${w.less} than a typical Manhattan street` : `about typical ${w.noun} for Manhattan`;
+    return v >= STORY.TYPICAL ? `${w.more} than a typical street in Manhattan, Brooklyn and LIC` : v <= 100 - STORY.TYPICAL ? `${w.less} than a typical street in Manhattan, Brooklyn and LIC` : `about typical ${w.noun} for Manhattan, Brooklyn and LIC`;
    });
    const asked = storyJoin(asks.slice(0, 2).map((a) => (a.low ? 'less ' : '') + STORY_WORDS[a.dim].ask));
    why = parts.every((x) => x.startsWith('similar')) ? `You asked for ${asked}: ${isFastest ? 'about the same as the other options' : 'about the same as the fastest way'}${parts.length > 1 ? ' on both' : ''}.` : `You asked for ${asked}: ${storyJoin(parts)}.`;

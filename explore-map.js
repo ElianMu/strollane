@@ -12,7 +12,12 @@ const EXPLORE_VIEWS=[
 ];
 // Full Manhattan first; the Midtown pilot is used only if the Manhattan build is missing (and is labelled as such).
 const DIMENSION_AREAS=['manhattan','midtown'];
-const exploreMap={data:null,loading:null,active:false,view:2,opacity:.9,hover:null,selected:null,collapsed:false,thumbs:false,labels:[],stops:null,manifest:null,base:null,details:null,detailsLoading:null,no2:null};
+// Brooklyn and Long Island City join the same layer once the map shows them (Brooklyn alone is ~11 MB). All three are
+// ranked on one shared percentile scale (scripts/dimensions/combine_areas.py), so a score means the same in each; an
+// area is added only when its build carries the same calculation version. Boxes as in scripts/areas.py.
+const EXTRA_DIMENSION_AREAS=[{area:'brooklyn',label:'Brooklyn',box:[-74.0420,40.5700,-73.8330,40.7395]},{area:'lic',label:'Long Island City',box:[-73.9650,40.7280,-73.9150,40.7750]}];
+const AREA_SHORT={manhattan:'Manhattan',midtown:'Midtown',brooklyn:'Brooklyn',lic:'LIC'};
+const exploreMap={areas:{},data:null,loading:null,active:false,view:2,opacity:.9,hover:null,selected:null,collapsed:false,thumbs:false,labels:[],stops:null,manifest:null,base:null,details:null,detailsLoading:null,no2:null};
 // Blue → cyan → yellow ramps (blue = low, yellow = high), one per map theme; the dark-theme ramp is brighter at
 // the low end so low scores stay visible on the dark basemap. Keep in sync with .explore-ramp i in styles.css.
 const EXPLORE_RAMPS={light:['#1f5c9e','#2b94d1','#54c3d0','#a9da84','#f5d64a'],dark:['#2a6fb3','#34a0de','#5cccd6','#b5e08a','#ffdf55']},EXPLORE_NA='#56585a';
@@ -41,7 +46,7 @@ function exploreCompatMeta(m){
 async function loadDimensionArea(){
  // Offline hook (DOM tests, single-file demo): {manifest, segments, indicators, no2} injected as window.STREETWISE_DIMENSIONS.
  const pre=window.STREETWISE_DIMENSIONS;
- if(pre){const fc=pre.segments;fc.metadata=exploreCompatMeta(pre.manifest);exploreMap.manifest=pre.manifest;exploreMap.base=null;return fc;}
+ if(pre){const fc=pre.segments;fc.metadata=exploreCompatMeta(pre.manifest);exploreMap.manifest=pre.manifest;exploreMap.base=null;registerExploreArea(pre.manifest,null,fc,pre.indicators);return fc;}
  let last;
  for(const area of DIMENSION_AREAS){
   const base=`./data/dimensions/${area}/`;
@@ -49,38 +54,85 @@ async function loadDimensionArea(){
    const manifest=await timedJson(base+'manifest.json',15000);
    const fc=await timedJson(base+manifest.files.segments,30000);
    if(fc.metadata?.calculation_version!==manifest.calculation_version)throw new Error(`${area}: segment file and manifest come from different builds`);
-   fc.metadata=exploreCompatMeta(manifest);exploreMap.manifest=manifest;exploreMap.base=base;
+   fc.metadata=exploreCompatMeta(manifest);exploreMap.manifest=manifest;exploreMap.base=base;registerExploreArea(manifest,base,fc);
    return fc;
   }catch(e){last=e;}
  }
  throw last||new Error('no computed dimension data found');
+}
+/** One loaded area: its own manifest (segment count, build time, comparison text) and indicator file, found from the
+    segment ID prefix ("MN-", "BK-", "QN-"). Dimension and indicator definitions are the same spec in every area. */
+function registerExploreArea(manifest,base,fc,indicators=null){
+ const id=fc.features[0]?.properties.id||'';
+ exploreMap.areas[manifest.area]={manifest,base,prefix:id.slice(0,id.indexOf('-')+1),segments:fc.features.length,indicators,details:null,detailsLoading:null};
+}
+function exploreAreaOf(id){return Object.values(exploreMap.areas).find(a=>a.prefix&&String(id).startsWith(a.prefix))||exploreMap.areas[exploreMap.manifest?.area]||null;}
+const exploreSharedScale=()=>!!exploreMap.manifest?.combined_at;
+function exploreRecomputeStops(){
+ const overall=exploreMap.data.features.map(f=>f.properties.overall).filter(Number.isFinite).sort((a,b)=>a-b);
+ const q=p=>overall[Math.min(overall.length-1,Math.floor(p*(overall.length-1)))];
+ exploreMap.stops=[q(.02),q(.3),q(.55),q(.8),q(.98)].map((v,i,a)=>i&&v<=a[i-1]?a[i-1]+.5:v);
+}
+function renderExploreStatus(){
+ const mf=exploreMap.manifest,areas=Object.values(exploreMap.areas),total=areas.reduce((n,a)=>n+a.segments,0);
+ const done=mf.indicators.filter(x=>x.status==='computed').length,scored=mf.indicators.filter(x=>x.role==='up'||x.role==='down').length;
+ const pending=exploreSharedScale()?EXTRA_DIMENSION_AREAS.filter(x=>!exploreMap.areas[x.area]).map(x=>x.label):[];
+ $('exploreScope').textContent=mf.area!=='manhattan'?'MIDTOWN PILOT ONLY · NOT ALL MANHATTAN':exploreSharedScale()?'MANHATTAN · BROOKLYN · LONG ISLAND CITY · STREET SEGMENTS':'ALL MANHATTAN · STREET SEGMENTS';
+ const by=areas.length>1?` (${areas.map(a=>`${esc(AREA_SHORT[a.manifest.area]||a.manifest.area)} ${a.segments.toLocaleString()}`).join(' · ')})`:` ${esc(mf.area_label)}`;
+ $('exploreStatus').innerHTML=`<b>${total.toLocaleString()}</b> street segments${by} · <b>${done}/${scored}</b> scored indicators computed from real sources (retrieved ${esc((mf.windows?.retrieved_at||'').slice(0,10))}). `+
+  (exploreSharedScale()?'Percentiles rank segments across Manhattan, Brooklyn and Long Island City together. ':'Percentiles rank segments within this area only. ')+
+  (pending.length?`${esc(pending.join(' and '))} load when you move the map there. `:'')+
+  `N/A = not measurable, never 0. <span class="explore-version">calc ${esc(mf.calculation_version)} · built ${esc(mf.built_at.slice(0,16).replace('T',' '))} UTC</span>`;
 }
 async function loadExploreStreets(){
  if(exploreMap.data)return exploreMap.data;
  $('exploreStatus').textContent='Loading computed street dimensions…';
  exploreMap.loading=exploreMap.loading||loadDimensionArea();
  try{exploreMap.data=await exploreMap.loading;}catch(e){exploreMap.loading=null;$('exploreStatus').textContent='Computed street dimension data unavailable: '+e.message+'. Run python3 -m scripts.dimensions.build --area manhattan.';throw e;}
- const mf=exploreMap.manifest,overall=exploreMap.data.features.map(f=>f.properties.overall).filter(Number.isFinite).sort((a,b)=>a-b);
- const q=p=>overall[Math.min(overall.length-1,Math.floor(p*(overall.length-1)))];
- exploreMap.stops=[q(.02),q(.3),q(.55),q(.8),q(.98)].map((v,i,a)=>i&&v<=a[i-1]?a[i-1]+.5:v);
- const done=mf.indicators.filter(x=>x.status==='computed').length,scored=mf.indicators.filter(x=>x.role==='up'||x.role==='down').length;
- $('exploreScope').textContent=mf.area==='manhattan'?'ALL MANHATTAN · STREET SEGMENTS':'MIDTOWN PILOT ONLY · NOT ALL MANHATTAN';
- $('exploreStatus').innerHTML=`<b>${mf.segments.toLocaleString()}</b> ${esc(mf.area_label)} street segments · <b>${done}/${scored}</b> scored indicators computed from real sources (retrieved ${esc((mf.windows?.retrieved_at||'').slice(0,10))}). `+
-  `Percentiles rank segments within this area only. N/A = not measurable, never 0. <span class="explore-version">calc ${esc(mf.calculation_version)} · built ${esc(mf.built_at.slice(0,16).replace('T',' '))} UTC</span>`;
+ exploreRecomputeStops();renderExploreStatus();
  renderExploreThumbs();selectExploreView(exploreMap.view);
  if(state.mapLayersReady)state.map.getSource('manhattan-streets')?.setData(exploreMap.data);
  loadExploreNo2().catch(()=>{});
  if(typeof renderExploreAnalytics==='function')renderExploreAnalytics();
+ loadVisibleExploreAreas();
  return exploreMap.data;
 }
-/** Raw + percentile indicator values, fetched once on the first segment click (kept out of the map layer). */
-function loadExploreDetails(){
- if(exploreMap.details)return Promise.resolve(exploreMap.details);
- const pre=window.STREETWISE_DIMENSIONS?.indicators;
- exploreMap.detailsLoading=exploreMap.detailsLoading||(pre?Promise.resolve(pre):timedJson(exploreMap.base+exploreMap.manifest.files.indicators,30000)).then(d=>{
-  if(d.calculation_version!==exploreMap.manifest.calculation_version)throw new Error('indicator file comes from a different build');
-  d.index=new Map(d.ids.map((id,i)=>[id,i]));exploreMap.details=d;return d;}).catch(e=>{exploreMap.detailsLoading=null;throw e;});
- return exploreMap.detailsLoading;
+/** Adds Brooklyn or Long Island City to the street layer. Offline hook (DOM tests): window.STREETWISE_DIMENSION_AREAS[area]. */
+function loadExploreArea(area){
+ const spec=EXTRA_DIMENSION_AREAS.find(x=>x.area===area);
+ if(!spec||!exploreMap.data||!exploreSharedScale())return Promise.resolve(null);
+ if(exploreMap.areas[area])return Promise.resolve(exploreMap.areas[area]);
+ exploreMap.areaLoads=exploreMap.areaLoads||{};
+ return exploreMap.areaLoads[area]=exploreMap.areaLoads[area]||(async()=>{
+  const pre=window.STREETWISE_DIMENSION_AREAS?.[area],base=pre?null:`./data/dimensions/${area}/`;
+  const manifest=pre?pre.manifest:await timedJson(base+'manifest.json',15000);
+  if(manifest.calculation_version!==exploreMap.manifest.calculation_version)throw new Error(`${spec.label} is from another score build (${manifest.calculation_version}), so its scores are not on the same scale`);
+  const fc=pre?pre.segments:await timedJson(base+manifest.files.segments,60000);
+  if(fc.metadata?.calculation_version!==manifest.calculation_version)throw new Error(`${area}: segment file and manifest come from different builds`);
+  if(exploreMap.areas[area])return exploreMap.areas[area];
+  registerExploreArea(manifest,base,fc,pre?.indicators||null);
+  exploreMap.data.features.push(...fc.features);
+  exploreRecomputeStops();renderExploreStatus();selectExploreView(exploreMap.view);
+  if(state.mapLayersReady)state.map.getSource('manhattan-streets')?.setData(exploreMap.data);
+  return exploreMap.areas[area];
+ })().catch(e=>{delete exploreMap.areaLoads[area];toast(`${spec.label} street scores could not be loaded: ${e.message}`);return null;});
+}
+/** Loads each extra area whose box is on screen while Explore is open. */
+function loadVisibleExploreAreas(){
+ if(!exploreMap.active||!exploreMap.data||!state.map||!exploreSharedScale())return;
+ let b;try{b=state.map.getBounds();}catch(e){return;}
+ const W=b.getWest(),S=b.getSouth(),E=b.getEast(),N=b.getNorth();
+ for(const x of EXTRA_DIMENSION_AREAS)if(!exploreMap.areas[x.area]&&x.box[0]<E&&x.box[2]>W&&x.box[1]<N&&x.box[3]>S)loadExploreArea(x.area);
+}
+/** Raw + percentile indicator values of the segment's own area, fetched once on the first click there (kept out of the map layer). */
+function loadExploreDetails(id){
+ const a=id==null?exploreMap.areas[exploreMap.manifest?.area]:exploreAreaOf(id);
+ if(!a)return Promise.reject(new Error('no area loaded'));
+ if(a.details)return Promise.resolve(a.details);
+ a.detailsLoading=a.detailsLoading||(a.indicators?Promise.resolve(a.indicators):timedJson(a.base+a.manifest.files.indicators,60000)).then(d=>{
+  if(d.calculation_version!==a.manifest.calculation_version)throw new Error('indicator file comes from a different build');
+  d.index=new Map(d.ids.map((x,i)=>[x,i]));a.details=d;return d;}).catch(e=>{a.detailsLoading=null;throw e;});
+ return a.detailsLoading;
 }
 /** DOHMH annual NO₂ by Community District — area context drawn under Environment, never a street value. */
 async function loadExploreNo2(){
@@ -99,6 +151,7 @@ function setupExploreMap(){
  const m=state.map,W=[[10.5,.55],[12,1.1],[14,2.4],[16,5],[18,10]],ramp=f=>['interpolate',['exponential',1.5],['zoom'],...W.flatMap(([z,v])=>[z,f(v)])],width=ramp(v=>v);
  // Basemap labels and icons are hidden in Explore so nothing sits on top of the streets.
  exploreMap.labels=m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>l.id);
+ m.on('moveend',loadVisibleExploreAreas);
  m.addSource('manhattan-streets',{type:'geojson',data:exploreMap.data||emptyFC(),promoteId:'id'});
  m.addSource('explore-no2',{type:'geojson',data:exploreMap.no2||emptyFC()});
  const before='landmark-fill';
@@ -186,10 +239,11 @@ function renderExploreInspector(){
  const cov=v.dim==null?`${p.coverage} of 12 dimensions available on this segment`:`${p['n'+v.dim]} of ${dimMeta.scored_indicators.length} scored indicators available on this segment · model ${dimMeta.model_coverage}`;
  const head=`<div class="inspector-head"><div><div class="explore-eyebrow">STREET SEGMENT INFORMATION</div><strong>${esc(p.name||'Unnamed street')}</strong></div><div class="inspector-actions"><button type="button" id="inspectorPrev" class="explore-collapse" aria-label="Previous dimension" title="Previous dimension">‹</button><button type="button" id="inspectorNext" class="explore-collapse" aria-label="Next dimension" title="Next dimension">›</button><button type="button" id="inspectorClose" class="explore-collapse" aria-label="Close inspector" title="Close (Esc)">✕</button></div></div>
   <section class="inspector-summary" aria-label="Summary">
-  <div class="inspector-score"><span>${esc(v.label)} · Dimension Score</span><strong class="score-with-swatch"><i class="score-swatch${score==null?' na':''}" style="background:${exploreColor(score)}"></i><b data-k="dimension-score">${fmtScore(score)}</b></strong><small>0–100 percentile within ${esc(mf.area_label)} · ${esc(cov)}</small></div>
+  <div class="inspector-score"><span>${esc(v.label)} · Dimension Score</span><strong class="score-with-swatch"><i class="score-swatch${score==null?' na':''}" style="background:${exploreColor(score)}"></i><b data-k="dimension-score">${fmtScore(score)}</b></strong><small>0–100 percentile ${exploreSharedScale()?'across Manhattan, Brooklyn and Long Island City':'within '+esc(mf.area_label)} · ${esc(cov)}</small></div>
   <dl class="inspector-ids"><dt>Segment ID</dt><dd data-k="segment-id">${esc(p.id)}</dd><dt>Street Name</dt><dd>${esc(p.name||'N/A')}</dd><dt>Length</dt><dd>${Number(p.length_m).toLocaleString(undefined,{maximumFractionDigits:1})} m</dd><dt>Dimension</dt><dd>${esc(v.dim==null?v.label:`${dimMeta.num} ${dimMeta.label}`)}</dd></dl>
   </section>`;
- const prov=`<h4>Data &amp; version</h4><p>Segment ${esc(p.id)} = NYC LION physical ID. ${esc(mf.comparison_scope)} Calculation ${esc(mf.calculation_version)}, built ${esc(mf.built_at.slice(0,10))}. Values marked N/A were not measurable and are never counted as 0.</p>`;
+ const amf=exploreAreaOf(p.id)?.manifest||mf;
+ const prov=`<h4>Data &amp; version</h4><p>Segment ${esc(p.id)} = NYC LION physical ID (${esc(amf.area_label)}). ${esc(amf.comparison_scope)} Calculation ${esc(amf.calculation_version)}, built ${esc(amf.built_at.slice(0,10))}. Values marked N/A were not measurable and are never counted as 0.</p>`;
  const methodology=(method)=>`<details class="inspector-method"${exploreMap.methodOpen?' open':''}><summary>Methodology</summary>${method}${prov}</details>`;
  box.innerHTML=head+`<p class="explore-note" data-k="loading">Loading indicator values…</p>`+methodology('');box.classList.remove('hidden');
  // header buttons exist from the first paint and are wired once; the body is wired each time it is (re)written
@@ -200,7 +254,7 @@ function renderExploreInspector(){
   box.querySelectorAll('.explore-row[data-view]').forEach(b=>b.addEventListener('click',()=>selectExploreView(Number(b.dataset.view))));
  };
  wireBody();
- loadExploreDetails().then(D=>{
+ loadExploreDetails(p.id).then(D=>{
   if(token!==inspectorToken)return;
   const i=D.index.get(p.id);
   let body,method;
@@ -265,7 +319,7 @@ function setExploreMode(on){
  if(on)loadExploreStreets().catch(()=>{});
  renderExploreInspector();
  if(!state.mapLayersReady)return;
- if(on)state.map.fitBounds(MANHATTAN_BOUNDS,{padding:{top:30,bottom:40,right:60,left:exploreMap.collapsed||window.innerWidth<=740?30:300},duration:700,maxZoom:12});
+ if(on)state.map.fitBounds(STUDY_BOUNDS,{padding:{top:30,bottom:40,right:60,left:exploreMap.collapsed||window.innerWidth<=740?30:300},duration:700,maxZoom:12});
  updateMapStyles();
 }
 function applyExploreVisibility(){

@@ -3,7 +3,7 @@
    cross-provider de-duplication, ranking, partial provider failure. Live behaviour: run with LIVE=1. */
 const path=require('path'),assert=require('node:assert/strict');
 const rec=require('./fixtures/places/provider-responses.json');
-global.state={};global.window={};global.latLonInsideManhattanEnvelope=p=>p.lon>-74.03&&p.lon<-73.9&&p.lat>40.69&&p.lat<40.89;
+global.state={};global.window={};global.latLonInsideStudyArea=p=>[[-74.032,40.696,-73.904,40.883],[-74.042,40.57,-73.833,40.7395],[-73.965,40.728,-73.915,40.775]].some(b=>p.lon>b[0]&&p.lon<b[2]&&p.lat>b[1]&&p.lat<b[3]);
 let failGeo=false;
 if(!process.env.LIVE)global.fetch=async url=>{
  const u=new URL(url),q=u.searchParams.get('q')||u.searchParams.get('text');
@@ -28,6 +28,11 @@ const P=require(path.join(__dirname,'..','places.js'));
  // One provider down: results still come from the other, and the failure is reported.
  failGeo=true;const part=await P.searchPlaces('Brooklyn Museum',{});failGeo=false;
  if(!process.env.LIVE){assert(part.places.length>0);assert(part.errors.some(e=>/GeoSearch/.test(e)));}
+ // Walking-route coverage: Manhattan and Brooklyn whole; Queens only inside the Long Island City box; other boroughs never.
+ const cov=(borough,lat,lon)=>P.inRoutingCoverage({borough,lat,lon});
+ assert.equal(cov('Brooklyn',40.6710,-73.9633),true,'Brooklyn Museum');assert.equal(cov('Manhattan',40.7484,-73.9857),true,'Empire State Building');
+ assert.equal(cov('Queens',40.7447,-73.9485),true,'Court Square, LIC');assert.equal(cov('Queens',40.7597,-73.8296),false,'Flushing Main Street');
+ assert.equal(cov('Bronx',40.8296,-73.9262),false,'Yankee Stadium');assert.equal(cov(null,40.7040,-74.0560),false,'Liberty State Park, NJ');
  assert.equal(P.boroughOf('Kings County'),'Brooklyn');assert.equal(P.boroughOf('Richmond County'),'Staten Island');assert.equal(P.boroughOf('Hoboken'),null);
  console.log(`PLACES PASS (${process.env.LIVE?'live':'recorded'}): 5 Scenario-A queries → correct borough and coordinates, NYC-only, de-duplicated, provider failure isolated`);
 })().catch(e=>{console.error(e);process.exitCode=1;});

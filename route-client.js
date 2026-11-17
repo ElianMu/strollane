@@ -59,7 +59,7 @@ async function generateRoutes(userText=null,isFollowUp=false){
  if(!a||!b){toast('Select both a valid start and destination.');return}
  if(planner.constraints.stepFree){resetRoutes();$('rankingStatus').textContent='Step-free access needs verified curb-ramp and elevator data, which is not connected. No route recommendation will be returned.';appendChat('assistant','I cannot verify step-free access with the current source data, so no route has been recommended. "Avoid stairs" is available and excludes OSM steps.');return}
  if(geoDistanceKm([a.lon,a.lat],[b.lon,b.lat])<.07){toast('Start and destination too close to compare routes.');return}
- if(!latLonInsideManhattanEnvelope(a)||!latLonInsideManhattanEnvelope(b)){toast('Choose Manhattan locations.');return}
+ if(!latLonInsideStudyArea(a)||!latLonInsideStudyArea(b)){toast(`Choose a start and destination in ${STUDY_AREA_NAME}.`);return}
  chooseIntentLayer();
  const previous=state.routes.find(r=>r.id===state.activeRoute)?.raw.ordered_edge_ids.join(',');
  const run=++planner.runId;state.routingBusy=true;
@@ -119,7 +119,7 @@ function routeCardDetails(r){
 function renderRouteCards(){
  const root=$('routeCards'),routes=state.routes,more=$('routeMore');
  if(!routes.length){routeStory.showAll=false;$('routeCount').textContent='';if(more)more.classList.add('hidden');renderAlongWalk();
-  root.innerHTML=`<div class="empty-route"><strong>${state.routingBusy?'Finding walks…':'No walks yet'}</strong><p>${state.routingBusy?'Searching the Manhattan walking network.':'Describe how you want to walk, or tap a few chips.'}</p></div>`;if(typeof renderNavStart==='function')renderNavStart();return}
+  root.innerHTML=`<div class="empty-route"><strong>${state.routingBusy?'Finding walks…':'No walks yet'}</strong><p>${state.routingBusy?'Searching the walking network of Manhattan, Brooklyn and Long Island City.':'Describe how you want to walk, or tap a few chips.'}</p></div>`;if(typeof renderNavStart==='function')renderNavStart();return}
  if(typeof storyEnsurePlaces==='function')storyEnsurePlaces();
  const story=storyBuild(routes.map(x=>x.raw)),shownSet=new Set(story.shown);
  const shownRaw=routes.filter(x=>shownSet.has(x.id)).map(x=>x.raw);
@@ -303,7 +303,7 @@ function setupRouteEdgeLayer(){
 // --- GPS: position on the active route via the engine's progress endpoint (no live tracking is claimed) ------
 function setGpsPosition(coords){
  state.gps={name:'My current location',lat:coords.latitude,lon:coords.longitude};
- $('gpsMain').textContent=latLonInsideManhattanEnvelope(state.gps)?'ACTIVE':'OUTSIDE STUDY AREA';
+ $('gpsMain').textContent=latLonInsideStudyArea(state.gps)?'ACTIVE':'OUTSIDE STUDY AREA';
  $('gpsMeta').textContent=`±${coords.accuracy?Math.round(coords.accuracy)+'m':'?'} accuracy`;
  syncMapData();updateRouteProgress(coords.accuracy);
 }
