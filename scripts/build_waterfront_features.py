@@ -11,7 +11,7 @@ def build():
  with gzip.open(source,'rt') as f:d=json.load(f)
  polygons=[scale(shape(f['geometry']),xfact=MX,yfact=MY,origin=(0,0)) for f in d['features']]
  index=STRtree(polygons)
- with gzip.open(ROOT/'data/pedestrian/manhattan-walk-graph.json.gz','rt') as f:g=json.load(f)
+ with gzip.open(ROOT/'data/pedestrian/nyc-walk-graph.json.gz','rt') as f:g=json.load(f)  # the joined network the router uses
  values=[];distances=[]
  for i,geom in enumerate(g['geoms']):
   points=[]

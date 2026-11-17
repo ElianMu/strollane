@@ -240,8 +240,8 @@ def read_json(handler, limit):
 def validate_point(p, label):
     if not isinstance(p, dict) or type(p.get('lat')) not in (int, float) or type(p.get('lon')) not in (int, float):
         raise ValueError(f'{label} must be {{"lat": number, "lon": number}}')
-    if not (-74.1 <= p['lon'] <= -73.85 and 40.65 <= p['lat'] <= 40.92):
-        raise ValueError(f'{label} is outside the Manhattan routing area')
+    if not (-74.1 <= p['lon'] <= -73.80 and 40.55 <= p['lat'] <= 40.92):  # Manhattan, Brooklyn, Long Island City; snapping does the fine check
+        raise ValueError(f'{label} is outside the routing area (Manhattan, Brooklyn and Long Island City)')
     return {'lat': float(p['lat']), 'lon': float(p['lon'])}
 
 
@@ -544,7 +544,7 @@ class Handler(SimpleHTTPRequestHandler):
                                  'score_version': served_score_version(),
                                  'interpretation_contract': 'strict-paired-v3-independent',
                                  'features': {'itinerary': True, 'menu_verify': 'official website only (no menu API connected)',
-                                              'routing_coverage': 'Manhattan OSM pedestrian graph',
+                                              'routing_coverage': 'OSM pedestrian graph of Manhattan, Brooklyn and Long Island City, joined',
                                               'place_search': 'Manhattan discovery + NYC DOHMH food permits + NYC Parks and public restrooms (citywide discovery; new unsnapped points are search only)',
                                               'food_recommendations': True, 'menu_ocr_available': bool(menu_check.shutil.which('tesseract')),
                                               'citywide_official_discovery': True},

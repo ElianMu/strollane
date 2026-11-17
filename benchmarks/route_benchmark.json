@@ -1,5 +1,5 @@
 {
- "network_version": "osm-walk-20261023-99602011",
+ "network_version": "nyc3-90e7f769",
  "score_version": "strollane-12x24-v1+nyc3-2c5f8e8350",
  "weight": 80,
  "constraints": {
@@ -19,7 +19,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 99,
@@ -30,7 +30,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 99,
@@ -41,7 +41,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "122ed56e326cbfad",
+    "route_signature": "149b4131ea6b9a11",
     "distance_m": 1602.2,
     "detour_pct": 8.6,
     "score": 99,
@@ -62,7 +62,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 37,
@@ -73,7 +73,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 37,
@@ -84,7 +84,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "edeead1cce7fac34",
+    "route_signature": "6ef15d48041c18f6",
     "distance_m": 1600.1,
     "detour_pct": 8.5,
     "score": 39,
@@ -105,7 +105,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 85,
@@ -116,7 +116,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 85,
@@ -127,7 +127,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "122ed56e326cbfad",
+    "route_signature": "149b4131ea6b9a11",
     "distance_m": 1602.2,
     "detour_pct": 8.6,
     "score": 84,
@@ -148,7 +148,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 43,
@@ -159,7 +159,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "22db0d21191d563b",
+    "route_signature": "5ac9fcc1f637fcc1",
     "distance_m": 1608.6,
     "detour_pct": 9.0,
     "score": 56,
@@ -170,7 +170,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "1cfc24cecca9e55b",
+    "route_signature": "a525656ef40192ec",
     "distance_m": 1490.0,
     "detour_pct": 1.0,
     "score": 45,
@@ -191,7 +191,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 58,
@@ -202,7 +202,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3eec12f850d8c4ac",
+    "route_signature": "727578f566cb2c4c",
     "distance_m": 1617.6,
     "detour_pct": 9.6,
     "score": 68,
@@ -213,7 +213,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0b85d656d083266f",
+    "route_signature": "6b472b5203f3457b",
     "distance_m": 1625.5,
     "detour_pct": 10.2,
     "score": 61,
@@ -234,7 +234,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -245,7 +245,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -256,7 +256,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "122ed56e326cbfad",
+    "route_signature": "149b4131ea6b9a11",
     "distance_m": 1602.2,
     "detour_pct": 8.6,
     "score": 95,
@@ -277,7 +277,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 80,
@@ -288,7 +288,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 80,
@@ -299,7 +299,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "e281d06e0be41b4c",
+    "route_signature": "43b9ca9694676923",
     "distance_m": 1668.1,
     "detour_pct": 13.1,
     "score": 83,
@@ -320,7 +320,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 93,
@@ -331,7 +331,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 93,
@@ -342,7 +342,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "122ed56e326cbfad",
+    "route_signature": "149b4131ea6b9a11",
     "distance_m": 1602.2,
     "detour_pct": 8.6,
     "score": 93,
@@ -363,7 +363,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 80,
@@ -374,7 +374,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 80,
@@ -385,7 +385,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "122ed56e326cbfad",
+    "route_signature": "149b4131ea6b9a11",
     "distance_m": 1602.2,
     "detour_pct": 8.6,
     "score": 81,
@@ -406,7 +406,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 24,
@@ -417,7 +417,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "5ddf2436554e03d0",
+    "route_signature": "0fcb0fc96f5e27cb",
     "distance_m": 1655.7,
     "detour_pct": 12.2,
     "score": 32,
@@ -428,7 +428,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "95fae54af41cbcff",
+    "route_signature": "6a20f4f0d603dc35",
     "distance_m": 1665.5,
     "detour_pct": 12.9,
     "score": 32,
@@ -449,7 +449,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 20,
@@ -460,7 +460,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 20,
@@ -471,7 +471,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "5bb97197c3bea3cd",
+    "route_signature": "871519f8ae10f35a",
     "distance_m": 1602.6,
     "detour_pct": 8.6,
     "score": 20,
@@ -492,7 +492,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -503,7 +503,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f108efc9210005ae",
+    "route_signature": "d13c452a284b3a8e",
     "distance_m": 1475.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -514,7 +514,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "122ed56e326cbfad",
+    "route_signature": "149b4131ea6b9a11",
     "distance_m": 1602.2,
     "detour_pct": 8.6,
     "score": 96,
@@ -535,7 +535,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 90,
@@ -546,7 +546,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 90,
@@ -557,7 +557,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "fa12060ee1f16ad9",
+    "route_signature": "a3acab2d34122131",
     "distance_m": 1056.4,
     "detour_pct": 8.9,
     "score": 91,
@@ -578,7 +578,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 53,
@@ -589,7 +589,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "6064c5533f678db0",
+    "route_signature": "07d87e5f2186b7e6",
     "distance_m": 973.7,
     "detour_pct": 0.4,
     "score": 54,
@@ -600,7 +600,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "b8a63ba82a255fb2",
+    "route_signature": "d48e59665f1eb1d6",
     "distance_m": 1066.4,
     "detour_pct": 9.9,
     "score": 53,
@@ -621,7 +621,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 96,
@@ -632,7 +632,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 96,
@@ -643,7 +643,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a5f6136ff049bfc8",
+    "route_signature": "9d880e44539f38df",
     "distance_m": 1056.1,
     "detour_pct": 8.9,
     "score": 95,
@@ -664,7 +664,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 25,
@@ -675,7 +675,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "fe457c091ec1986a",
+    "route_signature": "5b228afb9e71e2ee",
     "distance_m": 1031.8,
     "detour_pct": 6.4,
     "score": 34,
@@ -686,7 +686,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "65416c53415ab38f",
+    "route_signature": "f2dee174de688bc5",
     "distance_m": 1126.1,
     "detour_pct": 16.1,
     "score": 30,
@@ -707,7 +707,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 63,
@@ -718,7 +718,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 63,
@@ -729,7 +729,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "6ac6b0a65f78bde2",
+    "route_signature": "bf708fad39003ebd",
     "distance_m": 972.0,
     "detour_pct": 0.2,
     "score": 63,
@@ -750,7 +750,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 84,
@@ -761,7 +761,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c68bdeaa281370d9",
+    "route_signature": "8c70ba5d01789f0a",
     "distance_m": 1012.9,
     "detour_pct": 4.4,
     "score": 87,
@@ -772,7 +772,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "4c119fa9ab813ed8",
+    "route_signature": "31c8f2f8feff6ebd",
     "distance_m": 1070.0,
     "detour_pct": 10.3,
     "score": 86,
@@ -793,7 +793,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 85,
@@ -804,7 +804,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 85,
@@ -815,7 +815,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "fa12060ee1f16ad9",
+    "route_signature": "a3acab2d34122131",
     "distance_m": 1056.4,
     "detour_pct": 8.9,
     "score": 84,
@@ -836,7 +836,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 63,
@@ -847,7 +847,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 63,
@@ -858,7 +858,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a5f6136ff049bfc8",
+    "route_signature": "9d880e44539f38df",
     "distance_m": 1056.1,
     "detour_pct": 8.9,
     "score": 64,
@@ -879,7 +879,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 68,
@@ -890,7 +890,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 68,
@@ -901,7 +901,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "6064c5533f678db0",
+    "route_signature": "07d87e5f2186b7e6",
     "distance_m": 973.7,
     "detour_pct": 0.4,
     "score": 68,
@@ -922,7 +922,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 23,
@@ -933,7 +933,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b1ed2d8a05e13ecc",
+    "route_signature": "3354927efb508cd7",
     "distance_m": 1014.2,
     "detour_pct": 4.6,
     "score": 30,
@@ -944,7 +944,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "0bb13ffd65940482",
+    "route_signature": "849a002534774886",
     "distance_m": 971.2,
     "detour_pct": 0.1,
     "score": 23,
@@ -965,7 +965,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 66,
@@ -976,7 +976,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 66,
@@ -987,7 +987,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a5f6136ff049bfc8",
+    "route_signature": "9d880e44539f38df",
     "distance_m": 1056.1,
     "detour_pct": 8.9,
     "score": 65,
@@ -1008,7 +1008,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 86,
@@ -1019,7 +1019,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "23cd116c12890903",
+    "route_signature": "cc9760ba3afd8f33",
     "distance_m": 970.0,
     "detour_pct": 0.0,
     "score": 86,
@@ -1030,7 +1030,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "fa12060ee1f16ad9",
+    "route_signature": "a3acab2d34122131",
     "distance_m": 1056.4,
     "detour_pct": 8.9,
     "score": 86,
@@ -1051,7 +1051,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 89,
@@ -1062,7 +1062,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b1f2c8f24b4d663c",
+    "route_signature": "efd098e34d5fe480",
     "distance_m": 3248.5,
     "detour_pct": 1.1,
     "score": 94,
@@ -1073,7 +1073,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "b4b85bbc712104b2",
+    "route_signature": "542dc1a102f8829e",
     "distance_m": 3307.9,
     "detour_pct": 2.9,
     "score": 94,
@@ -1094,7 +1094,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 33,
@@ -1105,7 +1105,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3bd8aa64cfa17191",
+    "route_signature": "c8977eb069666b01",
     "distance_m": 3602.1,
     "detour_pct": 12.1,
     "score": 63,
@@ -1116,7 +1116,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "c3b296c57ad3416b",
+    "route_signature": "56f7f0816e3c734f",
     "distance_m": 3460.1,
     "detour_pct": 7.6,
     "score": 58,
@@ -1137,7 +1137,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 88,
@@ -1148,7 +1148,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "31e92ce670933750",
+    "route_signature": "280b01bb758f771a",
     "distance_m": 3232.1,
     "detour_pct": 0.5,
     "score": 94,
@@ -1159,7 +1159,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d02df380fc3e4ad5",
+    "route_signature": "c6e47d89e69feec3",
     "distance_m": 3323.6,
     "detour_pct": 3.4,
     "score": 94,
@@ -1180,7 +1180,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 40,
@@ -1191,7 +1191,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "530049c6b2bfc337",
+    "route_signature": "91c492446046a948",
     "distance_m": 3479.9,
     "detour_pct": 8.3,
     "score": 61,
@@ -1202,7 +1202,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "8a459659fd4f1ce4",
+    "route_signature": "83a40d433f01d5bf",
     "distance_m": 3406.7,
     "detour_pct": 6.0,
     "score": 58,
@@ -1223,7 +1223,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 47,
@@ -1234,7 +1234,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "cebda1624d6d0f73",
+    "route_signature": "ccaa24e899574140",
     "distance_m": 3312.0,
     "detour_pct": 3.0,
     "score": 55,
@@ -1245,7 +1245,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "df4955819e60bfb6",
+    "route_signature": "d3b4900de7d451e5",
     "distance_m": 3362.7,
     "detour_pct": 4.6,
     "score": 53,
@@ -1266,7 +1266,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 84,
@@ -1277,7 +1277,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "29a292ed497dbb50",
+    "route_signature": "a2b92f52a9fff309",
     "distance_m": 3324.9,
     "detour_pct": 3.4,
     "score": 95,
@@ -1288,7 +1288,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "1ddcd0af1deeaf5f",
+    "route_signature": "4291eb228efd0b5b",
     "distance_m": 3244.6,
     "detour_pct": 0.9,
     "score": 93,
@@ -1309,7 +1309,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 86,
@@ -1320,7 +1320,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "5b07c9a0aadc1d30",
+    "route_signature": "6b42b496c1ce59ef",
     "distance_m": 3424.6,
     "detour_pct": 6.5,
     "score": 93,
@@ -1331,7 +1331,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "7d71e47a67aff79b",
+    "route_signature": "a9dc075537a73164",
     "distance_m": 3447.3,
     "detour_pct": 7.2,
     "score": 93,
@@ -1352,7 +1352,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 71,
@@ -1363,7 +1363,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "31e92ce670933750",
+    "route_signature": "280b01bb758f771a",
     "distance_m": 3232.1,
     "detour_pct": 0.5,
     "score": 78,
@@ -1374,7 +1374,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d02df380fc3e4ad5",
+    "route_signature": "c6e47d89e69feec3",
     "distance_m": 3323.6,
     "detour_pct": 3.4,
     "score": 79,
@@ -1395,7 +1395,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 77,
@@ -1406,7 +1406,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b190948a8353a858",
+    "route_signature": "8c8f87a5bdf51806",
     "distance_m": 3412.3,
     "detour_pct": 6.2,
     "score": 85,
@@ -1417,7 +1417,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "c2db1f0ed4dfdc56",
+    "route_signature": "3ec8dd3c02dac959",
     "distance_m": 3255.5,
     "detour_pct": 1.3,
     "score": 81,
@@ -1438,7 +1438,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 26,
@@ -1449,7 +1449,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "e0a71d5e75ff4601",
+    "route_signature": "cb73789c7461c1a7",
     "distance_m": 3321.9,
     "detour_pct": 3.3,
     "score": 40,
@@ -1460,7 +1460,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "f8eac93daaa03635",
+    "route_signature": "c12fa149bed060bd",
     "distance_m": 3354.3,
     "detour_pct": 4.3,
     "score": 36,
@@ -1481,7 +1481,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 35,
@@ -1492,7 +1492,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "637a767da0aa1e05",
+    "route_signature": "ef1ced6ec4349ebd",
     "distance_m": 3218.4,
     "detour_pct": 0.1,
     "score": 36,
@@ -1503,7 +1503,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "c44e303aa7ed8a47",
+    "route_signature": "5abb4100fad110cf",
     "distance_m": 3347.3,
     "detour_pct": 4.1,
     "score": 37,
@@ -1524,7 +1524,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "2a863a5a9ffee862",
+    "route_signature": "5c48bcf167ceeec2",
     "distance_m": 3214.5,
     "detour_pct": 0.0,
     "score": 76,
@@ -1535,7 +1535,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "5087bc65f85608cb",
+    "route_signature": "ead40083dfaccb24",
     "distance_m": 3332.9,
     "detour_pct": 3.7,
     "score": 91,
@@ -1546,7 +1546,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "e6d0f14cb64e83af",
+    "route_signature": "eeaa7db3c09cd8a4",
     "distance_m": 3302.5,
     "detour_pct": 2.7,
     "score": 90,
@@ -1567,7 +1567,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 85,
@@ -1578,7 +1578,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "20c86d8e5c66441a",
+    "route_signature": "9d58b5f1715ff19f",
     "distance_m": 2701.6,
     "detour_pct": 6.0,
     "score": 93,
@@ -1589,7 +1589,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "e4999e5e03440130",
+    "route_signature": "f1d8a132cdd30e0f",
     "distance_m": 2824.9,
     "detour_pct": 10.8,
     "score": 94,
@@ -1610,7 +1610,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 41,
@@ -1621,7 +1621,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "23f030cfa073dfb3",
+    "route_signature": "81a1ce1f382896ac",
     "distance_m": 2649.1,
     "detour_pct": 3.9,
     "score": 67,
@@ -1632,7 +1632,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "8a5a7fb4a7a73ed5",
+    "route_signature": "16534243b3609d3e",
     "distance_m": 2905.8,
     "detour_pct": 14.0,
     "score": 66,
@@ -1653,7 +1653,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 96,
@@ -1664,7 +1664,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "ad57c928530789d9",
+    "route_signature": "1488d968f9a2ecb4",
     "distance_m": 2562.1,
     "detour_pct": 0.5,
     "score": 97,
@@ -1675,7 +1675,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "8d10c6d415f4ddea",
+    "route_signature": "5c534c10ea603c35",
     "distance_m": 2621.3,
     "detour_pct": 2.8,
     "score": 97,
@@ -1696,7 +1696,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 19,
@@ -1707,7 +1707,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "9793ac51174880e5",
+    "route_signature": "f94c95532d843a15",
     "distance_m": 2772.3,
     "detour_pct": 8.7,
     "score": 41,
@@ -1718,7 +1718,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "5c7b3dede2f00185",
+    "route_signature": "40db765b310912e9",
     "distance_m": 2732.2,
     "detour_pct": 7.2,
     "score": 40,
@@ -1739,7 +1739,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 57,
@@ -1750,7 +1750,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "35a9f9f5fb1ed765",
+    "route_signature": "d9f572a962839821",
     "distance_m": 2586.3,
     "detour_pct": 1.5,
     "score": 60,
@@ -1761,7 +1761,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "a88a692f91f2bb48",
+    "route_signature": "a38a0bc9727014ee",
     "distance_m": 2553.7,
     "detour_pct": 0.2,
     "score": 58,
@@ -1782,7 +1782,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 95,
@@ -1793,7 +1793,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9f248ddde1fa1d70",
+    "route_signature": "545c709e8a222e71",
     "distance_m": 2572.2,
     "detour_pct": 0.9,
     "score": 97,
@@ -1804,7 +1804,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d3d97b59724a43f6",
+    "route_signature": "f4f3238e61c719e6",
     "distance_m": 2614.2,
     "detour_pct": 2.5,
     "score": 97,
@@ -1825,7 +1825,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 95,
@@ -1836,7 +1836,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "acaaddd26c46d277",
+    "route_signature": "918dc08b7dde7ac4",
     "distance_m": 2579.0,
     "detour_pct": 1.2,
     "score": 98,
@@ -1847,7 +1847,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "7ca6d84d9499a6ca",
+    "route_signature": "63e9c5e95e06611b",
     "distance_m": 2710.6,
     "detour_pct": 6.3,
     "score": 98,
@@ -1868,7 +1868,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 70,
@@ -1879,7 +1879,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3f7856cb39524a9e",
+    "route_signature": "1607da9dbb33b486",
     "distance_m": 2549.8,
     "detour_pct": 0.0,
     "score": 70,
@@ -1890,7 +1890,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "1af19a563f06555f",
+    "route_signature": "78d6bfefe52ff7f9",
     "distance_m": 2763.8,
     "detour_pct": 8.4,
     "score": 73,
@@ -1911,7 +1911,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 70,
@@ -1922,7 +1922,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "4f90fd103f918ddb",
+    "route_signature": "c6fc0bcda2948dda",
     "distance_m": 2552.3,
     "detour_pct": 0.1,
     "score": 71,
@@ -1933,7 +1933,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "b0442e1c00daefa1",
+    "route_signature": "9213533a02015618",
     "distance_m": 2564.0,
     "detour_pct": 0.6,
     "score": 71,
@@ -1954,7 +1954,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 18,
@@ -1965,7 +1965,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b0b8840a8ee15c7a",
+    "route_signature": "42779893d5e38694",
     "distance_m": 2608.8,
     "detour_pct": 2.3,
     "score": 25,
@@ -1976,7 +1976,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3a8df4f303802485",
+    "route_signature": "8e8d43d425cdd4e9",
     "distance_m": 2712.2,
     "detour_pct": 6.4,
     "score": 27,
@@ -1997,7 +1997,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 38,
@@ -2008,7 +2008,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "20c86d8e5c66441a",
+    "route_signature": "9d58b5f1715ff19f",
     "distance_m": 2701.6,
     "detour_pct": 6.0,
     "score": 50,
@@ -2019,7 +2019,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "5b8c452ee9d744ac",
+    "route_signature": "b0c7b7af09068dc8",
     "distance_m": 2853.5,
     "detour_pct": 11.9,
     "score": 51,
@@ -2040,7 +2040,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3bbf9a7b6fdf1e22",
+    "route_signature": "15c437e5b2e4febe",
     "distance_m": 2549.3,
     "detour_pct": 0.0,
     "score": 61,
@@ -2051,7 +2051,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "fbe634f53aca5ebe",
+    "route_signature": "aac98e45bf6b3deb",
     "distance_m": 2854.5,
     "detour_pct": 12.0,
     "score": 82,
@@ -2062,7 +2062,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "e4ac27010f499d74",
+    "route_signature": "c8f4958bdf930d7c",
     "distance_m": 2857.9,
     "detour_pct": 12.1,
     "score": 80,
@@ -2083,7 +2083,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 84,
@@ -2094,7 +2094,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "1cd350794fc5f691",
+    "route_signature": "2e5ce4f624c74a6e",
     "distance_m": 1684.6,
     "detour_pct": 0.5,
     "score": 85,
@@ -2105,7 +2105,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "ce2c43908a9fc0fa",
+    "route_signature": "b72ee9735caa6f15",
     "distance_m": 1697.5,
     "detour_pct": 1.2,
     "score": 85,
@@ -2126,7 +2126,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 46,
@@ -2137,7 +2137,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "d6527b22670fdf3c",
+    "route_signature": "4f2fa24d93830861",
     "distance_m": 1709.0,
     "detour_pct": 1.9,
     "score": 53,
@@ -2148,7 +2148,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3965d5b3dd3b0493",
+    "route_signature": "40676b9a553c99b8",
     "distance_m": 1698.5,
     "detour_pct": 1.3,
     "score": 49,
@@ -2169,7 +2169,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 86,
@@ -2180,7 +2180,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "d149187721837f6e",
+    "route_signature": "2b999be7c13ddf1a",
     "distance_m": 1681.6,
     "detour_pct": 0.3,
     "score": 86,
@@ -2191,7 +2191,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "6b0c94837e629e29",
+    "route_signature": "f85d86c3bcf3f554",
     "distance_m": 1748.3,
     "detour_pct": 4.3,
     "score": 84,
@@ -2212,7 +2212,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 34,
@@ -2223,7 +2223,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "fcabb5707c01cbd4",
+    "route_signature": "0826fef3df10596b",
     "distance_m": 1680.0,
     "detour_pct": 0.2,
     "score": 48,
@@ -2234,7 +2234,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "35fca8ffeb60ad5b",
+    "route_signature": "1cf9b05e75deec49",
     "distance_m": 1751.3,
     "detour_pct": 4.4,
     "score": 47,
@@ -2255,7 +2255,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 44,
@@ -2266,7 +2266,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "e85416a0515fbccf",
+    "route_signature": "f4d41f4bd99d4983",
     "distance_m": 1913.2,
     "detour_pct": 14.1,
     "score": 61,
@@ -2277,7 +2277,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "964ce4548426a41e",
+    "route_signature": "5e22d2b1a614af39",
     "distance_m": 1701.3,
     "detour_pct": 1.5,
     "score": 49,
@@ -2298,7 +2298,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 89,
@@ -2309,7 +2309,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 89,
@@ -2320,7 +2320,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "c74e23603fa27b48",
+    "route_signature": "7ef3a5b7fcdcb760",
     "distance_m": 1764.9,
     "detour_pct": 5.2,
     "score": 87,
@@ -2341,7 +2341,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 84,
@@ -2352,7 +2352,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "fdff5b19ca338de7",
+    "route_signature": "d75a4c7c247bc134",
     "distance_m": 1698.7,
     "detour_pct": 1.3,
     "score": 85,
@@ -2363,7 +2363,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "947a931e77db9e70",
+    "route_signature": "83d240262576ffc5",
     "distance_m": 1754.7,
     "detour_pct": 4.6,
     "score": 86,
@@ -2384,7 +2384,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 73,
@@ -2395,7 +2395,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 73,
@@ -2406,7 +2406,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "c984edf79724a1e0",
+    "route_signature": "55f28e3ad9cbdc39",
     "distance_m": 1678.4,
     "detour_pct": 0.1,
     "score": 73,
@@ -2427,7 +2427,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 83,
@@ -2438,7 +2438,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "b6048debf2bd5dba",
+    "route_signature": "9a2fae5a5b2d389e",
     "distance_m": 1680.2,
     "detour_pct": 0.2,
     "score": 87,
@@ -2449,7 +2449,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "92c7ee7e270deb51",
+    "route_signature": "82c952ef92d6099e",
     "distance_m": 1686.7,
     "detour_pct": 0.6,
     "score": 87,
@@ -2470,7 +2470,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 33,
@@ -2481,7 +2481,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "4ea8b6b11bf228d0",
+    "route_signature": "20080c6d98217201",
     "distance_m": 1687.1,
     "detour_pct": 0.6,
     "score": 46,
@@ -2492,7 +2492,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "dbcca7ca6d0bc592",
+    "route_signature": "291031ea3a49dac9",
     "distance_m": 1837.1,
     "detour_pct": 9.6,
     "score": 43,
@@ -2513,7 +2513,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 44,
@@ -2524,7 +2524,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 44,
@@ -2535,7 +2535,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3a31a8ad65563595",
+    "route_signature": "45172f0a7009ba8f",
     "distance_m": 1774.2,
     "detour_pct": 5.8,
     "score": 44,
@@ -2556,7 +2556,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 83,
@@ -2567,7 +2567,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "e7ccdd29c5a7b193",
+    "route_signature": "962b468fb66d2eb2",
     "distance_m": 1676.9,
     "detour_pct": 0.0,
     "score": 83,
@@ -2578,7 +2578,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "faf4f051337494ea",
+    "route_signature": "fe0eb6c6a321261f",
     "distance_m": 1680.4,
     "detour_pct": 0.2,
     "score": 83,
@@ -2599,7 +2599,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 88,
@@ -2610,7 +2610,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "232b8d1c6b14ef88",
+    "route_signature": "e629d812299d3cd3",
     "distance_m": 3458.0,
     "detour_pct": 6.8,
     "score": 94,
@@ -2621,7 +2621,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3feae3581bdf3241",
+    "route_signature": "d674794bb4ee7da4",
     "distance_m": 3583.1,
     "detour_pct": 10.7,
     "score": 94,
@@ -2642,7 +2642,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 42,
@@ -2653,7 +2653,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "398ade759d2fd440",
+    "route_signature": "765bbdf7431c583d",
     "distance_m": 3545.9,
     "detour_pct": 9.5,
     "score": 68,
@@ -2664,7 +2664,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "9526a1a3cf342cad",
+    "route_signature": "0236032e2a84e305",
     "distance_m": 3712.2,
     "detour_pct": 14.7,
     "score": 62,
@@ -2685,7 +2685,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 91,
@@ -2696,7 +2696,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "cdb9dd2896ecf767",
+    "route_signature": "1a79928ec7883126",
     "distance_m": 3444.3,
     "detour_pct": 6.4,
     "score": 98,
@@ -2707,7 +2707,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "7063f2851f46143f",
+    "route_signature": "7998d1501403b867",
     "distance_m": 3515.7,
     "detour_pct": 8.6,
     "score": 97,
@@ -2728,7 +2728,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 29,
@@ -2739,7 +2739,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3315651f5c5ecff4",
+    "route_signature": "8c8101136f9f5835",
     "distance_m": 3246.2,
     "detour_pct": 0.3,
     "score": 39,
@@ -2750,7 +2750,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "95fa647980c2fb2f",
+    "route_signature": "015da7697ff3fe73",
     "distance_m": 3543.9,
     "detour_pct": 9.5,
     "score": 42,
@@ -2771,7 +2771,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 50,
@@ -2782,7 +2782,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "7a481adacd79f93a",
+    "route_signature": "915adce75e501e14",
     "distance_m": 3472.3,
     "detour_pct": 7.3,
     "score": 61,
@@ -2793,7 +2793,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "e5faae4fa5f1e9d2",
+    "route_signature": "24628b8e378a87e7",
     "distance_m": 3558.3,
     "detour_pct": 9.9,
     "score": 60,
@@ -2814,7 +2814,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 91,
@@ -2825,7 +2825,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "004f299c79d45db7",
+    "route_signature": "8d5546e9361fb6e0",
     "distance_m": 3531.7,
     "detour_pct": 9.1,
     "score": 96,
@@ -2836,7 +2836,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "a76a4093eda9f6de",
+    "route_signature": "569fb6d3aec76938",
     "distance_m": 3254.6,
     "detour_pct": 0.5,
     "score": 92,
@@ -2857,7 +2857,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 85,
@@ -2868,7 +2868,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "e384fc2354ec9043",
+    "route_signature": "b113b75d7ea1dfa5",
     "distance_m": 3526.3,
     "detour_pct": 8.9,
     "score": 93,
@@ -2879,7 +2879,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "85956f6a2d07f7ac",
+    "route_signature": "42911c7ba51ea825",
     "distance_m": 3580.0,
     "detour_pct": 10.6,
     "score": 92,
@@ -2900,7 +2900,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 75,
@@ -2911,7 +2911,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 75,
@@ -2922,7 +2922,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "63bfc5be2c5767fc",
+    "route_signature": "ed5d28dbc5fc56cf",
     "distance_m": 3400.4,
     "detour_pct": 5.0,
     "score": 76,
@@ -2943,7 +2943,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 70,
@@ -2954,7 +2954,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3776414254983894",
+    "route_signature": "c3b412c328d7e3c5",
     "distance_m": 3337.0,
     "detour_pct": 3.1,
     "score": 75,
@@ -2965,7 +2965,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "8cea18bf900ed79a",
+    "route_signature": "cf2db341b3023e65",
     "distance_m": 3404.3,
     "detour_pct": 5.2,
     "score": 73,
@@ -2986,7 +2986,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 25,
@@ -2997,7 +2997,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "7db8a79cda8789ab",
+    "route_signature": "bcc76073c280ff59",
     "distance_m": 3347.7,
     "detour_pct": 3.4,
     "score": 31,
@@ -3008,7 +3008,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "318cd1c1ddba03a3",
+    "route_signature": "aa19629a0d2d93d9",
     "distance_m": 3559.7,
     "detour_pct": 10.0,
     "score": 30,
@@ -3029,7 +3029,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 33,
@@ -3040,7 +3040,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "20233553add982c7",
+    "route_signature": "ee7baa2124b18ea9",
     "distance_m": 3478.4,
     "detour_pct": 7.4,
     "score": 47,
@@ -3051,7 +3051,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "1c797d512de4c2ba",
+    "route_signature": "2ae0bc0faaf6f6ff",
     "distance_m": 3519.6,
     "detour_pct": 8.7,
     "score": 46,
@@ -3072,7 +3072,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "47c43e974868f684",
+    "route_signature": "4df4a16bebef27e7",
     "distance_m": 3237.4,
     "detour_pct": 0.0,
     "score": 66,
@@ -3083,7 +3083,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "02f0da9dfa34b5ed",
+    "route_signature": "e529e047edcaba66",
     "distance_m": 3607.8,
     "detour_pct": 11.4,
     "score": 86,
@@ -3094,7 +3094,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "ea64976af76e1965",
+    "route_signature": "d4274014c4c406bb",
     "distance_m": 3542.7,
     "detour_pct": 9.4,
     "score": 82,
@@ -3115,7 +3115,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 98,
@@ -3126,7 +3126,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 98,
@@ -3137,7 +3137,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "105e7a6927915eda",
+    "route_signature": "47c7d285bcb83934",
     "distance_m": 983.0,
     "detour_pct": 5.5,
     "score": 98,
@@ -3158,7 +3158,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 37,
@@ -3169,7 +3169,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9e2b4a15f0fbc61d",
+    "route_signature": "726a6b6082633d63",
     "distance_m": 934.9,
     "detour_pct": 0.4,
     "score": 38,
@@ -3180,7 +3180,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a93b4c2612269736",
+    "route_signature": "49cf1317d663d09b",
     "distance_m": 1008.0,
     "detour_pct": 8.2,
     "score": 36,
@@ -3201,7 +3201,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 83,
@@ -3212,7 +3212,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "65ebe6c568c02a4e",
+    "route_signature": "c0f39545a3af8fc9",
     "distance_m": 1008.9,
     "detour_pct": 8.3,
     "score": 95,
@@ -3223,7 +3223,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "9124281587d0632c",
+    "route_signature": "905f7a6cfa92da23",
     "distance_m": 1088.3,
     "detour_pct": 16.8,
     "score": 96,
@@ -3244,7 +3244,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 39,
@@ -3255,7 +3255,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c62cf051041c4961",
+    "route_signature": "b90bf7b3899c83bc",
     "distance_m": 936.1,
     "detour_pct": 0.5,
     "score": 47,
@@ -3266,7 +3266,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "fcbb3ea394c9e03e",
+    "route_signature": "c897389f9481958e",
     "distance_m": 1007.9,
     "detour_pct": 8.2,
     "score": 47,
@@ -3287,7 +3287,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 66,
@@ -3298,7 +3298,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 66,
@@ -3309,7 +3309,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "e880a5ee7bfddc1f",
+    "route_signature": "486330fe19fe63a8",
     "distance_m": 1012.7,
     "detour_pct": 8.7,
     "score": 69,
@@ -3330,7 +3330,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 92,
@@ -3341,7 +3341,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "eacd40a09d94018d",
+    "route_signature": "d168c97bf2671c0e",
     "distance_m": 933.1,
     "detour_pct": 0.2,
     "score": 93,
@@ -3352,7 +3352,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "fcbb3ea394c9e03e",
+    "route_signature": "c897389f9481958e",
     "distance_m": 1007.9,
     "detour_pct": 8.2,
     "score": 94,
@@ -3373,7 +3373,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 92,
@@ -3384,7 +3384,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 92,
@@ -3395,7 +3395,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "762e033adc4602ff",
+    "route_signature": "ccbccb310031f3bb",
     "distance_m": 932.1,
     "detour_pct": 0.1,
     "score": 92,
@@ -3416,7 +3416,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 70,
@@ -3427,7 +3427,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 70,
@@ -3438,7 +3438,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "105e7a6927915eda",
+    "route_signature": "47c7d285bcb83934",
     "distance_m": 983.0,
     "detour_pct": 5.5,
     "score": 70,
@@ -3459,7 +3459,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 35,
@@ -3470,7 +3470,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9e2b4a15f0fbc61d",
+    "route_signature": "726a6b6082633d63",
     "distance_m": 934.9,
     "detour_pct": 0.4,
     "score": 36,
@@ -3481,7 +3481,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "9782b5d419d8eaa2",
+    "route_signature": "605640d9b3d50b0b",
     "distance_m": 983.4,
     "detour_pct": 5.6,
     "score": 32,
@@ -3502,7 +3502,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 12,
@@ -3513,7 +3513,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c62cf051041c4961",
+    "route_signature": "b90bf7b3899c83bc",
     "distance_m": 936.1,
     "detour_pct": 0.5,
     "score": 16,
@@ -3524,7 +3524,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "105e7a6927915eda",
+    "route_signature": "47c7d285bcb83934",
     "distance_m": 983.0,
     "detour_pct": 5.5,
     "score": 12,
@@ -3545,7 +3545,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 52,
@@ -3556,7 +3556,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 52,
@@ -3567,7 +3567,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a93b4c2612269736",
+    "route_signature": "49cf1317d663d09b",
     "distance_m": 1008.0,
     "detour_pct": 8.2,
     "score": 55,
@@ -3588,7 +3588,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "b8da9c4f2612872b",
+    "route_signature": "4717aeea6e44c14e",
     "distance_m": 931.4,
     "detour_pct": 0.0,
     "score": 88,
@@ -3599,7 +3599,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "65ebe6c568c02a4e",
+    "route_signature": "c0f39545a3af8fc9",
     "distance_m": 1008.9,
     "detour_pct": 8.3,
     "score": 97,
@@ -3610,7 +3610,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "9124281587d0632c",
+    "route_signature": "905f7a6cfa92da23",
     "distance_m": 1088.3,
     "detour_pct": 16.8,
     "score": 97,
@@ -3631,7 +3631,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -3642,7 +3642,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -3653,7 +3653,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 96,
@@ -3674,7 +3674,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 20,
@@ -3685,7 +3685,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 22,
@@ -3696,7 +3696,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a04eff5c9dfcbea1",
+    "route_signature": "d6648aae452234b9",
     "distance_m": 1537.8,
     "detour_pct": 23.7,
     "score": 26,
@@ -3717,7 +3717,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 98,
@@ -3728,7 +3728,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 98,
@@ -3739,7 +3739,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 98,
@@ -3760,7 +3760,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 17,
@@ -3771,7 +3771,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 17,
@@ -3782,7 +3782,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 17,
@@ -3803,7 +3803,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 52,
@@ -3814,7 +3814,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "d8b192982cba974d",
+    "route_signature": "ac184290b2903d01",
     "distance_m": 1458.4,
     "detour_pct": 17.3,
     "score": 64,
@@ -3825,7 +3825,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 54,
@@ -3846,7 +3846,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -3857,7 +3857,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 96,
@@ -3868,7 +3868,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 96,
@@ -3889,7 +3889,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 92,
@@ -3900,7 +3900,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 92,
@@ -3911,7 +3911,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 92,
@@ -3932,7 +3932,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 69,
@@ -3943,7 +3943,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 69,
@@ -3954,7 +3954,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 69,
@@ -3975,7 +3975,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 59,
@@ -3986,7 +3986,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 61,
@@ -3997,7 +3997,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0c495a159e1b3ad9",
+    "route_signature": "d294340639a37f70",
     "distance_m": 1445.5,
     "detour_pct": 16.3,
     "score": 57,
@@ -4018,7 +4018,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 4,
@@ -4029,7 +4029,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 4,
@@ -4040,7 +4040,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 4,
@@ -4061,7 +4061,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 56,
@@ -4072,7 +4072,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 56,
@@ -4083,7 +4083,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 56,
@@ -4104,7 +4104,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 97,
@@ -4115,7 +4115,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f4478bf635e7c5a5",
+    "route_signature": "169144e21b487961",
     "distance_m": 1243.4,
     "detour_pct": 0.0,
     "score": 97,
@@ -4126,7 +4126,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0cfd6d286f3cc8d8",
+    "route_signature": "99986cd269f3987e",
     "distance_m": 1253.8,
     "detour_pct": 0.8,
     "score": 97,
@@ -4147,7 +4147,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 85,
@@ -4158,7 +4158,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "79579d9f04a832d8",
+    "route_signature": "7dcada0011e9942d",
     "distance_m": 3726.9,
     "detour_pct": 1.1,
     "score": 95,
@@ -4169,7 +4169,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "caef8a9a0c577026",
+    "route_signature": "211395b3799db468",
     "distance_m": 3723.5,
     "detour_pct": 1.0,
     "score": 95,
@@ -4190,7 +4190,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 32,
@@ -4201,7 +4201,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "e6d147a0e73c7e95",
+    "route_signature": "7dbade0f2a492e9f",
     "distance_m": 4308.7,
     "detour_pct": 16.8,
     "score": 57,
@@ -4212,7 +4212,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "62f14ff2c1d95e8b",
+    "route_signature": "4ec234169bc63a57",
     "distance_m": 3772.7,
     "detour_pct": 2.3,
     "score": 42,
@@ -4233,7 +4233,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 90,
@@ -4244,7 +4244,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "2d731059cad38fc8",
+    "route_signature": "1f89eb70edbb72dc",
     "distance_m": 3760.5,
     "detour_pct": 2.0,
     "score": 94,
@@ -4255,7 +4255,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "3530cfcbaa39a6f3",
+    "route_signature": "1c31b1b55292fff2",
     "distance_m": 3730.5,
     "detour_pct": 1.2,
     "score": 93,
@@ -4276,7 +4276,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 27,
@@ -4287,7 +4287,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "d0aa252e04b3a478",
+    "route_signature": "2a96cc67cad9e087",
     "distance_m": 3754.1,
     "detour_pct": 1.8,
     "score": 41,
@@ -4298,7 +4298,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "34bd0a284d1684bc",
+    "route_signature": "2f495931f99a4307",
     "distance_m": 3795.8,
     "detour_pct": 2.9,
     "score": 41,
@@ -4319,7 +4319,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 59,
@@ -4330,7 +4330,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9c4d9a4f0a662788",
+    "route_signature": "e93e600d2e7473dd",
     "distance_m": 3764.9,
     "detour_pct": 2.1,
     "score": 65,
@@ -4341,7 +4341,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "bd42d6daf4ad9579",
+    "route_signature": "ff11c8ae5c13b92e",
     "distance_m": 3792.3,
     "detour_pct": 2.8,
     "score": 60,
@@ -4362,7 +4362,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 92,
@@ -4373,7 +4373,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "242909c123f6d43f",
+    "route_signature": "e5084b682705949d",
     "distance_m": 3760.0,
     "detour_pct": 2.0,
     "score": 96,
@@ -4384,7 +4384,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "8be4a5df3e2c4054",
+    "route_signature": "44c826d65dcb9cf8",
     "distance_m": 3770.4,
     "detour_pct": 2.2,
     "score": 95,
@@ -4405,7 +4405,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 89,
@@ -4416,7 +4416,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "df808227371c7355",
+    "route_signature": "915c7b2f090e0e15",
     "distance_m": 3746.6,
     "detour_pct": 1.6,
     "score": 94,
@@ -4427,7 +4427,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "134a072f42ed4a10",
+    "route_signature": "5199937a4efbaa9c",
     "distance_m": 3762.2,
     "detour_pct": 2.0,
     "score": 94,
@@ -4448,7 +4448,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 76,
@@ -4459,7 +4459,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b06b9df4b8246f39",
+    "route_signature": "f8b9d9b20157b1f4",
     "distance_m": 3755.8,
     "detour_pct": 1.9,
     "score": 77,
@@ -4470,7 +4470,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "99d3f784047c58ee",
+    "route_signature": "8a95f5496eeaa327",
     "distance_m": 3797.8,
     "detour_pct": 3.0,
     "score": 75,
@@ -4491,7 +4491,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 47,
@@ -4502,7 +4502,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "749b99b2dbccbfa0",
+    "route_signature": "3fcc8c774da8b873",
     "distance_m": 3774.7,
     "detour_pct": 2.4,
     "score": 57,
@@ -4513,7 +4513,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "53b01117d3729a68",
+    "route_signature": "6d263488c0e4c88c",
     "distance_m": 3736.8,
     "detour_pct": 1.3,
     "score": 56,
@@ -4534,7 +4534,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 23,
@@ -4545,7 +4545,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c475b5f6730e887d",
+    "route_signature": "e42331bde6df5cec",
     "distance_m": 3719.0,
     "detour_pct": 0.9,
     "score": 26,
@@ -4556,7 +4556,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "457087d42aa814ec",
+    "route_signature": "8d521f34776c4fb6",
     "distance_m": 3768.3,
     "detour_pct": 2.2,
     "score": 24,
@@ -4577,7 +4577,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 46,
@@ -4588,7 +4588,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "de91d25e8ed17a15",
+    "route_signature": "da248547cdaf6cc4",
     "distance_m": 3781.4,
     "detour_pct": 2.5,
     "score": 52,
@@ -4599,7 +4599,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0f7fa1905f70172f",
+    "route_signature": "62134f4ca20b508e",
     "distance_m": 3796.6,
     "detour_pct": 3.0,
     "score": 51,
@@ -4620,7 +4620,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a1e7020f076ff5b4",
+    "route_signature": "1ecd3c643d7a19f0",
     "distance_m": 3687.5,
     "detour_pct": 0.0,
     "score": 86,
@@ -4631,7 +4631,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "a72a0d9a838ad21e",
+    "route_signature": "0a4fbaa2684e91b0",
     "distance_m": 3756.8,
     "detour_pct": 1.9,
     "score": 94,
@@ -4642,7 +4642,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "8f14834e96ce6104",
+    "route_signature": "443c465193733978",
     "distance_m": 3810.5,
     "detour_pct": 3.3,
     "score": 94,
@@ -4663,7 +4663,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 80,
@@ -4674,7 +4674,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "62f4ada80725dd37",
+    "route_signature": "b67c9a97e2919a6f",
     "distance_m": 2939.2,
     "detour_pct": 1.7,
     "score": 95,
@@ -4685,7 +4685,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "b7412340de68cb22",
+    "route_signature": "da8a8ec87f2c8884",
     "distance_m": 3023.3,
     "detour_pct": 4.6,
     "score": 95,
@@ -4706,7 +4706,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 30,
@@ -4717,7 +4717,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "00d362e230d6ebab",
+    "route_signature": "a5514a6e97ca431d",
     "distance_m": 2929.9,
     "detour_pct": 1.4,
     "score": 40,
@@ -4728,7 +4728,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "b59baf40a84038f4",
+    "route_signature": "8870c14a5b1fecc1",
     "distance_m": 2992.5,
     "detour_pct": 3.5,
     "score": 38,
@@ -4749,7 +4749,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 74,
@@ -4760,7 +4760,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "db124cb9e6d9207b",
+    "route_signature": "cd6e0321f85d0a03",
     "distance_m": 2939.9,
     "detour_pct": 1.7,
     "score": 88,
@@ -4771,7 +4771,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "c6a36ca5ff7cfd5f",
+    "route_signature": "1eb2141848f1e881",
     "distance_m": 3040.4,
     "detour_pct": 5.2,
     "score": 88,
@@ -4792,7 +4792,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 35,
@@ -4803,7 +4803,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "20881af2a87b5932",
+    "route_signature": "09403d39c4208077",
     "distance_m": 2958.0,
     "detour_pct": 2.3,
     "score": 54,
@@ -4814,7 +4814,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "55ceba6905900fed",
+    "route_signature": "52f2686cbde6f4e3",
     "distance_m": 2987.5,
     "detour_pct": 3.4,
     "score": 47,
@@ -4835,7 +4835,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 56,
@@ -4846,7 +4846,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c95fe235fe2cc7bf",
+    "route_signature": "9855cf06d458e235",
     "distance_m": 2915.4,
     "detour_pct": 0.9,
     "score": 64,
@@ -4857,7 +4857,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "5b7e43336b8ec7f8",
+    "route_signature": "c428e20d4c917ba2",
     "distance_m": 3013.2,
     "detour_pct": 4.3,
     "score": 60,
@@ -4878,7 +4878,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 84,
@@ -4889,7 +4889,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "fc57061236f28558",
+    "route_signature": "223c3d0c4587791c",
     "distance_m": 2933.9,
     "detour_pct": 1.5,
     "score": 96,
@@ -4900,7 +4900,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "da2761bcb7e8b61d",
+    "route_signature": "17a70686dbf62c50",
     "distance_m": 2929.8,
     "detour_pct": 1.4,
     "score": 96,
@@ -4921,7 +4921,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 80,
@@ -4932,7 +4932,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "ce8cbe82b798ff47",
+    "route_signature": "29eb1382d80dda5b",
     "distance_m": 2918.7,
     "detour_pct": 1.0,
     "score": 89,
@@ -4943,7 +4943,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "5ccddb5ab040accb",
+    "route_signature": "fe3be7c4fe3db984",
     "distance_m": 2930.9,
     "detour_pct": 1.4,
     "score": 89,
@@ -4964,7 +4964,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 77,
@@ -4975,7 +4975,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "e16f9ae8f322ef94",
+    "route_signature": "0ea462976a061c02",
     "distance_m": 2904.1,
     "detour_pct": 0.5,
     "score": 79,
@@ -4986,7 +4986,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "fd50a8818103b730",
+    "route_signature": "4a9c3cb163690528",
     "distance_m": 2913.5,
     "detour_pct": 0.8,
     "score": 79,
@@ -5007,7 +5007,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 44,
@@ -5018,7 +5018,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "5148f0d6afbf8d45",
+    "route_signature": "b0814a26f75f1ad3",
     "distance_m": 2937.1,
     "detour_pct": 1.6,
     "score": 52,
@@ -5029,7 +5029,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "a4b764ce7ec1a3ea",
+    "route_signature": "2a1ad609e622ef2f",
     "distance_m": 2942.1,
     "detour_pct": 1.8,
     "score": 52,
@@ -5050,7 +5050,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 22,
@@ -5061,7 +5061,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "dbc70a50d14d5bd6",
+    "route_signature": "b5cfb5261aba0b32",
     "distance_m": 2961.0,
     "detour_pct": 2.4,
     "score": 29,
@@ -5072,7 +5072,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "64beac8ed571c7a4",
+    "route_signature": "a241ab5e08714a38",
     "distance_m": 2962.9,
     "detour_pct": 2.5,
     "score": 29,
@@ -5093,7 +5093,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 29,
@@ -5104,7 +5104,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "16eef64d023c6c72",
+    "route_signature": "ba5f8a0b8162ec2e",
     "distance_m": 2950.9,
     "detour_pct": 2.1,
     "score": 39,
@@ -5115,7 +5115,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "868e8edb93652983",
+    "route_signature": "7448197e99f43c97",
     "distance_m": 2922.3,
     "detour_pct": 1.1,
     "score": 38,
@@ -5136,7 +5136,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "43f9543b6bb3dc9d",
+    "route_signature": "558228e575d6131a",
     "distance_m": 2890.3,
     "detour_pct": 0.0,
     "score": 64,
@@ -5147,7 +5147,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "cba51d72e4dd803e",
+    "route_signature": "6dbd99268ede2f24",
     "distance_m": 2921.0,
     "detour_pct": 1.1,
     "score": 89,
@@ -5158,7 +5158,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a40ee73d74dcb05b",
+    "route_signature": "784fe8536f5aaa2c",
     "distance_m": 2998.1,
     "detour_pct": 3.7,
     "score": 88,
@@ -5179,7 +5179,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 97,
@@ -5190,7 +5190,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 97,
@@ -5201,7 +5201,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "29a80fb8fa1ffb01",
+    "route_signature": "95c06bd1c99c516e",
     "distance_m": 1806.9,
     "detour_pct": 15.6,
     "score": 98,
@@ -5222,7 +5222,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 39,
@@ -5233,7 +5233,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "2c924494a344358f",
+    "route_signature": "3488d134a71d7a0b",
     "distance_m": 1566.7,
     "detour_pct": 0.3,
     "score": 40,
@@ -5244,7 +5244,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "c4477cc2c6702e18",
+    "route_signature": "6192e9b21a4a80b6",
     "distance_m": 1751.3,
     "detour_pct": 12.1,
     "score": 44,
@@ -5265,7 +5265,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 90,
@@ -5276,7 +5276,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 90,
@@ -5287,7 +5287,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "77dd816394abdb82",
+    "route_signature": "0b6e6d821344da72",
     "distance_m": 1705.6,
     "detour_pct": 9.2,
     "score": 92,
@@ -5308,7 +5308,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 28,
@@ -5319,7 +5319,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "188297d07fcb4e9f",
+    "route_signature": "4bbbc0a128575f38",
     "distance_m": 1716.4,
     "detour_pct": 9.9,
     "score": 34,
@@ -5330,7 +5330,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d656b0627d4ad543",
+    "route_signature": "723758792eab8bc0",
     "distance_m": 1666.1,
     "detour_pct": 6.6,
     "score": 32,
@@ -5351,7 +5351,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 59,
@@ -5362,7 +5362,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "faf38f753be22b33",
+    "route_signature": "08e9b114484ab69b",
     "distance_m": 1566.9,
     "detour_pct": 0.3,
     "score": 60,
@@ -5373,7 +5373,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d504f1578afcab33",
+    "route_signature": "e0107f450fbe6a91",
     "distance_m": 1809.3,
     "detour_pct": 15.8,
     "score": 65,
@@ -5394,7 +5394,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 95,
@@ -5405,7 +5405,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 95,
@@ -5416,7 +5416,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "89256a2a38857581",
+    "route_signature": "af5d6174dae815de",
     "distance_m": 1563.8,
     "detour_pct": 0.1,
     "score": 95,
@@ -5437,7 +5437,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 88,
@@ -5448,7 +5448,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "432333b416a53f33",
+    "route_signature": "1f4b206dc86f6fec",
     "distance_m": 1663.1,
     "detour_pct": 6.4,
     "score": 92,
@@ -5459,7 +5459,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "7a85e9ee4849a2e5",
+    "route_signature": "b180601b372f086b",
     "distance_m": 1826.3,
     "detour_pct": 16.9,
     "score": 93,
@@ -5480,7 +5480,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 73,
@@ -5491,7 +5491,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 73,
@@ -5502,7 +5502,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "48f4572d2d538052",
+    "route_signature": "9e72c88db673a772",
     "distance_m": 1806.5,
     "detour_pct": 15.6,
     "score": 76,
@@ -5523,7 +5523,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 43,
@@ -5534,7 +5534,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "0ea33e5cd3807ab8",
+    "route_signature": "9c8ee4eb8ae45842",
     "distance_m": 1671.4,
     "detour_pct": 7.0,
     "score": 60,
@@ -5545,7 +5545,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d2fcc7e3ae20ebe3",
+    "route_signature": "32bbf53d4751e6d8",
     "distance_m": 1838.8,
     "detour_pct": 17.7,
     "score": 61,
@@ -5566,7 +5566,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 15,
@@ -5577,7 +5577,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "591bb9a2dabe93ad",
+    "route_signature": "2cfb06a890bb4b09",
     "distance_m": 1564.4,
     "detour_pct": 0.1,
     "score": 16,
@@ -5588,7 +5588,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "26f9e2f519773419",
+    "route_signature": "acf09498b8076af2",
     "distance_m": 1807.9,
     "detour_pct": 15.7,
     "score": 22,
@@ -5609,7 +5609,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 50,
@@ -5620,7 +5620,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 50,
@@ -5631,7 +5631,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "e7ab3cd79cd17423",
+    "route_signature": "a3e371ceaf399350",
     "distance_m": 1735.1,
     "detour_pct": 11.1,
     "score": 54,
@@ -5652,7 +5652,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40f02a5cdba5e953",
+    "route_signature": "4a04a8fae112d3a9",
     "distance_m": 1562.4,
     "detour_pct": 0.0,
     "score": 86,
@@ -5663,7 +5663,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "432333b416a53f33",
+    "route_signature": "1f4b206dc86f6fec",
     "distance_m": 1663.1,
     "detour_pct": 6.4,
     "score": 95,
@@ -5674,7 +5674,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3f0056904820731f",
+    "route_signature": "c97e62861777b2a9",
     "distance_m": 1824.4,
     "detour_pct": 16.8,
     "score": 96,
@@ -5695,7 +5695,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 72,
@@ -5706,7 +5706,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "2e17f024059c5742",
+    "route_signature": "69716bd652d117eb",
     "distance_m": 2781.2,
     "detour_pct": 1.1,
     "score": 84,
@@ -5717,7 +5717,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "6619183ff6a557c9",
+    "route_signature": "a51c2283889a906c",
     "distance_m": 2785.8,
     "detour_pct": 1.3,
     "score": 84,
@@ -5738,7 +5738,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 25,
@@ -5749,7 +5749,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "ddf40ff43c4aabdc",
+    "route_signature": "32b3af70259e61fe",
     "distance_m": 2804.7,
     "detour_pct": 2.0,
     "score": 51,
@@ -5760,7 +5760,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "420450da32fcfadd",
+    "route_signature": "edaf61a3197cd0fe",
     "distance_m": 2800.7,
     "detour_pct": 1.8,
     "score": 50,
@@ -5781,7 +5781,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 96,
@@ -5792,7 +5792,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "d52a3d29e18dc0b5",
+    "route_signature": "94ed5f1a6d6d62be",
     "distance_m": 2763.3,
     "detour_pct": 0.5,
     "score": 97,
@@ -5803,7 +5803,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "8674ebc72b0f413d",
+    "route_signature": "839c5283391b94e2",
     "distance_m": 2756.8,
     "detour_pct": 0.2,
     "score": 97,
@@ -5824,7 +5824,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 33,
@@ -5835,7 +5835,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3552e8dd6a5520c0",
+    "route_signature": "5115f9c69678615a",
     "distance_m": 2779.2,
     "detour_pct": 1.0,
     "score": 43,
@@ -5846,7 +5846,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "5ea857052bbf59a2",
+    "route_signature": "2ddef3fd4793e6ca",
     "distance_m": 2807.8,
     "detour_pct": 2.1,
     "score": 43,
@@ -5867,7 +5867,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 52,
@@ -5878,7 +5878,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "8b4d195699515042",
+    "route_signature": "789cc433612910c1",
     "distance_m": 2783.2,
     "detour_pct": 1.2,
     "score": 67,
@@ -5889,7 +5889,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d1bad760cbc89e87",
+    "route_signature": "5ab730970fdfe330",
     "distance_m": 2787.1,
     "detour_pct": 1.3,
     "score": 62,
@@ -5910,7 +5910,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 90,
@@ -5921,7 +5921,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "61ce2a9c2c677648",
+    "route_signature": "1fc9a1510ac784d7",
     "distance_m": 2779.8,
     "detour_pct": 1.1,
     "score": 95,
@@ -5932,7 +5932,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "15361af083d84430",
+    "route_signature": "b7b05d2650c4b9b8",
     "distance_m": 2784.4,
     "detour_pct": 1.2,
     "score": 95,
@@ -5953,7 +5953,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 87,
@@ -5964,7 +5964,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "8c7423dacdd3be6e",
+    "route_signature": "f7693d3b015fd14e",
     "distance_m": 2780.5,
     "detour_pct": 1.1,
     "score": 94,
@@ -5975,7 +5975,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "9407fdd8d8495cc8",
+    "route_signature": "2b414c724cee6736",
     "distance_m": 2786.9,
     "detour_pct": 1.3,
     "score": 94,
@@ -5996,7 +5996,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 71,
@@ -6007,7 +6007,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3fe2249cfc6f7922",
+    "route_signature": "109bdbfa23ec9afa",
     "distance_m": 2761.9,
     "detour_pct": 0.4,
     "score": 73,
@@ -6018,7 +6018,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3999f5334bc717e4",
+    "route_signature": "13f836c8c1d0bee9",
     "distance_m": 2780.2,
     "detour_pct": 1.1,
     "score": 73,
@@ -6039,7 +6039,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 45,
@@ -6050,7 +6050,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b519d3901b2a7510",
+    "route_signature": "d1944cded978da30",
     "distance_m": 2786.4,
     "detour_pct": 1.3,
     "score": 51,
@@ -6061,7 +6061,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "c8455a00abc46b52",
+    "route_signature": "418e41b417a89743",
     "distance_m": 2895.9,
     "detour_pct": 5.3,
     "score": 48,
@@ -6082,7 +6082,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 12,
@@ -6093,7 +6093,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9a58da388635b2be",
+    "route_signature": "d08cfbb0b3a544bd",
     "distance_m": 2802.0,
     "detour_pct": 1.9,
     "score": 24,
@@ -6104,7 +6104,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "e92d6f61f7a6485d",
+    "route_signature": "825ac09a41c924b2",
     "distance_m": 2810.2,
     "detour_pct": 2.2,
     "score": 22,
@@ -6125,7 +6125,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 30,
@@ -6136,7 +6136,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "e605b423be3b0d71",
+    "route_signature": "d0f62e91721ba737",
     "distance_m": 2777.0,
     "detour_pct": 1.0,
     "score": 43,
@@ -6147,7 +6147,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "fe052853e9b37024",
+    "route_signature": "8b23d2a7e6455475",
     "distance_m": 2800.6,
     "detour_pct": 1.8,
     "score": 43,
@@ -6168,7 +6168,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "a996aae7f61bff52",
+    "route_signature": "bdfc8aa7bdbb9651",
     "distance_m": 2750.6,
     "detour_pct": 0.0,
     "score": 87,
@@ -6179,7 +6179,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "0961e6dba358235b",
+    "route_signature": "e83b3e7a01008952",
     "distance_m": 2772.6,
     "detour_pct": 0.8,
     "score": 92,
@@ -6190,7 +6190,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "ddd1c32fa2c69793",
+    "route_signature": "6a55d2341dd7a588",
     "distance_m": 2857.4,
     "detour_pct": 3.9,
     "score": 92,
@@ -6211,7 +6211,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 73,
@@ -6222,7 +6222,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c505492b9f9b015b",
+    "route_signature": "09df120a5ba5bcf1",
     "distance_m": 1163.8,
     "detour_pct": 0.9,
     "score": 85,
@@ -6233,7 +6233,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a9f588ae41402e14",
+    "route_signature": "84955597ee1ea38c",
     "distance_m": 1221.1,
     "detour_pct": 5.9,
     "score": 83,
@@ -6254,7 +6254,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 61,
@@ -6265,7 +6265,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "de665f734f9269f7",
+    "route_signature": "df41abde9177938c",
     "distance_m": 1166.5,
     "detour_pct": 1.1,
     "score": 72,
@@ -6276,7 +6276,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "9d0306141e7054da",
+    "route_signature": "67e483f4c2190d64",
     "distance_m": 1178.7,
     "detour_pct": 2.2,
     "score": 66,
@@ -6297,7 +6297,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 50,
@@ -6308,7 +6308,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3331ec51b1835d2c",
+    "route_signature": "3a38f1f78fe40af3",
     "distance_m": 1233.2,
     "detour_pct": 6.9,
     "score": 62,
@@ -6319,7 +6319,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "b74c23442e8d6ffb",
+    "route_signature": "4220918dd931cf78",
     "distance_m": 1164.9,
     "detour_pct": 1.0,
     "score": 56,
@@ -6340,7 +6340,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 48,
@@ -6351,7 +6351,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "281cc18b93a32520",
+    "route_signature": "dd4b89e6def8b35c",
     "distance_m": 1213.6,
     "detour_pct": 5.2,
     "score": 54,
@@ -6362,7 +6362,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "e9e520497016ea92",
+    "route_signature": "0026df3ae1c8f070",
     "distance_m": 1154.8,
     "detour_pct": 0.1,
     "score": 49,
@@ -6383,7 +6383,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 54,
@@ -6394,7 +6394,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "5fbeacab1eae4db9",
+    "route_signature": "42c87977b0e40cdc",
     "distance_m": 1266.1,
     "detour_pct": 9.8,
     "score": 66,
@@ -6405,7 +6405,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "a7347e15d806da59",
+    "route_signature": "428523df1435170c",
     "distance_m": 1167.3,
     "detour_pct": 1.2,
     "score": 57,
@@ -6426,7 +6426,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 75,
@@ -6437,7 +6437,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b74c23442e8d6ffb",
+    "route_signature": "4220918dd931cf78",
     "distance_m": 1164.9,
     "detour_pct": 1.0,
     "score": 78,
@@ -6448,7 +6448,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "db3e76584b948c08",
+    "route_signature": "9b3480d881ad0afe",
     "distance_m": 1281.2,
     "detour_pct": 11.1,
     "score": 81,
@@ -6469,7 +6469,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 48,
@@ -6480,7 +6480,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "02a3a9928cea19f0",
+    "route_signature": "0342c5e5a362ba7d",
     "distance_m": 1258.7,
     "detour_pct": 9.1,
     "score": 73,
@@ -6491,7 +6491,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "92872c25339b7c1e",
+    "route_signature": "c6e7e3e2e6bba1fa",
     "distance_m": 1252.2,
     "detour_pct": 8.6,
     "score": 72,
@@ -6512,7 +6512,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 69,
@@ -6523,7 +6523,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "657a5cc192ff5d56",
+    "route_signature": "02178bc7f8437ca4",
     "distance_m": 1165.4,
     "detour_pct": 1.0,
     "score": 70,
@@ -6534,7 +6534,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "e9e520497016ea92",
+    "route_signature": "0026df3ae1c8f070",
     "distance_m": 1154.8,
     "detour_pct": 0.1,
     "score": 69,
@@ -6555,7 +6555,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 41,
@@ -6566,7 +6566,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "3d1cf1132ea57303",
+    "route_signature": "ad99bbfede939e81",
     "distance_m": 1165.8,
     "detour_pct": 1.1,
     "score": 46,
@@ -6577,7 +6577,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "9f1ef9991b9c8efc",
+    "route_signature": "0851d9d2d270b5ae",
     "distance_m": 1198.4,
     "detour_pct": 3.9,
     "score": 41,
@@ -6598,7 +6598,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 53,
@@ -6609,7 +6609,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 53,
@@ -6620,7 +6620,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "657a5cc192ff5d56",
+    "route_signature": "02178bc7f8437ca4",
     "distance_m": 1165.4,
     "detour_pct": 1.0,
     "score": 51,
@@ -6641,7 +6641,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 54,
@@ -6652,7 +6652,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 54,
@@ -6663,7 +6663,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3d1cf1132ea57303",
+    "route_signature": "ad99bbfede939e81",
     "distance_m": 1165.8,
     "detour_pct": 1.1,
     "score": 52,
@@ -6684,7 +6684,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 71,
@@ -6695,7 +6695,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3989f6ff3c8f76c3",
+    "route_signature": "5936d2348c932211",
     "distance_m": 1153.4,
     "detour_pct": 0.0,
     "score": 71,
@@ -6706,7 +6706,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "6858dda94ca2d093",
+    "route_signature": "89bc07143ea55fbf",
     "distance_m": 1164.7,
     "detour_pct": 1.0,
     "score": 65,
@@ -6727,7 +6727,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 59,
@@ -6738,7 +6738,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "ae2e5bd09e16ede0",
+    "route_signature": "768c649bea4e45a6",
     "distance_m": 2741.3,
     "detour_pct": 15.9,
     "score": 86,
@@ -6749,7 +6749,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "e33de94013a9f40d",
+    "route_signature": "908639dd1ceaacbb",
     "distance_m": 2443.7,
     "detour_pct": 3.3,
     "score": 70,
@@ -6770,7 +6770,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 63,
@@ -6781,7 +6781,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "afd2609ee570acfc",
+    "route_signature": "5801beae40938b73",
     "distance_m": 2708.9,
     "detour_pct": 14.5,
     "score": 83,
@@ -6792,7 +6792,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "c862376551f175ff",
+    "route_signature": "8807860147490843",
     "distance_m": 2763.9,
     "detour_pct": 16.8,
     "score": 79,
@@ -6813,7 +6813,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 73,
@@ -6824,7 +6824,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "af1866b366b48f10",
+    "route_signature": "6f55c7ce3e860260",
     "distance_m": 2805.1,
     "detour_pct": 18.6,
     "score": 91,
@@ -6835,7 +6835,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "4248d5b916905206",
+    "route_signature": "6c27a7e9fa5756f9",
     "distance_m": 2449.5,
     "detour_pct": 3.6,
     "score": 81,
@@ -6856,7 +6856,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 74,
@@ -6867,7 +6867,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "8a3b9c4bcceeaebe",
+    "route_signature": "5ea46c126ff6c06b",
     "distance_m": 2398.2,
     "detour_pct": 1.4,
     "score": 77,
@@ -6878,7 +6878,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "6e19bbc8a1d80695",
+    "route_signature": "8dacf2a8fac0ba5c",
     "distance_m": 2740.0,
     "detour_pct": 15.8,
     "score": 77,
@@ -6899,7 +6899,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 34,
@@ -6910,7 +6910,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "6d00de3cdc52974d",
+    "route_signature": "662edfab3f19e5b7",
     "distance_m": 2713.0,
     "detour_pct": 14.7,
     "score": 60,
@@ -6921,7 +6921,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "5038c6746f46155c",
+    "route_signature": "d2918093b0a41c1c",
     "distance_m": 2451.9,
     "detour_pct": 3.7,
     "score": 49,
@@ -6942,7 +6942,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 61,
@@ -6953,7 +6953,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "e33de94013a9f40d",
+    "route_signature": "908639dd1ceaacbb",
     "distance_m": 2443.7,
     "detour_pct": 3.3,
     "score": 67,
@@ -6964,7 +6964,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "5355cbf2aa7f74f8",
+    "route_signature": "607f86f52d409cfd",
     "distance_m": 2394.9,
     "detour_pct": 1.2,
     "score": 65,
@@ -6985,7 +6985,7 @@
    "feasible": 2,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 41,
@@ -6996,7 +6996,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "be43d4a8a619b0ee",
+    "route_signature": "5a3aa16506815ed6",
     "distance_m": 2388.1,
     "detour_pct": 1.0,
     "score": 45,
@@ -7018,7 +7018,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 73,
@@ -7029,7 +7029,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "4d230d2e0f14f85f",
+    "route_signature": "bb396dfd66f7f781",
     "distance_m": 2373.7,
     "detour_pct": 0.4,
     "score": 74,
@@ -7040,7 +7040,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0c1268a697990636",
+    "route_signature": "b013fe0adac90a95",
     "distance_m": 2572.1,
     "detour_pct": 8.7,
     "score": 74,
@@ -7061,7 +7061,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 50,
@@ -7072,7 +7072,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "0271df8fbb4de8da",
+    "route_signature": "3b21202f2e6b59df",
     "distance_m": 2387.7,
     "detour_pct": 0.9,
     "score": 53,
@@ -7083,7 +7083,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a52c522445719220",
+    "route_signature": "0c1036977b354037",
     "distance_m": 2564.1,
     "detour_pct": 8.4,
     "score": 49,
@@ -7104,7 +7104,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 76,
@@ -7115,7 +7115,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "907ede30209ccd94",
+    "route_signature": "2dc57aa2e442a2ee",
     "distance_m": 2373.6,
     "detour_pct": 0.3,
     "score": 78,
@@ -7126,7 +7126,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "4f68e40ee683ad91",
+    "route_signature": "a7dbee5c1cbebc82",
     "distance_m": 2575.0,
     "detour_pct": 8.9,
     "score": 77,
@@ -7147,7 +7147,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 66,
@@ -7158,7 +7158,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 66,
@@ -7169,7 +7169,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0a8be3747082b962",
+    "route_signature": "beda42f5d4dbb0e0",
     "distance_m": 2555.6,
     "detour_pct": 8.0,
     "score": 65,
@@ -7190,7 +7190,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "acf0cda5318055b5",
+    "route_signature": "f9d2b3e522198ae1",
     "distance_m": 2365.4,
     "detour_pct": 0.0,
     "score": 40,
@@ -7201,7 +7201,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b9df2b0ebcd4066b",
+    "route_signature": "ddb5c33c0c3b9fce",
     "distance_m": 2584.8,
     "detour_pct": 9.3,
     "score": 59,
@@ -7212,7 +7212,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "ddff9410ef23436c",
+    "route_signature": "10970f5cf88ff71f",
     "distance_m": 2811.9,
     "detour_pct": 18.9,
     "score": 60,
@@ -7233,7 +7233,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 64,
@@ -7244,7 +7244,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "81d165bf95dd45c0",
+    "route_signature": "d0c5828eac4130e3",
     "distance_m": 1958.3,
     "detour_pct": 21.4,
     "score": 81,
@@ -7255,7 +7255,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "564bc36d83b28479",
+    "route_signature": "2efcdde45c8922ee",
     "distance_m": 1982.8,
     "detour_pct": 22.9,
     "score": 80,
@@ -7276,7 +7276,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 63,
@@ -7287,7 +7287,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "ac86ea9fc07167dd",
+    "route_signature": "489a6e6f5a7b75db",
     "distance_m": 1967.1,
     "detour_pct": 22.0,
     "score": 81,
@@ -7298,7 +7298,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "b314d1be1fc5c33e",
+    "route_signature": "585c6c735fafe3df",
     "distance_m": 1819.8,
     "detour_pct": 12.8,
     "score": 77,
@@ -7319,7 +7319,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 89,
@@ -7330,7 +7330,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 89,
@@ -7341,7 +7341,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "9b87e1b1d1c52596",
+    "route_signature": "4d30446bd13654c7",
     "distance_m": 1618.6,
     "detour_pct": 0.4,
     "score": 89,
@@ -7362,7 +7362,7 @@
    "feasible": 2,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 78,
@@ -7373,7 +7373,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 78,
@@ -7384,7 +7384,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "be46a448a7eb988b",
+    "route_signature": "228afd333259c440",
     "distance_m": 1910.0,
     "detour_pct": 18.4,
     "score": 85,
@@ -7405,7 +7405,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 43,
@@ -7416,7 +7416,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9b87e1b1d1c52596",
+    "route_signature": "4d30446bd13654c7",
     "distance_m": 1618.6,
     "detour_pct": 0.4,
     "score": 48,
@@ -7427,7 +7427,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "27a398c305e2734b",
+    "route_signature": "c3497bd0fe1a4115",
     "distance_m": 1966.6,
     "detour_pct": 21.9,
     "score": 50,
@@ -7448,7 +7448,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 56,
@@ -7459,7 +7459,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "23f67c359e9cf94c",
+    "route_signature": "5ad4c0108a1451dc",
     "distance_m": 1616.4,
     "detour_pct": 0.2,
     "score": 57,
@@ -7470,7 +7470,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "bab02e30a8bcccae",
+    "route_signature": "cd3a7be7681a01f2",
     "distance_m": 1818.2,
     "detour_pct": 12.7,
     "score": 54,
@@ -7491,7 +7491,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 23,
@@ -7502,7 +7502,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "63600e3da0c81602",
+    "route_signature": "9ba3daeed0a98623",
     "distance_m": 1786.2,
     "detour_pct": 10.7,
     "score": 38,
@@ -7513,7 +7513,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "62e14fb4e37c6039",
+    "route_signature": "9c27e54539d98d57",
     "distance_m": 1648.4,
     "detour_pct": 2.2,
     "score": 29,
@@ -7534,7 +7534,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 68,
@@ -7545,7 +7545,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 68,
@@ -7556,7 +7556,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "eef2ace06a4a827b",
+    "route_signature": "40cc3eb5351a3d49",
     "distance_m": 1809.8,
     "detour_pct": 12.2,
     "score": 65,
@@ -7577,7 +7577,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 33,
@@ -7588,7 +7588,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b42ba4e9ee1559d3",
+    "route_signature": "04f7164eed0a2f6b",
     "distance_m": 1619.5,
     "detour_pct": 0.4,
     "score": 35,
@@ -7599,7 +7599,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "4595879507c204db",
+    "route_signature": "9758a64afe2d8dd8",
     "distance_m": 1817.9,
     "detour_pct": 12.7,
     "score": 38,
@@ -7620,7 +7620,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 85,
@@ -7631,7 +7631,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 85,
@@ -7642,7 +7642,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "eb7a05e21b8e8391",
+    "route_signature": "dd2093a245228fc8",
     "distance_m": 1797.5,
     "detour_pct": 11.4,
     "score": 85,
@@ -7663,7 +7663,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 65,
@@ -7674,7 +7674,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 65,
@@ -7685,7 +7685,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "eef2ace06a4a827b",
+    "route_signature": "40cc3eb5351a3d49",
     "distance_m": 1809.8,
     "detour_pct": 12.2,
     "score": 64,
@@ -7706,7 +7706,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "3a3925371e42b41d",
+    "route_signature": "20b441ad8defc26d",
     "distance_m": 1612.9,
     "detour_pct": 0.0,
     "score": 39,
@@ -7717,7 +7717,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "4d0a081cf52ab35a",
+    "route_signature": "6fdd9041dfbb5fa5",
     "distance_m": 1847.7,
     "detour_pct": 14.6,
     "score": 58,
@@ -7728,7 +7728,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0b9ef4f8847001d8",
+    "route_signature": "4a07d7ddf4bfa40d",
     "distance_m": 1857.4,
     "detour_pct": 15.2,
     "score": 53,
@@ -7749,7 +7749,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 86,
@@ -7760,7 +7760,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b438a8059e0e9d68",
+    "route_signature": "e931b35b084fc9f4",
     "distance_m": 1071.3,
     "detour_pct": 1.1,
     "score": 90,
@@ -7771,7 +7771,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "2fb472dbcf656e3b",
+    "route_signature": "305b699f00dcf281",
     "distance_m": 1145.0,
     "detour_pct": 8.1,
     "score": 90,
@@ -7792,7 +7792,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 64,
@@ -7803,7 +7803,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c2eb9db532135033",
+    "route_signature": "6cc3c404b5749d17",
     "distance_m": 1060.4,
     "detour_pct": 0.1,
     "score": 65,
@@ -7814,7 +7814,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "05f13be749dae4c4",
+    "route_signature": "3e26f7167e77d67c",
     "distance_m": 1094.6,
     "detour_pct": 3.3,
     "score": 64,
@@ -7835,7 +7835,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 88,
@@ -7846,7 +7846,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9ee40efdc127bbf5",
+    "route_signature": "093e3ac49d43fd90",
     "distance_m": 1071.5,
     "detour_pct": 1.1,
     "score": 88,
@@ -7857,7 +7857,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "3006d0ea40e3243c",
+    "route_signature": "3ef08d7c437f3c64",
     "distance_m": 1062.5,
     "detour_pct": 0.3,
     "score": 88,
@@ -7878,7 +7878,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 25,
@@ -7889,7 +7889,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "21cb57db0d5bc5ea",
+    "route_signature": "9e486eda96c482dc",
     "distance_m": 1095.3,
     "detour_pct": 3.4,
     "score": 39,
@@ -7900,7 +7900,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "6a6d909577940e3c",
+    "route_signature": "ec11a560df08b153",
     "distance_m": 1097.5,
     "detour_pct": 3.6,
     "score": 35,
@@ -7921,7 +7921,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 52,
@@ -7932,7 +7932,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "b35446d6789ce11b",
+    "route_signature": "e3d693ca27fb8df5",
     "distance_m": 1072.4,
     "detour_pct": 1.2,
     "score": 59,
@@ -7943,7 +7943,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "92609f494acf861f",
+    "route_signature": "97d3eafcd15f02b3",
     "distance_m": 1144.0,
     "detour_pct": 8.0,
     "score": 59,
@@ -7964,7 +7964,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 77,
@@ -7975,7 +7975,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 77,
@@ -7986,7 +7986,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "8f219ce4ef7ca351",
+    "route_signature": "b37cc27d5a66dd1d",
     "distance_m": 1061.9,
     "detour_pct": 0.2,
     "score": 77,
@@ -8007,7 +8007,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 61,
@@ -8018,7 +8018,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "4c97e1e64789ebb8",
+    "route_signature": "c6e297c00879eb75",
     "distance_m": 1093.5,
     "detour_pct": 3.2,
     "score": 75,
@@ -8029,7 +8029,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "4e2fcc0e48ca208c",
+    "route_signature": "1e873ee3140f998c",
     "distance_m": 1120.9,
     "detour_pct": 5.8,
     "score": 75,
@@ -8050,7 +8050,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 69,
@@ -8061,7 +8061,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 69,
@@ -8072,7 +8072,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "230e4caaad2552d2",
+    "route_signature": "f8a7a85fa9e778f0",
     "distance_m": 1059.9,
     "detour_pct": 0.0,
     "score": 69,
@@ -8093,7 +8093,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 46,
@@ -8104,7 +8104,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "c776007f3c192446",
+    "route_signature": "feab2fff8125a877",
     "distance_m": 1060.7,
     "detour_pct": 0.1,
     "score": 47,
@@ -8115,7 +8115,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "7c021f681c302541",
+    "route_signature": "6183d889448d3a5a",
     "distance_m": 1144.7,
     "detour_pct": 8.0,
     "score": 47,
@@ -8136,7 +8136,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 19,
@@ -8147,7 +8147,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "f2128a47f0303e49",
+    "route_signature": "7c62903cb54e46fe",
     "distance_m": 1147.0,
     "detour_pct": 8.3,
     "score": 37,
@@ -8158,7 +8158,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "5b421c78e14faaa3",
+    "route_signature": "e87f520a1751ed5c",
     "distance_m": 1071.5,
     "detour_pct": 1.1,
     "score": 27,
@@ -8179,7 +8179,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 54,
@@ -8190,7 +8190,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "caf97312370fff4e",
+    "route_signature": "10f33c67d2913a8a",
     "distance_m": 1071.3,
     "detour_pct": 1.1,
     "score": 57,
@@ -8201,7 +8201,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "e5764868a5a57de1",
+    "route_signature": "36d0fb80bf284279",
     "distance_m": 1070.7,
     "detour_pct": 1.1,
     "score": 56,
@@ -8222,7 +8222,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 73,
@@ -8233,7 +8233,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "f07e386d20df0702",
+    "route_signature": "6014f52395e1fc3b",
     "distance_m": 1059.5,
     "detour_pct": 0.0,
     "score": 73,
@@ -8244,7 +8244,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "ac20c6cb24063d09",
+    "route_signature": "5603447f2a129f39",
     "distance_m": 1060.3,
     "detour_pct": 0.1,
     "score": 73,
@@ -8265,7 +8265,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 83,
@@ -8276,7 +8276,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "ec1ef0df4d6909fa",
+    "route_signature": "e43898b673241ac0",
     "distance_m": 1976.6,
     "detour_pct": 0.2,
     "score": 83,
@@ -8287,7 +8287,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "7ca458bceb3514a5",
+    "route_signature": "0cb28cd42ced8575",
     "distance_m": 1981.6,
     "detour_pct": 0.4,
     "score": 83,
@@ -8308,7 +8308,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 35,
@@ -8319,7 +8319,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "8d4c3bf50ff1884b",
+    "route_signature": "0abf337f28113abb",
     "distance_m": 2423.8,
     "detour_pct": 22.8,
     "score": 72,
@@ -8330,7 +8330,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "6818a43e41ac2149",
+    "route_signature": "25c7f1c2957b3f10",
     "distance_m": 2175.1,
     "detour_pct": 10.2,
     "score": 59,
@@ -8351,7 +8351,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 71,
@@ -8362,7 +8362,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "63702090d0c7bc79",
+    "route_signature": "9a0ed8c247c9a08b",
     "distance_m": 2122.2,
     "detour_pct": 7.6,
     "score": 79,
@@ -8373,7 +8373,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "6b45b6d4b5ecbee1",
+    "route_signature": "c01345cc3f814341",
     "distance_m": 2315.8,
     "detour_pct": 17.4,
     "score": 80,
@@ -8394,7 +8394,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 34,
@@ -8405,7 +8405,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "7bcd54aa77cdca62",
+    "route_signature": "d8ce2f1f3ccc11b2",
     "distance_m": 2237.1,
     "detour_pct": 13.4,
     "score": 65,
@@ -8416,7 +8416,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "ca1ba608ec95fe74",
+    "route_signature": "d8593c774ecf0569",
     "distance_m": 2181.7,
     "detour_pct": 10.6,
     "score": 62,
@@ -8437,7 +8437,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 52,
@@ -8448,7 +8448,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "dbd715af577827b0",
+    "route_signature": "554cb4f34b4a4560",
     "distance_m": 2104.3,
     "detour_pct": 6.6,
     "score": 59,
@@ -8459,7 +8459,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "76ad72310e1b91d4",
+    "route_signature": "ad9c75878858fb86",
     "distance_m": 1983.9,
     "detour_pct": 0.5,
     "score": 53,
@@ -8480,7 +8480,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 64,
@@ -8491,7 +8491,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 64,
@@ -8502,7 +8502,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "ec1ef0df4d6909fa",
+    "route_signature": "e43898b673241ac0",
     "distance_m": 1976.6,
     "detour_pct": 0.2,
     "score": 64,
@@ -8523,7 +8523,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 57,
@@ -8534,7 +8534,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "d2b612536d48641c",
+    "route_signature": "df810a291d52f2cd",
     "distance_m": 2247.7,
     "detour_pct": 13.9,
     "score": 64,
@@ -8545,7 +8545,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "0dd16f414704486f",
+    "route_signature": "43ea75457850eac1",
     "distance_m": 2050.7,
     "detour_pct": 3.9,
     "score": 56,
@@ -8566,7 +8566,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 69,
@@ -8577,7 +8577,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "243ebdd2032d3a3e",
+    "route_signature": "ef6ac27b958d70f5",
     "distance_m": 2175.7,
     "detour_pct": 10.3,
     "score": 77,
@@ -8588,7 +8588,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a97c4dba0d6c449d",
+    "route_signature": "9cd37c59c1728d39",
     "distance_m": 2303.8,
     "detour_pct": 16.8,
     "score": 77,
@@ -8609,7 +8609,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 37,
@@ -8620,7 +8620,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "af0ad2d9048fa7d9",
+    "route_signature": "2de7b115015193c5",
     "distance_m": 2242.4,
     "detour_pct": 13.6,
     "score": 51,
@@ -8631,7 +8631,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "f2b72ecaa42ac6a5",
+    "route_signature": "d805f54092aebd69",
     "distance_m": 2297.8,
     "detour_pct": 16.5,
     "score": 45,
@@ -8652,7 +8652,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 44,
@@ -8663,7 +8663,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "6b14c93d4b99fda2",
+    "route_signature": "c457d0896717b816",
     "distance_m": 2254.4,
     "detour_pct": 14.3,
     "score": 54,
@@ -8674,7 +8674,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "5c78afeb59ca5f69",
+    "route_signature": "0688830ca1d2a9a3",
     "distance_m": 1978.9,
     "detour_pct": 0.3,
     "score": 46,
@@ -8695,7 +8695,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 44,
@@ -8706,7 +8706,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 44,
@@ -8717,7 +8717,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "5c78afeb59ca5f69",
+    "route_signature": "0688830ca1d2a9a3",
     "distance_m": 1978.9,
     "detour_pct": 0.3,
     "score": 44,
@@ -8738,7 +8738,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "5cdbcb8d7bf2786a",
+    "route_signature": "7938745643362b12",
     "distance_m": 1973.1,
     "detour_pct": 0.0,
     "score": 56,
@@ -8749,7 +8749,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "1d2635cfce6644bd",
+    "route_signature": "14679c22e64bb587",
     "distance_m": 2173.9,
     "detour_pct": 10.2,
     "score": 70,
@@ -8760,7 +8760,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "3aa2b1d05bb26303",
+    "route_signature": "57d7e8a9d553ccdd",
     "distance_m": 2321.3,
     "detour_pct": 17.6,
     "score": 71,
@@ -8781,7 +8781,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 30,
@@ -8792,7 +8792,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 30,
@@ -8803,7 +8803,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "ad9782138c1ca88d",
+    "route_signature": "782f20d13e5ecdfd",
     "distance_m": 2130.5,
     "detour_pct": 10.0,
     "score": 30,
@@ -8824,7 +8824,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 79,
@@ -8835,7 +8835,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9f5f7ef1b066b7e9",
+    "route_signature": "ca7a93c9d74157c6",
     "distance_m": 2040.5,
     "detour_pct": 5.4,
     "score": 83,
@@ -8846,7 +8846,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "d123f18cb612f13d",
+    "route_signature": "2ad4125dbe33fc73",
     "distance_m": 2045.5,
     "detour_pct": 5.6,
     "score": 78,
@@ -8867,7 +8867,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 25,
@@ -8878,7 +8878,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "1817ab4e1cf554c7",
+    "route_signature": "30ceda8c0f2962ae",
     "distance_m": 2140.2,
     "detour_pct": 10.5,
     "score": 32,
@@ -8889,7 +8889,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "52df36e7ac948f46",
+    "route_signature": "e40ccb6a706014e2",
     "distance_m": 2075.5,
     "detour_pct": 7.2,
     "score": 29,
@@ -8910,7 +8910,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 42,
@@ -8921,7 +8921,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "cdc8b12e07032ae9",
+    "route_signature": "f1fc2f9a5e7d22f7",
     "distance_m": 2334.1,
     "detour_pct": 20.5,
     "score": 64,
@@ -8932,7 +8932,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "2cce7f35de237cbb",
+    "route_signature": "c2c832d499632228",
     "distance_m": 2046.8,
     "detour_pct": 5.7,
     "score": 57,
@@ -8953,7 +8953,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 38,
@@ -8964,7 +8964,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "dff75d821560f5ff",
+    "route_signature": "15886fde650b7ed8",
     "distance_m": 2137.5,
     "detour_pct": 10.4,
     "score": 61,
@@ -8975,7 +8975,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "ebe1a7cb4f39163e",
+    "route_signature": "f3770e393f187e4e",
     "distance_m": 2257.3,
     "detour_pct": 16.6,
     "score": 55,
@@ -8996,7 +8996,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 67,
@@ -9007,7 +9007,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 67,
@@ -9018,7 +9018,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "a4a36541dd8d8452",
+    "route_signature": "ebcd0c23316b9a9d",
     "distance_m": 2054.4,
     "detour_pct": 6.1,
     "score": 68,
@@ -9039,7 +9039,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 39,
@@ -9050,7 +9050,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "dff75d821560f5ff",
+    "route_signature": "15886fde650b7ed8",
     "distance_m": 2137.5,
     "detour_pct": 10.4,
     "score": 45,
@@ -9061,7 +9061,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "ad20f5aa779411d1",
+    "route_signature": "a404ef2461f2d79e",
     "distance_m": 2053.7,
     "detour_pct": 6.1,
     "score": 36,
@@ -9082,7 +9082,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 78,
@@ -9093,7 +9093,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 78,
@@ -9104,7 +9104,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "dff75d821560f5ff",
+    "route_signature": "15886fde650b7ed8",
     "distance_m": 2137.5,
     "detour_pct": 10.4,
     "score": 82,
@@ -9125,7 +9125,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 20,
@@ -9136,7 +9136,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "dff75d821560f5ff",
+    "route_signature": "15886fde650b7ed8",
     "distance_m": 2137.5,
     "detour_pct": 10.4,
     "score": 40,
@@ -9147,7 +9147,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "1c1fe8446ceb7171",
+    "route_signature": "5773bacf08c9b96e",
     "distance_m": 2265.2,
     "detour_pct": 17.0,
     "score": 39,
@@ -9168,7 +9168,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 70,
@@ -9179,7 +9179,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "9f5f7ef1b066b7e9",
+    "route_signature": "ca7a93c9d74157c6",
     "distance_m": 2040.5,
     "detour_pct": 5.4,
     "score": 77,
@@ -9190,7 +9190,7 @@
    },
    "alternative": {
     "objective": "experience_balanced",
-    "route_signature": "ecd9a8882b227507",
+    "route_signature": "a11c7517f1e45c14",
     "distance_m": 1958.5,
     "detour_pct": 1.1,
     "score": 72,
@@ -9211,7 +9211,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 19,
@@ -9222,7 +9222,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "9112b343e730c3d2",
+    "route_signature": "406ada9dfd162d5b",
     "distance_m": 2139.3,
     "detour_pct": 10.5,
     "score": 29,
@@ -9233,7 +9233,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "503ad2b2e4de13ce",
+    "route_signature": "42b7c8e5069b6269",
     "distance_m": 2050.5,
     "detour_pct": 5.9,
     "score": 21,
@@ -9254,7 +9254,7 @@
    "feasible": 3,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 67,
@@ -9265,7 +9265,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "06fde175049dca97",
+    "route_signature": "9dfd516b96c38c1f",
     "distance_m": 1936.3,
     "detour_pct": 0.0,
     "score": 67,
@@ -9276,7 +9276,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "5463b760f76657d3",
+    "route_signature": "78ef36424d4b745f",
     "distance_m": 2130.3,
     "detour_pct": 10.0,
     "score": 71,
@@ -9297,7 +9297,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 84,
@@ -9308,7 +9308,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "a271d3b10f259e07",
+    "route_signature": "80cbdd0dd5c98774",
     "distance_m": 1938.2,
     "detour_pct": 0.2,
     "score": 87,
@@ -9319,7 +9319,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "6f27723192b071d8",
+    "route_signature": "09c7d879e62e837b",
     "distance_m": 1962.7,
     "detour_pct": 1.5,
     "score": 86,
@@ -9340,7 +9340,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 51,
@@ -9351,7 +9351,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "337d4059ed9ab704",
+    "route_signature": "e86f4767cb6c98b6",
     "distance_m": 1945.0,
     "detour_pct": 0.6,
     "score": 56,
@@ -9362,7 +9362,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "34357d0cef3c1953",
+    "route_signature": "5a1f258fef783750",
     "distance_m": 1991.0,
     "detour_pct": 2.9,
     "score": 55,
@@ -9383,7 +9383,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 64,
@@ -9394,7 +9394,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "fe69b65294e9a564",
+    "route_signature": "ac545b560534368a",
     "distance_m": 1937.7,
     "detour_pct": 0.2,
     "score": 73,
@@ -9405,7 +9405,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "934288add523aaba",
+    "route_signature": "490ecb817a838776",
     "distance_m": 1963.9,
     "detour_pct": 1.5,
     "score": 73,
@@ -9426,7 +9426,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 50,
@@ -9437,7 +9437,7 @@
    },
    "preference": {
     "objective": "alternative",
-    "route_signature": "8b709610ca3dc1b5",
+    "route_signature": "064b88573b7fa919",
     "distance_m": 1991.3,
     "detour_pct": 3.0,
     "score": 55,
@@ -9448,7 +9448,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "814d2ecb3b88e6c4",
+    "route_signature": "116964c88828e3f2",
     "distance_m": 1938.4,
     "detour_pct": 0.2,
     "score": 53,
@@ -9469,7 +9469,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 54,
@@ -9480,7 +9480,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "177c06936f2bb971",
+    "route_signature": "ee3fe7aa5a8bba41",
     "distance_m": 1937.9,
     "detour_pct": 0.2,
     "score": 65,
@@ -9491,7 +9491,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "8d6fcb016f19efd9",
+    "route_signature": "51c4a80e62098d3f",
     "distance_m": 1965.9,
     "detour_pct": 1.6,
     "score": 62,
@@ -9512,7 +9512,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 76,
@@ -9523,7 +9523,7 @@
    },
    "preference": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 76,
@@ -9534,7 +9534,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "08c2d76e22e64cf9",
+    "route_signature": "2a42f274808bdcd7",
     "distance_m": 1937.5,
     "detour_pct": 0.2,
     "score": 76,
@@ -9555,7 +9555,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 72,
@@ -9566,7 +9566,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "63656079848fc319",
+    "route_signature": "1ee9924d897fe0ce",
     "distance_m": 1940.1,
     "detour_pct": 0.3,
     "score": 76,
@@ -9577,7 +9577,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "acff425ad43f31cc",
+    "route_signature": "b483a5d74e1a6e10",
     "distance_m": 1960.3,
     "detour_pct": 1.4,
     "score": 75,
@@ -9598,7 +9598,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 47,
@@ -9609,7 +9609,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "a7ec05804c662232",
+    "route_signature": "5fc88c9460d67e2c",
     "distance_m": 1937.6,
     "detour_pct": 0.2,
     "score": 56,
@@ -9620,7 +9620,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "4f17cbdcb805b601",
+    "route_signature": "97ac7e44b9290777",
     "distance_m": 1999.4,
     "detour_pct": 3.4,
     "score": 56,
@@ -9641,7 +9641,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 39,
@@ -9652,7 +9652,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "1958de1da33cd235",
+    "route_signature": "2752985040194227",
     "distance_m": 1938.1,
     "detour_pct": 0.2,
     "score": 43,
@@ -9663,7 +9663,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "307555bed80e1763",
+    "route_signature": "217b909b7aca70f6",
     "distance_m": 1990.8,
     "detour_pct": 2.9,
     "score": 42,
@@ -9684,7 +9684,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 38,
@@ -9695,7 +9695,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "96f2f10cd81e82c5",
+    "route_signature": "6855a934e6089b6e",
     "distance_m": 2148.8,
     "detour_pct": 11.1,
     "score": 56,
@@ -9706,7 +9706,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "7e8584aa05f527f7",
+    "route_signature": "db5b49ea9368ef89",
     "distance_m": 2189.8,
     "detour_pct": 13.2,
     "score": 55,
@@ -9727,7 +9727,7 @@
    "feasible": 5,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 47,
@@ -9738,7 +9738,7 @@
    },
    "preference": {
     "objective": "experience_balanced",
-    "route_signature": "670b6955185769ae",
+    "route_signature": "c6ab62c96f2ffd9a",
     "distance_m": 1937.8,
     "detour_pct": 0.2,
     "score": 49,
@@ -9749,7 +9749,7 @@
    },
    "alternative": {
     "objective": "experience",
-    "route_signature": "c1b434a2d2b0198a",
+    "route_signature": "f1580b1ffc4e8cc6",
     "distance_m": 1938.7,
     "detour_pct": 0.2,
     "score": 49,
@@ -9770,7 +9770,7 @@
    "feasible": 4,
    "shortest": {
     "objective": "shortest",
-    "route_signature": "40b1fca1f383c062",
+    "route_signature": "bf4ee8ba43321c1e",
     "distance_m": 1934.1,
     "detour_pct": 0.0,
     "score": 59,
@@ -9781,7 +9781,7 @@
    },
    "preference": {
     "objective": "experience",
-    "route_signature": "14f6a72f145383ea",
+    "route_signature": "2c83de9bd80c382b",
     "distance_m": 1938.7,
     "detour_pct": 0.2,
     "score": 65,
@@ -9792,7 +9792,7 @@
    },
    "alternative": {
     "objective": "alternative",
-    "route_signature": "297b8b86e47edb41",
+    "route_signature": "462ffcbaac6dad6f",
     "distance_m": 1962.2,
     "detour_pct": 1.5,
     "score": 64,
@@ -9805,7 +9805,7 @@
    "gain_points": 6
   }
  ],
- "generated_at": "2026-11-17T21:33:40Z",
+ "generated_at": "2026-11-17T22:18:18Z",
  "summary": {
   "all": {
    "runs": 228,

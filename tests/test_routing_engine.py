@@ -35,7 +35,7 @@ class A_PedestrianNetwork(unittest.TestCase):
         s = NET.status()
         self.assertGreater(s['nodes'], 30000); self.assertGreater(s['edges'], 100000)
         self.assertGreater(s['main_component_nodes'] / s['nodes'], .85)
-        self.assertTrue(s['network_version'].startswith('osm-walk-'))
+        self.assertTrue(s['network_version'].startswith('nyc3-'), 'the joined network of Manhattan, Brooklyn and Long Island City')
 
     def test_pedestrian_restrictions_applied(self):
         for u, v, k, gi, rev, length, osmids, t in NET.edges:
@@ -130,7 +130,7 @@ class C_ExperienceScores(unittest.TestCase):
     def test_versions_consistent(self):
         self.assertEqual(NET.score_version, MAP_BUILD['calculation_version'], 'routes and the Explore map must use one score build')
         self.assertEqual({r['score_version'] for r in MAPPING}, {NET.score_version})
-        self.assertEqual({r['network_version'] for r in MAPPING}, {NET.network_version})
+        self.assertEqual({r['network_version'] for r in MAPPING}, {NET.meta['area_network_versions']['manhattan']}, 'Manhattan mapping is for the Manhattan download joined into the network')
 
     def test_edge_score_is_overlap_weighted_mean_of_segments(self):
         rows = {}
@@ -177,8 +177,8 @@ class C_ExperienceScores(unittest.TestCase):
 
     def test_scores_are_the_explore_map_build(self):
         """One score build: the edge scores name the Explore map's calculation version and say how many indicators back them."""
-        meta = NET.score_meta
-        self.assertEqual(meta['score_version'], MAP_BUILD['calculation_version'])
+        self.assertEqual(NET.score_meta['score_version'], MAP_BUILD['calculation_version'])
+        meta = NET.score_meta['by_area']['manhattan'] | {'score_version': NET.score_meta['score_version'], 'keys': NET.score_meta['keys']}
         self.assertEqual(meta['keys'], [d['key'] for d in MAP_BUILD['dimensions']])
         for d in MAP_BUILD['dimensions']:
             basis = meta['indicator_basis'][d['key']]

@@ -46,6 +46,7 @@ SCORES = os.path.join(ROOT, 'data', 'pedestrian', 'edge-scores.json.gz')
 MAP_BUILD = os.path.join(ROOT, 'data', 'dimensions', 'manhattan')
 OUT = os.path.join(ROOT, 'data', 'pedestrian', 'direct-edge-indicators.json.gz')
 PARK_TILES = 'data/layers/tiles/parks/*.json'
+PARKS = [None]  # Manhattan: park_polygons() from the map-layer tiles; another area: its own download (set in main)
 KEYS = ['seat_access_m', 'route_directness', 'crime_k', 'waterfront_access_m']
 # An indicator is written only if, on street segments, at least this share of values match the map build's stored
 # value within the tolerance, and where a value exists in one it exists in the other. Segment geometry is read back
@@ -91,7 +92,7 @@ class Lines:
 
     def src(self, name):
         if name not in self._src:
-            self._src[name] = {'seating': sources.seating, 'crime': sources.crime, 'water': sources.water_and_waterfront, 'parks': park_polygons}[name]()
+            self._src[name] = {'seating': sources.seating, 'crime': sources.crime, 'water': sources.water_and_waterfront, 'parks': PARKS[0]}[name]()
         return self._src[name]
 
 
@@ -131,7 +132,17 @@ SHARED_SOURCES = {}
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--verify', action='store_true', help='only run the self-check on street segments; write nothing')
+    ap.add_argument('--area', default='manhattan', help='manhattan (default), brooklyn or lic')
     args = ap.parse_args()
+    global GRAPH, SCORES, MAP_BUILD, OUT
+    PARKS[0] = park_polygons
+    if args.area != 'manhattan':  # the area's own sources and walk network, exactly as its map build used them
+        from scripts.dimensions import area_build
+        area_build.configure(args.area)
+        P = os.path.join(ROOT, 'data', 'pedestrian')
+        GRAPH, SCORES = os.path.join(P, f'{args.area}-walk-graph.json.gz'), os.path.join(P, f'{args.area}-edge-scores.json.gz')
+        MAP_BUILD, OUT = os.path.join(ROOT, 'data', 'dimensions', args.area), os.path.join(P, f'{args.area}-direct-edge-indicators.json.gz')
+        PARKS[0] = lambda: sources.parks()
     xy, u, v, w, _ = sources.osm_walk_graph()
     graph = geo.Graph(xy, u, v, w)
     report = verify(graph)

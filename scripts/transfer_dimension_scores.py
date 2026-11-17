@@ -127,7 +127,14 @@ def verify_previous(graph, prev, overlaps):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--verify-previous', action='store_true', help='only check that this code reproduces the previous file from the previous street scores')
+    ap.add_argument('--area', default='manhattan', help='manhattan (default), brooklyn or lic (after scripts/match_area.py and measure_direct_edges.py --area)')
     args = ap.parse_args()
+    global GRAPH, MAPPING, SCORES, MANIFEST, SEGMENTS, INDICATORS, DIRECT_EXTRA
+    area = args.area
+    if area != 'manhattan':
+        GRAPH, MAPPING, SCORES = P('pedestrian', f'{area}-walk-graph.json.gz'), P('pedestrian', f'{area}-street_osm_edge_mapping.csv.gz'), P('pedestrian', f'{area}-edge-scores.json.gz')
+        MANIFEST, SEGMENTS, INDICATORS = P('dimensions', area, 'manifest.json'), P('dimensions', area, 'segments.geojson'), P('dimensions', area, 'indicators.json')
+        DIRECT_EXTRA = P('pedestrian', f'{area}-direct-edge-indicators.json.gz')
     graph = json.load(gzip.open(GRAPH, 'rt', encoding='utf-8'))
     prev = json.load(gzip.open(SCORES, 'rt', encoding='utf-8'))
     overlaps, mapping_rows = load_overlaps(graph)
@@ -149,13 +156,13 @@ def main():
     # Directly measured edges are ranked on the same scale as the street scores: against Manhattan's segments alone, or,
     # once scripts/dimensions/combine_areas.py has run, against every segment of the combined areas (one shared scale).
     combined = os.path.join(os.path.dirname(MANIFEST), '..', 'combined.json')
-    ref_areas = ['manhattan']
+    ref_areas = [area]
     if os.path.exists(combined):
         cdoc = json.load(open(combined, encoding='utf-8'))
         if cdoc['calculation_version'] != manifest['calculation_version']:
             sys.exit('combined.json and the Manhattan manifest disagree; rerun scripts/dimensions/combine_areas.py.')
         ref_areas = cdoc['areas']
-    ref_raw = [json.load(open(os.path.join(os.path.dirname(MANIFEST), '..', a, 'indicators.json'), encoding='utf-8'))['raw'] if a != 'manhattan' else ind['raw'] for a in ref_areas]
+    ref_raw = [ind['raw'] if a == area else json.load(open(os.path.join(os.path.dirname(MANIFEST), '..', a, 'indicators.json'), encoding='utf-8'))['raw'] for a in ref_areas]
     reference = {k: sorted(v for r in ref_raw for v in r[k] if v is not None) for inds in computed for k, _ in inds}
 
     # Indicators of the map build measured on the directly measured edges themselves (scripts/measure_direct_edges.py).
@@ -216,11 +223,11 @@ def main():
             'indicator_basis': {k: {'computed_indicators': [x for x, _ in computed[j]],
                                     'routable_length_with_all': round(full[j] / routable_len, 3),
                                     'routable_length_with_fewer': round(partial[j] / routable_len, 3)} for j, k in enumerate(keys)},
-            'direct_edge_indicators': {'file': 'data/pedestrian/direct-edge-indicators.json.gz', 'indicators': extra_keys,
+            'direct_edge_indicators': {'file': os.path.relpath(DIRECT_EXTRA, ROOT), 'indicators': extra_keys,
                                        'not_measured_on_direct_edges': sorted({k for inds in computed for k, _ in inds} - set(extra_keys) - {k for g in out if g['src'] == 'direct_osm' for k in g['raw']})},
             'ranking_reference_areas': ref_areas,
             'street_scores': {'spec_version': manifest['spec_version'], 'calculation_version': manifest['calculation_version'],
-                              'built_at': manifest['built_at'], 'segments': manifest['segments'], 'files': 'data/dimensions/manhattan/'},
+                              'built_at': manifest['built_at'], 'segments': manifest['segments'], 'files': f'data/dimensions/{area}/'},
             'fields': prev['metadata']['fields'],
             'method': f'Street scores are those of the Explore Urban Data map ({manifest["calculation_version"]}). Edges of which at least '
                       f'{MIN_LION_SHARE:.0%} follows street segments take the overlap-length weighted mean of the segment scores. Other routable '

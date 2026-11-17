@@ -1,6 +1,7 @@
 """STREETWISE pedestrian routing engine (standard library only).
 
-Routes are computed on the OSM pedestrian graph (data/pedestrian/manhattan-walk-graph.json.gz) and scored with
+Routes are computed on the joined OSM pedestrian graph of Manhattan, Brooklyn and Long Island City
+(data/pedestrian/nyc-walk-graph.json.gz, scripts/merge_networks.py; read from nyc-network.bin.gz when current) and scored with
 the 12 experience scores transferred to each OSM edge (data/pedestrian/edge-scores.json.gz). NYC LION is never
 routed on; it only supplies scores through street_osm_edge_mapping. Every route keeps its ordered edge list, and
 its geometry, distance and scores are all derived from that one list.
@@ -21,8 +22,8 @@ except ImportError:  # run as a top-level module (tests import routing.engine; s
     import maneuvers as mv
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GRAPH = os.path.join(ROOT, 'data', 'pedestrian', 'manhattan-walk-graph.json.gz')
-SCORES = os.path.join(ROOT, 'data', 'pedestrian', 'edge-scores.json.gz')
+GRAPH = os.path.join(ROOT, 'data', 'pedestrian', 'nyc-walk-graph.json.gz')
+SCORES = os.path.join(ROOT, 'data', 'pedestrian', 'nyc-edge-scores.json.gz')
 DIMENSIONS = ['Architecture', 'Nature', 'Culture', 'Quiet & Relax', 'Spatial Comfort', 'Urban Vibrancy', 'Food & Retail',
               'Scenic & Visual', 'Walkability', 'Access & Safety', 'Environment', 'Transit Connectivity']
 MIN_WALK_MINUTES = 10  # smallest accepted max walking time; there is deliberately no upper cap
@@ -93,6 +94,9 @@ class PedestrianNetwork:
             if os.path.exists(streets):
                 with open(streets, encoding='utf-8') as f: feats = json.load(f)['features']
             evidence = {f['properties']['id']: f['properties'] for f in feats}
+        extra = os.path.join(ROOT, 'data', 'pedestrian', 'area-segment-evidence.json.gz')  # Brooklyn and LIC (scripts/merge_networks.py)
+        if os.path.exists(extra):
+            with gzip.open(extra, 'rt') as f: evidence = {**evidence, **json.load(f)['records']}
         self.segment_names = {sid: (p.get('name'), p.get('source_segment_id')) for sid, p in evidence.items()}
         # Raw Nature sub-indicators per LION segment: the spatial evidence for the weather heat term (routing/weather.py).
         self.segment_raw = {sid: {k: p.get(k) for k in ('tree_km', 'park_pct')} for sid, p in evidence.items()}
@@ -242,7 +246,7 @@ class PedestrianNetwork:
             if best and best[0] <= r * 100:
                 break
         if not best or best[0] > MAX_SNAP_M:
-            raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan pedestrian network'
+            raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan, Brooklyn and Long Island City pedestrian network'
                                + (' that avoids stairs.' if allowed else '. Roosevelt, Randall\'s and Governors Island connect only through other boroughs and are not routable.'))
         d, i, along = best
         geo_len = self.glen[self.edges[i][3]] or 1
