@@ -1,0 +1,21 @@
+{"at": "2026-11-17T21:18:23+00:00", "stage": "lpc_k", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 0.0, "max": 19.260275915675674, "seconds": 0.2}
+{"at": "2026-11-17T21:18:26+00:00", "stage": "tree_km", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 50.0, "max": 1408.2108721028587, "seconds": 3.0}
+{"at": "2026-11-17T21:18:27+00:00", "stage": "park_pct", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 0.0, "max": 1.0, "seconds": 0.8}
+{"at": "2026-11-17T21:18:27+00:00", "stage": "cult_k", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 0.0, "max": 17.75049975507129, "seconds": 0.4}
+{"at": "2026-11-17T21:18:28+00:00", "stage": "noise_k", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 9.178202416934653, "max": 5129.2585361471865, "seconds": 1.2}
+{"at": "2026-11-17T21:18:29+00:00", "stage": "width_ft", "status": "done", "segments": 25819, "valid": 24844, "min": 4.0, "median": 34.0, "max": 300.0, "seconds": 0.0}
+{"at": "2026-11-17T21:18:52+00:00", "stage": "sidewalk_pct", "status": "done", "segments": 25819, "valid": 24983, "min": 0.0, "median": 0.275, "max": 1.0, "seconds": 23.7}
+{"at": "2026-11-17T21:18:54+00:00", "stage": "seat_access_m", "status": "done", "segments": 25819, "valid": 25819, "min": 7.937995440124956, "median": 294.2104361100038, "max": 500.0, "seconds": 2.1}
+{"at": "2026-11-17T21:18:55+00:00", "stage": "ramp_coverage", "status": "done", "segments": 25819, "valid": 23593, "min": 0.0, "median": 1.0, "max": 1.0, "seconds": 0.8}
+{"at": "2026-11-17T21:18:55+00:00", "stage": "vibr_idx", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 2.0447992070508714, "max": 4.045661372272698, "seconds": 0.4}
+{"at": "2026-11-17T21:18:56+00:00", "stage": "food_k", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 0.20485410045896948, "max": 34.61286451043942, "seconds": 0.1}
+{"at": "2026-11-17T21:18:56+00:00", "stage": "scenic_k", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 0.0, "max": 9.282210638384479, "seconds": 0.1}
+{"at": "2026-11-17T21:19:02+00:00", "stage": "waterfront_access_m", "status": "done", "segments": 25819, "valid": 25819, "min": 1.08252075062954, "median": 2338.51250134273, "max": 3000.0, "seconds": 5.8}
+{"at": "2026-11-17T21:19:02+00:00", "stage": "inter_n", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 17.0, "max": 65.0, "seconds": 0.1}
+{"at": "2026-11-17T21:19:14+00:00", "stage": "route_directness", "status": "done", "segments": 25819, "valid": 25794, "min": 1.0236448758226921, "median": 1.3364968082623854, "max": 3.498103299732822, "seconds": 12.2}
+{"at": "2026-11-17T21:19:14+00:00", "stage": "crash_k", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 0.4579867116535399, "max": 15.673373321180891, "seconds": 0.1}
+{"at": "2026-11-17T21:19:16+00:00", "stage": "crime_k", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 58.51727063565278, "max": 1676.1583196750385, "seconds": 2.5}
+{"at": "2026-11-17T21:19:17+00:00", "stage": "hwy_m", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 1231.0813197812922, "max": 1500.0, "seconds": 0.2}
+{"at": "2026-11-17T21:19:17+00:00", "stage": "sub_n", "status": "done", "segments": 25819, "valid": 25819, "min": 0.0, "median": 0.0, "max": 34.0, "seconds": 0.0}
+{"at": "2026-11-17T21:19:17+00:00", "stage": "sub_m", "status": "done", "segments": 25819, "valid": 25819, "min": 2.512535335884533, "median": 438.3132383952459, "max": 1500.0, "seconds": 0.0}
+{"at": "2026-11-17T21:19:21+00:00", "stage": "export", "status": "done", "segments": 25819, "calculation_version": "strollane-12x24-v1+62ac8445fd", "dimensions": {"Architecture": "1/1", "Nature": "2/3", "Culture": "1/1", "Quiet & Relax": "2/2", "Spatial Comfort": "3/3", "Urban Vibrancy": "1/1", "Food & Retail": "1/1", "Scenic & Visual": "2/2", "Walkability": "2/2", "Access & Safety": "2/2", "Environment": "1/2", "Transit Connectivity": "2/2"}}
