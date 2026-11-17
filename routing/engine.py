@@ -586,7 +586,7 @@ class RoutePlanner:
             'feasible_count': sum(r['constraints']['feasible'] for r in ranked),
             'routes': ranked, 'compute_seconds': round(time.time() - t0, 2), 'weather_routing': wctx,
             'notes': ['Walking time uses a fixed 4.8 km/h planning pace; no live pedestrian or traffic data.',
-                      'Scores are relative ranks within Manhattan (0–100), not calibrated experience scores. N/A dimensions are excluded, never counted as zero.'],
+                      'Scores are relative ranks among the street segments of Manhattan, Brooklyn and Long Island City (0–100), not calibrated experience scores. N/A dimensions are excluded, never counted as zero.'],
         }
 
     def remember(self, routes):

@@ -17,7 +17,9 @@ IND = json.loads((ROOT / 'data' / 'dimensions' / 'manhattan' / 'indicators.json'
 EDGES = json.load(gzip.open(ROOT / 'data' / 'pedestrian' / 'edge-scores.json.gz', 'rt', encoding='utf-8'))
 ROLE = {i['key']: i['role'] for i in MANIFEST['indicators']}
 COMPUTED = [[(k, ROLE[k]) for k in d['available_indicators'] if ROLE[k] in ('up', 'down')] for d in MANIFEST['dimensions']]
-REFERENCE = {k: sorted(v for v in IND['raw'][k] if v is not None) for inds in COMPUTED for k, _ in inds}
+COMBINED = json.loads((ROOT / 'data' / 'dimensions' / 'combined.json').read_text())  # one scale for the combined areas
+RAWS = [json.loads((ROOT / 'data' / 'dimensions' / a / 'indicators.json').read_text())['raw'] for a in COMBINED['areas']]
+REFERENCE = {k: sorted(v for r in RAWS for v in r[k] if v is not None) for inds in COMPUTED for k, _ in inds}
 NEW_ONLY = {'seat_access_m', 'ramp_coverage', 'waterfront_access_m', 'route_directness', 'crime_k'}
 EXTRA = json.load(gzip.open(ROOT / 'data' / 'pedestrian' / 'direct-edge-indicators.json.gz', 'rt', encoding='utf-8'))  # scripts/measure_direct_edges.py
 
@@ -66,7 +68,8 @@ class TransferredScores(unittest.TestCase):
     def test_direct_edge_measurements_are_the_committed_ones(self):
         """Values measured on the edges themselves: same network, same map build, self-check passed, nothing invented."""
         self.assertEqual(EXTRA['network_version'], EDGES['metadata']['network_version'])
-        self.assertEqual(EXTRA['map_build'], MANIFEST['calculation_version'])
+        self.assertEqual(EXTRA['map_build'], MANIFEST['raw_calculation_version'])
+        self.assertEqual(EDGES['metadata']['ranking_reference_areas'], COMBINED['areas'])
         self.assertNotIn('ramp_coverage', EXTRA['values'])
         self.assertIn('ramp_coverage', EXTRA['not_measured'])
         for k, vals in EXTRA['values'].items():
