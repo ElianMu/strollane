@@ -143,7 +143,7 @@ def test_aggregate_equal_weight_coverage_and_na():
 
 
 # --- exported data integrity (runs when the pipeline output exists) -------------------------------------------
-AREAS = [a for a in ('midtown', 'manhattan') if os.path.exists(os.path.join(OUT, a, 'manifest.json'))]
+AREAS = [a for a in ('midtown', 'manhattan', 'brooklyn', 'lic') if os.path.exists(os.path.join(OUT, a, 'manifest.json'))]
 
 
 @pytest.mark.parametrize('area', AREAS)
@@ -160,10 +160,19 @@ def test_export_scores_recompute_from_indicator_file(area):
         got = np.array([np.nan if f['properties'][f'd{j}'] is None else f['properties'][f'd{j}'] for f in fc['features']])
         assert np.allclose(got, s[dim], equal_nan=True, atol=0.051), dim
         assert [f['properties'][f'n{j}'] for f in fc['features']] == list(c[dim])
-    # percentiles recompute from raw values
+    # percentiles recompute from raw values: within the area, or, on the combined scale, among all combined areas
+    combined = os.path.join(OUT, 'combined.json')
+    cdoc = json.load(open(combined)) if os.path.exists(combined) else None
+    if cdoc and m['calculation_version'] == cdoc['calculation_version']:
+        order = cdoc['areas']
+        raws = {a: json.load(open(os.path.join(OUT, a, 'indicators.json')))['raw'] for a in order}
+        start = sum(cdoc['segments'][a] for a in order[:order.index(area)])
+    else:
+        order, raws, start = [area], {area: D['raw']}, 0
     for k, v in D['raw'].items():
         if spec.BY_KEY[k]['role'] in spec.SCORED_ROLES:
-            r = scoring.percentile(np.array([np.nan if x is None else x for x in v], float), invert=spec.BY_KEY[k]['role'] == 'down')
+            allv = np.concatenate([np.array([np.nan if x is None else x for x in raws[a][k]], float) for a in order])
+            r = scoring.percentile(allv, invert=spec.BY_KEY[k]['role'] == 'down')[start:start + len(v)]
             assert np.allclose(r, pct[k], equal_nan=True, atol=0.051), k
 
 
@@ -174,8 +183,12 @@ def test_export_is_honest_about_missing_sources(area):
     st = {x['key']: x for x in m['indicators']}
     for k in ('canopy_pct', 'impervious_pct'):
         assert st[k]['status'] == 'unavailable' and k not in D['raw'] and st[k]['notes']
-    assert st['no2_area_context']['status'] == 'context-only' and all(v is None for v in D['raw']['no2_area_context'])
-    assert st['ped_flow_observed']['status'] == 'validation-only'
+    if area in ('brooklyn', 'lic'):  # their only inputs cover Manhattan: not computed there (scripts/dimensions/area_build.py)
+        assert st['no2_area_context']['status'] == st['ped_flow_observed']['status'] == 'not available for this area'
+        assert 'no2_area_context' not in D['raw'] and 'ped_flow_observed' not in D['raw']
+    else:
+        assert st['no2_area_context']['status'] == 'context-only' and all(v is None for v in D['raw']['no2_area_context'])
+        assert st['ped_flow_observed']['status'] == 'validation-only'
     assert 'ped_flow_observed' not in D['pct'] and 'no2_area_context' not in D['pct']
     dims = {d['key']: d for d in m['dimensions']}
     assert dims['nature']['model_coverage'] == '2/3' and dims['nature']['status'] == 'partial'

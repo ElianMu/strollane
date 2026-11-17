@@ -145,14 +145,24 @@ def main():
         sys.exit('indicators.json and manifest.json come from different builds.')
     role = {i['key']: i['role'] for i in manifest['indicators']}
     computed = [[(k, role[k]) for k in d['available_indicators'] if role[k] in ('up', 'down')] for d in manifest['dimensions']]
-    reference = {k: sorted(v for v in ind['raw'][k] if v is not None) for inds in computed for k, _ in inds}
+    # Directly measured edges are ranked on the same scale as the street scores: against Manhattan's segments alone, or,
+    # once scripts/dimensions/combine_areas.py has run, against every segment of the combined areas (one shared scale).
+    combined = os.path.join(os.path.dirname(MANIFEST), '..', 'combined.json')
+    ref_areas = ['manhattan']
+    if os.path.exists(combined):
+        cdoc = json.load(open(combined, encoding='utf-8'))
+        if cdoc['calculation_version'] != manifest['calculation_version']:
+            sys.exit('combined.json and the Manhattan manifest disagree; rerun scripts/dimensions/combine_areas.py.')
+        ref_areas = cdoc['areas']
+    ref_raw = [json.load(open(os.path.join(os.path.dirname(MANIFEST), '..', a, 'indicators.json'), encoding='utf-8'))['raw'] if a != 'manhattan' else ind['raw'] for a in ref_areas]
+    reference = {k: sorted(v for r in ref_raw for v in r[k] if v is not None) for inds in computed for k, _ in inds}
 
     # Indicators of the map build measured on the directly measured edges themselves (scripts/measure_direct_edges.py).
     # Used only when they were measured on this network with this map build; otherwise those indicators stay absent.
     extra, extra_keys = {}, []
     if os.path.exists(DIRECT_EXTRA):
         doc = json.load(gzip.open(DIRECT_EXTRA, 'rt', encoding='utf-8'))
-        if doc['network_version'] == graph['metadata']['network_version'] and doc['map_build'] == manifest['calculation_version']:
+        if doc['network_version'] == graph['metadata']['network_version'] and doc['map_build'] == manifest.get('raw_calculation_version', manifest['calculation_version']):
             extra_keys = sorted(doc['values'])
             for n, gi in enumerate(doc['geometry_index']):
                 extra[gi] = {k: doc['values'][k][n] for k in extra_keys}
@@ -207,6 +217,7 @@ def main():
                                     'routable_length_with_fewer': round(partial[j] / routable_len, 3)} for j, k in enumerate(keys)},
             'direct_edge_indicators': {'file': 'data/pedestrian/direct-edge-indicators.json.gz', 'indicators': extra_keys,
                                        'not_measured_on_direct_edges': sorted({k for inds in computed for k, _ in inds} - set(extra_keys) - {k for g in out if g['src'] == 'direct_osm' for k in g['raw']})},
+            'ranking_reference_areas': ref_areas,
             'street_scores': {'spec_version': manifest['spec_version'], 'calculation_version': manifest['calculation_version'],
                               'built_at': manifest['built_at'], 'segments': manifest['segments'], 'files': 'data/dimensions/manhattan/'},
             'fields': prev['metadata']['fields'],

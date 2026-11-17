@@ -1,10 +1,37 @@
 # Spatial evidence methodology / 空间证据方法
 
-> **Read this first (updated 2026-11-15).** Everything below "Scope and truthfulness" describes the original **Midtown
+> **Read this first (updated 2026-11-17).** Everything below "Scope and truthfulness" describes the original **Midtown
 > pilot "Street evidence" layer** (`experience-core.js`, `data/pilot.json`): two raw proxies, 75 m buffers, scores NULL.
 > That layer still exists in Navigate → *Street evidence*, and the text is accurate **for that layer only**. It is no
 > longer how routes are ranked or how the Explore map is coloured. Current scoring is described in the next three
 > sections, in `README.md`, `ARCHITECTURE.md` and `DIMENSIONS_MAP_MODE_REPORT.md`.
+
+## One scale for Manhattan, Brooklyn and Long Island City (since 2026-11-17)
+
+Approved by the project owner on 2026-11-17 so that routes can cross the East River and scores can be compared
+between areas. Each area is built on its own with identical indicator definitions (`build.py` for Manhattan,
+`scripts/dimensions/area_build.py` for Brooklyn and Long Island City); `scripts/dimensions/combine_areas.py` then keeps
+every raw value and re-ranks each scored indicator among **all 38,589 street segments of the three areas
+together** (10,533 Manhattan, 25,819 Brooklyn, 2,237 Long Island City). A score of 80
+now means better than 80 % of those segments, in whichever area it lies. Version: `strollane-12x24-v1+nyc3-2c5f8e8350`;
+each area's own build stays in its manifest as `raw_calculation_version`. Directly measured routing edges (crossings,
+park paths) are ranked against the same combined reference.
+
+What this changed for Manhattan. Brooklyn has two and a half times as many segments and most of them have far fewer
+landmarks, cultural venues and shops, so Manhattan streets now rank high on those dimensions as a block: median
+Architecture 50.0 → 82.0, Culture 50.0 → 76.0, Urban Vibrancy 50.0 → 75.9, Scenic & Visual 48.2 → 73.0. Manhattan
+ranks lower on Environment (50.0 → 31.8) and Access & Safety (48.8 → 34.5). About half of Manhattan's segments moved by
+more than 20 points on Architecture, Culture, Urban Vibrancy, Scenic & Visual and Environment.
+
+The cost, measured. The route benchmark (Manhattan trips only) was rerun: mean gain **+6.9 points for a 3.4 % mean
+detour** (one-scale-per-area: +8.3 and 4.0 %); 60 of 228 runs returned the shortest route (was 50). When most Manhattan
+streets sit near the top of a dimension, there is less to gain by detouring for it inside Manhattan: Urban Vibrancy
++2.8 (was +5.5), Architecture +6.3 (was +10.9), Environment +3.7 (was +6.4). Nature (+13.2) and Quiet & Relax (+11.9)
+gained slightly. This is the trade-off of one shared scale, not an error.
+
+Known limit at area edges: point sources were downloaded per borough, so a Long Island City street beside Newtown
+Creek does not count 311 complaints or crimes reported on the Brooklyn bank. Water separates almost all of these
+edges, so the effect is small, but it is not zero.
 
 ## One score build for routes and the Explore map (since 2026-11-14)
 
@@ -55,7 +82,7 @@ the earlier file).
 
 ## What the route scores are, and are not
 
-Each scored indicator is a 0–100 percentile rank among Manhattan street segments ("lower is better" indicators
+Each scored indicator is a 0–100 percentile rank among the street segments of Manhattan, Brooklyn and Long Island City ("lower is better" indicators
 reversed); a dimension score is the equal-weight mean of its available indicators; a route score is the length-weighted
 mean over the OSM edges the route uses. These are **relative ranks of proxies computed from public records**. They are
 not calibrated measurements and have not been validated against how people experience a walk.

@@ -26,19 +26,20 @@ def load(area):
 class AreaDimensions(unittest.TestCase):
     def test_manhattan_build_is_untouched(self):
         """area_build patches loaders at run time; it must not change the Manhattan code hash or outputs."""
-        self.assertEqual(build.calc_version(), MANHATTAN['calculation_version'])
+        self.assertEqual(build.calc_version(), MANHATTAN['raw_calculation_version'])
 
     def test_each_area(self):
         for area in ('brooklyn', 'lic'):
             with self.subTest(area=area):
                 m, feats, ind = load(area)
                 self.assertEqual(m['area'], area)
-                self.assertNotEqual(m['calculation_version'], MANHATTAN['calculation_version'])
-                self.assertTrue(m['calculation_version'].startswith(spec.SPEC_VERSION + '+'))
+                self.assertEqual(m['calculation_version'], MANHATTAN['calculation_version'], 'one scale: one calculation version')
+                self.assertNotEqual(m['raw_calculation_version'], MANHATTAN['raw_calculation_version'])
+                self.assertTrue(m['calculation_version'].startswith(spec.SPEC_VERSION + '+nyc3-'))
                 self.assertEqual([d['label'] for d in m['dimensions']], [d['label'] for d in MANHATTAN['dimensions']], 'same 12 dimensions, same order')
                 self.assertEqual(len(feats), m['segments']); self.assertEqual(ind['ids'], [f['properties']['id'] for f in feats])
                 self.assertTrue(all(i.startswith(PREFIX[area]) for i in ind['ids'])); self.assertEqual(len(set(ind['ids'])), len(ind['ids']))
-                self.assertIn('not on the same scale as Manhattan', m['comparison_scope'])
+                self.assertIn('Manhattan, Brooklyn and Long Island City together', m['comparison_scope'])
                 for k in ('ped_counts', 'dohmh_no2'):
                     self.assertIsNone(m['sources'][k]['file']); self.assertEqual(m['sources'][k]['status'], 'not available for this area')
                 self.assertFalse((D / area / 'context_no2.geojson').exists(), 'no Manhattan NO2 layer in another area')
@@ -56,13 +57,22 @@ class AreaDimensions(unittest.TestCase):
                 lion = m['sources']['lion']['qa']
                 self.assertEqual(lion['file'], f'data/cache/sources/{area}/streets_v4.json')
 
-    def test_percentiles_are_ranked_within_the_area(self):
-        """The top-ranked segment of an area scores 100 on an 'up' indicator, whatever Manhattan's values are."""
-        for area in ('brooklyn', 'lic'):
-            _, _, ind = load(area)
-            vals = [v for v in ind['raw']['tree_km'] if v is not None]
-            pct = [p for p, v in zip(ind['pct']['tree_km'], ind['raw']['tree_km']) if v == max(vals)]
-            self.assertEqual(pct[0], 100.0)
+    def test_one_scale_for_the_three_areas(self):
+        """The best raw value across ALL areas scores 100; a Brooklyn and a Manhattan segment with equal raw values score the same."""
+        c = json.load(open(D / 'combined.json'))
+        self.assertEqual(c['areas'], ['manhattan', 'brooklyn', 'lic']); self.assertEqual(c['total_segments'], sum(c['segments'].values()))
+        inds = {a: load(a)[2] for a in c['areas']}
+        top = max(v for a in inds for v in inds[a]['raw']['tree_km'] if v is not None)
+        hits = [p for a in inds for p, v in zip(inds[a]['pct']['tree_km'], inds[a]['raw']['tree_km']) if v == top]
+        self.assertTrue(hits and all(p == 100.0 for p in hits))
+        for a in ('brooklyn', 'lic'):
+            self.assertLess(max(p for p in inds[a]['pct']['tree_km'] if p is not None) + (0 if a == 'brooklyn' else 0), 100.01)
+        same = {}
+        for a in inds:
+            for p, v in zip(inds[a]['pct']['noise_k'], inds[a]['raw']['noise_k']):
+                if v is not None:
+                    same.setdefault(v, set()).add(p)
+        self.assertTrue(all(len(ps) == 1 for ps in same.values()), 'equal raw value, equal percentile, whatever the area')
 
     def test_lic_is_inside_its_box(self):
         w, s, e, n = AREAS['lic']['box']

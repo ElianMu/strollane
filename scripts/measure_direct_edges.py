@@ -151,7 +151,7 @@ def main():
     rnd = {'seat_access_m': 1, 'route_directness': 3, 'crime_k': 3, 'waterfront_access_m': 1}
     values = {k: [None if not np.isfinite(x) else round(float(x), rnd[k]) for x in got[k]] for k in keep}
     doc = {'network_version': g['metadata']['network_version'],
-           'map_build': json.load(open(os.path.join(MAP_BUILD, 'manifest.json'), encoding='utf-8'))['calculation_version'],
+           'map_build': (lambda m: m.get('raw_calculation_version', m['calculation_version']))(json.load(open(os.path.join(MAP_BUILD, 'manifest.json'), encoding='utf-8'))),  # the raw build the values reproduce
            'measured_at': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
            'method': 'scripts/measure_direct_edges.py: the map build\'s indicator functions on the OSM geometry of each directly measured edge.',
            'not_measured': {'ramp_coverage': 'defined on the LION end nodes of a street segment; a crossing or park path has none.',
