@@ -32,8 +32,12 @@ class Stub:
         for name in self.fail:
             if name in url:
                 raise RuntimeError('stub outage')
+        if 'wikidata.org' in url:
+            return {'entities': {'Q1': {'sitelinks': {'enwiki': {}, 'frwiki': {}}, 'labels': {'en': {'value': 'x'}}, 'descriptions': {'en': {'value': 'a café'}},
+                                        'claims': {'P856': [{'mainsnak': {'datavalue': {'value': 'https://x.example'}}}]}}}}
         if 'overpass' in url:
-            return {'elements': [{'type': 'node', 'id': 1, 'lat': INSIDE[1], 'lon': INSIDE[0], 'tags': {'amenity': 'cafe', 'name': 'x', 'cuisine': 'y'}},
+            return {'osm3s': {'timestamp_osm_base': '2026-11-17T00:00:00Z'},
+                    'elements': [{'type': 'node', 'id': 1, 'lat': INSIDE[1], 'lon': INSIDE[0], 'tags': {'amenity': 'cafe', 'name': 'x', 'cuisine': 'y', 'wikidata': 'Q1', 'opening_hours': 'Mo-Su 08:00-18:00', 'fixme': 'z'}},
                                  {'type': 'way', 'id': 2, 'center': {'lat': INSIDE[1], 'lon': INSIDE[0]}, 'tags': {'shop': 'books'}},
                                  {'type': 'relation', 'id': 3, 'tags': {'leisure': 'park'}}]}
         if 'FeatureServer' in url:
@@ -51,6 +55,10 @@ class Stub:
             return [{'signname': 'in', 'multipolygon': poly(INSIDE)}, {'signname': 'out', 'multipolygon': poly(OUTSIDE)}]
         if 'entrance_latitude' in sel:
             return [{'entrance_latitude': str(INSIDE[1]), 'entrance_longitude': str(INSIDE[0])}, {'entrance_latitude': str(OUTSIDE[1]), 'entrance_longitude': str(OUTSIDE[0])}]
+        if sel.startswith('facility_name'):
+            return [{'facility_name': 'in', 'latitude': str(INSIDE[1]), 'longitude': str(INSIDE[0])}, {'facility_name': 'out', 'latitude': str(OUTSIDE[1]), 'longitude': str(OUTSIDE[0])}]
+        if 'bldg_class' in sel:
+            return [{'bbl': '4000010001', 'bldg_class': 'H2', 'taxyear': '2026', 'latitude': str(INSIDE[1]), 'longitude': str(INSIDE[0])}]
         if sel == 'latitude,longitude':
             return [{'latitude': str(INSIDE[1]), 'longitude': str(INSIDE[0])}, {'latitude': str(OUTSIDE[1]), 'longitude': str(OUTSIDE[0])},
                     {'latitude': str(BK[1]), 'longitude': str(BK[0])}, {'latitude': None, 'longitude': None}]
@@ -84,7 +92,7 @@ class DownloadAreaSources(unittest.TestCase):
         si.get = stub = Stub()
         report = D.download('lic')
         self.assertEqual({k: v['status'] for k, v in report['sources'].items()}, {k: 'ok' for k in report['sources']})
-        self.assertEqual(len(report['sources']), 10)
+        self.assertEqual(len(report['sources']), 15)
         for name in ('streets_v4', 'lpc', 'parks', 'noise', 'collisions', 'subway'):
             self.assertEqual(len(self.cache('lic', name)), 1, f'{name}: the record outside the box is dropped')
         self.assertEqual(self.cache('lic', 'forestry_trees'), [list(INSIDE)])
@@ -96,7 +104,15 @@ class DownloadAreaSources(unittest.TestCase):
             self.assertIn(expected, wheres)
         self.assertNotIn('MANHATTAN', wheres.upper())
         overpass = [parse.unquote_plus(d.decode()) for u, _, d in stub.calls if 'overpass' in u]
-        self.assertEqual(len(overpass), 1); self.assertIn('(40.728,-73.965,40.775,-73.915)', overpass[0])
+        self.assertEqual(len(overpass), 2, 'one tile each for osm and places_osm'); self.assertTrue(all('(40.728,-73.965,40.775,-73.915)' in q for q in overpass))
+        places = self.cache('lic', 'places_osm')
+        self.assertEqual(places['osm_timestamp'], '2026-11-17T00:00:00Z')
+        self.assertEqual(places['elements'][0]['tags'], {'amenity': 'cafe', 'name': 'x', 'cuisine': 'y', 'wikidata': 'Q1', 'opening_hours': 'Mo-Su 08:00-18:00'},
+                         'the tags scripts/build_place_index.py reads are kept (cuisine, hours, Wikidata); others are not')
+        self.assertEqual(len(places['elements']), 2, 'an element without a position is skipped')
+        self.assertEqual(self.cache('lic', 'wikidata'), {'Q1': [2, 'x', 'a café', 'https://x.example']})
+        self.assertEqual([r['facility_name'] for r in self.cache('lic', 'restrooms')], ['in'], 'restrooms are cut to the box')
+        self.assertIn("borough in('QUEENS','4')", wheres)
         self.assertEqual(report['windows'].keys(), {'noise_window_from', 'collision_window_from'})
 
     def test_brooklyn_is_not_clipped_and_asks_overpass_in_tiles(self):
@@ -133,7 +149,7 @@ class DownloadAreaSources(unittest.TestCase):
         si.get = Stub(fail={'erm2-nwe9'})           # the 311 dataset is down
         report = D.download('lic')
         self.assertEqual(report['sources']['noise']['status'], 'FAILED'); self.assertIn('stub outage', report['sources']['noise']['error'])
-        self.assertEqual(sum(v['status'] == 'ok' for v in report['sources'].values()), 9, 'the other sources are not lost')
+        self.assertEqual(sum(v['status'] == 'ok' for v in report['sources'].values()), 14, 'the other sources are not lost')
         self.assertFalse((pathlib.Path(self.tmp.name) / 'data' / 'cache' / 'sources' / 'lic' / 'noise.json').exists(), 'nothing is written for a failed source')
         si.get = stub = Stub()
         report = D.download('lic')
