@@ -988,7 +988,7 @@ def refresh_street_data_if_stale():
         global _segments
         # The street snapshot and the edge matching are rebuilt together from the same download; the router's scores are then
         # transferred again from the Explore map's street scores, so routes and the map keep reporting the same build.
-        for script, args in (('build_manhattan_streets.py', ['--refresh']), ('match_lion_osm.py', []), ('transfer_dimension_scores.py', []), ('build_score_indicators.py', [])):
+        for script, args in (('build_manhattan_streets.py', ['--refresh']), ('match_lion_osm.py', []), ('transfer_dimension_scores.py', []), ('build_score_indicators.py', []), ('compile_network.py', [])):
             result = subprocess.run([sys.executable, str(ROOT / 'scripts' / script), *args], capture_output=True, text=True)
             if result.returncode != 0:
                 print(f'{script} failed; keeping the previous snapshot.\n' + result.stderr[-600:])

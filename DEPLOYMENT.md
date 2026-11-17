@@ -32,3 +32,18 @@ service → Environment → Add Environment Variable), then redeploy:
   `"failed_points"` above 0 means Mapillary did not answer (bad token, rate limit or outage).
 - Without the variable the endpoint answers `"configured": false` and the page shows no street photos.
 
+
+## Router memory (compiled network pack)
+
+The router reads `data/pedestrian/<area>-network.bin.gz`, a compact binary copy of `<area>-walk-graph.json.gz` and the
+area's edge scores (`routing/netpack.py`), when the SHA-256 of both JSON files matches the one recorded in the pack.
+Otherwise it falls back to the JSON, which gives the same routes but costs much more memory. After anything rewrites
+the walk graph or the edge scores, run:
+
+    python3 scripts/compile_network.py            # Manhattan; --area brooklyn / --area lic for the others
+
+`tests/test_netpack.py` fails while the committed pack is stale. Measured on 2026-11-17 with
+`scripts/check_capacity.py` (fresh process, real data, concurrent route requests), Manhattan's peak was 408 MB from
+the JSON and 182 MB from the pack. Loading the Brooklyn and Long Island City networks as well added about 173 MB
+(measured with placeholder scores, since those areas had no edge scores yet), which keeps all three under the
+448 MB ceiling the capacity check reserves inside a 512 MB instance.

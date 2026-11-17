@@ -8,6 +8,8 @@ its geometry, distance and scores are all derived from that one list.
 import gzip, hashlib, heapq, json, math, os, threading, time, uuid
 from collections import OrderedDict
 from .geometry_store import PackedPolylines, ProjectedPolylines
+from .compact import EdgeIds, GeomIndex, PackedScores, intern_edges
+from . import netpack
 
 try:
     from . import weather as wx
@@ -47,22 +49,22 @@ def as_list(v):
 class PedestrianNetwork:
     def __init__(self, graph_path=GRAPH, scores_path=SCORES):
         t0 = time.time()
-        graph = json.load(gzip.open(graph_path, 'rt', encoding='utf-8'))
-        scores = json.load(gzip.open(scores_path, 'rt', encoding='utf-8'))
-        self.meta, self.score_meta = graph['metadata'], scores['metadata']
+        pack = graph_path.replace('-walk-graph.json.gz', '-network.bin.gz')
+        self.loaded_from = 'json'
+        if os.path.exists(pack) and self._pack_matches(pack, graph_path, scores_path):
+            self._load_pack(pack)
+            self.loaded_from = 'pack'
+        else:
+            self._load_json(graph_path, scores_path)
         if self.score_meta['network_version'] != self.meta['network_version']:
             raise RuntimeError('edge-scores.json.gz was built for a different network version; rerun scripts/match_lion_osm.py')
         self.network_version = self.meta['network_version']
         self.score_version = self.score_meta['score_version']
-        self.nodes = {int(k): v for k, v in graph['nodes'].items()}
-        self.geoms = PackedPolylines(graph.pop('geoms'))
-        self.edges, self.gscores = graph['edges'], scores['geoms']
-        self.adj, self.by_id, self.by_geom = {}, {}, {}
-        for i, (u, v, k, gi, rev, length, osmids, tags) in enumerate(self.edges):
-            self.adj.setdefault(u, []).append(i)
-            self.by_id[f'{u}-{v}-{k}'] = i
-            self.by_geom[(gi, rev)] = i
-            tags['_steps'] = 'steps' in as_list(tags.get('highway'))
+        self.adj = {}
+        for i, e in enumerate(self.edges):
+            self.adj.setdefault(e[0], []).append(i)
+        self.by_id = EdgeIds(self.edges, self.adj)
+        self.by_geom = GeomIndex(self.edges, len(self.geoms))
         # Metric polylines and a 100 m bucket index of routable edge geometries (both endpoints in the main component).
         self.gxy = ProjectedPolylines(self.geoms, xy)
         self.glen = [sum(math.dist(a, b) for a, b in zip(g, g[1:])) for g in self.gxy]
@@ -96,6 +98,47 @@ class PedestrianNetwork:
         self.segment_raw = {sid: {k: p.get(k) for k in ('tree_km', 'park_pct')} for sid, p in evidence.items()}
         self._exposure = None
         self.load_seconds = round(time.time() - t0, 1)
+
+    @staticmethod
+    def _pack_matches(pack, graph_path, scores_path):
+        """The binary pack is used only when it was compiled from exactly these JSON files."""
+        try:
+            h = netpack.read_header(pack)['inputs']
+        except (OSError, ValueError, KeyError):
+            return False
+        return h.get('graph_sha256') == netpack.sha256(graph_path) and h.get('scores_sha256') == netpack.sha256(scores_path)
+
+    def _load_json(self, graph_path, scores_path):
+        # The parsed JSON is converted to compact forms as soon as each part is read, and dropped (routing/compact.py).
+        scores = json.load(gzip.open(scores_path, 'rt', encoding='utf-8'))
+        self.score_meta = scores['metadata']
+        self.gscores = PackedScores(scores.pop('geoms'), len(DIMENSIONS))
+        del scores
+        graph = json.load(gzip.open(graph_path, 'rt', encoding='utf-8'))
+        self.meta = graph['metadata']
+        self.nodes = {int(k): v for k, v in graph.pop('nodes').items()}
+        self.geoms = PackedPolylines(graph.pop('geoms'))
+        raw_edges = graph.pop('edges')
+        del graph
+        for e in raw_edges:
+            e[7]['_steps'] = 'steps' in as_list(e[7].get('highway'))
+        self.edges = intern_edges(raw_edges, {n: n for n in self.nodes})
+
+    def _load_pack(self, pack):
+        """Same structures as _load_json, from the compiled arrays (routing/netpack.py): no large JSON parse."""
+        header, A = netpack.unpack(pack)
+        self.meta, self.score_meta = header['graph_metadata'], header['score_metadata']
+        ids = A['node_id'].tolist()
+        ll, cnt, comp = A['node_lonlat'], A['node_count'], A['node_comp']
+        self.nodes = {n: [ll[2 * i], ll[2 * i + 1], cnt[i], comp[i]] for i, n in enumerate(ids)}
+        self.geoms = PackedPolylines.from_arrays(A['coords'], A['offsets'])
+        tags = header['tags']
+        for t in tags:
+            t['_steps'] = 'steps' in as_list(t.get('highway'))
+        ways = header['ways']
+        U, V, K, G, R, L, W, T = (A[c] for c in ('e_u', 'e_v', 'e_k', 'e_gi', 'e_rev', 'e_len', 'e_ways', 'e_tags'))
+        self.edges = [(ids[U[i]], ids[V[i]], K[i], G[i], R[i], L[i], ways[W[i]], tags[T[i]]) for i in range(len(U))]
+        self.gscores = netpack.scores_from_pack(header, A, len(DIMENSIONS))
 
     def heat_exposure(self):
         """(per-geometry exposure 0..1, has-evidence flags, neutral median) — computed once, on the first hot-weather request."""
@@ -407,14 +450,14 @@ class RoutePlanner:
 
     def edge_utility(self, gi, weights):
         """0..1 preference fit of one edge; missing dimensions count as neutral 0.5 (never as good or bad)."""
-        s = self.net.gscores[gi]
+        sv, cv = self.net.gscores.scores(gi)
         num = den = 0.0
         for j, d in enumerate(DIMENSIONS):
             if d not in weights:
                 continue
             w, direction = weights[d]
             den += w
-            v, c = s['s'][j], s['c'][j]
+            v, c = sv[j], cv[j]
             if v is None:
                 continue
             fit = (v if direction == 'high' else 100 - v) / 100
@@ -442,7 +485,7 @@ class RoutePlanner:
             water_pref=waterfront.validate(preferences['waterfront']);water_data=waterfront.data(net)
         # Weather: a dynamic context, separate from the 12 static scores. It adds a cost only when assess() finds a factor
         # with spatial evidence (daytime heat → tree-cover proxy); otherwise every search below is exactly the static one.
-        wctx = wx.assess(wx.validate_snapshot(weather), evidence_available=bool(net.segment_raw) or any(g.get('raw') for g in net.gscores))
+        wctx = wx.assess(wx.validate_snapshot(weather), evidence_available=bool(net.segment_raw) or bool(net.gscores.raw_at))
         heat = wctx['routing']['level'] * wctx['routing']['multiplier'] if wctx['routing']['active'] else 0.0
         exposure = net.heat_exposure()[0] if heat else None
         heat_coef = wx.CONFIG['heat']['edge_coefficient'] * heat
