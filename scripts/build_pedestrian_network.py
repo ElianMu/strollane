@@ -1,6 +1,8 @@
 """Build the Manhattan OSM pedestrian routing graph (the routing layer; NYC LION is never routed on).
 
-Run: python3 scripts/build_pedestrian_network.py
+Run: python3 scripts/build_pedestrian_network.py                    Manhattan (unchanged default)
+     python3 scripts/build_pedestrian_network.py --area brooklyn    another area of scripts/areas.py, written to
+                                                                    data/pedestrian/<area>-walk-graph.json.gz
 Needs OSMnx (>= 2.0) and NetworkX at build time only; the server reads the output with the standard library.
 Writes data/pedestrian/manhattan-walk-graph.json.gz:
   nodes  {osm_node_id: [lon, lat, street_count, component]}
@@ -48,12 +50,27 @@ def oneway_for_foot(d):
 
 
 def main():
+    global OUT, PLACE
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--area', default='manhattan', help='manhattan (default) or an area of scripts/areas.py')
+    area = ap.parse_args().area
+    box = None
+    if area != 'manhattan':
+        sys.path.insert(0, os.path.join(ROOT, 'scripts'))
+        from areas import AREAS
+        OUT = os.path.join(ROOT, 'data', 'pedestrian', f'{area}-walk-graph.json.gz')
+        PLACE, box = AREAS[area]['osm_place'] or AREAS[area]['label'], (None if AREAS[area]['osm_place'] else AREAS[area]['box'])
     ox.settings.use_cache = True
     ox.settings.cache_folder = os.path.join(ROOT, 'data', 'cache', 'osmnx')
     ox.settings.log_console = False
     ox.settings.useful_tags_way = sorted(set(ox.settings.useful_tags_way + EXTRA_TAGS))
     t0 = time.time()
-    boundary = ox.geocode_to_gdf(PLACE).geometry.iloc[0]
+    if box:  # an area with no OSM boundary of its own (Long Island City): the box of scripts/areas.py
+        from shapely.geometry import box as box_polygon
+        boundary = box_polygon(*box)
+    else:
+        boundary = ox.geocode_to_gdf(PLACE).geometry.iloc[0]
     print('Downloading OSM walk network (Overpass)…', flush=True)
     G = ox.graph_from_polygon(boundary, network_type='walk', simplify=True, retain_all=True, truncate_by_edge=True)
     raw_nodes, raw_edges = G.number_of_nodes(), G.number_of_edges()
