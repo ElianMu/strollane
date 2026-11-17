@@ -110,21 +110,14 @@ def angle_diff(x, y):
     return min(d, 180 - d)
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--cache', default=os.path.join(ROOT, 'data', 'cache', 'sources'), help='raw source cache (shared with build_manhattan_streets.py)')
-    args = ap.parse_args()
-    t0 = time.time()
-    graph = json.load(gzip.open(GRAPH, 'rt', encoding='utf-8'))
-    streets = json.load(open(STREETS, encoding='utf-8'))
-    gmeta, smeta = graph['metadata'], streets['metadata']
-    if smeta.get('score_version') != si.score_version():
-        sys.exit('manhattan-streets.json was built with a different indicator definition; rebuild it first.')
+def match_geometries(graph, features, t0=None):
+    """Match every edge geometry of `graph` to LION analysis segments (`features`: GeoJSON features with an `id` and a
+    `name`). Returns (segs, geom_info). Pure geometry and names: reads no other source, so any area can use it."""
+    t0 = t0 or time.time()
     nodes, geoms, edges = graph['nodes'], graph['geoms'], graph['edges']
-
     # LION analysis segments in metric space, indexed by 50 m buckets.
     segs = []
-    for f in streets['features']:
+    for f in features:
         p = f['properties']; pts = [si.xy(q) for q in f['geometry']['coordinates']]
         segs.append({'p': p, 'pts': pts, 'names': name_tokens(p['name']),
                      'bearings': [bearing(a, b) for a, b in zip(pts, pts[1:])]})
@@ -204,6 +197,24 @@ def main():
         info['rows'] = kept
         info['frac'] = min(1.0, sum(r['overlap'] for r in kept.values()) / total) if total else 0.0
     print(f'  matched in {time.time() - t0:.0f}s', flush=True)
+
+    return segs, geom_info
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--cache', default=os.path.join(ROOT, 'data', 'cache', 'sources'), help='raw source cache (shared with build_manhattan_streets.py)')
+    args = ap.parse_args()
+    t0 = time.time()
+    graph = json.load(gzip.open(GRAPH, 'rt', encoding='utf-8'))
+    streets = json.load(open(STREETS, encoding='utf-8'))
+    gmeta, smeta = graph['metadata'], streets['metadata']
+    if smeta.get('score_version') != si.score_version():
+        sys.exit('manhattan-streets.json was built with a different indicator definition; rebuild it first.')
+    nodes, geoms, edges = graph['nodes'], graph['geoms'], graph['edges']
+
+    segs, geom_info = match_geometries(graph, streets['features'], t0)
+    stats = {'lion': 0, 'direct': 0, 'none': 0}
 
     # Scores: LION-borrowed when most of the edge is matched; otherwise measured directly on the OSM geometry.
     keys = si.KEYS

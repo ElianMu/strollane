@@ -47,3 +47,22 @@ the walk graph or the edge scores, run:
 the JSON and 182 MB from the pack. Loading the Brooklyn and Long Island City networks as well added about 173 MB
 (measured with placeholder scores, since those areas had no edge scores yet), which keeps all three under the
 448 MB ceiling the capacity check reserves inside a 512 MB instance.
+
+## Rebuilding the joined network (Manhattan, Brooklyn, Long Island City)
+
+After a new download or a scoring change, in this order (all standard library except steps marked *):
+
+    python3 scripts/download_area_sources.py                       # Brooklyn, LIC sources (needs open internet)
+    python3 scripts/build_pedestrian_network.py --area brooklyn     # * osmnx; same for --area lic
+    python3 -m scripts.dimensions.area_build --area brooklyn        # * numpy, shapely, pyproj; same for lic
+    python3 -m scripts.dimensions.combine_areas                     # * one scale for the three areas
+    python3 scripts/transfer_dimension_scores.py                    # Manhattan edges
+    python3 scripts/match_area.py --area brooklyn                   # same for lic
+    python3 scripts/measure_direct_edges.py --area brooklyn         # * same for lic
+    python3 scripts/transfer_dimension_scores.py --area brooklyn    # same for lic
+    python3 scripts/merge_networks.py
+    python3 scripts/compile_network.py --area nyc
+    python3 scripts/build_waterfront_features.py                    # * numpy, shapely
+    python3 scripts/build_score_indicators.py
+
+`tests/test_joined_network.py` and `tests/test_netpack.py` fail if a step is skipped.

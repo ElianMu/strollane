@@ -6,6 +6,35 @@
 > longer how routes are ranked or how the Explore map is coloured. Current scoring is described in the next three
 > sections, in `README.md`, `ARCHITECTURE.md` and `DIMENSIONS_MAP_MODE_REPORT.md`.
 
+## Routes across Manhattan, Brooklyn and Long Island City (since 2026-11-17)
+
+The router uses one walking network joining the three areas (`nyc3-90e7f769`, `scripts/merge_networks.py`):
+119,570 nodes and 373,280 directed edges, 114,490 nodes in the routable component. The three
+OSMnx downloads are joined on OSM node IDs; where a directed edge is in more than one download, the copy from the area
+listed first (Manhattan, Brooklyn, Long Island City) is kept with that area's scores. Brooklyn's and Long Island City's
+street scores reach their edges by the same steps as Manhattan's: `scripts/match_area.py` (Manhattan's matching function,
+verified to reproduce Manhattan's 77,522 committed mapping rows exactly), `scripts/measure_direct_edges.py --area`
+(self-check reproduced each area's stored values for 99.6–100 % of segments), `scripts/transfer_dimension_scores.py --area`.
+Scored share of routable length: Brooklyn 98.3 %, Long Island City 99.1 %.
+
+River crossings checked on the joined network: Brooklyn Bridge, Manhattan Bridge, Queensboro Bridge and Pulaski Bridge
+connect. **The Williamsburg Bridge does not**: in Manhattan's OSM download of 2026-10-23 its walkway ends over the river
+without reaching Delancey Street, so walks between the Lower East Side and Williamsburg detour (about 7.7 km instead of
+about 2.3 km). Whether that is a closure tagged in OpenStreetMap or a tagging gap was not checked. A fresh Manhattan
+download would show; `tests/test_joined_network.py` fails once it is fixed.
+
+The Long Island City box also covers Manhattan's east edge and part of Greenpoint; those streets come from the Manhattan
+and Brooklyn downloads. About 30 Long Island City edges touch Manhattan nodes, mostly the Queensboro Bridge walkway
+and footways at its Manhattan end.
+
+Heat-aware routing (`routing/weather.py`) uses tree and park evidence per street segment; for Brooklyn and Long Island
+City it comes from the map build (`data/pedestrian/area-segment-evidence.json.gz`, park share ×100 to match Manhattan's
+0–100 field), giving evidence on 98 % of edge geometries.
+
+Memory: `scripts/check_capacity.py` peak with the joined network is 341 MB, under its 448 MB ceiling (512 MB instance).
+
+The page itself (map view, place search, recommended walks) still treats Manhattan as the study area; that is the next step.
+
 ## One scale for Manhattan, Brooklyn and Long Island City (since 2026-11-17)
 
 Approved by the project owner on 2026-11-17 so that routes can cross the East River and scores can be compared

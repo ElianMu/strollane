@@ -64,7 +64,7 @@ class CapacityTests(unittest.TestCase):
         for i, line in enumerate(source):
             self.assertEqual(net.geoms[i], line, f'original coordinates: {i}')
             self.assertEqual(net.gxy[i], [xy(*p) for p in line], f'original projection: {i}')
-        self.assertLess(net.geoms.packed_bytes, 10 * 1024 * 1024)
+        self.assertLess(net.geoms.packed_bytes, 16 * 1024 * 1024)  # three areas joined (10.1 MiB on 2026-11-17); scripts/check_capacity.py guards the real peak
         for cache in (net.geoms, net.gxy):
             status = cache.cache_status()
             self.assertLessEqual(status['lines'], status['max_lines'])

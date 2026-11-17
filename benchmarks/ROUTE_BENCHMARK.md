@@ -1,6 +1,6 @@
 # Route benchmark — shortest vs preference route
 
-Generated 2026-11-17T21:33:40Z by `benchmarks/route_benchmark.py` · network `osm-walk-20261023-99602011` · scores `strollane-12x24-v1+nyc3-2c5f8e8350` · 19 trips × 12 single-dimension preferences (weight 80) · limits: 100 min, 25% detour.
+Generated 2026-11-17T22:18:18Z by `benchmarks/route_benchmark.py` · network `nyc3-90e7f769` · scores `strollane-12x24-v1+nyc3-2c5f8e8350` · 19 trips × 12 single-dimension preferences (weight 80) · limits: 100 min, 25% detour.
 
 "Gain" = the preference route's score on the requested dimension minus the shortest route's score (0–100 ranks within Manhattan). 5 points is the smallest difference the app describes in words (`route-story.js`). These are the router's own scores: a gain shows the engine moved its metric, **not** that a walker perceives the difference. The trip set is hand-picked, not a random sample.
 

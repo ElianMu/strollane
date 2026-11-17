@@ -116,7 +116,7 @@ class A_Itinerary(unittest.TestCase):
         self.assertTrue(any('exact' in m for m in small['itinerary']['method']))
 
     def test_outside_coverage_is_explicit(self):
-        brooklyn_museum = {'id': 'bkm', 'name': 'Brooklyn Museum', 'lat': 40.6710, 'lon': -73.9633}
+        brooklyn_museum = {'id': 'lsp', 'name': 'Liberty State Park, Jersey City', 'lat': 40.7040, 'lon': -74.0560}  # outside Manhattan, Brooklyn and LIC
         with self.assertRaisesRegex(RoutingError, 'coverage'):
             plan(stops=[{**brooklyn_museum, 'required': True}])
         with self.assertRaisesRegex(RoutingError, 'coverage'):
