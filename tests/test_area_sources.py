@@ -110,6 +110,25 @@ class DownloadAreaSources(unittest.TestCase):
         self.assertGreater(len(tiles), 1)
         self.assertEqual(len(self.cache('brooklyn', 'osm')), 2, 'an element returned by several tiles is kept once')
 
+    def test_a_busy_overpass_server_costs_one_tile_not_the_area(self):
+        """Seen on the first real run (2026-11-16): overpass-api.de answered 502 partway through Brooklyn."""
+        class Busy(Stub):
+            def __call__(self, url, params=None, data=None, timeout=120, tries=3):
+                if 'overpass-api.de' in url:
+                    self.calls.append((url, params, data)); raise RuntimeError('HTTP Error 502: Bad Gateway')
+                return super().__call__(url, params, data, timeout, tries)
+        si.get = stub = Busy()
+        report = D.download('brooklyn', only={'osm'})
+        self.assertEqual(report['sources']['osm']['status'], 'ok', 'another Overpass server answers')
+        tiles = sum(1 for _ in D.osm_tiles(AREAS['brooklyn']['box']))
+        kept = sorted((pathlib.Path(self.tmp.name) / 'data' / 'cache' / 'sources' / 'brooklyn' / 'osm-tiles').glob('*.json'))
+        self.assertEqual(len(kept), tiles, 'each finished tile is kept on disk')
+        si.get = stub = Stub(fail={'overpass'})          # every server down on the next run
+        (pathlib.Path(self.tmp.name) / 'data' / 'cache' / 'sources' / 'brooklyn' / 'osm.json').unlink()
+        report = D.download('brooklyn', only={'osm'})
+        self.assertEqual(report['sources']['osm']['status'], 'ok', 'the area is rebuilt from the kept tiles without the network')
+        self.assertEqual(stub.calls, [])
+
     def test_a_failed_source_is_reported_and_only_it_is_retried(self):
         si.get = Stub(fail={'erm2-nwe9'})           # the 311 dataset is down
         report = D.download('lic')

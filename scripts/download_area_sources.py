@@ -59,15 +59,43 @@ def osm_tiles(box, step=OSM_TILE_DEG):
         y += step
 
 
-def fetch_osm(box):
-    """Named places and amenities, as fetch_osm() of the Manhattan build, tile by tile; an element is kept once."""
+OVERPASS = [si.SOURCES['osm'], 'https://overpass.kumi.systems/api/interpreter', 'https://overpass.private.coffee/api/interpreter']
+
+
+def overpass(query):
+    """One Overpass request. The public servers answer 502/504/429 when busy, so each is tried in turn, three rounds."""
+    last = None
+    for attempt in range(3):
+        for url in OVERPASS:
+            try:
+                return si.get(url, data=parse.urlencode({'data': query}).encode(), timeout=240, tries=1)
+            except Exception as e:
+                last = e
+                time.sleep(5 * (attempt + 1))
+    raise RuntimeError(f'Overpass unavailable on {len(OVERPASS)} servers: {last}')
+
+
+def fetch_osm(box, tile_dir=None):
+    """Named places and amenities, as fetch_osm() of the Manhattan build, tile by tile; an element is kept once.
+    With tile_dir each finished tile is kept on disk, so a busy server costs one tile, not the whole area."""
     seen, out = set(), []
-    for w, s, e, n in osm_tiles(box):
-        b = f'{s},{w},{n},{e}'
-        q = (f'[out:json][timeout:180];(nwr["amenity"]({b});nwr["shop"]({b});nwr["tourism"]({b});nwr["leisure"]({b});'
-             f'nwr["historic"]({b}););out tags center;')
-        d = si.get(si.SOURCES['osm'], data=parse.urlencode({'data': q}).encode(), timeout=240)
-        for x in d['elements']:
+    for i, (w, s, e, n) in enumerate(osm_tiles(box)):
+        path = tile_dir and os.path.join(tile_dir, f'{i:03d}.json')
+        if path and os.path.exists(path):
+            elements = json.load(open(path))
+        else:
+            b = f'{s},{w},{n},{e}'
+            q = (f'[out:json][timeout:180];(nwr["amenity"]({b});nwr["shop"]({b});nwr["tourism"]({b});nwr["leisure"]({b});'
+                 f'nwr["historic"]({b}););out tags center;')
+            elements = overpass(q)['elements']
+            if path:
+                os.makedirs(tile_dir, exist_ok=True)
+                with open(path + '.tmp', 'w') as f:
+                    json.dump(elements, f)
+                os.replace(path + '.tmp', path)
+            print(f'    osm tile {i + 1}: {len(elements):,} elements', flush=True)
+            time.sleep(2)  # be polite to the public Overpass servers
+        for x in elements:
             key = (x['type'], x['id'])
             if key in seen:
                 continue
@@ -77,7 +105,6 @@ def fetch_osm(box):
                 continue
             t = x.get('tags', {})
             out.append([lon, lat, {k: t[k] for k in ('amenity', 'shop', 'tourism', 'leisure', 'historic', 'name') if k in t}])
-        time.sleep(2)  # be polite to the public Overpass server
     return out
 
 
@@ -112,7 +139,7 @@ def jobs_for(area, now=None):
         'ramps': (f'Pedestrian ramp survey, within_box({box_sql})',
                   lambda: si.socrata(RAMPS, 'rampid,cornerid,the_geom', f'within_box(the_geom,{box_sql})')),
         'osm': (f'OpenStreetMap amenity / shop / tourism / leisure / historic elements in the box, {sum(1 for _ in osm_tiles(a["box"]))} Overpass tiles',
-                lambda: fetch_osm(a['box'])),
+                lambda: fetch_osm(a['box'], os.path.join(ROOT, 'data', 'cache', 'sources', area, 'osm-tiles'))),
     }
     return q, {'noise_window_from': noise_from[:10], 'collision_window_from': crash_from[:10]}
 
