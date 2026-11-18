@@ -545,7 +545,7 @@ class Handler(SimpleHTTPRequestHandler):
                                  'interpretation_contract': 'strict-paired-v3-independent',
                                  'features': {'itinerary': True, 'menu_verify': 'official website only (no menu API connected)',
                                               'routing_coverage': 'OSM pedestrian graph of Manhattan, Brooklyn and Long Island City, joined',
-                                              'place_search': 'Manhattan discovery + NYC DOHMH food permits + NYC Parks and public restrooms (citywide discovery; new unsnapped points are search only)',
+                                              'place_search': 'Discovery index for Manhattan, Brooklyn and Long Island City + NYC DOHMH food permits + NYC Parks and public restrooms (citywide discovery; new unsnapped points are search only)',
                                               'food_recommendations': True, 'menu_ocr_available': bool(menu_check.shutil.which('tesseract')),
                                               'citywide_official_discovery': True},
                                  'providers': providers.configured()})
@@ -599,7 +599,7 @@ class Handler(SimpleHTTPRequestHandler):
                 res = S.search(near, cats, radius_m=radius, limit=max(1, min(50, int(qs.get('limit') or 20))), query=(qs.get('q') or '')[:60] or None,
                                cuisine=(qs.get('cuisine') or '')[:40] or None, include_closed=qs.get('include_closed') == '1')
                 self.send_json(200, {'results': res, 'count': len(res), 'radius_m': radius, 'categories': cats,
-                                     'note': 'Straight-line pre-selection; walking distance comes from the router. Outside Manhattan results are search only.'})
+                                     'note': 'Straight-line pre-selection; walking distance comes from the router. Outside Manhattan, Brooklyn and Long Island City, results are search only.'})
                 return
             if parts == ['hotels', 'search']:
                 near = {'lat': float(qs['lat']), 'lon': float(qs['lon'])}

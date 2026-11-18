@@ -22,13 +22,18 @@ class TourismEvidence(unittest.TestCase):
         self.assertTrue(all(r['search_only'] and r['source_url'].startswith('https://data.cityofnewyork.us/') for r in d['records']))
         q=store().search({'lat':40.67,'lon':-73.98},['parks'],radius_m=3000)
         self.assertTrue(q)
-        self.assertTrue(all(r['routing_coverage']=='search_only' for r in q))
+        official=[r for r in q if r['index_id'].startswith('nyc:')]
+        self.assertTrue(official and all(r['routing_coverage']=='search_only' for r in official), 'citywide official records stay search only')
+        self.assertTrue(all(r['borough']=='Brooklyn' for r in q if r['routing_coverage']!='search_only'), 'routable parks here are Brooklyn index records')
 
-    def test_queens_inside_manhattan_rectangle_still_gets_citywide_food(self):
-        results=store().search({'lat':40.744,'lon':-73.956},['restaurants'],radius_m=1000,limit=50)
-        queens=[r for r in results if r['borough']=='Queens']
-        self.assertTrue(queens)
-        self.assertTrue(all(r['routing_coverage']=='search_only' for r in queens))
+    def test_queens_food_is_routable_only_inside_the_lic_box(self):
+        import sys; sys.path.insert(0, str(ROOT/'scripts')); from areas import AREAS, in_box
+        for near in ({'lat':40.744,'lon':-73.956}, {'lat':40.7465,'lon':-73.9140}):  # Hunters Point (in the box), Sunnyside edge
+            queens=[r for r in store().search(near,['restaurants'],radius_m=1000,limit=80) if r['borough']=='Queens']
+            self.assertTrue(queens)
+            for r in queens:
+                inside=in_box(r['coordinates']['lon'],r['coordinates']['lat'],AREAS['lic']['box'])
+                if r['routing_coverage']!='search_only': self.assertTrue(inside, r['name'])
 
     def test_current_inspection_and_snapshot_timestamp_are_distinct(self):
         r={'id':'test:1','name':'Test fixture','lat':40.75,'lon':-73.98,'cat':'cafes','src':'osm','chk':'2026-10-24','amen':{'wifi':'no','delivery':'yes'}}

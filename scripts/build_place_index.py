@@ -169,11 +169,12 @@ def _title(s):
     return ' '.join(w.capitalize() if w.isupper() or w.islower() else w for w in str(s or '').split()) or None
 
 
-def link_hotel_lots(groups):
+def link_hotel_lots(groups, rows=None):
     """Corroborate mapped hotels with NYC Department of Finance hotel-class tax lots (Hotels Properties Citywide, tjus-cn27):
-    a lot in building class H* within 35 m. The lot proves a hotel property, not the hotel's name, rating or availability."""
+    a lot in building class H* within 35 m. The lot proves a hotel property, not the hotel's name, rating or availability.
+    rows: lots already downloaded (scripts/download_area_sources.py hotel_lots); otherwise Manhattan's are fetched."""
     try:
-        rows = si.get('https://data.cityofnewyork.us/resource/tjus-cn27.json?' + si.parse.urlencode(
+        rows = rows if rows is not None else si.get('https://data.cityofnewyork.us/resource/tjus-cn27.json?' + si.parse.urlencode(
             {'$select': 'bbl,parid,taxyear,bldg_class,latitude,longitude', '$where': "borough in('MANHATTAN','1') and latitude is not null", '$limit': 50000}), timeout=120)
     except RuntimeError as e:
         raise RuntimeError('Hotel-property source unavailable; preserving existing verified source evidence') from e
@@ -194,13 +195,14 @@ def link_hotel_lots(groups):
     return {'available': True, 'lots': len(pts), 'hotels_matched': n}
 
 
-def link_inspections(groups, routable):
+def link_inspections(groups, routable, boros=('Manhattan',), keep=None, extra=None):
     """Attach DOHMH permits to OpenStreetMap food places (same name words AND within 60 m), and add the routable permits
-    that OSM does not map as their own records. Returns link counts."""
+    that OSM does not map as their own records. Returns link counts. boros / keep (a lon, lat test) choose the permits;
+    extra fields are added to each permit record (scripts/build_area_places.py: area and borough)."""
     if not os.path.exists(INSPECTIONS):
         return {'available': False}
     import gzip
-    recs = [r for r in json.load(gzip.open(INSPECTIONS, 'rt'))['records'] if r['boro'] == 'Manhattan' and r['lat']]
+    recs = [r for r in json.load(gzip.open(INSPECTIONS, 'rt'))['records'] if r['boro'] in boros and r['lat'] and (keep is None or keep(r['lon'], r['lat']))]
     food = [r for c in ('restaurants', 'cafes', 'bakeries', 'bars') for r in groups[c]]
     grid = {}
     for r in food:
@@ -236,10 +238,10 @@ def link_inspections(groups, routable):
         rec = {'id': 'dohmh:' + d['camis'], 'name': _title(d['name']), 'name_registered': d['name'], 'lat': d['lat'], 'lon': d['lon'], 'src': 'dohmh',
                'sub': 'dohmh=' + (d['cuisine'] or 'food_service'), 'addr': _title(d['addr']), 'phone': d['phone'],
                'cuisine': DOHMH_CUISINE.get(d['cuisine'], (d['cuisine'] or '').lower().replace(' ', '_').replace('/', '_') or None), 'snap': round(snap, 1),
-               **{k: v for k, v in insp.items() if v is not None}}
+               **{k: v for k, v in insp.items() if v is not None}, **(extra or {})}
         groups[cat].append({k: v for k, v in rec.items() if v not in (None, '')})
         added += 1
-    return {'available': True, 'manhattan_permits': len(recs), 'linked_to_osm': linked, 'added_from_dohmh': added, 'closed_by_dohmh': closed}
+    return {'available': True, ('manhattan_permits' if boros == ('Manhattan',) else 'permits'): len(recs), 'linked_to_osm': linked, 'added_from_dohmh': added, 'closed_by_dohmh': closed}
 
 
 def resolve_entities(groups, osm_stamp, built):
@@ -320,6 +322,41 @@ def resolve_entities(groups, osm_stamp, built):
     return quality
 
 
+NOTABLE = ('hotels', 'museums', 'attractions', 'historic', 'parks', 'culture', 'shopping')
+
+
+def apply_wikidata(groups, sl):
+    """sl: {QID: (sitelinks, English label, description, official website)}. Adds the sitelink count (a notability signal),
+    the short description and, if the place has none, the official website."""
+    shared = Counter(r.get('wd') for c in NOTABLE for r in groups[c] if r.get('wd'))
+    for c in NOTABLE:
+        for r in groups[c]:
+            # an ID on many records names their subject (45 plaques "Broadway" → Q11260), not each place
+            if r.get('wd') in sl and shared[r['wd']] <= 3 and _same_thing(r['name'], sl[r['wd']][1]):
+                r['sl'] = sl[r['wd']][0]
+                if sl[r['wd']][2]:
+                    r['wdesc'] = sl[r['wd']][2]          # Wikidata short description (CC0)
+                if sl[r['wd']][3] and not r.get('web'):
+                    r['web'] = sl[r['wd']][3]; r['web_src'] = 'wikidata P856'
+
+
+def osm_record(eid, cat, lat, lon, t, snap):
+    """One OpenStreetMap element → index record (fields copied from its tags, nothing added)."""
+    rec = {'id': eid, 'name': t.get('name') or UNNAMED_LABEL[cat], 'unnamed': None if t.get('name') else True, 'lat': round(lat, 6), 'lon': round(lon, 6), 'sub': subtype(t), 'src': 'osm',
+           'addr': ' '.join(v for v in (t.get('addr:housenumber'), t.get('addr:street')) if v) or None,
+           'web': t.get('website'), 'menu': t.get('website:menu'), 'hours': t.get('opening_hours'), 'wd': t.get('wikidata'), 'access': t.get('access'),
+           'cuisine': t.get('cuisine'), 'brand': t.get('brand'), 'stars': t.get('stars'), 'wheelchair': t.get('wheelchair'),
+           'drink': {k[6:]: v for k, v in t.items() if k.startswith('drink:')} or None,
+           'diet': {k[5:]: v for k, v in t.items() if k.startswith('diet:')} or None, 'snap': round(snap, 1),
+           'phone': t.get('phone') or t.get('contact:phone'), 'fee': t.get('fee'), 'charge': t.get('charge'), 'reservation': t.get('reservation'),
+           'desc': t.get('description'),
+           # hotel facts as mapped (OSM): kept apart from any guest rating
+           'amen': {k: t[k] for k in ('internet_access', 'air_conditioning', 'outdoor_seating', 'takeaway', 'delivery', 'rooms', 'beds', 'check_in', 'check_out') if t.get(k)} or None}
+    if not rec['web'] and t.get('contact:website'):
+        rec['web'] = t['contact:website']
+    return {k: v for k, v in rec.items() if v is not None}
+
+
 def main():
     t0 = time.time()
     net = PedestrianNetwork()
@@ -349,19 +386,7 @@ def main():
         if snap is None:
             dropped += 1
             continue
-        rec = {'id': f"osm:{x['type']}/{x['id']}", 'name': t.get('name') or UNNAMED_LABEL[cat], 'unnamed': None if t.get('name') else True, 'lat': round(lat, 6), 'lon': round(lon, 6), 'sub': subtype(t), 'src': 'osm',
-               'addr': ' '.join(v for v in (t.get('addr:housenumber'), t.get('addr:street')) if v) or None,
-               'web': t.get('website'), 'menu': t.get('website:menu'), 'hours': t.get('opening_hours'), 'wd': t.get('wikidata'), 'access': t.get('access'),
-               'cuisine': t.get('cuisine'), 'brand': t.get('brand'), 'stars': t.get('stars'), 'wheelchair': t.get('wheelchair'),
-               'drink': {k[6:]: v for k, v in t.items() if k.startswith('drink:')} or None,
-               'diet': {k[5:]: v for k, v in t.items() if k.startswith('diet:')} or None, 'snap': round(snap, 1),
-               'phone': t.get('phone') or t.get('contact:phone'), 'fee': t.get('fee'), 'charge': t.get('charge'), 'reservation': t.get('reservation'),
-               'desc': t.get('description'),
-               # hotel facts as mapped (OSM): kept apart from any guest rating
-               'amen': {k: t[k] for k in ('internet_access', 'air_conditioning', 'outdoor_seating', 'takeaway', 'delivery', 'rooms', 'beds', 'check_in', 'check_out') if t.get(k)} or None}
-        if not rec['web'] and t.get('contact:website'):
-            rec['web'] = t['contact:website']
-        groups[cat].append({k: v for k, v in rec.items() if v is not None})
+        groups[cat].append(osm_record(f"osm:{x['type']}/{x['id']}", cat, lat, lon, t, snap))
     for rec in restroom_records():
         snap = routable(rec['lon'], rec['lat'])
         if snap is not None:
@@ -370,19 +395,7 @@ def main():
         snap = routable(rec['lon'], rec['lat'])
         if snap is not None:
             groups['historic_lpc'].append({**rec, 'snap': round(snap, 1)})
-    notable = ('hotels', 'museums', 'attractions', 'historic', 'parks', 'culture', 'shopping')
-    sl = wikidata_sitelinks([r['wd'] for c in notable for r in groups[c] if r.get('wd', '').startswith('Q')])
-    from collections import Counter
-    shared = Counter(r.get('wd') for c in notable for r in groups[c] if r.get('wd'))
-    for c in notable:
-        for r in groups[c]:
-            # an ID on many records names their subject (45 plaques "Broadway" → Q11260), not each place
-            if r.get('wd') in sl and shared[r['wd']] <= 3 and _same_thing(r['name'], sl[r['wd']][1]):
-                r['sl'] = sl[r['wd']][0]
-                if sl[r['wd']][2]:
-                    r['wdesc'] = sl[r['wd']][2]          # Wikidata short description (CC0)
-                if sl[r['wd']][3] and not r.get('web'):
-                    r['web'] = sl[r['wd']][3]; r['web_src'] = 'wikidata P856'
+    apply_wikidata(groups, wikidata_sitelinks([r['wd'] for c in NOTABLE for r in groups[c] if r.get('wd', '').startswith('Q')]))
     built = datetime.now(timezone.utc).isoformat(timespec='seconds')
     inspections = link_inspections(groups, routable)
     hotel_lots = link_hotel_lots(groups)

@@ -107,7 +107,7 @@ The tree census is from 2015, not a live vegetation inventory. LPC and centerlin
 | 酒店 | Implemented | 酒店属于同一个地点搜索；“My Hotel”可作为起点、终点或搜索中心；名称有歧义时列出真实候选让用户确认；只有勾选“Remember on this device”才保存在本浏览器。只是搜索，没有实时房态、价格或预订。 |
 | 生活服务 | Implemented | “附近找”只列出地点，不改路线；“沿途找”按真实路网绕路时间排序（`/api/detours`）；“先去存行李”作为必经站点。营业状态来自 OSM 营业时间，不推断一定开放。 |
 | 语音输入 | Partial | 浏览器 Web Speech API（中文/English），转写结果进入同一输入框，可编辑后发送，与文字使用同一套解析和规划。没有服务器端语音服务；不支持的浏览器会禁用麦克风并提示。真实麦克风识别未在自动化测试中验证。 |
-| 路由覆盖范围 | Manhattan + Brooklyn + Long Island City | 地点搜索覆盖五大区；步行路网覆盖曼哈顿、布鲁克林和长岛市（皇后区内的一个框），三区一张网，可跨桥规划。其他地方的地点会标注 “search only”，规划时明确报错，不生成虚假路线；不把渡轮、地铁当作步行连接。沿途推荐地点（餐饮、咖啡、景点）的索引暂时只有曼哈顿。 |
+| 路由覆盖范围 | Manhattan + Brooklyn + Long Island City | 地点搜索覆盖五大区；步行路网覆盖曼哈顿、布鲁克林和长岛市（皇后区内的一个框），三区一张网，可跨桥规划。其他地方的地点会标注 “search only”，规划时明确报错，不生成虚假路线；不把渡轮、地铁当作步行连接。沿途推荐地点（餐饮、咖啡、景点、酒店）三个区都有。 |
 
 营业时间：`opening-hours.js` 只在 OSM 写法能被确定解析时判断“到达时是否营业”，否则显示“未知”。
 
@@ -117,7 +117,7 @@ Data coverage and quality are measured, not estimated: `python3 scripts/build_re
 
 | API | Purpose |
 |---|---|
-| `GET /api/places/search?lat&lon&categories&radius_m&q&cuisine&include_closed` | Canonical places near a point. Manhattan: discovery index (OSM, LPC, NYC restrooms, DOHMH, Wikidata, DOF hotel lots). Other boroughs: DOHMH food permits, `routing_coverage: search_only`. |
+| `GET /api/places/search?lat&lon&categories&radius_m&q&cuisine&include_closed` | Canonical places near a point. Manhattan, Brooklyn and Long Island City: discovery index (OSM, LPC, NYC restrooms, DOHMH, Wikidata, DOF hotel lots). Elsewhere: DOHMH food permits and NYC Parks / restrooms, `routing_coverage: search_only`. (`manhattan_network` means routable on the joined network; the name is historical.) |
 | `GET /api/places/<id>` | Canonical place with a `restaurant` / `hotel` / `attraction` / `service` extension, `data_sources` and a rule-based `quality_status` (`verified`, `unverified`, `limited_data`, `closed`). |
 | `GET /api/places/<id>/ratings` | Ratings per provider (Google Places, Yelp Fusion, Foursquare), never blended, held 15 min in memory only. Without keys: `blocked_by_provider_access`. |
 | `GET /api/hotels/<id>/rooms?checkin&checkout&guests` | Room types, prices and availability need a lodging partner API (Booking.com Demand, Expedia Rapid). None is configured: `blocked_by_provider_access`, no rooms. |

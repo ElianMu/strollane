@@ -66,3 +66,12 @@ After a new download or a scoring change, in this order (all standard library ex
     python3 scripts/build_score_indicators.py
 
 `tests/test_joined_network.py` and `tests/test_netpack.py` fail if a step is skipped.
+
+Place recommendations for Brooklyn and Long Island City (after the joined network, so places are snapped to it):
+
+    python3 scripts/download_area_sources.py --places             # OSM places, landmarks, restrooms, hotel lots, Wikidata (needs open internet)
+    python3 scripts/build_area_places.py                          # adds both areas to data/places; Manhattan records unchanged
+    python3 scripts/build_registry.py                             # then keep only its places:* rows if the rest should not change
+
+A place is kept when it is in its area's box, its nearest LION street segment belongs to that area (the boxes reach into
+Manhattan) and it is within 150 m of the walk network. `tests/test_area_places.py` checks the result.
