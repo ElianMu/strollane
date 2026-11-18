@@ -1,6 +1,6 @@
 """Canonical NYC place store for the agent tools (GET /api/places/search, GET /api/places/<id>, ratings, hotel rooms).
 
-Sources: data/places (Manhattan discovery index: OpenStreetMap, NYC LPC, NYC restrooms, DOHMH permits, Wikidata) and
+Sources: data/places (discovery index for Manhattan, Brooklyn and Long Island City: OpenStreetMap, NYC LPC, NYC restrooms, DOHMH permits, Wikidata) and
 data/inspections/dohmh.json.gz (DOHMH food permits in all five boroughs). Every field is copied from a source or left None;
 `data_sources` lists where each place's facts come from.
 
@@ -10,7 +10,8 @@ quality_status is set by rules on evidence, never for looks:
                     notable place with an official website (attractions), a NYC DOF hotel-class tax lot (hotels)
   limited_data      no address, website or hours in any source
   unverified        listed by a source, nothing more confirmed
-routing_coverage: 'manhattan_network' when the place snaps to the pedestrian graph, otherwise 'search_only'.
+routing_coverage: 'manhattan_network' when the place snaps to the pedestrian graph (the name is historical: the graph now joins
+Manhattan, Brooklyn and Long Island City), otherwise 'search_only'.
 """
 import gzip, json, math, os, re, threading
 from array import array
@@ -125,7 +126,8 @@ class PlaceStore:
             la.append(r['lat']); lo.append(r['lon'])
 
     def _outside(self):
-        """DOHMH food permits in Brooklyn, Queens, the Bronx and Staten Island (Manhattan permits are already in the index)."""
+        """DOHMH food permits outside the discovery index (search only). Permits already in the index (Manhattan, and the
+        Brooklyn / Long Island City permits scripts/build_area_places.py added) only refresh their inspection fields."""
         if self.dohmh_meta is None and os.path.exists(DOHMH):
             with self._outside_lock:
                 if self.dohmh_meta is None:
@@ -134,9 +136,10 @@ class PlaceStore:
                     meta = _DEC.raw_decode(text, text.index('"metadata":') + 11)[0]
                     def inspection_rows():
                         for r, _ in _stream(text):
-                            if r['boro']=='Manhattan' and 'dohmh:'+r['camis'] in self.ref:
+                            if 'dohmh:'+r['camis'] in self.ref:  # in the discovery index (Manhattan, Brooklyn, LIC): newest inspection only
                                 self.inspection_updates[r['camis']] = {'grade':r['grade'],'gdate':r['grade_date'],'insp':r['last_inspection'],
                                     'closed':r['closure_date'] if r['closed_by_dohmh'] else None, 'dcuisine':r['cuisine']}
+                                continue
                             if not (r.get('name') and r['lat'] and r['lon'] and 40.4<r['lat']<41 and -74.3<r['lon']< -73.6 and r['boro'] in BORO and r['boro']!='Manhattan'): continue
                             yield {'id':'dohmh:'+r['camis'],'name':' '.join(w.capitalize() for w in str(r['name'] or 'Name unavailable').split()),
                                 'lat':r['lat'],'lon':r['lon'],'src':'dohmh','addr':r['addr'].title(),'phone':r['phone'],'dcuisine':r['cuisine'],
@@ -250,7 +253,7 @@ class PlaceStore:
     # ---------------------------------------------------------------- search
     def search(self, near, categories, radius_m=1200, limit=20, query=None, cuisine=None, include_closed=False):
         """Places of the given categories within radius_m of near (straight-line pre-selection; walking distance is the
-        router's job). Manhattan comes from the discovery index; food elsewhere in NYC from DOHMH (search only)."""
+        router's job). Manhattan, Brooklyn and LIC come from the discovery index; food elsewhere in NYC from DOHMH (search only)."""
         q = re.sub(r'[^a-z0-9 ]', '', (query or '').lower()).strip()
         out, seen = [], set()
         pools = [c for c in categories if c in self.rows]

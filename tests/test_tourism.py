@@ -49,13 +49,17 @@ def recommend(doc, status='not_found_in_checked_sources'):
 
 
 class A_Datasets(unittest.TestCase):
-    def test_index_ids_unique_and_coordinates_in_manhattan(self):
+    def test_index_ids_unique_and_coordinates_in_their_area(self):
+        import sys; sys.path.insert(0, str(ROOT / 'scripts')); from areas import AREAS, in_box
         for cat in S.categories:
             recs = list(S.records(cat))
             ids = [r['id'] for r in recs]
             self.assertEqual(len(ids), len(set(ids)), cat)
             for r in recs:
-                self.assertTrue(40.68 < r['lat'] < 40.89 and -74.05 < r['lon'] < -73.90, (cat, r['id']))
+                if r.get('area'):  # Brooklyn / Long Island City (scripts/build_area_places.py)
+                    self.assertTrue(in_box(r['lon'], r['lat'], AREAS[r['area']]['box']), (cat, r['id']))
+                else:
+                    self.assertTrue(40.68 < r['lat'] < 40.89 and -74.05 < r['lon'] < -73.90, (cat, r['id']))
 
     def test_dohmh_covers_five_boroughs_with_metadata(self):
         meta = S._outside()
@@ -100,10 +104,13 @@ class B_Places(unittest.TestCase):
                 self.assertTrue(h['verification_basis'])
                 self.assertTrue(h['hotel']['dof_hotel_lot'] or any(b['source']=='NYC LPC' for b in h['verification_basis']))
 
-    def test_outside_manhattan_is_search_only(self):
-        res = S.search({'lat': 40.6782, 'lon': -73.9442}, ['restaurants'], radius_m=400, limit=10)
+    def test_outside_the_walk_network_is_search_only(self):
+        res = S.search({'lat': 40.7590, 'lon': -73.8300}, ['restaurants'], radius_m=400, limit=10)  # Flushing, Queens
         self.assertTrue(res)
-        self.assertTrue(all(r['routing_coverage'] == 'search_only' and r['borough'] == 'Brooklyn' for r in res))
+        self.assertTrue(all(r['routing_coverage'] == 'search_only' and r['borough'] == 'Queens' for r in res))
+        res = S.search({'lat': 40.6782, 'lon': -73.9442}, ['restaurants'], radius_m=400, limit=10)  # Crown Heights, Brooklyn
+        self.assertTrue(res and all(r['borough'] == 'Brooklyn' for r in res))
+        self.assertTrue(any(r['routing_coverage'] == 'manhattan_network' for r in res), 'Brooklyn is in the index now')
 
     def test_dohmh_closed_places_hidden_unless_asked(self):
         closed = next(r for c in ('restaurants', 'cafes') for r in S.records(c) if r.get('closed'))
