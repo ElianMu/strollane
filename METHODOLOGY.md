@@ -66,6 +66,13 @@ gained slightly. This is the trade-off of one shared scale, not an error.
 Widening the Queens box (2026-11-18) moved Manhattan's and Brooklyn's medians by 0–2.6 points; the benchmark is now
 **+6.8 points for a 3.6 % mean detour**, 57 of 228 runs returning the shortest route, and the activity order is unchanged.
 
+Outside Manhattan (`benchmarks/ROUTE_BENCHMARK_AREAS.md`, 16 hand-picked trips, `--set areas`, 2026-11-18): mean gain
++6.5 points for a 3.9 % mean detour over 192 runs; Brooklyn +8.5 (4.8 % detour), western Queens +5.2 (3.6 %), trips across
+the East River +3.4 (1.8 %). Culture (+2.2) and Environment (+1.4) gain least there. This set does not order the walk
+presets; the Manhattan set does. It also found that route QA failed every Queensboro Bridge walk into Manhattan: the
+sidewalks at the bridge's Manhattan end are `foot=designated` + `access=no`, and QA read `access` alone. QA now lets the
+specific key win, as OpenStreetMap and `scripts/build_pedestrian_network.py` do.
+
 Known limit at area edges: point sources were downloaded per borough, so a western Queens street beside Newtown
 Creek does not count 311 complaints or crimes reported on the Brooklyn bank. Water separates almost all of these
 edges, so the effect is small, but it is not zero.

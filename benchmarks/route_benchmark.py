@@ -13,7 +13,8 @@ in-process and records, from the engine's own response:
 Honesty rules:
   - Nothing here asserts or assumes that B is better than A. "Same as shortest" and zero or negative gains are
     reported as they come out.
-  - Scores are the router's own street scores (ranks within Manhattan, see README). A gain shows that the engine
+  - Scores are the router's own street scores (0–100 ranks over the street segments of Manhattan, Brooklyn and western
+    Queens together, see METHODOLOGY.md). A gain shows that the engine
     moved its own metric, not that a walker would notice the difference. That needs user validation.
   - The trip set is hand-picked (19 trips), not a random sample.
   - No weather, no crime/waterfront preference: only the 12 static dimensions.
@@ -21,8 +22,13 @@ Honesty rules:
 Deterministic for a given network_version + score_version: the search has no randomness, so two runs give the same
 `runs` list (tests/test_route_benchmark.py checks this).
 
-Usage:  python3 benchmarks/route_benchmark.py            # writes benchmarks/route_benchmark.json + ROUTE_BENCHMARK.md
-        python3 benchmarks/route_benchmark.py --no-write # print the summary only
+Usage:  python3 benchmarks/route_benchmark.py              # Manhattan trips: route_benchmark.json + ROUTE_BENCHMARK.md
+        python3 benchmarks/route_benchmark.py --set areas  # Brooklyn, western Queens, river crossings (od_pairs_areas.json):
+                                                           #   route_benchmark_areas.json + ROUTE_BENCHMARK_AREAS.md
+        python3 benchmarks/route_benchmark.py --no-write   # print the summary only
+
+The Manhattan set alone orders the walk-preset pills (walk-presets.js, tests/test_route_benchmark.py); the areas set is
+reported next to it so its trips do not move that order.
 """
 import argparse
 import datetime
@@ -76,9 +82,13 @@ def run_one(planner, pair, dim):
     return out
 
 
-def run(pairs=None, dimensions=None):
+SETS = {'manhattan': ('od_pairs.json', 'route_benchmark.json', 'ROUTE_BENCHMARK.md', 'Manhattan trips'),
+        'areas': ('od_pairs_areas.json', 'route_benchmark_areas.json', 'ROUTE_BENCHMARK_AREAS.md', 'Brooklyn, western Queens and East River crossings')}
+
+
+def run(pairs=None, dimensions=None, pair_file='od_pairs.json'):
     planner = get_planner()
-    pairs = pairs or json.loads((ROOT / 'benchmarks' / 'od_pairs.json').read_text())['pairs']
+    pairs = pairs or json.loads((ROOT / 'benchmarks' / pair_file).read_text())['pairs']
     runs = [run_one(planner, p, dim) for p in pairs for dim in (dimensions or DIMENSIONS)]
     return {'network_version': planner.net.network_version, 'score_version': planner.net.score_version,
             'weight': WEIGHT, 'constraints': CONSTRAINTS, 'claim_points': CLAIM_POINTS, 'pairs': len(pairs), 'runs': runs}
@@ -107,8 +117,10 @@ def summary(result):
     by_bucket = {name: summarise([r for r in runs if r.get('length_bucket') == name]) for name, *_ in BUCKETS}
     presets = {name: {b: summarise([r for r in runs if r['dimension'] == dim and r.get('length_bucket') == b]) for b, *_ in BUCKETS}
                for name, dim in PRESETS.items()}
+    areas = sorted({r['area'] for r in runs}, key=lambda a: [r['area'] for r in runs].index(a))
     return {'all': summarise(runs), 'errors': sum('error' in r for r in runs), 'by_dimension': by_dim,
-            'by_length': by_bucket, 'presets_by_length': presets}
+            'by_length': by_bucket, 'presets_by_length': presets,
+            'by_area': {a: summarise([r for r in runs if r['area'] == a]) for a in areas}}
 
 
 def markdown(result, s):
@@ -119,15 +131,16 @@ def markdown(result, s):
                 f"{x['same_as_shortest']}/{x['scored']} | {x['mean_detour_pct']}% | {x['mean_overlap_with_shortest']:.2f} |")
     head = ('| | Runs | Mean gain (pts) | Median gain | Gain ≥ %d pts | Same as shortest | Mean detour | Mean overlap with shortest |\n'
             '|---|---|---|---|---|---|---|---|') % result['claim_points']
-    lines = ['# Route benchmark — shortest vs preference route', '',
+    lines = [f"# Route benchmark — shortest vs preference route ({result.get('set_label', 'Manhattan trips')})", '',
              f"Generated {result['generated_at']} by `benchmarks/route_benchmark.py` · network `{result['network_version']}` · "
              f"scores `{result['score_version']}` · {result['pairs']} trips × {len(s['by_dimension'])} single-dimension preferences "
              f"(weight {result['weight']}) · limits: {result['constraints']['max_minutes']} min, {result['constraints']['max_detour_pct']}% detour.", '',
-             '"Gain" = the preference route\'s score on the requested dimension minus the shortest route\'s score (0–100 ranks within '
-             f"Manhattan). {result['claim_points']} points is the smallest difference the app describes in words (`route-story.js`). "
+             '"Gain" = the preference route\'s score on the requested dimension minus the shortest route\'s score (0–100 ranks over '
+             f"Manhattan, Brooklyn and western Queens together). {result['claim_points']} points is the smallest difference the app describes in words (`route-story.js`). "
              'These are the router\'s own scores: a gain shows the engine moved its metric, **not** that a walker perceives the '
              'difference. The trip set is hand-picked, not a random sample.', '',
              '## By dimension', '', head] + [row(d, x) for d, x in s['by_dimension'].items()] + [row('**All**', s['all'])]
+    lines += ['', '## By area', '', head] + [row(a, x) for a, x in s['by_area'].items()]
     lines += ['', '## By trip length (shortest-path distance)', '', head] + [row(b, x) for b, x in s['by_length'].items()]
     for name, per in s['presets_by_length'].items():
         lines += ['', f"## {name} ({PRESETS[name]}) by trip length", '', head] + [row(b, x) for b, x in per.items()]
@@ -139,16 +152,19 @@ def markdown(result, s):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--no-write', action='store_true', help='print the summary without writing files')
+    ap.add_argument('--set', choices=list(SETS), default='manhattan', help='trip set (default: manhattan)')
     args = ap.parse_args()
-    result = run()
+    pair_file, json_out, md_out, label = SETS[args.set]
+    result = run(pair_file=pair_file)
+    result['set'], result['set_label'] = args.set, label
     result['generated_at'] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     s = summary(result)
     result['summary'] = s
     md = markdown(result, s)
     print(md)
     if not args.no_write:
-        (ROOT / 'benchmarks' / 'route_benchmark.json').write_text(json.dumps(result, indent=1, ensure_ascii=False) + '\n')
-        (ROOT / 'benchmarks' / 'ROUTE_BENCHMARK.md').write_text(md)
+        (ROOT / 'benchmarks' / json_out).write_text(json.dumps(result, indent=1, ensure_ascii=False) + '\n')
+        (ROOT / 'benchmarks' / md_out).write_text(md)
 
 
 if __name__ == '__main__':

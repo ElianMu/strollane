@@ -1,8 +1,8 @@
-# Route benchmark — shortest vs preference route
+# Route benchmark — shortest vs preference route (Manhattan trips)
 
-Generated 2026-11-18T03:20:46Z by `benchmarks/route_benchmark.py` · network `nyc3-1efe6705` · scores `strollane-12x24-v1+nyc3-8829299a21` · 19 trips × 12 single-dimension preferences (weight 80) · limits: 100 min, 25% detour.
+Generated 2026-11-18T16:53:58Z by `benchmarks/route_benchmark.py` · network `nyc3-1efe6705` · scores `strollane-12x24-v1+nyc3-8829299a21` · 19 trips × 12 single-dimension preferences (weight 80) · limits: 100 min, 25% detour.
 
-"Gain" = the preference route's score on the requested dimension minus the shortest route's score (0–100 ranks within Manhattan). 5 points is the smallest difference the app describes in words (`route-story.js`). These are the router's own scores: a gain shows the engine moved its metric, **not** that a walker perceives the difference. The trip set is hand-picked, not a random sample.
+"Gain" = the preference route's score on the requested dimension minus the shortest route's score (0–100 ranks over Manhattan, Brooklyn and western Queens together). 5 points is the smallest difference the app describes in words (`route-story.js`). These are the router's own scores: a gain shows the engine moved its metric, **not** that a walker perceives the difference. The trip set is hand-picked, not a random sample.
 
 ## By dimension
 
@@ -21,6 +21,14 @@ Generated 2026-11-18T03:20:46Z by `benchmarks/route_benchmark.py` · network `ny
 | Environment | 19 | +4.8 | +3.0 | 8/19 | 7/19 | 3.6% | 0.41 |
 | Transit Connectivity | 19 | +8.9 | +8.0 | 12/19 | 7/19 | 4.2% | 0.45 |
 | **All** | 228 | +6.8 | +5.0 | 120/228 | 57/228 | 3.6% | 0.44 |
+
+## By area
+
+| | Runs | Mean gain (pts) | Median gain | Gain ≥ 5 pts | Same as shortest | Mean detour | Mean overlap with shortest |
+|---|---|---|---|---|---|---|---|
+| Downtown | 72 | +6.4 | +5.0 | 37/72 | 22/72 | 3.3% | 0.48 |
+| Midtown | 72 | +6.1 | +5.0 | 37/72 | 19/72 | 2.2% | 0.42 |
+| Uptown | 84 | +7.8 | +5.5 | 46/84 | 16/84 | 5.0% | 0.42 |
 
 ## By trip length (shortest-path distance)
 
