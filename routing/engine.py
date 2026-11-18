@@ -1,6 +1,6 @@
 """STREETWISE pedestrian routing engine (standard library only).
 
-Routes are computed on the joined OSM pedestrian graph of Manhattan, Brooklyn and Long Island City
+Routes are computed on the joined OSM pedestrian graph of Manhattan, Brooklyn and western Queens
 (data/pedestrian/nyc-walk-graph.json.gz, scripts/merge_networks.py; read from nyc-network.bin.gz when current) and scored with
 the 12 experience scores transferred to each OSM edge (data/pedestrian/edge-scores.json.gz). NYC LION is never
 routed on; it only supplies scores through street_osm_edge_mapping. Every route keeps its ordered edge list, and
@@ -94,7 +94,7 @@ class PedestrianNetwork:
             if os.path.exists(streets):
                 with open(streets, encoding='utf-8') as f: feats = json.load(f)['features']
             evidence = {f['properties']['id']: f['properties'] for f in feats}
-        extra = os.path.join(ROOT, 'data', 'pedestrian', 'area-segment-evidence.json.gz')  # Brooklyn and LIC (scripts/merge_networks.py)
+        extra = os.path.join(ROOT, 'data', 'pedestrian', 'area-segment-evidence.json.gz')  # Brooklyn and western Queens (scripts/merge_networks.py)
         if os.path.exists(extra):
             with gzip.open(extra, 'rt') as f: evidence = {**evidence, **json.load(f)['records']}
         self.segment_names = {sid: (p.get('name'), p.get('source_segment_id')) for sid, p in evidence.items()}
@@ -246,7 +246,7 @@ class PedestrianNetwork:
             if best and best[0] <= r * 100:
                 break
         if not best or best[0] > MAX_SNAP_M:
-            raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan, Brooklyn and Long Island City pedestrian network'
+            raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan, Brooklyn and western Queens pedestrian network'
                                + (' that avoids stairs.' if allowed else '. Roosevelt, Randall\'s and Governors Island connect only through other boroughs and are not routable.'))
         d, i, along = best
         geo_len = self.glen[self.edges[i][3]] or 1
@@ -633,7 +633,7 @@ class RoutePlanner:
             'feasible_count': sum(r['constraints']['feasible'] for r in ranked),
             'routes': ranked, 'compute_seconds': round(time.time() - t0, 2), 'weather_routing': wctx,
             'notes': ['Walking time uses a fixed 4.8 km/h planning pace; no live pedestrian or traffic data.',
-                      'Scores are relative ranks among the street segments of Manhattan, Brooklyn and Long Island City (0–100), not calibrated experience scores. N/A dimensions are excluded, never counted as zero.'],
+                      'Scores are relative ranks among the street segments of Manhattan, Brooklyn and western Queens (0–100), not calibrated experience scores. N/A dimensions are excluded, never counted as zero.'],
         }
 
     def remember(self, routes):

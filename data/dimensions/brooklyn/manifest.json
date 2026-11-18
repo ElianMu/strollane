@@ -5,11 +5,11 @@
  "area_polygon": null,
  "segments": 25819,
  "spec_version": "strollane-12x24-v1",
- "calculation_version": "strollane-12x24-v1+nyc3-2c5f8e8350",
+ "calculation_version": "strollane-12x24-v1+nyc3-8829299a21",
  "built_at": "2026-11-17T21:19:18+00:00",
  "crs_processing": "EPSG:32618",
  "crs_output": "EPSG:4326",
- "comparison_scope": "Percentiles are ranked among the 38,589 street segments of Manhattan, Brooklyn and Long Island City together (10,533 manhattan, 25,819 brooklyn, 2,237 lic); this area has 25,819. One scale for all three areas (scripts/dimensions/combine_areas.py).",
+ "comparison_scope": "Percentiles are ranked among the 42,791 street segments of Manhattan, Brooklyn and western Queens together (10,533 Manhattan, 25,819 Brooklyn, 6,439 western Queens); this area has 25,819. One scale for all three areas (scripts/dimensions/combine_areas.py).",
  "score_method": "Each scored indicator → percentile rank 0–100 among segments of the comparison area that have a value (ties take the lowest rank; \"lower is better\" indicators reversed as 100 − rank). Dimension score = equal-weight mean of the indicator percentiles available on that segment. N/A when none is available; missing values are never 0. Validation/context indicators never enter a score.",
  "dimensions": [
   {
@@ -1366,5 +1366,5 @@
   "osm_place": "Brooklyn, Kings County, New York, United States"
  },
  "raw_calculation_version": "strollane-12x24-v1+62ac8445fd",
- "combined_at": "2026-11-17T21:31:38+00:00"
+ "combined_at": "2026-11-18T02:24:27+00:00"
 }

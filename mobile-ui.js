@@ -478,7 +478,7 @@
   }
   // Starting point (§4.4): 1) a start named in the request, 2) a start the user chose this session,
   // 3) the user's own location — asked for once on load (app.js autoLocateStart) and again when a walk is
-  // planned without a start (app.js ensurePlanStart), used when it is inside Manhattan, Brooklyn or Long Island City, 4) otherwise ask.
+  // planned without a start (app.js ensurePlanStart), used when it is inside Manhattan, Brooklyn or western Queens, 4) otherwise ask.
   // There is no preset start or destination.
   let startConfirmed = false;
   function confirmStart() { startConfirmed = true; }

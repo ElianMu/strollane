@@ -99,12 +99,15 @@ class DownloadAreaSources(unittest.TestCase):
         self.assertEqual(self.cache('lic', 'osm'), [[INSIDE[0], INSIDE[1], {'amenity': 'cafe', 'name': 'x'}], [INSIDE[0], INSIDE[1], {'shop': 'books'}]],
                          'same tag subset as the Manhattan build; an element without a position is skipped')
         wheres = ' | '.join(str((p or {}).get('where') or (p or {}).get('$where') or '') for _, p, _ in stub.calls)
-        for expected in ("borocode='4'", "BORO='Queens'", "borough='Q'", "borough='QUEENS'", 'within_box(location,40.775,-73.965,40.728,-73.915)',
+        for expected in ("borocode='4'", "BORO='Queens'", "borough='Q'", "borough='QUEENS'", 'within_box(location,40.785,-73.965,40.728,-73.87)',
                          "starts_with(complaint_type,'Noise')", 'number_of_pedestrians_injured>0'):
             self.assertIn(expected, wheres)
         self.assertNotIn('MANHATTAN', wheres.upper())
         overpass = [parse.unquote_plus(d.decode()) for u, _, d in stub.calls if 'overpass' in u]
-        self.assertEqual(len(overpass), 2, 'one tile each for osm and places_osm'); self.assertTrue(all('(40.728,-73.965,40.775,-73.915)' in q for q in overpass))
+        tiles = list(D.osm_tiles(LIC))
+        self.assertEqual(len(overpass), 2 * len(tiles), 'every tile, once for osm and once for places_osm')
+        self.assertTrue(all(f'({t[1]},{t[0]},{t[3]},{t[2]})' in q for t in tiles for q in overpass if f'({t[1]},{t[0]},' in q))
+        self.assertTrue(any('(40.728,-73.965,' in q for q in overpass))
         places = self.cache('lic', 'places_osm')
         self.assertEqual(places['osm_timestamp'], '2026-11-17T00:00:00Z')
         self.assertEqual(places['elements'][0]['tags'], {'amenity': 'cafe', 'name': 'x', 'cuisine': 'y', 'wikidata': 'Q1', 'opening_hours': 'Mo-Su 08:00-18:00'},
@@ -137,7 +140,7 @@ class DownloadAreaSources(unittest.TestCase):
         report = D.download('brooklyn', only={'osm'})
         self.assertEqual(report['sources']['osm']['status'], 'ok', 'another Overpass server answers')
         tiles = sum(1 for _ in D.osm_tiles(AREAS['brooklyn']['box']))
-        kept = sorted((pathlib.Path(self.tmp.name) / 'data' / 'cache' / 'sources' / 'brooklyn' / 'osm-tiles').glob('*.json'))
+        kept = sorted((pathlib.Path(self.tmp.name) / 'data' / 'cache' / 'sources' / 'brooklyn' / ('osm-tiles-' + D.box_key(AREAS['brooklyn']['box']))).glob('*.json'))
         self.assertEqual(len(kept), tiles, 'each finished tile is kept on disk')
         si.get = stub = Stub(fail={'overpass'})          # every server down on the next run
         (pathlib.Path(self.tmp.name) / 'data' / 'cache' / 'sources' / 'brooklyn' / 'osm.json').unlink()

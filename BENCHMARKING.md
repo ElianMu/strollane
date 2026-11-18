@@ -20,7 +20,7 @@ Happy Maps 用 30 + 54 位参与者证明了路线确实更受欢迎，STROLLANE
 | **Green Paths** (University of Helsinki) | Helsinki region; version 2 is built to be moved to other cities | Quieter, cleaner-air or greener walking and cycling routes, each shown against the shortest | Real-time air quality index, modelled traffic noise, street-level greenery from street-view images; open source ([project page](https://www.helsinki.fi/en/researchgroups/digital-geography-lab/green-paths)) | Used in published exposure studies; presented by its authors as a proof of concept |
 | **Footways** | Central London | Nothing to ask for: a fixed network of quiet, interesting streets on a printed and online map | Chosen by hand: its founders walked the city and consulted local officers and guides ([SW Londoner](https://swlondoner.co.uk/?p=93905)) | None needed in the same sense; the judgment is the editors' |
 | **Happy Maps** (Quercia, Schifanella, Aiello, 2014) | London and Boston; research, not a product | The beautiful, quiet or happy route | Votes from more than 3,300 people comparing pairs of street photos, and Flickr metadata ([paper](https://arxiv.org/abs/1407.1031)) | Yes: 30 participants in London and 54 in Boston judged the recommended routes more beautiful than the shortest ones, at about 12 % extra length ([MIT Technology Review](https://www.technologyreview.com/2014/07/08/12999/forget-the-shortest-route-across-a-city-new-algorithm-finds-the-most-beautiful/)) |
-| **STROLLANE · NYC** | Manhattan | Any mix of 12 dimensions, three preset activities, a plain-language request, a destination or a recommended loop | 20 computed indicators from NYC Open Data and OpenStreetMap, ranked within Manhattan; listed per route with sources, time windows and coverage | **None yet.** A benchmark of the router against itself: +6.9 points on the requested dimension for a 3.4 % mean detour over 228 runs. `RESEARCH_PROTOCOL.md` describes the user study; it has not been run |
+| **STROLLANE · NYC** | Manhattan | Any mix of 12 dimensions, three preset activities, a plain-language request, a destination or a recommended loop | 20 computed indicators from NYC Open Data and OpenStreetMap, ranked within Manhattan; listed per route with sources, time windows and coverage | **None yet.** A benchmark of the router against itself: +6.8 points on the requested dimension for a 3.6 % mean detour over 228 runs. `RESEARCH_PROTOCOL.md` describes the user study; it has not been run |
 
 I found no product offering experience-based walking routes for New York beyond Citymapper's Main Roads switch. That
 is a statement about what my search turned up, not proof that none exists.
@@ -47,7 +47,7 @@ is a statement about what my search turned up, not proof that none exists.
 - **Static scores.** Green Paths uses real-time air quality and the shade tools reason about time of day. STROLLANE's
   street scores are a snapshot of records retrieved on 2026-10-23; weather is the only live input.
 - **One borough**, against city-wide or national coverage.
-- **Short trips gain little.** Under 1.5 km, 37 of 72 benchmark runs returned the shortest route and the mean gain
+- **Short trips gain little.** Under 1.5 km, 36 of 72 benchmark runs returned the shortest route and the mean gain
   was 3.5 points, which is why `AUDIENCE.md` aims the product at walks of 20 minutes or more.
 - **A web page, not an installed app**, on a host that sleeps when idle, so the first request can take tens of
   seconds.
@@ -57,6 +57,6 @@ is a statement about what my search turned up, not proof that none exists.
 1. **Borrow the Happy Maps test.** Show people who know the area the shortest route and the recommended one, without
    saying which is which, and ask which they would rather walk. It is cheap, it needs no app changes, and it is the
    comparison a reviewer will ask for.
-2. **Report detour the way they do.** Happy Maps' headline is "about 12 % longer"; STROLLANE's 3.4 % mean detour is a
+2. **Report detour the way they do.** Happy Maps' headline is "about 12 % longer"; STROLLANE's 3.6 % mean detour is a
    strong number and belongs next to any claim about gain.
 3. **Keep the transparency.** It is the one thing here no commercial product does, and it costs nothing to keep.

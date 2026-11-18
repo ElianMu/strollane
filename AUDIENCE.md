@@ -7,13 +7,13 @@ be tested and, if wrong, changed.
 ## Lead audience: people new to New York
 
 People in their first year in the city (new students, recent movers) who have free time and want to get to know a
-neighbourhood in Manhattan, Brooklyn or Long Island City on foot.
+neighbourhood in Manhattan, Brooklyn or western Queens on foot.
 
 Why this group, on the evidence available:
 
 - **The product only pays off on longer, unhurried walks.** In the route benchmark (`benchmarks/ROUTE_BENCHMARK.md`),
   choosing a priority raised that dimension's route score by 3.5 points on average for trips under 1.5 km, where
-  37 of 72 runs simply returned the shortest route, against 8.1 points for 1.5–3 km and 9.6 points for 3 km
+  36 of 72 runs simply returned the shortest route, against 8.1 points for 1.5–3 km and 9.6 points for 3 km
   and more. Someone going somewhere in a hurry gets nothing from it; someone with 20 minutes or more to spare does.
 - **They do not already know which streets are pleasant.** A long-time resident has their own routes. A newcomer has
   the time and the reason to choose a street by what it is like.
@@ -21,7 +21,7 @@ Why this group, on the evidence available:
   on street-by-street differences needs.
 - **They can be reached for validation.** A first round of 8–12 walk-along participants can be recruited among new
   students, so the trust question the critique raised can actually be tested with this group.
-- **Coverage fits.** Scores and walking routes cover Manhattan, Brooklyn and Long Island City, where this group
+- **Coverage fits.** Scores and walking routes cover Manhattan, Brooklyn and western Queens (Long Island City to Jackson Heights), where this group
   explores first, with place recommendations (food, cafés, sights) in all three.
 
 ## Use cases built around the lead audience

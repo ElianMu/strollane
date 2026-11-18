@@ -169,7 +169,7 @@ class Planner:
 
         oi, err = add(req['origin'], 'origin')
         if oi is None:
-            raise RoutingError(f"Start is outside walking-route coverage ({err}). Place search covers all five boroughs; walking routes cover Manhattan, Brooklyn and Long Island City.")
+            raise RoutingError(f"Start is outside walking-route coverage ({err}). Place search covers all five boroughs; walking routes cover Manhattan, Brooklyn and western Queens.")
         ei = None
         if req['end_mode'] in ('fixed', 'hotel'):
             ei, err = add(req['end_place'], 'end')
@@ -484,7 +484,7 @@ class Planner:
                      'constraints': {**cons, 'feasible': not violations, 'violations': violations},
                      'departure': departure.astimezone(oh.NY).isoformat(timespec='minutes') if departure else None, 'time_warnings': time_warnings,
                      'matrix': {'points': len(points), 'seconds': matrix_s, 'basis': 'network shortest-path metres (Dijkstra on the OSM pedestrian graph)'},
-                     'coverage': 'Walking routes use the joined OSM pedestrian graph of Manhattan, Brooklyn and Long Island City; places elsewhere can be searched but not routed.'}
+                     'coverage': 'Walking routes use the joined OSM pedestrian graph of Manhattan, Brooklyn and western Queens; places elsewhere can be searched but not routed.'}
         return {'network_version': net.network_version, 'score_version': net.score_version, 'routes': [route], 'itinerary': itinerary,
                 'feasible_count': int(not violations), 'shortest_distance_m': route['distance_m'],
                 'constraints_used': {'max_minutes': cons.get('max_minutes'), 'max_km': cons.get('max_km'), 'max_outing_minutes': cons.get('max_outing_minutes'),

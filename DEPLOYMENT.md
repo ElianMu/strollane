@@ -48,12 +48,16 @@ the JSON and 182 MB from the pack. Loading the Brooklyn and Long Island City net
 (measured with placeholder scores, since those areas had no edge scores yet), which keeps all three under the
 448 MB ceiling the capacity check reserves inside a 512 MB instance.
 
-## Rebuilding the joined network (Manhattan, Brooklyn, Long Island City)
+With western Queens (2026-11-18: Long Island City to Jackson Heights, 416,268 edges) and the Brooklyn / western Queens place
+index, the capacity check peak is 407 MB, still under the 448 MB ceiling. The router costs about 0.6 MB per 1,000 edges, so
+a larger area needs a larger instance; widen `scripts/areas.py` only after measuring.
+
+## Rebuilding the joined network (Manhattan, Brooklyn, western Queens)
 
 After a new download or a scoring change, in this order (all standard library except steps marked *):
 
-    python3 scripts/download_area_sources.py                       # Brooklyn, LIC sources (needs open internet)
-    python3 scripts/build_pedestrian_network.py --area brooklyn     # * osmnx; same for --area lic
+    python3 scripts/download_area_sources.py                       # Brooklyn, western Queens ('lic') sources (needs open internet)
+    python3 scripts/build_pedestrian_network.py --area brooklyn     # * osmnx; same for --area lic (retries busy Overpass servers)
     python3 -m scripts.dimensions.area_build --area brooklyn        # * numpy, shapely, pyproj; same for lic
     python3 -m scripts.dimensions.combine_areas                     # * one scale for the three areas
     python3 scripts/transfer_dimension_scores.py                    # Manhattan edges
@@ -67,7 +71,10 @@ After a new download or a scoring change, in this order (all standard library ex
 
 `tests/test_joined_network.py` and `tests/test_netpack.py` fail if a step is skipped.
 
-Place recommendations for Brooklyn and Long Island City (after the joined network, so places are snapped to it):
+After changing an area's box in `scripts/areas.py`, download that area again with `--refresh` (kept Overpass tiles are
+per box) and remove `data/dimensions/work/<area>/` before `area_build`: its stage files belong to the old segment set.
+
+Place recommendations for Brooklyn and western Queens (after the joined network, so places are snapped to it):
 
     python3 scripts/download_area_sources.py --places             # OSM places, landmarks, restrooms, hotel lots, Wikidata (needs open internet)
     python3 scripts/build_area_places.py                          # adds both areas to data/places; Manhattan records unchanged

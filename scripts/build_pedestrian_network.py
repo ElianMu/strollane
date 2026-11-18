@@ -49,6 +49,25 @@ def oneway_for_foot(d):
     return 'yes' in as_list(d.get('oneway:foot'))
 
 
+# The public Overpass servers answer 502/504/429 when busy (seen 2026-11-17 for western Queens): each is tried in turn,
+# three rounds with a growing pause. Finished sub-queries stay in osmnx's cache, so a retry does not repeat them.
+OVERPASS_SERVERS = ['https://overpass-api.de/api', 'https://overpass.kumi.systems/api', 'https://overpass.private.coffee/api']
+
+
+def download_walk_graph(boundary):
+    last = None
+    for attempt in range(3):
+        for url in OVERPASS_SERVERS:
+            ox.settings.overpass_url = url
+            try:
+                return ox.graph_from_polygon(boundary, network_type='walk', simplify=True, retain_all=True, truncate_by_edge=True)
+            except Exception as e:  # busy server: try the next one
+                last = e
+                print(f'  {url} failed ({str(e).splitlines()[0][:100]}); trying the next server', flush=True)
+                time.sleep(15 * (attempt + 1))
+    raise SystemExit(f'Overpass unavailable on {len(OVERPASS_SERVERS)} servers, 3 rounds: {last}')
+
+
 def main():
     global OUT, PLACE
     import argparse
@@ -72,7 +91,7 @@ def main():
     else:
         boundary = ox.geocode_to_gdf(PLACE).geometry.iloc[0]
     print('Downloading OSM walk network (Overpass)…', flush=True)
-    G = ox.graph_from_polygon(boundary, network_type='walk', simplify=True, retain_all=True, truncate_by_edge=True)
+    G = download_walk_graph(boundary)
     raw_nodes, raw_edges = G.number_of_nodes(), G.number_of_edges()
 
     # Pedestrian access: drop legally closed edges; a directed copy against an oneway:foot restriction is dropped too.
