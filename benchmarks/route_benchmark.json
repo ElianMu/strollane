@@ -2756,8 +2756,8 @@
     "score": 41,
     "coverage": 0.979,
     "overlap_with_shortest": 0.025,
-    "qa_status": "fail",
-    "blocking_issues": 1
+    "qa_status": "pass_with_warnings",
+    "blocking_issues": 0
    },
    "same_as_shortest": false,
    "gain_points": 9
@@ -9805,7 +9805,9 @@
    "gain_points": 6
   }
  ],
- "generated_at": "2026-11-18T03:20:46Z",
+ "set": "manhattan",
+ "set_label": "Manhattan trips",
+ "generated_at": "2026-11-18T16:53:58Z",
  "summary": {
   "all": {
    "runs": 228,
@@ -10124,6 +10126,50 @@
      "mean_coverage": 0.98,
      "blocking_issues": 0
     }
+   }
+  },
+  "by_area": {
+   "Downtown": {
+    "runs": 72,
+    "scored": 72,
+    "same_as_shortest": 22,
+    "mean_gain": 6.4,
+    "median_gain": 5.0,
+    "gain_at_least_claim": 37,
+    "negative_gain": 0,
+    "mean_detour_pct": 3.3,
+    "max_detour_pct": 14.1,
+    "mean_overlap_with_shortest": 0.48,
+    "mean_coverage": 0.98,
+    "blocking_issues": 0
+   },
+   "Midtown": {
+    "runs": 72,
+    "scored": 72,
+    "same_as_shortest": 19,
+    "mean_gain": 6.1,
+    "median_gain": 5.0,
+    "gain_at_least_claim": 37,
+    "negative_gain": 0,
+    "mean_detour_pct": 2.2,
+    "max_detour_pct": 17.3,
+    "mean_overlap_with_shortest": 0.42,
+    "mean_coverage": 0.99,
+    "blocking_issues": 0
+   },
+   "Uptown": {
+    "runs": 84,
+    "scored": 84,
+    "same_as_shortest": 16,
+    "mean_gain": 7.8,
+    "median_gain": 5.5,
+    "gain_at_least_claim": 46,
+    "negative_gain": 0,
+    "mean_detour_pct": 5.0,
+    "max_detour_pct": 22.8,
+    "mean_overlap_with_shortest": 0.42,
+    "mean_coverage": 0.99,
+    "blocking_issues": 0
    }
   }
  }

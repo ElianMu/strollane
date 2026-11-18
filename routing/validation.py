@@ -20,6 +20,21 @@ NYC_BBOX = (-74.2591, 40.4774, -73.7004, 40.9176)
 JOIN_TOL_M, JUMP_M = 1.0, 800.0
 STOP_REACH_M, ACCESS_OK_M, ACCESS_WARN_M = 15.0, 30.0, 80.0
 BLOCKED_HIGHWAY = {'motorway', 'motorway_link', 'trunk_link'}
+ALLOWED_FOOT = {'yes', 'designated', 'permissive', 'official'}
+
+
+def _tagset(v):
+    return set(v if isinstance(v, list) else [v]) - {None}
+
+
+def foot_allowed(tags):
+    """OSM: the specific key wins over the general one, so foot=designated with access=no is open to walkers (the
+    sidewalks at the Manhattan end of the Queensboro Bridge are tagged so). Same rule as
+    scripts/build_pedestrian_network.py, which built the network."""
+    foot, access = _tagset(tags.get('foot')), _tagset(tags.get('access'))
+    if foot & {'no', 'private', 'use_sidepath'}:
+        return False
+    return not (access & {'no', 'private'}) or bool(foot & ALLOWED_FOOT)
 MX, MY = 84414.3, 111049.7
 
 
@@ -82,8 +97,7 @@ def validate(route, net, constraints=None, stops=None, now=None):
             closed.append(e['edge_id'])
         hw = tags.get('highway')
         hw = hw if isinstance(hw, list) else [hw]
-        foot = tags.get('foot')
-        if set(hw) & BLOCKED_HIGHWAY or foot in ('no', 'private') or tags.get('access') in ('no', 'private'):
+        if set(hw) & BLOCKED_HIGHWAY or not foot_allowed(tags):
             closed.append(e['edge_id'])
         steps += bool(tags.get('_steps'))
     if unknown:

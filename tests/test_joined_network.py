@@ -71,6 +71,18 @@ class JoinedNetwork(unittest.TestCase):
             self.assertTrue(any(bridge in n or bridge.replace('Brooklyn', 'Brookyln') in n for n in names), (bridge, sorted(n for n in names if 'ridge' in n)))
             self.assertLess(dist, max_km * 1000, bridge)
 
+    def test_queensboro_walks_pass_route_qa(self):
+        """The sidewalks at the Manhattan end of the Queensboro Bridge are foot=designated + access=no; OSM's specific
+        key wins, so route QA must not fail Queens–Manhattan walks over them (it did until 2026-11-18)."""
+        from routing.validation import foot_allowed
+        self.assertTrue(foot_allowed({'foot': 'designated', 'access': 'no'}))
+        self.assertFalse(foot_allowed({'access': 'no'}))
+        self.assertFalse(foot_allowed({'foot': ['yes', 'no']}))
+        r = PLANNER.plan({'lon': -73.9585, 'lat': 40.7455}, {'lon': -73.9776, 'lat': 40.7614}, {'weights': {'Architecture': 80}})
+        self.assertTrue(r['routes'])
+        for route in r['routes']:
+            self.assertEqual(route['validation']['blocking_issues'], [], route['objective'])
+
     def test_williamsburg_bridge_gap_is_known(self):
         """Known limit (METHODOLOGY.md): the Williamsburg Bridge walkway stops over the river in Manhattan's 2026-10-23 OSM
         download, so walks between the Lower East Side and Williamsburg detour. If this fails, the gap has been fixed:
