@@ -2,7 +2,11 @@
 
 No network calls, invented records or refreshed timestamps for upstream sources.
 Keep OSM fields/canonical IDs; rebuild only permit associations and permit-only
-records, using exact normalized addresses and unambiguous name matches.
+records, using unambiguous name matches and build_place_index.permit_matches (same normalized address, or no house number on
+the OSM place and under 40 m).
+
+Manhattan only: records with an "area" (Brooklyn, western Queens) are left as they are; rebuild those with
+scripts/build_area_places.py, which links their permits with the same rule.
 """
 import hashlib
 import json
@@ -21,9 +25,10 @@ def main():
     original={c:json.loads((root/(c+'.json')).read_text())['records'] for c in categories}
     old={r['id']:r for rows in original.values() for r in rows}
     groups={c:[] for c in categories}
+    area_rows={c:[r for r in rows if r.get('area')] for c,rows in original.items()}
     for cat,rows in original.items():
         for record in rows:
-            if record.get('src')=='dohmh':continue
+            if record.get('area') or record.get('src')=='dohmh':continue
             r=dict(record)
             for key in ('dohmh','grade','gdate','insp','dcuisine','closed'):r.pop(key,None)
             r['pids']=[p for p in r.get('pids',[r['id']]) if not p.startswith('dohmh:')]
@@ -43,14 +48,16 @@ def main():
                 r['pids'].append('dohmh:'+r['dohmh'])
             if len(r.get('pids',[]))==1:r.pop('pids')
             r['status']='closed_by_dohmh' if r.get('closed') else 'listed'
-        rows.sort(key=lambda r:(r['name'].casefold(),r['id']))
+    for cat in groups:
+        groups[cat]+=area_rows[cat]
+        groups[cat].sort(key=lambda r:(r['name'].casefold(),r['id']))
     aliases=[p for rows in groups.values() for r in rows for p in r.get('pids',[r['id']])]
     assert len(aliases)==len(set(aliases)), 'Provider aliases must identify exactly one record'
     ids=[r['cid'] for rows in groups.values() for r in rows]
     assert len(ids)==len(set(ids)), 'Canonical identities must not collide after splitting links'
     changed=[{'id':r['id'],'name':r['name'],'old_permit':old[r['id']].get('dohmh'),'new_permit':r.get('dohmh')}
              for rows in groups.values() for r in rows if r['id'] in old and old[r['id']].get('dohmh')!=r.get('dohmh')]
-    receipt={'method':'same source snapshots; unambiguous names AND exact normalized address AND <60 m; uncertain records retained separately',
+    receipt={'method':'same source snapshots; unambiguous names AND (exact normalized address AND <60 m, OR no house number on the OSM place AND <40 m); uncertain records retained separately; Manhattan records only',
              'repaired_at':at,'permit_source_sha256':hashlib.sha256(Path(build.INSPECTIONS).read_bytes()).hexdigest(),
              'source_record_counts':{c:len(v) for c,v in original.items()},'result_record_counts':{c:len(v) for c,v in groups.items()},
              'changed_links':changed,'summary':summary}
@@ -59,6 +66,10 @@ def main():
         if c['id'] in groups:
             rows=groups[c['id']];c['count']=len(rows)
             c['missing']={k:sum(not r.get(k) for r in rows) for k in ('addr','web','hours')}
+            if 'by_area' in c:
+                c['by_area']['manhattan']=sum(1 for r in rows if not r.get('area'))
+            if 'manhattan_quality' in c:
+                c['manhattan_quality']={**c['manhattan_quality'],'records_after_permit_repair':c['by_area']['manhattan']}
     index['inspections']=summary
     index['permit_link_repair']={k:v for k,v in receipt.items() if k!='changed_links'}
     docs={c+'.json':{'category':c,'records':v} for c,v in groups.items()}

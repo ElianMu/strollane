@@ -52,6 +52,14 @@ class PlaceHardening(unittest.TestCase):
         self.assertTrue(build.permit_matches(a,{**a,'addr':'100 WEST 44 STREET'}))
         self.assertFalse(build.permit_matches(a,{**a,'addr':'101 WEST 44 STREET'}))
         self.assertFalse(build.permit_matches(a,{**a,'name':'Different Cafe'}))
+        # no house number on the OSM place (street only, or none): names must agree and the permit be within 40 m
+        b={**a,'addr':'West 44th Street'}; near={**a,'addr':'100 WEST 44 STREET','lat':a['lat']+0.0002}
+        self.assertTrue(build.permit_matches(b,near), '22 m, street-only address')
+        self.assertFalse(build.permit_matches(b,{**near,'lat':a['lat']+0.0004}), '44 m is too far without an address')
+        self.assertFalse(build.permit_matches({**b,'addr':None},{**near,'name':'Different Cafe'}))
+        self.assertTrue(build.permit_matches({**b,'addr':'31st Street'},near), 'a street name that starts with a digit is not a house number')
+        for addr in ('30-92 31st Street','12A Main St','100 West 44th Street'): self.assertTrue(build.HOUSE_NUMBER.match(addr), addr)
+        for addr in ('31st Street','5th Avenue','West 44th Street'): self.assertFalse(build.HOUSE_NUMBER.match(addr), addr)
 
     def test_holiday_and_invalid_clock_rules_are_unknown_not_open(self):
         when=datetime.fromisoformat('2026-12-25T12:00:00-05:00')
