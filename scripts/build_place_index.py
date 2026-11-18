@@ -145,13 +145,24 @@ def _addr(a):
     return normalized_address(a)
 
 
+# "30-92 31st Street", "12A Main St" have a house number; "31st Street" and "5th Avenue" do not.
+HOUSE_NUMBER = re.compile(r'\s*\d+(?:-\d+)?[A-Z]?\s')
+
+
 def permit_matches(record, permit):
-    """Require source address plus specific name agreement, not nearest-name alone."""
+    """Specific name agreement plus either the same source address within 60 m, or, when the OSM place has no house
+    number (no address to contradict the permit; about 2,000 such pairs were listed twice before 2026-11-18), within 40 m.
+    Not nearest-name alone: link_inspections still links a permit only when exactly one place matches."""
     stop={'the','and','of','nyc','new','york','cafe','restaurant','inc','llc'}
     a=set(_norm(record.get('name')).split())-stop
     b=set(_norm(permit.get('name')).split())-stop
     names=bool(a and b) and (a<=b or b<=a or len(a&b)/len(a|b)>=.67)
-    return bool(names and _addr(record.get('addr')) and _addr(record.get('addr'))==_addr(permit.get('addr')) and _metres(record,permit)<60)
+    if not names:
+        return False
+    d=_metres(record,permit)
+    if HOUSE_NUMBER.match(str(record.get('addr') or '')):  # the place has a house number: it must be the permit's address
+        return bool(_addr(record.get('addr'))) and _addr(record.get('addr'))==_addr(permit.get('addr')) and d<60
+    return d<40
 
 
 def _metres(a, b):
@@ -221,6 +232,9 @@ def link_inspections(groups, routable, boros=('Manhattan',), keep=None, extra=No
                     m = _metres(r, d)
                     if permit_matches(r,d):
                         matches.append(r)
+        if len(matches) > 1:  # an exact address match outranks the 40 m rule for places without a house number
+            exact = [r for r in matches if _addr(r.get('addr')) and _addr(r.get('addr')) == _addr(d.get('addr'))]
+            matches = exact if len(exact) == 1 else matches
         best = matches[0] if len(matches)==1 else None
         insp = {'dohmh': d['camis'], 'grade': d['grade'], 'gdate': d['grade_date'], 'insp': d['last_inspection'], 'dcuisine': d['cuisine']}
         if d['closed_by_dohmh']:
