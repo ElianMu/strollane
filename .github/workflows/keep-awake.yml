@@ -1,0 +1,32 @@
+# Keeps the free Render service (streetwise-api) from spinning down. Render stops a Free web service after 15 minutes
+# without inbound traffic, and starting it again (plus loading the joined walk network) keeps the first visitor waiting
+# about a minute or more. A request every 10 minutes keeps it up.
+#
+# Free instance hours: Render gives 750 per workspace per month; one service running all month uses about 720-744.
+# A second Free service in the same workspace would run both out before the month ends, so remove this workflow (or
+# move to a paid instance) before adding one.
+#
+# GitHub may delay scheduled runs at busy times, so an occasional gap is possible. GitHub also pauses schedules in a
+# public repository after 60 days without commits; re-enable it under Actions if that happens.
+name: Keep API awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Request routing status (loads the walk network if the service had stopped)
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 https://streetwise-api.onrender.com/api/routing/status) && echo "HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "::warning::streetwise-api did not answer 200 after 3 tries"
