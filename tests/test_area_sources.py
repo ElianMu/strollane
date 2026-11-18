@@ -7,7 +7,9 @@ import json
 import pathlib
 import sys
 import tempfile
+import os
 import unittest
+from unittest import mock
 from urllib import parse
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -19,6 +21,9 @@ from areas import AREAS, in_box, touches_box  # noqa: E402
 LIC = AREAS['lic']['box']
 INSIDE, OUTSIDE = (-73.94, 40.75), (-73.80, 40.70)   # one point in the LIC box, one elsewhere in Queens
 BK = (-73.95, 40.65)                                 # in Brooklyn, outside the Manhattan box of the original build
+
+
+NON_LAYER = set(D.jobs_for('lic')[0]) - set(D.LAYER_SOURCES)
 
 
 class Stub:
@@ -90,9 +95,9 @@ class DownloadAreaSources(unittest.TestCase):
 
     def test_lic_is_cut_to_its_box_and_queries_name_queens(self):
         si.get = stub = Stub()
-        report = D.download('lic')
+        report = D.download('lic', only=NON_LAYER)
         self.assertEqual({k: v['status'] for k, v in report['sources'].items()}, {k: 'ok' for k in report['sources']})
-        self.assertEqual(len(report['sources']), 15)
+        self.assertEqual(len(report['sources']), len(NON_LAYER))
         for name in ('streets_v4', 'lpc', 'parks', 'noise', 'collisions', 'subway'):
             self.assertEqual(len(self.cache('lic', name)), 1, f'{name}: the record outside the box is dropped')
         self.assertEqual(self.cache('lic', 'forestry_trees'), [list(INSIDE)])
@@ -150,12 +155,12 @@ class DownloadAreaSources(unittest.TestCase):
 
     def test_a_failed_source_is_reported_and_only_it_is_retried(self):
         si.get = Stub(fail={'erm2-nwe9'})           # the 311 dataset is down
-        report = D.download('lic')
+        report = D.download('lic', only=NON_LAYER)
         self.assertEqual(report['sources']['noise']['status'], 'FAILED'); self.assertIn('stub outage', report['sources']['noise']['error'])
         self.assertEqual(sum(v['status'] == 'ok' for v in report['sources'].values()), 14, 'the other sources are not lost')
         self.assertFalse((pathlib.Path(self.tmp.name) / 'data' / 'cache' / 'sources' / 'lic' / 'noise.json').exists(), 'nothing is written for a failed source')
         si.get = stub = Stub()
-        report = D.download('lic')
+        report = D.download('lic', only=NON_LAYER)
         self.assertEqual(report['sources']['noise']['status'], 'ok')
         self.assertEqual({v['status'] for k, v in report['sources'].items() if k != 'noise'}, {'already downloaded'})
         self.assertTrue(all('erm2-nwe9' in u for u, _, _ in stub.calls), 'the retry asks only for what failed')
@@ -165,3 +170,45 @@ class DownloadAreaSources(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class LayerStub:
+    """Answers every map-layer query with one record inside the LIC box and one outside, in each coordinate form."""
+
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, url, params=None, data=None, timeout=120, tries=3):
+        self.calls.append((url, params, data))
+        if 'gbfs' in url:
+            return {'last_updated': 1, 'data': {'stations': [{'station_id': 'in', 'lon': INSIDE[0], 'lat': INSIDE[1]}, {'station_id': 'out', 'lon': OUTSIDE[0], 'lat': OUTSIDE[1]}]}}
+        if 'overpass' in url:
+            return {'osm3s': {'timestamp_osm_base': 't'}, 'elements': [{'type': 'node', 'id': 1, 'lat': INSIDE[1], 'lon': INSIDE[0], 'tags': {'amenity': 'bench', 'note': 'dropped'}}]}
+        if 'FeatureServer' in url:
+            if params['resultOffset']:
+                return {'features': []}
+            poly = lambda p: {'type': 'Polygon', 'coordinates': [[list(p), [p[0] + .001, p[1]], [p[0], p[1] + .001], list(p)]]}
+            return {'features': [{'type': 'Feature', 'properties': {'LPC_NAME': n}, 'geometry': poly(p)} for n, p in (('in', INSIDE), ('out', OUTSIDE))]}
+        if params['$offset']:
+            return []
+        row = lambda n, p: {'id': n, 'latitude': str(p[1]), 'longitude': str(p[0]), 'gtfs_latitude': str(p[1]), 'gtfs_longitude': str(p[0]),
+                            'entrance_latitude': str(p[1]), 'entrance_longitude': str(p[0]),
+                            'the_geom': {'type': 'Point', 'coordinates': list(p)}, 'location': {'type': 'Point', 'coordinates': list(p)},
+                            'multipolygon': {'type': 'MultiPolygon', 'coordinates': [[[list(p), [p[0] + .001, p[1]], [p[0], p[1] + .001], list(p)]]]}}
+        return [row('in', INSIDE), row('out', OUTSIDE)]
+
+
+class DownloadAreaLayers(unittest.TestCase):
+    def test_every_layer_source_downloads_and_small_citywide_sets_are_cut_to_the_box(self):
+        self.tmp = tempfile.mkdtemp()
+        stub = LayerStub()
+        with mock.patch.object(D, 'ROOT', self.tmp), mock.patch.object(D.si, 'get', stub), mock.patch.object(D.time, 'sleep', lambda s: None):
+            report = D.download('lic', only=set(D.LAYER_SOURCES))
+        self.assertEqual({k: v['status'] for k, v in report['sources'].items()}, {k: 'ok' for k in D.LAYER_SOURCES})
+        read = lambda n: json.load(open(os.path.join(self.tmp, 'data', 'cache', 'sources', 'lic', n + '.json')))
+        for name in ('layer_gardens', 'layer_plazas', 'layer_fountains', 'layer_pops', 'layer_linknyc', 'layer_subway_stations', 'layer_subway', 'layer_crashes', 'layer_lpc'):
+            rows = read(name)
+            self.assertEqual(len(rows), 1, name)
+        self.assertEqual([x['station_id'] for x in read('layer_citibike')['stations']], ['in'])
+        self.assertEqual(read('layer_osm')['elements'][0]['tags'], {'amenity': 'bench'}, 'only the tags build_urban_layers.py keeps')
+        self.assertEqual(read('layer_pops')[0]['id'], 'in', 'whole rows are kept, not just coordinates')

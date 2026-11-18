@@ -9,6 +9,7 @@ Standard library only. Run from the repository root, on a computer with normal i
     python3 scripts/download_area_sources.py                # Brooklyn and Long Island City
     python3 scripts/download_area_sources.py --area lic     # one area
     python3 scripts/download_area_sources.py --places       # only the place-recommendation sources (below)
+    python3 scripts/download_area_sources.py --layers       # only the map-layer sources (scripts/build_area_layers.py)
 
 Writes data/cache/sources/<area>/<name>.json (git-ignored) and data/cache/sources/<area>/download-report.json, which
 lists every source with its record count, size, time, query and any error. A finished source is not downloaded again;
@@ -51,6 +52,19 @@ def points(rows, box, lat='latitude', lon='longitude'):
             continue
         if in_box(p[0], p[1], box):
             out.append(p)
+    return out
+
+
+
+def rows_in_box(rows, box, lat='latitude', lon='longitude'):
+    """The rows themselves (all their fields) whose coordinates are inside the box; points() keeps only (lon, lat)."""
+    out = []
+    for r in rows:
+        try:
+            if in_box(float(r[lon]), float(r[lat]), box):
+                out.append(r)
+        except (KeyError, TypeError, ValueError):
+            pass
     return out
 
 
@@ -207,6 +221,90 @@ def fetch_wikidata(area):
 PLACE_SOURCES = ('places_osm', 'lpc_places', 'restrooms', 'hotel_lots', 'wikidata')
 
 
+# Map-layer sources (scripts/build_area_layers.py): the same datasets and fields as scripts/build_urban_layers.py uses for
+# Manhattan. Small citywide datasets are downloaded whole and cut to the box here, so no borough code has to be guessed.
+LAYER_OSM_KEEP = ('name', 'amenity', 'shop', 'tourism', 'leisure', 'historic', 'artwork_type', 'cuisine', 'opening_hours', 'website',
+                  'addr:housenumber', 'addr:street', 'operator', 'wheelchair')
+LAYER_NODE_KEEP = ('highway', 'name', 'route_ref', 'shelter', 'bench', 'crossing', 'traffic_signals', 'network', 'operator')
+OPEN_DATA, NY_DATA = 'https://data.cityofnewyork.us', 'https://data.ny.gov'
+
+
+def fetch_overpass_points(box, body, keep, tile_dir):
+    """Overpass elements (node position or way/relation centre) with the kept tags, tile by tile like fetch_osm."""
+    seen, out, stamp = set(), [], None
+    for i, (w, s, e, n) in enumerate(osm_tiles(box)):
+        path = os.path.join(tile_dir, f'{i:03d}.json')
+        if os.path.exists(path):
+            d = json.load(open(path))
+        else:
+            r = overpass('[out:json][timeout:180];' + body.format(b=f'{s},{w},{n},{e}'))
+            d = {'stamp': r.get('osm3s', {}).get('timestamp_osm_base'), 'elements': r['elements']}
+            os.makedirs(tile_dir, exist_ok=True)
+            with open(path + '.tmp', 'w') as f:
+                json.dump(d, f)
+            os.replace(path + '.tmp', path)
+            print(f'    tile {i + 1}: {len(d["elements"]):,} elements', flush=True)
+            time.sleep(2)
+        stamp = max(filter(None, (stamp, d['stamp'])), default=None)
+        for x in d['elements']:
+            if (x['type'], x['id']) in seen:
+                continue
+            seen.add((x['type'], x['id']))
+            lat, lon = (x.get('lat'), x.get('lon')) if x['type'] == 'node' else (x.get('center', {}).get('lat'), x.get('center', {}).get('lon'))
+            if lat is not None:
+                out.append({'id': f"{x['type']}/{x['id']}", 'lon': lon, 'lat': lat, 'tags': {k: v for k, v in x.get('tags', {}).items() if k in keep}})
+    return {'timestamp_osm_base': stamp, 'elements': out}
+
+
+def layer_jobs(area, a, box_sql, crash_from):
+    soc = lambda view, select, where, page=50000, host=OPEN_DATA: si.socrata(f'{host}/resource/{view}.json', select, where, page)
+    inbox = lambda rows, geom: [r for r in rows if r.get(geom) and touches_box(r[geom], a['box'])]
+    tiles = lambda name: os.path.join(ROOT, 'data', 'cache', 'sources', area, f'{name}-tiles-' + box_key(a['box']))
+    crashes = lambda who: rows_in_box(soc('h9gi-nx95', f'collision_id,crash_date,crash_time,on_street_name,cross_street_name,off_street_name,number_of_{who}_injured,number_of_{who}_killed,contributing_factor_vehicle_1,latitude,longitude',
+                                     f"borough='{a['borough_upper']}' AND (number_of_{who}_injured>0 OR number_of_{who}_killed>0) AND crash_date>='{crash_from}'"), a['box'])
+    return {
+        'layer_osm': ('OpenStreetMap amenity / shop / tourism / leisure / historic, with the tags build_urban_layers.py keeps',
+                      lambda: fetch_overpass_points(a['box'], '(nwr["amenity"]({b});nwr["shop"]({b});nwr["tourism"]({b});nwr["leisure"]({b});nwr["historic"]({b}););out tags center;', LAYER_OSM_KEEP, tiles('layer-osm'))),
+        'layer_osm_street_nodes': ('OpenStreetMap bus stops and traffic signals',
+                                   lambda: fetch_overpass_points(a['box'], 'node["highway"~"^(bus_stop|traffic_signals)$"]({b});out;', LAYER_NODE_KEEP, tiles('layer-nodes'))),
+        'layer_trees': (f"Forestry tree points with species, size and condition, tpstructure='Full', within_box({box_sql})",
+                        lambda: soc('hn5i-inap', 'objectid,genusspecies,dbh,tpcondition,tpstructure,planteddate,updateddate,riskrating,location', f"tpstructure='Full' AND within_box(location,{box_sql})")),
+        'layer_parks': (f"Parks properties with type, acres and address, borough='{a['parks_borough']}'",
+                        lambda: inbox(soc('enfh-gkve', 'gispropnum,signname,typecategory,subcategory,acres,address,multipolygon', f"borough='{a['parks_borough']}'"), 'multipolygon')),
+        'layer_gardens': ('GreenThumb community gardens (citywide, cut to the box)',
+                          lambda: inbox(soc('p78i-pat6', 'parksid,gardenname,address,status,juris,openhrsm,openhrstu,openhrsw,openhrsth,openhrsf,openhrssa,openhrssu,multipolygon', '1=1'), 'multipolygon')),
+        'layer_ramps': (f'Pedestrian ramps with width, slope and condition, within_box({box_sql})',
+                        lambda: soc('ufzp-rrqu', 'rampid,cornerid,stname1,stname2,ramp_width,ramp_running_slope_total,curb_reveal,dws_conditions,ponding,the_geom', f'within_box(the_geom,{box_sql})')),
+        'layer_plazas': ('DOT pedestrian plazas (citywide, cut to the box)',
+                         lambda: inbox(soc('k5k6-6jex', 'objectid,plazaname,onstreet,fromstreet,tostreet,partner,boroname,the_geom', '1=1'), 'the_geom')),
+        'layer_bike_routes': (f'DOT bike routes, within_box({box_sql})',
+                              lambda: soc('mzxg-pwib', 'segmentid,street,fromstreet,tostreet,facilitycl,allclasses,bikedir,onoffst,instdate,status,the_geom', f'within_box(the_geom,{box_sql})')),
+        'layer_fountains': ('Parks drinking fountains (citywide, cut to the box)',
+                            lambda: inbox(soc('qnv7-p7a2', 'system,fountainty,position,propertyna,featuresta,the_geom', '1=1'), 'the_geom')),
+        'layer_pops': ('Privately owned public spaces (citywide, cut to the box)',
+                       lambda: rows_in_box(soc('rvih-nhyn', 'pops_number,building_name,building_address_with_zip,public_space_type,year_completed,hour_of_access_required,amenities_required,latitude,longitude', 'latitude IS NOT NULL'), a['box'])),
+        'layer_lpc': (f"LPC individual landmark lots with all designation fields, BORO='{a['lpc_boro']}'",
+                      lambda: [f for f in si.arcgis(si.SOURCES['lpc'], f"BORO='{a['lpc_boro']}'", 'LPC_LPNumb,LPC_NAME,Address,DesDate,Style_Prim,Arch_Prima,BuildType,Date_Low,Date_High,URL_REPORT,BBL') if touches_box(f.get('geometry'), a['box'])]),
+        'layer_historic_districts': ('LPC historic districts (citywide; State Plane geometry, cut to the box after reprojection)',
+                                     lambda: soc('skyk-mpzq', 'lp_number,area_name,status_of_,desdate,caldate,extension,the_geom', '1=1')),
+        'layer_linknyc': ('LinkNYC kiosks (citywide, cut to the box)',
+                          lambda: rows_in_box(soc('s4kf-3yrf', 'link_site_id,street_address,cross_street_1,cross_street_2,link_installation_status,planned_kiosk_type,link_installation,latitude,longitude', 'latitude IS NOT NULL'), a['box'])),
+        'layer_crashes': (f"Pedestrian injury crashes since {crash_from[:10]}, borough='{a['borough_upper']}', cut to the box", lambda: crashes('pedestrians')),
+        'layer_cyclist_crashes': (f"Cyclist injury crashes since {crash_from[:10]}, borough='{a['borough_upper']}', cut to the box", lambda: crashes('cyclist')),
+        'layer_speed_limits': (f'Posted speed limits, within_box({box_sql})',
+                               lambda: soc('5mad-ntua', 'street,postvz_sl,the_geom', f'within_box(the_geom,{box_sql})')),
+        'layer_subway_stations': ('MTA subway stations (statewide data, cut to the box)',
+                                  lambda: rows_in_box(soc('39hk-dx4f', 'gtfs_stop_id,station_id,complex_id,stop_name,daytime_routes,line,structure,ada,ada_notes,gtfs_latitude,gtfs_longitude', '1=1', host=NY_DATA), a['box'], 'gtfs_latitude', 'gtfs_longitude')),
+        'layer_subway': ('MTA subway entrances (cut to the box)',
+                         lambda: rows_in_box(soc('i9wp-a4ja', 'station_id,gtfs_stop_id,stop_name,daytime_routes,line,division,entrance_type,entry_allowed,exit_allowed,entrance_latitude,entrance_longitude', '1=1', host=NY_DATA), a['box'], 'entrance_latitude', 'entrance_longitude')),
+        'layer_citibike': ('Citi Bike station information (GBFS)',
+                           lambda: (lambda d: {'last_updated': d.get('last_updated'), 'stations': [x for x in d['data']['stations'] if in_box(x['lon'], x['lat'], a['box'])]})(si.get('https://gbfs.citibikenyc.com/gbfs/en/station_information.json', timeout=40))),
+    }
+
+
+LAYER_SOURCES = tuple(layer_jobs('lic', {'box': (0, 0, 0, 0), 'borough_upper': '', 'parks_borough': '', 'lpc_boro': ''}, '', ''))
+
+
 def jobs_for(area, now=None):
     """{source name: (description of the query, function returning the records)} for one area."""
     a = AREAS[area]
@@ -251,6 +349,7 @@ def jobs_for(area, now=None):
                                           f"borough in('{a['borough_upper']}','{a['borocode']}') and latitude is not null")),
         'wikidata': ('Wikidata sitelinks, labels, descriptions and official websites for the Wikidata IDs in places_osm',
                      lambda: fetch_wikidata(area)),
+        **layer_jobs(area, a, box_sql, crash_from),
     }
     return q, {'noise_window_from': noise_from[:10], 'collision_window_from': crash_from[:10]}
 
@@ -300,9 +399,12 @@ def main():
     ap.add_argument('--only', action='append', help='download only this source (repeatable), e.g. --only osm')
     ap.add_argument('--refresh', action='store_true', help='download again even if a file exists')
     ap.add_argument('--places', action='store_true', help='only the place-recommendation sources: ' + ', '.join(PLACE_SOURCES))
+    ap.add_argument('--layers', action='store_true', help='only the map-layer sources: ' + ', '.join(LAYER_SOURCES))
     args = ap.parse_args()
     if args.places:
         args.only = list(PLACE_SOURCES)
+    if args.layers:
+        args.only = (args.only or []) + list(LAYER_SOURCES)
     failed = []
     for area in args.area or list(AREAS):
         r = download(area, args.refresh, args.only)

@@ -330,56 +330,68 @@ async function loadData(kind){
   if(kind==='streets')return loadManhattanStreets();
   return loadViewportEvidence(kind);
 }
+// NYC Street Centerline requests for the three routing areas, Manhattan first so it draws first. Western Queens is a box
+// inside Queens (scripts/areas.py), so its request adds an envelope. FIDs are unique across boroughs in this service.
+const STREET_QUERIES = [
+  {label: 'Manhattan', where: "borocode='1'"},
+  {label: 'Brooklyn', where: "borocode='3'"},
+  {label: 'western Queens', where: "borocode='4'", bbox: STUDY_AREAS.find(a => a.id === 'lic').box},
+];
 async function loadManhattanStreets(){
   if(state.loading.streets)return;
   state.loading.streets=true;
   state.dataComplete.streets=false;
-  setSourceStatus('LOADING MANHATTAN STREET CENTERLINES…');
-  let features=state.datasets.streets?.features||[];
-  let offset=features.length;
-  let expected=state.streetExpected;
+  setSourceStatus('LOADING NYC STREET CENTERLINES…');
+  if(!state.datasets.streets)state.datasets.streets=emptyFC();
+  const features=state.datasets.streets.features;
+  state.streetExpectedBy=state.streetExpectedBy||{};
+  let current='';
   try{
-    if(expected===null){
-      const c=await timedJson(`${API.streets}?${new URLSearchParams({where:"borocode='1'",returnCountOnly:'true',f:'json'})}`,16000);
-      expected=Number.isFinite(c.count)?c.count:null;
-      state.streetExpected=expected;
-    }
-    if(!state.datasets.streets){state.datasets.streets=emptyFC();features=state.datasets.streets.features;}
-    // Request all Manhattan borough-code-1 records, ordered by stable object ID.
-    while(expected===null || offset<expected){
-      const d=await timedJson(makeArcGISQuery(API.streets,{where:"borocode='1'",count:STREET_PAGE_SIZE,offset,sort:'FID ASC',fields:'FID,borocode,st_label,st_name,status,physicalid,rw_type'}),26000);
-      if(!featureFC(d))throw new Error('NYC service did not return a GeoJSON FeatureCollection');
-      if(d.features.length===0){if(expected!==null&&offset<expected)throw new Error('NYC service returned an empty page before completion');break;}
-      for(const f of d.features){
-        if(f.properties){const clean={};for(const [key,value] of Object.entries(f.properties))clean[key.replace(/\\/g,'')]=value;f.properties=clean;}
-        const fid=String(f.properties?.FID??f.id??'');
-        if(!fid||state.streetsById.has(fid))continue;
-        // Geodetic coordinates belong to the authoritative NYC service. No hand-drawn lines.
-        if(!['LineString','MultiLineString'].includes(f.geometry?.type))continue;
-        const coords=featureCoords(f);
-        f.properties=f.properties||{};
-        f.properties.length_km=coords.length>=2?lineLengthKm(coords):null;
-        features.push(f);state.streetsById.set(fid,f);
+    for(const q of STREET_QUERIES){
+      current=q.label;
+      let expected=state.streetExpectedBy[q.label]??null;
+      if(expected===null){
+        const u=new URL(makeArcGISQuery(API.streets,{where:q.where,bbox:q.bbox}));u.searchParams.set('returnCountOnly','true');u.searchParams.set('f','json');
+        const c=await timedJson(u.toString(),16000);
+        expected=Number.isFinite(c.count)?c.count:null;
+        state.streetExpectedBy[q.label]=expected;
       }
-      offset+=d.features.length;
-      state.datasets.streets={type:'FeatureCollection',features};
-      const denom=expected===null?'?':expected.toLocaleString();
-      setSourceStatus(`MANHATTAN · ${features.length.toLocaleString()} / ${denom} STREETS`);
-      if(state.mapLayersReady)syncMapData();
-      if(d.features.length<STREET_PAGE_SIZE && !d.properties?.exceededTransferLimit && !d.exceededTransferLimit){
-        if(expected!==null && offset<expected)throw new Error(`Only ${offset} of ${expected} features were returned`);
-        break;
+      let offset=0,mine=0;
+      while(expected===null || offset<expected){
+        const d=await timedJson(makeArcGISQuery(API.streets,{where:q.where,bbox:q.bbox,count:STREET_PAGE_SIZE,offset,sort:'FID ASC',fields:'FID,borocode,st_label,st_name,status,physicalid,rw_type'}),26000);
+        if(!featureFC(d))throw new Error('NYC service did not return a GeoJSON FeatureCollection');
+        if(d.features.length===0){if(expected!==null&&offset<expected)throw new Error('NYC service returned an empty page before completion');break;}
+        for(const f of d.features){
+          if(f.properties){const clean={};for(const [key,value] of Object.entries(f.properties))clean[key.replace(/\\/g,'')]=value;f.properties=clean;}
+          const fid=String(f.properties?.FID??f.id??'');
+          if(!fid)continue;
+          mine++;
+          if(state.streetsById.has(fid))continue;
+          // Geodetic coordinates belong to the authoritative NYC service. No hand-drawn lines.
+          if(!['LineString','MultiLineString'].includes(f.geometry?.type))continue;
+          const coords=featureCoords(f);
+          f.properties=f.properties||{};
+          f.properties.length_km=coords.length>=2?lineLengthKm(coords):null;
+          features.push(f);state.streetsById.set(fid,f);
+        }
+        offset+=d.features.length;
+        setSourceStatus(`${q.label.toUpperCase()} · ${features.length.toLocaleString()} STREETS LOADED`);
+        if(state.mapLayersReady)syncMapData();
+        if(d.features.length<STREET_PAGE_SIZE && !d.properties?.exceededTransferLimit && !d.exceededTransferLimit){
+          if(expected!==null && offset<expected)throw new Error(`Only ${offset} of ${expected} ${q.label} features were returned`);
+          break;
+        }
+        if(offset>60000)throw new Error('Aborted unexpected oversized dataset');
       }
-      if(offset>60000)throw new Error('Aborted unexpected oversized dataset');
+      if(expected!==null && mine<expected)throw new Error(`Only ${mine} of ${expected} ${q.label} street features loaded`);
     }
-    if(expected!==null && features.length!==expected)throw new Error(`Only ${features.length} of ${expected} unique street features loaded`);
     state.dataComplete.streets=true;
-    setSourceStatus(`MANHATTAN · ${features.length.toLocaleString()} NYC CENTERLINES`,true);
-    toast('All Manhattan NYC Street Centerline geometry loaded. Streets are not a pedestrian-accessibility guarantee.');
+    setSourceStatus(`MANHATTAN · BROOKLYN · W. QUEENS · ${features.length.toLocaleString()} NYC CENTERLINES`,true);
+    toast(`NYC Street Centerline geometry loaded for ${STUDY_AREA_NAME}. Streets are not a pedestrian-accessibility guarantee.`);
   }catch(err){
     state.dataErrors.streets=err.message;
     setSourceStatus(`STREET DATA PARTIAL · ${features.length.toLocaleString()} FEATURES`);
-    toast(`Street data incomplete (${features.length.toLocaleString()} loaded). Retry button available; no substitute geometry was invented.`);
+    toast(`Street data incomplete at ${current} (${features.length.toLocaleString()} loaded). Retry button available; no substitute geometry was invented.`);
   }finally{state.loading.streets=false;syncMapData();updateLegend();updateSegmentDetails();}
 }
 /** A LngLatBounds-shaped box (getWest/getSouth/getEast/getNorth — the only methods every caller in this codebase

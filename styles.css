@@ -1215,3 +1215,6 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 /* Chinese headlines: break only between the phrases (the spaces), never inside one, and drop the English line break. */
 html[lang^=zh] .intro-row h1,html[lang^=zh] .right-head h2,html[lang^=zh] .m-composer-q{word-break:keep-all;letter-spacing:0;line-height:1.2}
 html[lang^=zh] .intro-row h1 br{display:none}
+
+/* Layers built for Manhattan only (catalog coverage), next to layers that cover all three areas. */
+.urban-only{font-size:.72em;font-weight:500;opacity:.7;margin-left:.35em;white-space:nowrap}
