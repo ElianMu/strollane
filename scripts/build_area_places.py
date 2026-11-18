@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add Brooklyn and Long Island City to the discovery place index (data/places), next to Manhattan's records.
+"""Add Brooklyn and western Queens to the discovery place index (data/places), next to Manhattan's records.
 
 Reads only files already downloaded by scripts/download_area_sources.py --places (no network):
     data/cache/sources/<area>/places_osm.json   OpenStreetMap places, the query and tags of scripts/build_place_index.py
@@ -11,7 +11,7 @@ plus the citywide DOHMH inspection file already in the repo (data/inspections/do
 
 Every record is built by the same functions as Manhattan's (scripts/build_place_index.py) and kept only when it lies in
 the area's box, its nearest NYC LION street segment is in that area (the boxes reach into Manhattan, and Brooklyn's box
-and the LIC box share a strip along Newtown Creek), and it is within 150 m of the joined walk network, so each one can be
+and the western Queens box share a strip along Newtown Creek), and it is within 150 m of the joined walk network, so each one can be
 routed to. Records get "area" and "boro";
 Manhattan's records are not changed. Rerunning replaces an area's records. An OpenStreetMap element already in the
 Manhattan index (a few at the river edges) stays there once.
@@ -168,7 +168,7 @@ def build_area(area, routable, taken, built, area_of):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--area', choices=list(BORO), action='append', help='default: Brooklyn and Long Island City')
+    ap.add_argument('--area', choices=list(BORO), action='append', help='default: Brooklyn and western Queens')
     areas = ap.parse_args().area or list(BORO)
     t0 = time.time()
     for area in areas:

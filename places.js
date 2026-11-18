@@ -25,7 +25,7 @@ const titleCase=s=>String(s||'').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase(
 function boroughOf(...names){for(const n of names){const b=BOROUGHS[String(n||'').toLowerCase()];if(b)return b;}return null;}
 function haversineKm(a,b){const R=6371.0088,r=Math.PI/180,dl=(b.lat-a.lat)*r,dn=(b.lon-a.lon)*r;const s=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(s));}
 function inNYC(p){return p.lon>=NYC_BBOX[0]&&p.lon<=NYC_BBOX[2]&&p.lat>=NYC_BBOX[1]&&p.lat<=NYC_BBOX[3];}
-/** Walking routes exist only on the pedestrian graph: Manhattan, Brooklyn and Long Island City (a box inside Queens).
+/** Walking routes exist only on the pedestrian graph: Manhattan, Brooklyn and western Queens (a box inside Queens: western Queens to Jackson Heights).
     Manhattan and Brooklyn count whole; elsewhere the position decides. The engine's snap is the final word. */
 function inRoutingCoverage(p){
  if(p.borough==='Manhattan'||p.borough==='Brooklyn')return true;
@@ -135,7 +135,7 @@ function attachPlaceSearch(input,{onSelect,onClear,osmTags=null,placeholder=null
  const render=()=>{
   show(st.items.map((p,i)=>`<button type="button" role="option" class="ps-item ${i===st.active?'active':''}" data-i="${i}" aria-selected="${i===st.active}">
    <span class="ps-name">${esc(p.name)}</span><span class="ps-cat">${esc(p.category||'')}</span>
-   <span class="ps-meta">${esc([p.address,p.neighborhood,p.borough].filter(Boolean).filter((v,j,a)=>a.indexOf(v)===j).join(' · '))}${!inRoutingCoverage(p)?' · <em>search only — walking routes cover Manhattan, Brooklyn and Long Island City</em>':''}</span>
+   <span class="ps-meta">${esc([p.address,p.neighborhood,p.borough].filter(Boolean).filter((v,j,a)=>a.indexOf(v)===j).join(' · '))}${!inRoutingCoverage(p)?' · <em>search only — walking routes cover Manhattan, Brooklyn and western Queens</em>':''}</span>
    ${placeDistanceText(p)?`<span class="ps-dist">${esc(placeDistanceText(p))}</span>`:''}</button>`).join('')+`<div class="ps-foot">Sources: ${esc([...new Set(st.items.map(p=>p.source))].join(' · '))}</div>`);
   list.querySelectorAll('[data-i]').forEach(b=>b.addEventListener('mousedown',e=>{e.preventDefault();choose(+b.dataset.i);}));
  };

@@ -12,11 +12,11 @@ const EXPLORE_VIEWS=[
 ];
 // Full Manhattan first; the Midtown pilot is used only if the Manhattan build is missing (and is labelled as such).
 const DIMENSION_AREAS=['manhattan','midtown'];
-// Brooklyn and Long Island City join the same layer once the map shows them (Brooklyn alone is ~11 MB). All three are
+// Brooklyn and western Queens join the same layer once the map shows them (Brooklyn alone is ~11 MB). All three are
 // ranked on one shared percentile scale (scripts/dimensions/combine_areas.py), so a score means the same in each; an
 // area is added only when its build carries the same calculation version. Boxes as in scripts/areas.py.
-const EXTRA_DIMENSION_AREAS=[{area:'brooklyn',label:'Brooklyn',box:[-74.0420,40.5700,-73.8330,40.7395]},{area:'lic',label:'Long Island City',box:[-73.9650,40.7280,-73.9150,40.7750]}];
-const AREA_SHORT={manhattan:'Manhattan',midtown:'Midtown',brooklyn:'Brooklyn',lic:'LIC'};
+const EXTRA_DIMENSION_AREAS=[{area:'brooklyn',label:'Brooklyn',box:[-74.0420,40.5700,-73.8330,40.7395]},{area:'lic',label:'Western Queens',box:[-73.9650,40.7280,-73.8700,40.7850]}];
+const AREA_SHORT={manhattan:'Manhattan',midtown:'Midtown',brooklyn:'Brooklyn',lic:'W. Queens'};
 const exploreMap={areas:{},data:null,loading:null,active:false,view:2,opacity:.9,hover:null,selected:null,collapsed:false,thumbs:false,labels:[],stops:null,manifest:null,base:null,details:null,detailsLoading:null,no2:null};
 // Blue → cyan → yellow ramps (blue = low, yellow = high), one per map theme; the dark-theme ramp is brighter at
 // the low end so low scores stay visible on the dark basemap. Keep in sync with .explore-ramp i in styles.css.
@@ -77,10 +77,10 @@ function renderExploreStatus(){
  const mf=exploreMap.manifest,areas=Object.values(exploreMap.areas),total=areas.reduce((n,a)=>n+a.segments,0);
  const done=mf.indicators.filter(x=>x.status==='computed').length,scored=mf.indicators.filter(x=>x.role==='up'||x.role==='down').length;
  const pending=exploreSharedScale()?EXTRA_DIMENSION_AREAS.filter(x=>!exploreMap.areas[x.area]).map(x=>x.label):[];
- $('exploreScope').textContent=mf.area!=='manhattan'?'MIDTOWN PILOT ONLY · NOT ALL MANHATTAN':exploreSharedScale()?'MANHATTAN · BROOKLYN · LONG ISLAND CITY · STREET SEGMENTS':'ALL MANHATTAN · STREET SEGMENTS';
+ $('exploreScope').textContent=mf.area!=='manhattan'?'MIDTOWN PILOT ONLY · NOT ALL MANHATTAN':exploreSharedScale()?'MANHATTAN · BROOKLYN · WESTERN QUEENS · STREET SEGMENTS':'ALL MANHATTAN · STREET SEGMENTS';
  const by=areas.length>1?` (${areas.map(a=>`${esc(AREA_SHORT[a.manifest.area]||a.manifest.area)} ${a.segments.toLocaleString()}`).join(' · ')})`:` ${esc(mf.area_label)}`;
  $('exploreStatus').innerHTML=`<b>${total.toLocaleString()}</b> street segments${by} · <b>${done}/${scored}</b> scored indicators computed from real sources (retrieved ${esc((mf.windows?.retrieved_at||'').slice(0,10))}). `+
-  (exploreSharedScale()?'Percentiles rank segments across Manhattan, Brooklyn and Long Island City together. ':'Percentiles rank segments within this area only. ')+
+  (exploreSharedScale()?'Percentiles rank segments across Manhattan, Brooklyn and western Queens together. ':'Percentiles rank segments within this area only. ')+
   (pending.length?`${esc(pending.join(' and '))} load when you move the map there. `:'')+
   `N/A = not measurable, never 0. <span class="explore-version">calc ${esc(mf.calculation_version)} · built ${esc(mf.built_at.slice(0,16).replace('T',' '))} UTC</span>`;
 }
@@ -97,7 +97,7 @@ async function loadExploreStreets(){
  loadVisibleExploreAreas();
  return exploreMap.data;
 }
-/** Adds Brooklyn or Long Island City to the street layer. Offline hook (DOM tests): window.STREETWISE_DIMENSION_AREAS[area]. */
+/** Adds Brooklyn or western Queens to the street layer. Offline hook (DOM tests): window.STREETWISE_DIMENSION_AREAS[area]. */
 function loadExploreArea(area){
  const spec=EXTRA_DIMENSION_AREAS.find(x=>x.area===area);
  if(!spec||!exploreMap.data||!exploreSharedScale())return Promise.resolve(null);
@@ -239,7 +239,7 @@ function renderExploreInspector(){
  const cov=v.dim==null?`${p.coverage} of 12 dimensions available on this segment`:`${p['n'+v.dim]} of ${dimMeta.scored_indicators.length} scored indicators available on this segment · model ${dimMeta.model_coverage}`;
  const head=`<div class="inspector-head"><div><div class="explore-eyebrow">STREET SEGMENT INFORMATION</div><strong>${esc(p.name||'Unnamed street')}</strong></div><div class="inspector-actions"><button type="button" id="inspectorPrev" class="explore-collapse" aria-label="Previous dimension" title="Previous dimension">‹</button><button type="button" id="inspectorNext" class="explore-collapse" aria-label="Next dimension" title="Next dimension">›</button><button type="button" id="inspectorClose" class="explore-collapse" aria-label="Close inspector" title="Close (Esc)">✕</button></div></div>
   <section class="inspector-summary" aria-label="Summary">
-  <div class="inspector-score"><span>${esc(v.label)} · Dimension Score</span><strong class="score-with-swatch"><i class="score-swatch${score==null?' na':''}" style="background:${exploreColor(score)}"></i><b data-k="dimension-score">${fmtScore(score)}</b></strong><small>0–100 percentile ${exploreSharedScale()?'across Manhattan, Brooklyn and Long Island City':'within '+esc(mf.area_label)} · ${esc(cov)}</small></div>
+  <div class="inspector-score"><span>${esc(v.label)} · Dimension Score</span><strong class="score-with-swatch"><i class="score-swatch${score==null?' na':''}" style="background:${exploreColor(score)}"></i><b data-k="dimension-score">${fmtScore(score)}</b></strong><small>0–100 percentile ${exploreSharedScale()?'across Manhattan, Brooklyn and western Queens':'within '+esc(mf.area_label)} · ${esc(cov)}</small></div>
   <dl class="inspector-ids"><dt>Segment ID</dt><dd data-k="segment-id">${esc(p.id)}</dd><dt>Street Name</dt><dd>${esc(p.name||'N/A')}</dd><dt>Length</dt><dd>${Number(p.length_m).toLocaleString(undefined,{maximumFractionDigits:1})} m</dd><dt>Dimension</dt><dd>${esc(v.dim==null?v.label:`${dimMeta.num} ${dimMeta.label}`)}</dd></dl>
   </section>`;
  const amf=exploreAreaOf(p.id)?.manifest||mf;

@@ -39,7 +39,7 @@ const run=s=>vm.runInContext(s,context);
  await run('loadExploreStreets()');assert(!w.document.querySelector('#explorePanel').classList.contains('hidden'));
  assert.equal(w.document.querySelectorAll('#exploreChips [data-view]').length,13);assert.equal(w.document.querySelectorAll('#exploreGrid .explore-dim').length,13);
  assert.equal(w.document.querySelector('#exploreTitle').textContent,'02 Nature');
- assert.equal(w.document.querySelector('#exploreScope').textContent,'MANHATTAN · BROOKLYN · LONG ISLAND CITY · STREET SEGMENTS');
+ assert.equal(w.document.querySelector('#exploreScope').textContent,'MANHATTAN · BROOKLYN · WESTERN QUEENS · STREET SEGMENTS');
  assert(w.document.querySelector('#exploreMetric').textContent.includes('canopy_pct'));assert(w.document.querySelector('#exploreMetric').textContent.includes('2/3 scored indicators available'));
  // A real segment whose LION record has no roadway width: that indicator is N/A, never 0.
  const D=w.STREETWISE_DIMENSIONS.indicators,k=D.raw.width_ft.findIndex(v=>v===null),seg=w.STREETWISE_DIMENSIONS.segments.features[k].properties;
@@ -98,16 +98,16 @@ const run=s=>vm.runInContext(s,context);
  w.document.querySelector('#exploreChips [data-view="11"]').click();await tick();await tick();
  assert(/Community District \d+/.test(insp().querySelector('[data-key="no2_area_context"]').textContent));assert(insp().querySelector('[data-key="no2_area_context"]').textContent.includes('ppb'));
  run("selectExploreSegment(null)");assert(insp().classList.contains('hidden'));
- // Long Island City joins the same layer (one shared score scale); its segments read LIC's own indicator file and manifest.
+ // Western Queens (area id 'lic') joins the same layer (one shared score scale); its segments read LIC's own indicator file and manifest.
  const licDir=path.join(root,'data/dimensions/lic'),rl=f=>JSON.parse(fs.readFileSync(path.join(licDir,f)));
  w.STREETWISE_DIMENSION_AREAS={lic:{manifest:rl('manifest.json'),segments:rl('segments.geojson'),indicators:rl('indicators.json')}};
  const nMn=run('exploreMap.data.features.length');await run("loadExploreArea('lic')");
- assert.equal(run('exploreMap.data.features.length'),nMn+2237);assert.equal(run("exploreAreaOf('QN-1').manifest.area"),'lic');assert.equal(run("exploreAreaOf('MN-1').manifest.area"),'manhattan');
- assert(/Manhattan 10,533 · LIC 2,237/.test(w.document.querySelector('#exploreStatus').textContent));assert(/Brooklyn load when you move the map there/.test(w.document.querySelector('#exploreStatus').textContent));
+ assert.equal(run('exploreMap.data.features.length'),nMn+6439);assert.equal(run("exploreAreaOf('QN-1').manifest.area"),'lic');assert.equal(run("exploreAreaOf('MN-1').manifest.area"),'manhattan');
+ assert(/Manhattan 10,533 · W. Queens 6,439/.test(w.document.querySelector('#exploreStatus').textContent));assert(/Brooklyn load when you move the map there/.test(w.document.querySelector('#exploreStatus').textContent));
  const L=w.STREETWISE_DIMENSION_AREAS.lic,lk=L.indicators.raw.width_ft.findIndex(v=>v!=null),lseg=L.segments.features[lk].properties;
  run('selectExploreView(4)');run(`selectExploreSegment(${JSON.stringify(lseg.id)})`);await tick();await tick();
  assert.equal(insp().querySelector('[data-k=segment-id]').textContent,lseg.id);assert.equal(insp().querySelector('[data-k=dimension-score]').textContent,lseg.d3==null?'N/A':String(Math.round(lseg.d3)));
- assert(insp().textContent.includes('Long Island City'));assert(insp().textContent.includes('across Manhattan, Brooklyn and Long Island City'));
+ assert(insp().textContent.includes('Western Queens'));assert(insp().textContent.includes('across Manhattan, Brooklyn and western Queens'));
  assert.equal(insp().querySelector('[data-key="width_ft"] [data-k=raw]').textContent.replace(/[^0-9.]/g,'')!=='',true);
  run("selectExploreSegment(null)");
  assert(run('exploreMap.data.features.length>10000&&exploreMap.data.features.every(f=>f.geometry.type==="LineString"&&ExperienceCore.keys.every((k,i)=>f.properties["d"+i]===null||(f.properties["d"+i]>=0&&f.properties["d"+i]<=100)))'));

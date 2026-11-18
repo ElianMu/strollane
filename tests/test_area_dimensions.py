@@ -39,7 +39,7 @@ class AreaDimensions(unittest.TestCase):
                 self.assertEqual([d['label'] for d in m['dimensions']], [d['label'] for d in MANHATTAN['dimensions']], 'same 12 dimensions, same order')
                 self.assertEqual(len(feats), m['segments']); self.assertEqual(ind['ids'], [f['properties']['id'] for f in feats])
                 self.assertTrue(all(i.startswith(PREFIX[area]) for i in ind['ids'])); self.assertEqual(len(set(ind['ids'])), len(ind['ids']))
-                self.assertIn('Manhattan, Brooklyn and Long Island City together', m['comparison_scope'])
+                self.assertIn('Manhattan, Brooklyn and western Queens together', m['comparison_scope'])
                 for k in ('ped_counts', 'dohmh_no2'):
                     self.assertIsNone(m['sources'][k]['file']); self.assertEqual(m['sources'][k]['status'], 'not available for this area')
                 self.assertFalse((D / area / 'context_no2.geojson').exists(), 'no Manhattan NO2 layer in another area')

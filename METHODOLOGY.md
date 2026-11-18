@@ -6,16 +6,22 @@
 > longer how routes are ranked or how the Explore map is coloured. Current scoring is described in the next three
 > sections, in `README.md`, `ARCHITECTURE.md` and `DIMENSIONS_MAP_MODE_REPORT.md`.
 
-## Routes across Manhattan, Brooklyn and Long Island City (since 2026-11-17)
+## Routes across Manhattan, Brooklyn and western Queens (since 2026-11-17)
 
-The router uses one walking network joining the three areas (`nyc3-90e7f769`, `scripts/merge_networks.py`):
-119,570 nodes and 373,280 directed edges, 114,490 nodes in the routable component. The three
+Western Queens (2026-11-18): the Queens box was widened from Long Island City alone to Long Island City, Astoria,
+Sunnyside, Woodside and Jackson Heights (Newtown Creek to Ditmars Boulevard, east to about 90th Street; `scripts/areas.py`,
+where its id stays `lic`). Its east edge is set by the 512 MB server: the router needs about 0.6 MB per 1,000 edges
+(measured: 129 MB for Manhattan's 122,092 edges, 280 MB for 373,280). All of Queens would not fit.
+
+The router uses one walking network joining the three areas (`nyc3-1efe6705`, `scripts/merge_networks.py`):
+133,059 nodes and 416,268 directed edges, 127,854 nodes in the routable component. The three
 OSMnx downloads are joined on OSM node IDs; where a directed edge is in more than one download, the copy from the area
-listed first (Manhattan, Brooklyn, Long Island City) is kept with that area's scores. Brooklyn's and Long Island City's
+listed first (Manhattan, Brooklyn, western Queens) is kept with that area's scores. Brooklyn's and western Queens'
 street scores reach their edges by the same steps as Manhattan's: `scripts/match_area.py` (Manhattan's matching function,
 verified to reproduce Manhattan's 77,522 committed mapping rows exactly), `scripts/measure_direct_edges.py --area`
 (self-check reproduced each area's stored values for 99.6–100 % of segments), `scripts/transfer_dimension_scores.py --area`.
-Scored share of routable length: Brooklyn 98.3 %, Long Island City 99.1 %.
+Scored share of routable length: Brooklyn 98.3 %, western Queens 98.8 % (Spatial Comfort 78.3 %: the ramp survey does not reach
+directly measured edges there).
 
 River crossings checked on the joined network: Brooklyn Bridge, Manhattan Bridge, Queensboro Bridge and Pulaski Bridge
 connect. **The Williamsburg Bridge does not**: in Manhattan's OSM download of 2026-10-23 its walkway ends over the river
@@ -23,26 +29,25 @@ without reaching Delancey Street, so walks between the Lower East Side and Willi
 about 2.3 km). Whether that is a closure tagged in OpenStreetMap or a tagging gap was not checked. A fresh Manhattan
 download would show; `tests/test_joined_network.py` fails once it is fixed.
 
-The Long Island City box also covers Manhattan's east edge and part of Greenpoint; those streets come from the Manhattan
-and Brooklyn downloads. About 30 Long Island City edges touch Manhattan nodes, mostly the Queensboro Bridge walkway
+The western Queens box also covers Manhattan's east edge, Roosevelt Island and part of Greenpoint; those streets come from
+the Manhattan and Brooklyn downloads. A few dozen western Queens edges touch Manhattan nodes, mostly the Queensboro Bridge walkway
 and footways at its Manhattan end.
 
-Heat-aware routing (`routing/weather.py`) uses tree and park evidence per street segment; for Brooklyn and Long Island
-City it comes from the map build (`data/pedestrian/area-segment-evidence.json.gz`, park share ×100 to match Manhattan's
+Heat-aware routing (`routing/weather.py`) uses tree and park evidence per street segment; for Brooklyn and western
+Queens it comes from the map build (`data/pedestrian/area-segment-evidence.json.gz`, park share ×100 to match Manhattan's
 0–100 field), giving evidence on 98 % of edge geometries.
 
-Memory: `scripts/check_capacity.py` peak with the joined network is 341 MB, under its 448 MB ceiling (512 MB instance).
+Memory: `scripts/check_capacity.py` peak with the joined network and the place index is 407 MB (2026-11-18), under its
+448 MB ceiling (512 MB instance); it was 380 MB with the Long Island City box alone.
 
-The page itself (map view, place search, recommended walks) still treats Manhattan as the study area; that is the next step.
-
-## One scale for Manhattan, Brooklyn and Long Island City (since 2026-11-17)
+## One scale for Manhattan, Brooklyn and western Queens (since 2026-11-17)
 
 Approved by the project owner on 2026-11-17 so that routes can cross the East River and scores can be compared
 between areas. Each area is built on its own with identical indicator definitions (`build.py` for Manhattan,
-`scripts/dimensions/area_build.py` for Brooklyn and Long Island City); `scripts/dimensions/combine_areas.py` then keeps
-every raw value and re-ranks each scored indicator among **all 38,589 street segments of the three areas
-together** (10,533 Manhattan, 25,819 Brooklyn, 2,237 Long Island City). A score of 80
-now means better than 80 % of those segments, in whichever area it lies. Version: `strollane-12x24-v1+nyc3-2c5f8e8350`;
+`scripts/dimensions/area_build.py` for Brooklyn and western Queens); `scripts/dimensions/combine_areas.py` then keeps
+every raw value and re-ranks each scored indicator among **all 42,791 street segments of the three areas
+together** (10,533 Manhattan, 25,819 Brooklyn, 6,439 western Queens; 38,589 with the Long Island City box alone). A score
+of 80 now means better than 80 % of those segments, in whichever area it lies. Version: `strollane-12x24-v1+nyc3-8829299a21`;
 each area's own build stays in its manifest as `raw_calculation_version`. Directly measured routing edges (crossings,
 park paths) are ranked against the same combined reference.
 
@@ -58,7 +63,10 @@ streets sit near the top of a dimension, there is less to gain by detouring for 
 +2.8 (was +5.5), Architecture +6.3 (was +10.9), Environment +3.7 (was +6.4). Nature (+13.2) and Quiet & Relax (+11.9)
 gained slightly. This is the trade-off of one shared scale, not an error.
 
-Known limit at area edges: point sources were downloaded per borough, so a Long Island City street beside Newtown
+Widening the Queens box (2026-11-18) moved Manhattan's and Brooklyn's medians by 0–2.6 points; the benchmark is now
+**+6.8 points for a 3.6 % mean detour**, 57 of 228 runs returning the shortest route, and the activity order is unchanged.
+
+Known limit at area edges: point sources were downloaded per borough, so a western Queens street beside Newtown
 Creek does not count 311 complaints or crimes reported on the Brooklyn bank. Water separates almost all of these
 edges, so the effect is small, but it is not zero.
 
@@ -111,7 +119,7 @@ the earlier file).
 
 ## What the route scores are, and are not
 
-Each scored indicator is a 0–100 percentile rank among the street segments of Manhattan, Brooklyn and Long Island City ("lower is better" indicators
+Each scored indicator is a 0–100 percentile rank among the street segments of Manhattan, Brooklyn and western Queens ("lower is better" indicators
 reversed); a dimension score is the equal-weight mean of its available indicators; a route score is the length-weighted
 mean over the OSM edges the route uses. These are **relative ranks of proxies computed from public records**. They are
 not calibrated measurements and have not been validated against how people experience a walk.

@@ -1,20 +1,20 @@
 'use strict';
 
-/** STREETWISE / NYC research prototype (walks in Manhattan, Brooklyn and Long Island City). All displayed geometry is remote GIS source data or external routing output. **/
+/** STREETWISE / NYC research prototype (walks in Manhattan, Brooklyn and western Queens). All displayed geometry is remote GIS source data or external routing output. **/
 const $ = (id) => document.getElementById(id);
 const CENTER = [-73.9698, 40.7840];
 // Study-area envelope, not a precise legal borough polygon.
 const MANHATTAN_BOUNDS = [[-74.032, 40.696], [-73.904, 40.883]];
 const BBOX = [MANHATTAN_BOUNDS[0][0], MANHATTAN_BOUNDS[0][1], MANHATTAN_BOUNDS[1][0], MANHATTAN_BOUNDS[1][1]];
-// Walking routes cover Manhattan, Brooklyn and Long Island City (one joined walk network; boxes as in scripts/areas.py).
+// Walking routes cover Manhattan, Brooklyn and western Queens (one joined walk network; boxes as in scripts/areas.py).
 // The boxes are a quick check in the page; the routing engine's snap to the walk network is the final word.
 const STUDY_AREAS = [
   {id: 'manhattan', label: 'Manhattan', box: BBOX},
   {id: 'brooklyn', label: 'Brooklyn', box: [-74.0420, 40.5700, -73.8330, 40.7395]},
-  {id: 'lic', label: 'Long Island City', box: [-73.9650, 40.7280, -73.9150, 40.7750]},
+  {id: 'lic', label: 'western Queens', box: [-73.9650, 40.7280, -73.8700, 40.7850]},  // id kept from the first (LIC-only) box
 ];
 const STUDY_BOUNDS = [[-74.042, 40.570], [-73.833, 40.883]];
-const STUDY_AREA_NAME = 'Manhattan, Brooklyn and Long Island City';
+const STUDY_AREA_NAME = 'Manhattan, Brooklyn and western Queens';
 const STREET_PAGE_SIZE = 1750;
 const OVERLAY_PAGE_SIZE = 1600;
 const PLACES = {
@@ -664,7 +664,7 @@ function routeBounds(routes,extraMeters=100){
   return [Math.min(...lon)-dx,Math.min(...lat)-dy,Math.max(...lon)+dx,Math.max(...lat)+dy];
 }
 async function fetchOfficialTrees(bbox,maxRecords){
-  const where=`latitude between ${bbox[1]} and ${bbox[3]} AND longitude between ${bbox[0]} and ${bbox[2]}`; // every borough's trees in view: the map now spans Manhattan, Brooklyn and Long Island City
+  const where=`latitude between ${bbox[1]} and ${bbox[3]} AND longitude between ${bbox[0]} and ${bbox[2]}`; // every borough's trees in view: the map now spans Manhattan, Brooklyn and western Queens
   const query=args=>API.trees+'?'+Object.entries(args).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
   const count=await timedJson(query({'$select':'count(*) as n','$where':where}),23000),expected=Number(count[0]?.n);
   if(!Number.isInteger(expected)||expected>maxRecords)throw new Error('Official tree source exceeds bounded scan');
@@ -823,7 +823,7 @@ function requestGPS(useAsStart=false,follow=false){
 }
 /** Default start = where the user is. Asked once on load (the browser shows its own permission prompt; nothing is
     assumed if it is refused or times out). Used only while the start is still the untouched preset — a start the user
-    picked, or named in the request, always wins — and only inside Manhattan, Brooklyn or Long Island City, the area the walking graph covers. */
+    picked, or named in the request, always wins — and only inside Manhattan, Brooklyn or western Queens, the area the walking graph covers. */
 async function autoLocateStart(){
   if(!navigator.geolocation||(!window.isSecureContext&&!['localhost','127.0.0.1'].includes(location.hostname)))return;
   try{const st=await navigator.permissions?.query({name:'geolocation'});if(st?.state==='denied')return;}catch(e){}

@@ -54,6 +54,11 @@ def points(rows, box, lat='latitude', lon='longitude'):
     return out
 
 
+def box_key(box):
+    """Kept tiles belong to one box: a changed box downloads its own tiles instead of reusing another box's."""
+    return '_'.join(f'{v:.4f}' for v in box)
+
+
 def osm_tiles(box, step=OSM_TILE_DEG):
     w, s, e, n = box
     y = s
@@ -233,9 +238,9 @@ def jobs_for(area, now=None):
         'ramps': (f'Pedestrian ramp survey, within_box({box_sql})',
                   lambda: si.socrata(RAMPS, 'rampid,cornerid,the_geom', f'within_box(the_geom,{box_sql})')),
         'osm': (f'OpenStreetMap amenity / shop / tourism / leisure / historic elements in the box, {sum(1 for _ in osm_tiles(a["box"]))} Overpass tiles',
-                lambda: fetch_osm(a['box'], os.path.join(ROOT, 'data', 'cache', 'sources', area, 'osm-tiles'))),
+                lambda: fetch_osm(a['box'], os.path.join(ROOT, 'data', 'cache', 'sources', area, 'osm-tiles-' + box_key(a['box'])))),
         'places_osm': (f'OpenStreetMap discovery places (query of scripts/build_place_index.py), {sum(1 for _ in osm_tiles(a["box"]))} Overpass tiles',
-                       lambda: fetch_places(a['box'], os.path.join(ROOT, 'data', 'cache', 'sources', area, 'place-tiles'))),
+                       lambda: fetch_places(a['box'], os.path.join(ROOT, 'data', 'cache', 'sources', area, 'place-tiles-' + box_key(a['box'])))),
         'lpc_places': (f"LPC individual landmark lots with name, address, date, style and report, BORO='{a['lpc_boro']}'",
                        lambda: feats(si.arcgis(si.SOURCES['lpc'], f"BORO='{a['lpc_boro']}'", 'LPC_LPNumb,LPC_NAME,Address,DesDate,Style_Prim,Arch_Prima,BuildType,Date_Low,URL_REPORT'))),
         'restrooms': ("NYC Open Data Public Restrooms (i7jb-7jku), cut to the area's box",

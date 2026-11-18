@@ -7,7 +7,7 @@
      autocomplete_places / search_places      places.js (Photon + NYC GeoSearch, five boroughs)
      discover_attractions / search_restaurants / search_hotels / search_local_services
                                               data/places/*.json — OpenStreetMap + NYC LPC + NYC restrooms snapshot,
-                                              limited to the walking-route coverage (Manhattan, Brooklyn, Long Island City)
+                                              limited to the walking-route coverage (Manhattan, Brooklyn, western Queens)
      verify_menu_item                         POST /api/menu/verify (official website only)
      recommend_food                           POST /api/recommend/food (hard filters → menu evidence → detour → explanation)
      get_place_details / get_place_ratings    GET /api/places/<id>, /api/places/<id>/ratings (per provider; blocked without keys)
@@ -333,7 +333,7 @@ async function handleHotelIntent(h){
   if(h.is_mine){
    if(ranked.length===1){setMyHotel(ranked[0]);out.push(`my hotel: ${ranked[0].name}`);}
    else if(ranked.length>1){askChoice(`Which hotel are you staying at? ${ranked.length} real matches${near?` near ${near.name}`:''}:`,ranked,p=>{setMyHotel(p);appendChat('assistant',`My hotel set to ${p.name}. It will be used as start / return point when you ask.`);});out.push('hotel: please confirm which one');}
-   else out.push(`no hotel named “${h.name}” in the hotel data (Manhattan, Brooklyn, Long Island City) — search it under My hotel`);
+   else out.push(`no hotel named “${h.name}” in the hotel data (Manhattan, Brooklyn, western Queens) — search it under My hotel`);
   }else{showFoundPlaces(`Hotels matching “${h.name}”`,ranked);out.push(`${ranked.length} hotels found (not set as yours)`);}
  }else{
   const res=await discoverPlaces(['hotels'],{near:near||getPlace('start'),limit:8,radiusKm:1.5});
