@@ -161,26 +161,41 @@ def fetch_places(box, tile_dir=None):
 
 
 def fetch_wikidata(area):
-    """{QID: [sitelinks, English label, English description, official website]} for the Wikidata IDs in places_osm."""
+    """{QID: [sitelinks, English label, English description, official website]} for the Wikidata IDs in places_osm.
+    A request that keeps failing is split in halves down to single IDs, so one bad ID or a busy moment costs only that
+    ID; IDs that still fail are listed under "_failed" with the error (the place keeps its OSM fields, nothing is added)."""
     d = json.load(open(os.path.join(ROOT, 'data', 'cache', 'sources', area, 'places_osm.json')))
     ids = sorted({x['tags']['wikidata'] for x in d['elements'] if str(x['tags'].get('wikidata', '')).startswith('Q')})
-    out = {}
-    for k in range(0, len(ids), 50):
-        q = parse.urlencode({'action': 'wbgetentities', 'ids': '|'.join(ids[k:k + 50]), 'props': 'sitelinks|labels|descriptions|claims', 'languages': 'en', 'format': 'json'})
-        for attempt in range(4):
+    out, failed = {}, {}
+
+    def ask(batch):
+        q = parse.urlencode({'action': 'wbgetentities', 'ids': '|'.join(batch), 'props': 'sitelinks|labels|descriptions|claims', 'languages': 'en', 'format': 'json'})
+        last = None
+        for attempt in range(3):
             try:
-                r = si.get('https://www.wikidata.org/w/api.php?' + q, timeout=60, tries=1)
-                break
-            except Exception:
-                r = None
+                return si.get('https://www.wikidata.org/w/api.php?' + q, timeout=60, tries=1)
+            except Exception as e:
+                last = e
                 time.sleep(5 * (attempt + 1))
-        if not r:
-            raise RuntimeError('Wikidata unavailable')
+        if len(batch) == 1:
+            failed[batch[0]] = str(last)[:200]
+            return {}
+        print(f'    wikidata: {len(batch)} IDs failed ({str(last)[:120]}); splitting', flush=True)
+        half = len(batch) // 2
+        a, b = ask(batch[:half]), ask(batch[half:])
+        return {'entities': {**a.get('entities', {}), **b.get('entities', {})}}
+
+    for k in range(0, len(ids), 50):
+        r = ask(ids[k:k + 50])
         for qid, ent in r.get('entities', {}).items():
             if 'sitelinks' in ent:
                 site = next((c['mainsnak'].get('datavalue', {}).get('value') for c in ent.get('claims', {}).get('P856', []) if c.get('mainsnak', {}).get('datavalue')), None)
                 out[qid] = [len(ent['sitelinks']), ent.get('labels', {}).get('en', {}).get('value', ''), ent.get('descriptions', {}).get('en', {}).get('value'), site]
         time.sleep(1)
+    if ids and not out:
+        raise RuntimeError(f'Wikidata unavailable: {next(iter(failed.values()), "no answer")}')
+    if failed:
+        out['_failed'] = failed
     return out
 
 

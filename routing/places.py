@@ -10,7 +10,8 @@ quality_status is set by rules on evidence, never for looks:
                     notable place with an official website (attractions), a NYC DOF hotel-class tax lot (hotels)
   limited_data      no address, website or hours in any source
   unverified        listed by a source, nothing more confirmed
-routing_coverage: 'manhattan_network' when the place snaps to the pedestrian graph, otherwise 'search_only'.
+routing_coverage: 'manhattan_network' when the place snaps to the pedestrian graph (the name is historical: the graph now joins
+Manhattan, Brooklyn and Long Island City), otherwise 'search_only'.
 """
 import gzip, json, math, os, re, threading
 from array import array

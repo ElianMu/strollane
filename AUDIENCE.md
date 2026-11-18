@@ -22,7 +22,7 @@ Why this group, on the evidence available:
 - **They can be reached for validation.** A first round of 8–12 walk-along participants can be recruited among new
   students, so the trust question the critique raised can actually be tested with this group.
 - **Coverage fits.** Scores and walking routes cover Manhattan, Brooklyn and Long Island City, where this group
-  explores first. Place recommendations (food, cafés, sights) are still indexed for Manhattan only.
+  explores first, with place recommendations (food, cafés, sights) in all three.
 
 ## Use cases built around the lead audience
 
