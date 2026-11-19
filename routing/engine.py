@@ -7,9 +7,10 @@ routed on; it only supplies scores through street_osm_edge_mapping. Every route 
 its geometry, distance and scores are all derived from that one list.
 """
 import gzip, hashlib, heapq, json, math, os, threading, time, uuid
+from array import array
 from collections import OrderedDict
 from .geometry_store import PackedPolylines, ProjectedPolylines
-from .compact import EdgeIds, GeomIndex, PackedScores, intern_edges
+from .compact import Adjacency, EdgeIds, EdgeTable, GeomIndex, NodeTable, PackedScores, intern_edges
 from . import netpack
 
 try:
@@ -61,9 +62,12 @@ class PedestrianNetwork:
             raise RuntimeError('edge-scores.json.gz was built for a different network version; rerun scripts/match_lion_osm.py')
         self.network_version = self.meta['network_version']
         self.score_version = self.score_meta['score_version']
-        self.adj = {}
-        for i, e in enumerate(self.edges):
-            self.adj.setdefault(e[0], []).append(i)
+        self.adj = Adjacency(self.nodes, (self.edges.node_ids[u] for u in self.edges.U))
+        # per edge: 1 when its head node is outside the main component (the search loops skip those edges)
+        # and the head node's NodeTable position, so A* reads its coordinates without a lookup
+        comp = self.nodes.comp
+        self.head_pos = array('i', (self.nodes.pos(v) for v in self.edges.v))
+        self.head_off = bytearray(1 if comp[p] != 0 else 0 for p in self.head_pos)
         self.by_id = EdgeIds(self.edges, self.adj)
         self.by_geom = GeomIndex(self.edges, len(self.geoms))
         # Metric polylines and a 100 m bucket index of routable edge geometries (both endpoints in the main component).
@@ -120,28 +124,29 @@ class PedestrianNetwork:
         del scores
         graph = json.load(gzip.open(graph_path, 'rt', encoding='utf-8'))
         self.meta = graph['metadata']
-        self.nodes = {int(k): v for k, v in graph.pop('nodes').items()}
+        nodes = {int(k): v for k, v in graph.pop('nodes').items()}
         self.geoms = PackedPolylines(graph.pop('geoms'))
         raw_edges = graph.pop('edges')
         del graph
         for e in raw_edges:
             e[7]['_steps'] = 'steps' in as_list(e[7].get('highway'))
-        self.edges = intern_edges(raw_edges, {n: n for n in self.nodes})
+        self.edges = EdgeTable.from_tuples(intern_edges(raw_edges, {n: n for n in nodes}))
+        self.nodes = NodeTable.from_dict(nodes)
 
     def _load_pack(self, pack):
         """Same structures as _load_json, from the compiled arrays (routing/netpack.py): no large JSON parse."""
         header, A = netpack.unpack(pack)
         self.meta, self.score_meta = header['graph_metadata'], header['score_metadata']
-        ids = A['node_id'].tolist()
+        ids = A['node_id']
         ll, cnt, comp = A['node_lonlat'], A['node_count'], A['node_comp']
-        self.nodes = {n: [ll[2 * i], ll[2 * i + 1], cnt[i], comp[i]] for i, n in enumerate(ids)}
+        self.nodes = NodeTable(A['node_id'], ll, cnt, comp)
         self.geoms = PackedPolylines.from_arrays(A['coords'], A['offsets'])
         tags = header['tags']
         for t in tags:
             t['_steps'] = 'steps' in as_list(t.get('highway'))
         ways = header['ways']
         U, V, K, G, R, L, W, T = (A[c] for c in ('e_u', 'e_v', 'e_k', 'e_gi', 'e_rev', 'e_len', 'e_ways', 'e_tags'))
-        self.edges = [(ids[U[i]], ids[V[i]], K[i], G[i], R[i], L[i], ways[W[i]], tags[T[i]]) for i in range(len(U))]
+        self.edges = EdgeTable(ids, U, V, K, G, R, L, W, T, ways, tags)
         self.gscores = netpack.scores_from_pack(header, A, len(DIMENSIONS))
 
     def heat_exposure(self):
@@ -179,16 +184,16 @@ class PedestrianNetwork:
         return f'{u}-{v}-{k}'
 
     def twin(self, i):
-        gi, rev = self.edges[i][3], self.edges[i][4]
+        gi, rev = self.edges.G[i], self.edges.R[i]
         return self.by_geom.get((gi, 1 - rev))
 
     def coords(self, i):
-        gi, rev = self.edges[i][3], self.edges[i][4]
+        gi, rev = self.edges.G[i], self.edges.R[i]
         g = self.geoms[gi]
         return g[::-1] if rev else g
 
     def coords_xy(self, i):
-        gi, rev = self.edges[i][3], self.edges[i][4]
+        gi, rev = self.edges.G[i], self.edges.R[i]
         g = self.gxy[gi]
         return g[::-1] if rev else g
 
@@ -249,14 +254,14 @@ class PedestrianNetwork:
             raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan, Brooklyn and western Queens pedestrian network'
                                + (' that avoids stairs.' if allowed else '. Roosevelt, Randall\'s and Governors Island connect only through other boroughs and are not routable.'))
         d, i, along = best
-        geo_len = self.glen[self.edges[i][3]] or 1
-        return {'edge': i, 'offset_m': along / geo_len * self.edges[i][5], 'snap_distance_m': round(d, 1),
+        geo_len = self.glen[self.edges.G[i]] or 1
+        return {'edge': i, 'offset_m': along / geo_len * self.edges.L[i], 'snap_distance_m': round(d, 1),
                 'edge_id': self.edge_id(i), 'input': [lon, lat]}
 
     # --- geometry helpers ------------------------------------------------------------------------------------
     def clip(self, i, a_m, b_m):
         """Edge coordinates between two offsets (metres of the edge's own length, in its direction)."""
-        length = self.edges[i][5] or 1
+        length = self.edges.L[i] or 1
         g, gx = self.coords(i), self.coords_xy(i)
         cum = [0.0]
         for p, q in zip(gx, gx[1:]):
@@ -279,6 +284,7 @@ class PedestrianNetwork:
         """One-to-many Dijkstra from a snapped origin to several snapped destinations (cost = multiplier × metres).
         Returns a list of costs (None when unreachable). Same virtual endpoints as search(), so the matrix agrees
         with the routes that are later drawn."""
+        E_v, E_len, E_off = self.edges.v, self.edges.L, self.head_off
         cost_cache = {}
 
         def cost(i):
@@ -297,18 +303,18 @@ class PedestrianNetwork:
             ends.setdefault(self.edges[i][0], []).append((k, (i, 0.0, off)))
             j = self.twin(i)
             if j is not None:
-                ends.setdefault(self.edges[j][0], []).append((k, (j, 0.0, self.edges[j][5] - off)))
+                ends.setdefault(self.edges[j][0], []).append((k, (j, 0.0, self.edges.L[j] - off)))
             if d['edge'] in (origin['edge'], self.twin(origin['edge'])):  # same edge: walk straight along it
-                along = abs((origin['offset_m'] if origin['edge'] == i else self.edges[i][5] - origin['offset_m']) - off)
+                along = abs((origin['offset_m'] if origin['edge'] == i else self.edges.L[i] - origin['offset_m']) - off)
                 c = cost(i)
                 if c is not None:
                     out[k] = c * along
         best, heap, tie, done = {}, [], iter(range(1 << 62)), set()
         i, off = origin['edge'], origin['offset_m']
-        starts = [(self.edges[i][1], (i, off, self.edges[i][5]))]
+        starts = [(self.edges.v[i], (i, off, self.edges.L[i]))]
         j = self.twin(i)
         if j is not None:
-            starts.append((self.edges[j][1], (j, self.edges[j][5] - off, self.edges[j][5])))
+            starts.append((self.edges.v[j], (j, self.edges.L[j] - off, self.edges.L[j])))
         for node, step in starts:
             c = step_cost(step)
             if c is not None and c < best.get(node, math.inf):
@@ -328,13 +334,13 @@ class PedestrianNetwork:
                 if c is not None and (out[k] is None or g + c < out[k]):
                     out[k] = g + c
             for e in self.adj.get(node, ()):
-                v = self.edges[e][1]
-                if v in done or self.nodes[v][3] != 0:
+                v = E_v[e]
+                if E_off[e] or v in done:
                     continue
                 c = cost(e)
                 if c is None:
                     continue
-                ng = g + c * self.edges[e][5]
+                ng = g + c * E_len[e]
                 if ng < best.get(v, math.inf):
                     best[v] = ng
                     heapq.heappush(heap, (ng, next(tie), v))
@@ -343,21 +349,29 @@ class PedestrianNetwork:
     def search(self, origin, dest, edge_cost):
         """A* over the graph with virtual origin/destination nodes on their snapped edges.
         edge_cost(i) returns cost per metre multiplier (>= 1, so straight-line distance stays admissible) or None."""
+        E_v, E_len, E_off = self.edges.v, self.edges.L, self.head_off
         O, D = 'O', 'D'
         tx, ty = xy(*self.clip(dest['edge'], dest['offset_m'], dest['offset_m'])[0])
+
+        LL, HP = self.nodes.lonlat, self.head_pos
 
         def h(node):
             lon, lat = self.nodes[node][:2]
             x, y = xy(lon, lat)
             return math.hypot(x - tx, y - ty)
 
+        def h_head(i):  # h() of edge i's head node, read from the columns
+            p = 2 * HP[i]
+            x, y = xy(LL[p], LL[p + 1])
+            return math.hypot(x - tx, y - ty)
+
         def leaving(snapped):
             """(node, step) choices from a snapped point: forward along its edge, or backward along the twin."""
             i, off = snapped['edge'], snapped['offset_m']
-            out = [(self.edges[i][1], (i, off, self.edges[i][5]))]
+            out = [(self.edges.v[i], (i, off, self.edges.L[i]))]
             j = self.twin(i)
             if j is not None:
-                out.append((self.edges[j][1], (j, self.edges[j][5] - off, self.edges[j][5])))
+                out.append((self.edges.v[j], (j, self.edges.L[j] - off, self.edges.L[j])))
             return out
 
         def arriving(snapped):
@@ -366,7 +380,7 @@ class PedestrianNetwork:
             out = {self.edges[i][0]: (i, 0.0, off)}
             j = self.twin(i)
             if j is not None:
-                out[self.edges[j][0]] = (j, 0.0, self.edges[j][5] - off)
+                out[self.edges[j][0]] = (j, 0.0, self.edges.L[j] - off)
             return out
 
         cost_cache = {}
@@ -389,8 +403,8 @@ class PedestrianNetwork:
         # Same-edge trip: walk directly between the two snapped points.
         if origin['edge'] in (dest['edge'], self.twin(dest['edge'])):
             i = dest['edge']
-            a, b = (origin['offset_m'] if origin['edge'] == i else self.edges[i][5] - origin['offset_m']), dest['offset_m']
-            step = (i, a, b) if a <= b else (self.twin(i), self.edges[i][5] - a, self.edges[i][5] - b) if self.twin(i) is not None else None
+            a, b = (origin['offset_m'] if origin['edge'] == i else self.edges.L[i] - origin['offset_m']), dest['offset_m']
+            step = (i, a, b) if a <= b else (self.twin(i), self.edges.L[i] - a, self.edges.L[i] - b) if self.twin(i) is not None else None
             if step and step_cost(step) is not None:
                 best[D] = step_cost(step); pred[D] = (O, step)
                 heapq.heappush(heap, (best[D], best[D], next(tie), D))
@@ -413,16 +427,16 @@ class PedestrianNetwork:
                     best[D] = g + c; pred[D] = (node, ends[node])
                     heapq.heappush(heap, (best[D], best[D], next(tie), D))
             for i in self.adj.get(node, ()):
-                v = self.edges[i][1]
-                if v in done or self.nodes[v][3] != 0:
+                v = E_v[i]
+                if E_off[i] or v in done:
                     continue
                 c = cost(i)
                 if c is None:
                     continue
-                ng = g + c * self.edges[i][5]
+                ng = g + c * E_len[i]
                 if ng < best.get(v, math.inf):
-                    best[v] = ng; pred[v] = (node, (i, 0.0, self.edges[i][5]))
-                    heapq.heappush(heap, (ng + h(v), ng, next(tie), v))
+                    best[v] = ng; pred[v] = (node, (i, 0.0, E_len[i]))
+                    heapq.heappush(heap, (ng + h_head(i), ng, next(tie), v))
         if D not in pred:
             return None
         steps, node = [], D
@@ -474,7 +488,7 @@ class RoutePlanner:
         constraints = constraints or {}
         avoid_stairs = bool(constraints.get('avoid_stairs'))
         sf = net.step_free_nodes() if avoid_stairs else None
-        no_steps = (lambda i: not net.edges[i][7]['_steps'] and net.edges[i][0] in sf and net.edges[i][1] in sf) if avoid_stairs else None
+        no_steps = (lambda i: not net.edges.steps(i) and net.edges[i][0] in sf and net.edges.v[i] in sf) if avoid_stairs else None
         o = net.snap(origin['lon'], origin['lat'], 'Origin', no_steps)
         d = net.snap(destination['lon'], destination['lat'], 'Destination', no_steps)
         weights, expressed = preference_weights(preferences)
@@ -495,7 +509,7 @@ class RoutePlanner:
         heat_coef = wx.CONFIG['heat']['edge_coefficient'] * heat
 
         def allowed(i):
-            return not (avoid_stairs and net.edges[i][7]['_steps'])
+            return not (avoid_stairs and net.edges.steps(i))
 
         def length_cost(i):
             return 1.0 if allowed(i) else None
@@ -504,7 +518,7 @@ class RoutePlanner:
             def f(i):
                 if not allowed(i):
                     return None
-                gi = net.edges[i][3]
+                gi = net.edges.G[i]
                 c = 1.0 + lam * (1.0 - net_utility(gi))
                 return c * (penalties.get(gi, 1.0) if penalties else 1.0)
             return f
@@ -518,7 +532,7 @@ class RoutePlanner:
 
         def weather_cost(i):
             c = experience_cost(0.8)(i)
-            return None if c is None else c + heat_coef * exposure[net.edges[i][3]]
+            return None if c is None else c + heat_coef * exposure[net.edges.G[i]]
 
         specs = [('shortest', 'Shortest Walk', length_cost)]
         specs += [('experience', 'Best Experience Match', experience_cost(2.0)), ('experience_balanced', 'Balanced Experience Route', experience_cost(0.8))]
@@ -528,7 +542,7 @@ class RoutePlanner:
                 def cost(i):
                     base = experience_cost(.8)(i)
                     if base is None: return None
-                    value = crime.fit(crime_field['values'][net.edges[i][3]], direction, crime_field['scale'])
+                    value = crime.fit(crime_field['values'][net.edges.G[i]], direction, crime_field['scale'])
                     return base + strength*(1-value)
                 return cost
             for direction in ('high', 'low'):
@@ -539,7 +553,7 @@ class RoutePlanner:
                 def cost(i):
                     base=experience_cost(.8)(i)
                     if base is None:return None
-                    share=water_data['within_100m_share'][net.edges[i][3]]
+                    share=water_data['within_100m_share'][net.edges.G[i]]
                     return base+strength*(1-(share if direction=='high' else 1-share))
                 return cost
             for direction in ('high','low'):
@@ -547,7 +561,7 @@ class RoutePlanner:
         if (crime_pref or water_pref) and (expressed or (crime_pref and water_pref)):
             def combined_cost(i):
                 if not allowed(i):return None
-                gi=net.edges[i][3];core_weight=sum(w for w,_ in weights.values()) if expressed else 0
+                gi=net.edges.G[i];core_weight=sum(w for w,_ in weights.values()) if expressed else 0
                 total=core_weight;matched=core_weight*net_utility(gi)
                 if crime_pref:
                     total+=crime_pref['weight'];matched+=crime_pref['weight']*crime.fit(crime_field['values'][gi],crime_pref['direction'],crime_field['scale'])
@@ -567,14 +581,14 @@ class RoutePlanner:
         used = {}
         for _, _, steps in candidates:
             for i, *_ in steps:
-                used[net.edges[i][3]] = 1.8
+                used[net.edges.G[i]] = 1.8
         for _ in range(2):
             steps = net.search(o, d, experience_cost(1.2, used))
             if steps is None:
                 break
             candidates.append(('alternative', 'Alternative Experience Route', steps))
             for i, *_ in steps:
-                used[net.edges[i][3]] = used.get(net.edges[i][3], 1.0) * 1.8
+                used[net.edges.G[i]] = used.get(net.edges.G[i], 1.0) * 1.8
         # The static candidates above are unchanged by weather; a hot day adds one more search with the heat term.
         if heat:
             steps = net.search(o, d, weather_cost)
@@ -660,9 +674,9 @@ class RoutePlanner:
             length = b - a
             total += length
             e = net.edge_object(i, traversed=length, offsets=(a, b))
-            e['partial'] = a > 0.01 or b < net.edges[i][5] - 0.01
+            e['partial'] = a > 0.01 or b < net.edges.L[i] - 0.01
             edges.append(e)
-            s = net.gscores[net.edges[i][3]]
+            s = net.gscores[net.edges.G[i]]
             for j in range(12):
                 if s['s'][j] is not None:
                     w = length * s['c'][j]
@@ -743,8 +757,8 @@ class RoutePlanner:
             elif coords and math.dist(xy(*coords[-1]), xy(*g[0])) > 1.0:
                 raise RoutingError('Route snapshot edges do not join; plan the route again.')
             coords += g
-            total += self.net.edges[i][5]
-            edges.append({'edge_id': str(eid), 'traversed_length_m': self.net.edges[i][5]})
+            total += self.net.edges.L[i]
+            edges.append({'edge_id': str(eid), 'traversed_length_m': self.net.edges.L[i]})
         r = {'route_id': snap.get('route_id') or 'snapshot', 'geometry': {'type': 'LineString', 'coordinates': coords}, 'edges': edges, 'distance_m': total,
              'network_version': self.net.network_version, 'ordered_edge_ids': [str(x) for x in ids]}
         if snap.get('route_signature') and snap['route_signature'] != route_signature(r):

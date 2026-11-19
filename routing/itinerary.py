@@ -146,7 +146,7 @@ class Planner:
         net, cons = self.net, req['constraints']
         notes, skipped = [], []
         avoid = cons.get('avoid_stairs')
-        allowed = (lambda i: not net.edges[i][7]['_steps']) if avoid else (lambda i: True)
+        allowed = (lambda i: not net.edges.steps(i)) if avoid else (lambda i: True)
 
         # 1. snap everything that may be visited -------------------------------------------------------------
         points = []  # each: dict(place, snap, role, ...)
@@ -387,7 +387,7 @@ class Planner:
 
         def exp_cost(i):
             if not allowed(i):return None
-            gi=net.edges[i][3];cost=1+.8*(1-util(gi))
+            gi=net.edges.G[i];cost=1+.8*(1-util(gi))
             if crime_pref:cost+=1.2*(1-crime.fit(crime_field['values'][gi],crime_pref['direction'],crime_field['scale']))
             if water_pref:
                 share=water_data['within_100m_share'][gi];cost+=1.2*(1-(share if water_pref['direction']=='high' else 1-share))

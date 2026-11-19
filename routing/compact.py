@@ -15,6 +15,7 @@ Values round-trip exactly: scores are integers 0–100 (or None), coverage has t
 and raw values are kept as float64 with a flag for values that were integers in the JSON.
 """
 from array import array
+from bisect import bisect_left
 import math
 
 NONE8 = 255
@@ -174,3 +175,155 @@ def intern_edges(edges, node_ids):
         osmids = way_pool.setdefault(wkey, osmids)
         out.append((node_ids.get(u, u), node_ids.get(v, v), k, gi, rev, length, osmids, tags))
     return out
+
+
+class EdgeTable:
+    """Read-only sequence of the network's directed edges, stored as columns instead of one tuple per edge.
+
+    net.edges[i] still returns (u, v, k, gi, rev, length, osmids, tags) with the same values (tags and OSM way lists are
+    shared objects, as intern_edges made them). A tuple per edge cost about 160 bytes; the columns cost about 30. The
+    search loops read the two columns they need (v, length) directly, which is also faster than building a tuple."""
+
+    def __init__(self, node_ids, U, V, K, G, R, L, W, T, ways, tags):
+        self.node_ids = node_ids                  # node position → OSM node id
+        self.U, self.K, self.G, self.R, self.L, self.W, self.T = U, K, G, R, L, W, T
+        self.v = array('q', (node_ids[x] for x in V))   # head node id per edge (the search loops' hot read)
+        self.ways, self.tags = ways, tags
+
+    @classmethod
+    def from_tuples(cls, edges):
+        """From intern_edges output (the JSON load path), keeping its shared tag and way objects."""
+        pos, ids, tag_ix, way_ix, tags, ways = {}, [], {}, {}, [], []
+        cols = [array('i'), array('i'), array('i'), array('i'), array('b'), array('d'), array('i'), array('i')]
+        for u, v, k, gi, rev, length, osmids, t in edges:
+            for n in (u, v):
+                if n not in pos:
+                    pos[n] = len(ids); ids.append(n)
+            w = way_ix.get(id(osmids))
+            if w is None:
+                w = way_ix[id(osmids)] = len(ways); ways.append(osmids)
+            x = tag_ix.get(id(t))
+            if x is None:
+                x = tag_ix[id(t)] = len(tags); tags.append(t)
+            for c, val in zip(cols, (pos[u], pos[v], k, gi, rev, length, w, x)):
+                c.append(val)
+        return cls(ids, *cols, ways, tags)
+
+    def __len__(self):
+        return len(self.U)
+
+    def __eq__(self, other):
+        return len(self) == len(other) and all(a == b for a, b in zip(self, other))
+
+    def steps(self, i):
+        """edges[i][7]['_steps'] without building the tuple."""
+        return self.tags[self.T[i]]['_steps']
+
+    def __getitem__(self, i):
+        if i < 0:
+            i += len(self.U)
+        return (self.node_ids[self.U[i]], self.v[i], self.K[i], self.G[i], self.R[i], self.L[i],
+                self.ways[self.W[i]], self.tags[self.T[i]])
+
+    def __iter__(self):
+        ids, ways, tags, v = self.node_ids, self.ways, self.tags, self.v
+        for i, (u, k, gi, rev, length, w, t) in enumerate(zip(self.U, self.K, self.G, self.R, self.L, self.W, self.T)):
+            yield (ids[u], v[i], k, gi, rev, length, ways[w], tags[t])
+
+
+class NodeTable:
+    """node id → [lon, lat, count, component], stored as columns sorted by node id (lookups by binary search).
+
+    Same answers as the dictionary it replaces (each lookup returns a new list; callers only read it). A dictionary
+    with a list per node cost about 170 bytes per node; the columns cost 32."""
+
+    def __init__(self, ids, lonlat, count, comp):
+        order = sorted(range(len(ids)), key=ids.__getitem__)
+        self.ids = array('q', (ids[i] for i in order))
+        self.lonlat = array('d', (x for i in order for x in (lonlat[2 * i], lonlat[2 * i + 1])))
+        self.count = array('i', (count[i] for i in order))
+        self.comp = array('i', (comp[i] for i in order))
+
+    @classmethod
+    def from_dict(cls, nodes):
+        ids = list(nodes)
+        return cls(ids, [x for n in ids for x in nodes[n][:2]], [nodes[n][2] for n in ids], [nodes[n][3] for n in ids])
+
+    def pos(self, node):
+        """Position of a node id, or -1."""
+        try:
+            p = bisect_left(self.ids, node)
+        except TypeError:
+            return -1
+        return p if p < len(self.ids) and self.ids[p] == node else -1
+
+    def at(self, p):
+        return [self.lonlat[2 * p], self.lonlat[2 * p + 1], self.count[p], self.comp[p]]
+
+    def __getitem__(self, node):
+        p = self.pos(node)
+        if p < 0:
+            raise KeyError(node)
+        return self.at(p)
+
+    def get(self, node, default=None):
+        p = self.pos(node)
+        return default if p < 0 else self.at(p)
+
+    def __contains__(self, node):
+        return self.pos(node) >= 0
+
+    def __len__(self):
+        return len(self.ids)
+
+    def __iter__(self):
+        return iter(self.ids)
+
+    def keys(self):
+        return iter(self.ids)
+
+    def values(self):
+        return (self.at(p) for p in range(len(self.ids)))
+
+    def items(self):
+        return ((n, self.at(p)) for p, n in enumerate(self.ids))
+
+    def __eq__(self, other):
+        return dict(self.items()) == (dict(other.items()) if hasattr(other, 'items') else other)
+
+
+class Adjacency:
+    """node id → indexes of the edges leaving it, in edge order (compressed rows over NodeTable positions).
+
+    Replaces a dictionary of lists (about 65 bytes per edge plus a list per node) with two integer arrays."""
+
+    def __init__(self, nodes, edge_tails):
+        n = len(nodes)
+        tails = array('i', (nodes.pos(u) for u in edge_tails))
+        off = array('i', bytes(4 * (n + 1)))
+        for p in tails:
+            off[p + 1] += 1
+        for p in range(n):
+            off[p + 1] += off[p]
+        fill = array('i', off[:-1])
+        idx = array('i', bytes(4 * len(tails)))
+        for i, p in enumerate(tails):            # ascending i: each row keeps edge order
+            idx[fill[p]] = i
+            fill[p] += 1
+        self.nodes, self.off, self.idx = nodes, off, idx
+
+    def get(self, node, default=()):
+        p = self.nodes.pos(node)
+        if p < 0:
+            return default
+        a, b = self.off[p], self.off[p + 1]
+        return self.idx[a:b] if b > a else default
+
+    def __getitem__(self, node):
+        r = self.get(node, None)
+        if r is None:
+            raise KeyError(node)
+        return r
+
+    def __contains__(self, node):
+        return self.get(node, None) is not None
