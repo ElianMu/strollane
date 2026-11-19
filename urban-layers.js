@@ -135,7 +135,7 @@ function urbanDatasetRow(d){
  const a=urbanData.active.get(d.id),dims=d.scoring.map(s=>dimLabel(ExperienceCore.names[ExperienceCore.keys.indexOf(s.dimension)])).join(', ');
  const cm=urbanData.crimeMeta,cf={...(planner.crime||{}),...(urbanData.crimeFilter||{})};
  const crimeFilters=d.remote==='crime'?`<div class="urban-note"><label>From <input type="date" data-crime-filter="from" value="${esc(cf.from||cm?.default_start||'')}" min="${esc(cm?.available_start||'')}" max="${esc(cm?.available_end_exclusive||'')}"></label> <label>To (exclusive) <input type="date" data-crime-filter="to" value="${esc(cf.to||cm?.available_end_exclusive||'')}"></label><label>Offense <select data-crime-filter="offense_types"><option value="">Felony + misdemeanor complaints</option>${[...new Set(Object.values(cm?.offenses||{}).flat())].sort().map(v=>`<option value="${esc(v)}" ${cf.offense_types?.includes(v)?'selected':''}>${esc(v)}</option>`).join('')}</select></label></div>`:'';
- return `<div class="urban-ds"><div class="urban-row"><input type="checkbox" data-ud-toggle="${d.id}" ${a?'checked':''} aria-label="Show ${esc(d.name)}"><span class="urban-swatch ${d.geometry.toLowerCase()}" style="--c:${udColor(d.id)}"></span><span class="urban-name">${esc(d.name)}${urbanData.catalog?.areas&&d.coverage==='Manhattan'?' <small class="urban-only">Manhattan only</small>':''}</span><span class="urban-badge ${d.used_in_scoring?'scoring':'context'}" title="${d.independent_metric?'Independent route objective; the 12 dimensions are unchanged':d.used_in_scoring?`Feeds the ${esc(dims)} score`:'Map context; not part of a core experience score'}">${d.independent_metric?'Route metric':d.used_in_scoring?'Scoring':'Context'}</span><button type="button" class="urban-info" data-ud-info aria-expanded="false" title="Dataset details">i</button></div>
+ return `<div class="urban-ds"><div class="urban-row"><input type="checkbox" data-ud-toggle="${d.id}" ${a?'checked':''} aria-label="Show ${esc(d.name)}"><span class="urban-swatch ${d.geometry.toLowerCase()}" style="--c:${udColor(d.id)}"></span><span class="urban-name">${esc(d.name)}${urbanData.catalog?.areas&&d.coverage==='Manhattan'?` <small class="urban-only"${BUILDING_3D_IDS.includes(d.id)?' title="Elsewhere the 3D view uses the base map&#39;s building outlines and heights; records are Manhattan only"':''}>${BUILDING_3D_IDS.includes(d.id)?'Records: Manhattan only':'Manhattan only'}</small>`:''}</span><span class="urban-badge ${d.used_in_scoring?'scoring':'context'}" title="${d.independent_metric?'Independent route objective; the 12 dimensions are unchanged':d.used_in_scoring?`Feeds the ${esc(dims)} score`:'Map context; not part of a core experience score'}">${d.independent_metric?'Route metric':d.used_in_scoring?'Scoring':'Context'}</span><button type="button" class="urban-info" data-ud-info aria-expanded="false" title="Dataset details">i</button></div>
   ${a?`<div class="urban-live"><span class="urban-status ${a.kind||''}" data-ud-status="${d.id}">${esc(a.status||'')}</span><span class="urban-repr" data-ud-repr="${d.id}">${esc(udRepresentation(d.id))}</span>${urbanData.settings?`<label class="urban-opacity">Opacity <input type="range" min="15" max="100" value="${Math.round(a.opacity*100)}" data-ud-opacity="${d.id}"></label>`:''}</div>${crimeFilters}`:''}
   <dl class="urban-meta hidden"><dt>Source</dt><dd><a href="${esc(d.source_url)}" target="_blank" rel="noopener noreferrer">${esc(d.source)}</a></dd><dt>Geometry</dt><dd>${esc(d.geometry)} · ${Number(d.feature_count).toLocaleString()} ${esc(d.coverage||'Manhattan')} records</dd><dt>Time</dt><dd>${esc(d.time_range||'—')}</dd><dt>Last updated</dt><dd>${esc(d.last_updated||'unknown')}</dd>
   <dt>Scoring</dt><dd>${d.used_in_scoring?esc(d.scoring.map(s=>`${dimLabel(ExperienceCore.names[ExperienceCore.keys.indexOf(s.dimension)])} (${s.sub_indicators.join(', ')})`).join('; ')):'Context only — not part of any score'}</dd>${d.note?`<dt>Note</dt><dd>${esc(d.note)}</dd>`:''}<dt>Fields</dt><dd>${esc(d.attributes.join(', '))}</dd></dl></div>`;
@@ -169,6 +169,13 @@ function addGroupLayers(){
   paint:{'fill-extrusion-color':T.building.neutral,'fill-extrusion-opacity':T.building.extrusionOpacity, // fill-extrusion-opacity is camera-only in MapLibre (no data expressions, unlike fill-opacity)
    'fill-extrusion-height':['*',0.3048,['coalesce',['to-number',['get',T.building.height.prop]],35]],
    'fill-extrusion-base':0,'fill-extrusion-vertical-gradient':true}},'ud-z-polys');
+ // Brooklyn and western Queens have no PLUTO footprints here (kept out to stay under GitHub Pages' 1 GB). The basemap's
+ // own vector tiles carry building outlines, about half with a height (metres), in every borough; they give those areas
+ // the same 3D massing. One 3D source at a time (syncBuildings3D): PLUTO while the view is centred on Manhattan, the
+ // basemap's elsewhere, so no building is drawn twice where the two overlap.
+ if(m.getSource('protomaps'))m.addLayer({id:'basemap-buildings-3d',type:'fill-extrusion',source:'protomaps','source-layer':'buildings',minzoom:T.zoom.neighbourhood-.5,
+  layout:{visibility:'none'},paint:{'fill-extrusion-color':T.building.neutral,'fill-extrusion-opacity':T.building.extrusionOpacity,
+   'fill-extrusion-height':['coalesce',['to-number',['get','height']],BASEMAP_DEFAULT_HEIGHT_M],'fill-extrusion-base':0,'fill-extrusion-vertical-gradient':true}},'ud-z-polys');
  layer({id:'udg-buildings-line',type:'line',source:'udg-buildings',minzoom:T.zoom.street,paint:{'line-color':T.building.outline,'line-width':['interpolate',['linear'],['zoom'],15,.3,18,.8],'line-opacity':.55}},'ud-z-polys');
  // Green: parks and gardens as soft fills with fine edges; classification subsets as dashed outlines.
  src('udg-green');
@@ -238,7 +245,7 @@ function setupUrbanMap(){
   showUrbanFeature(f.properties.ds,f);});
  let hovering=false;
  m.on('mousemove',e=>{if(state.pick||(typeof exploreMap!=='undefined'&&exploreMap.active))return;const on=!!topHit(e.point);if(on!==hovering){hovering=on;m.getCanvas().style.cursor=on?'pointer':'';}});
- m.on('moveend',urbanViewMoved);
+ m.on('moveend',urbanViewMoved);m.on('moveend',syncBuildings3D);
  m.on('zoomend',()=>{refreshRepresentations();renderUrbanLegend();});
  applyBuildingTheme();applyEnvTheme();refreshUrbanLayers();
 }
@@ -278,12 +285,31 @@ function composeUrbanGroups(){
  for(const g of all)state.map.getSource('udg-'+g)?.setData({type:'FeatureCollection',features:groups[g]||[]});
  renderUrbanLegend();
 }
+const BUILDING_3D_IDS=['building_footprints','building_heights','building_age'];
+const BASEMAP_DEFAULT_HEIGHT_M=10.7; // the PLUTO layer's own fallback, 35 ft, for outlines without a height
+// Manhattan's shoreline, simplified (about 100 m): decides which 3D source the view uses.
+const MANHATTAN_OUTLINE=[[-74.020,40.700],[-74.018,40.715],[-74.014,40.735],[-74.011,40.755],[-73.998,40.773],[-73.990,40.785],[-73.972,40.808],
+ [-73.958,40.826],[-73.943,40.851],[-73.930,40.868],[-73.922,40.878],[-73.910,40.874],[-73.925,40.855],[-73.935,40.835],[-73.934,40.810],
+ [-73.928,40.800],[-73.942,40.785],[-73.957,40.760],[-73.968,40.745],[-73.972,40.725],[-73.973,40.712],[-73.990,40.706],[-74.003,40.702],[-74.012,40.700]];
+function insideManhattan(lon,lat){let inside=false;for(let i=0,j=MANHATTAN_OUTLINE.length-1;i<MANHATTAN_OUTLINE.length;j=i++){const [xi,yi]=MANHATTAN_OUTLINE[i],[xj,yj]=MANHATTAN_OUTLINE[j];
+ if((yi>lat)!==(yj>lat)&&lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)inside=!inside;}return inside;}
+/** PLUTO 3D while the view is centred on Manhattan, the basemap's 3D buildings elsewhere, only while a building layer is on. */
+function syncBuildings3D(){
+ const m=state.map;if(!state.mapLayersReady||!m.getLayer('basemap-buildings-3d'))return;
+ const on=BUILDING_3D_IDS.some(id=>urbanData.active.has(id));
+ const c=m.getCenter(),man=insideManhattan(c.lng,c.lat);
+ m.setLayoutProperty('basemap-buildings-3d','visibility',on&&!man?'visible':'none');
+ if(m.getLayer('udg-buildings-fill')&&on)m.setLayoutProperty('udg-buildings-fill','visibility',man?'visible':'none');
+}
 function applyBuildingTheme(){
  if(!state.mapLayersReady)return;const B=UrbanStyle.T.building,t=urbanData.buildingTheme,light=document.documentElement.dataset.mapTheme==='light';
  // daylight map: the same height ramp, light to mid grey (the dark ramp would read as holes in a light city)
  const hStops=light?B.heightLight:B.height.stops,neutral=light?B.neutralLight:B.neutral;
  const color=t==='height'?UrbanStyle.rampExpr(B.height.prop,hStops):t==='landuse'?UrbanStyle.categoricalExpr(B.landuse.prop,B.landuse.classes,B.landuse.other):t==='age'?['case',['has',B.age.prop],UrbanStyle.rampExpr(B.age.prop,B.age.stops),neutral]:neutral;
  state.map.setPaintProperty('udg-buildings-fill','fill-extrusion-color',color);
+ // the basemap has heights only (no land use, no age): the height theme ramps on its metres in feet, others stay neutral
+ if(state.map.getLayer('basemap-buildings-3d'))state.map.setPaintProperty('basemap-buildings-3d','fill-extrusion-color',t==='height'
+  ?['interpolate',['linear'],['*',3.2808,['coalesce',['to-number',['get','height']],BASEMAP_DEFAULT_HEIGHT_M]],...hStops.flat()]:neutral);
  if(t==='landuse'&&!urbanData.active.has('land_use'))toast('Land use theme needs the Land use (tax lots) dataset; it has been switched on.');
  if(t==='landuse'&&!urbanData.active.has('land_use'))toggleUrbanDataset('land_use',true);
  refreshRepresentations();scheduleUrbanCompose();
@@ -294,7 +320,7 @@ function applyEnvTheme(){
  refreshRepresentations();renderUrbanLegend();
 }
 function setUrbanOpacity(id,op){const a=urbanData.active.get(id);if(!a)return;a.opacity=op;scheduleUrbanCompose();}
-function toggleUrbanDataset(id,on,quiet){
+function toggleUrbanDataset(id,on,quiet){setTimeout(syncBuildings3D,0);
  const d=urbanData.byId.get(id);if(!d||d.status!=='CONNECTED')return;
  if(on){if(!urbanData.active.has(id)){urbanData.active.set(id,{opacity:1,status:'Waiting',kind:'waiting',seq:0});}loadUrbanDataset(id);}
  else{urbanData.active.delete(id);urbanData.drawn.delete(id);scheduleUrbanCompose();}
