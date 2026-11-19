@@ -5219,7 +5219,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 76,
+    "bytes": 34013
+   }
   },
   "bike_routes": {
    "tiles": {
@@ -6521,7 +6525,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 2213,
+    "bytes": 395848
+   }
   },
   "public_restrooms": {
    "tiles": {
@@ -6786,7 +6794,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 596,
+    "bytes": 120819
+   }
   },
   "street_trees": {
    "tiles": {
@@ -7541,7 +7553,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 1147,
+    "bytes": 498466
+   }
   },
   "community_gardens": {
    "tiles": {
@@ -7674,7 +7690,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 443,
+    "bytes": 126210
+   }
   },
   "building_footprints": {
    "tiles": {
@@ -7936,7 +7956,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 384,
+    "bytes": 58759
+   }
   },
   "landmarks": {
    "tiles": {
@@ -8123,7 +8147,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 1169,
+    "bytes": 328978
+   }
   },
   "historic_districts": {
    "tiles": {
@@ -8242,7 +8270,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 119,
+    "bytes": 78840
+   }
   },
   "museums": {
    "tiles": {
@@ -8317,7 +8349,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 119,
+    "bytes": 21750
+   }
   },
   "galleries": {
    "tiles": {
@@ -8392,7 +8428,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 338,
+    "bytes": 59447
+   }
   },
   "theaters": {
    "tiles": {
@@ -8504,7 +8544,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 394,
+    "bytes": 70214
+   }
   },
   "cinemas": {
    "tiles": {
@@ -8552,7 +8596,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 52,
+    "bytes": 9331
+   }
   },
   "libraries": {
    "tiles": {
@@ -8673,7 +8721,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 143,
+    "bytes": 27172
+   }
   },
   "public_art": {
    "tiles": {
@@ -8819,7 +8871,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 607,
+    "bytes": 99910
+   }
   },
   "monuments": {
    "tiles": {
@@ -8976,7 +9032,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 664,
+    "bytes": 110590
+   }
   },
   "restaurants": {
    "tiles": {
@@ -9495,7 +9555,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 2567,
+    "bytes": 450092
+   }
   },
   "bars": {
    "tiles": {
@@ -9677,7 +9741,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 1698,
+    "bytes": 296944
+   }
   },
   "bakeries": {
    "tiles": {
@@ -9846,7 +9914,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 668,
+    "bytes": 119590
+   }
   },
   "grocery": {
    "tiles": {
@@ -10125,7 +10197,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 3564,
+    "bytes": 646925
+   }
   },
   "retail": {
    "tiles": {
@@ -10478,7 +10554,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 65,
+    "bytes": 11925
+   }
   },
   "entertainment": {
    "tiles": {
@@ -10564,7 +10644,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 132,
+    "bytes": 23431
+   }
   },
   "recreation": {
    "tiles": {
@@ -11219,7 +11303,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 860,
+    "bytes": 160781
+   }
   },
   "pharmacies": {
    "tiles": {
@@ -11415,7 +11503,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 732,
+    "bytes": 130717
+   }
   },
   "schools": {
    "tiles": {
@@ -11687,7 +11779,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 1425,
+    "bytes": 279225
+   }
   },
   "benches": {
    "tiles": {
@@ -11995,7 +12091,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 31,
+    "bytes": 5662
+   }
   },
   "viewpoints": {
    "tiles": {
@@ -12062,7 +12162,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 115,
+    "bytes": 17778
+   }
   },
   "linknyc": {
    "tiles": {
@@ -12231,7 +12335,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 1798,
+    "bytes": 371675
+   }
   },
   "pedestrian_crashes": {
    "tiles": {
@@ -13511,7 +13619,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 362,
+    "bytes": 59010
+   }
   },
   "subway_entrances": {
    "tiles": {
@@ -13698,7 +13810,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 1607,
+    "bytes": 316480
+   }
   },
   "bike_share": {
    "tiles": {
@@ -13934,7 +14050,11 @@
     "manhattan",
     "brooklyn",
     "lic"
-   ]
+   ],
+   "overview": {
+    "features": 1908,
+    "bytes": 385235
+   }
   }
  },
  "network_version": "osm-walk-20261023-99602011",
