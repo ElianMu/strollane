@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/6744695373","addr:housenumber":"25-18","addr:street":"Queens Plaza South","amenity":"clinic","name":"CityMD","operator":"CityMD","website":"https://www.citymd.com/urgent-care-locations/ny/long-island-city","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.940073,40.750165]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R43","station_id":"37","complex_id":"37","stop_name":"77 St","daytime_routes":"R","line":"4th Av","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.02551,40.629742]}}]}

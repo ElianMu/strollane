@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/9777993195","addr:housenumber":"874","addr:street":"Hancock Street","name":"Bakery by Textbook","opening_hours":"Mo-We 07:30-17:00; Th-Sa 07:30-00:30; Su 07:30-22:00","shop":"bakery","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.920429,40.68582]}}]}

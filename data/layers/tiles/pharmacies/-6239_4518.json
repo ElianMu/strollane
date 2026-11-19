@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/3118221934","addr:housenumber":"623","addr:street":"Wilson Avenue","amenity":"pharmacy","name":"Rimco Pharmacy","opening_hours":"Mo-Fr 09:00-19:00; Sa 09:00-17:00","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.906543,40.689953]}}]}

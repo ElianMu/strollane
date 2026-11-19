@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"D39","station_id":"54","complex_id":"54","stop_name":"Sheepshead Bay","daytime_routes":"B Q","line":"Broadway - Brighton","structure":"Open Cut","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.954155,40.586896]}}]}

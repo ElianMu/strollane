@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/9675290378","addr:housenumber":"2860B","addr:street":"West 5th Street","amenity":"bar","name":"Beerland","opening_hours":"Mo-Th,Su 11:00-23:00; Fr-Sa 12:00-24:00","wheelchair":"yes","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.972255,40.579207]}}]}

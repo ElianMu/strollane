@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"L29","station_id":"138","complex_id":"138","stop_name":"Canarsie-Rockaway Pkwy","daytime_routes":"L","line":"Canarsie","structure":"At Grade","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.90185,40.646654]}}]}

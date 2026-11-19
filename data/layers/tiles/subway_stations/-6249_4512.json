@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R42","station_id":"36","complex_id":"36","stop_name":"Bay Ridge Av","daytime_routes":"R","line":"4th Av","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.023377,40.634967]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R39","station_id":"33","complex_id":"33","stop_name":"45 St","daytime_routes":"R","line":"4th Av","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.010006,40.648939]}}]}

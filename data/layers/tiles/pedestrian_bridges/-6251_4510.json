@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"598424422-5618034417-0","osm_way_ids":"46868316 588187191","highway":"footway","surface":"paved","length_m":49.67,"bridge":"yes","area":"brooklyn"},"geometry":{"type":"LineString","coordinates":[[-74.041453,40.620521],[-74.040945,40.620566],[-74.040869,40.620573]]}}]}

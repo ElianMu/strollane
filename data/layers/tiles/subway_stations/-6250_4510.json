@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R45","station_id":"39","complex_id":"39","stop_name":"Bay Ridge-95 St","daytime_routes":"R","line":"4th Av","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.030876,40.616622]}}]}

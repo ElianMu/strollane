@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"11808363874-11808369000-0","osm_way_ids":"1271585441","highway":"footway","footway":"crossing","surface":"asphalt","length_m":7.36,"area":"brooklyn"},"geometry":{"type":"LineString","coordinates":[[-73.906542,40.611795],[-73.90655,40.611861]]}}]}

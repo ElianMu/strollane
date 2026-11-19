@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R03","station_id":"2","complex_id":"2","stop_name":"Astoria Blvd","daytime_routes":"N W","line":"Astoria","structure":"Elevated","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.917843,40.770258]}}]}

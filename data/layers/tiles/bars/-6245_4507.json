@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/2555640561","addr:housenumber":"315","addr:street":"Avenue X","amenity":"pub","cuisine":"pub;eastern_european","name":"DB","website":"https://www.draftbarnny.com/avex/","wheelchair":"yes","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.971389,40.59054]}}]}

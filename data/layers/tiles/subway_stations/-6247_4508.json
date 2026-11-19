@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"B21","station_id":"68","complex_id":"68","stop_name":"Bay Pkwy","daytime_routes":"D","line":"West End","structure":"Elevated","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.993728,40.601875]}}]}

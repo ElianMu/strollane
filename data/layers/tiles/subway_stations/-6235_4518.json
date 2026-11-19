@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"J16","station_id":"84","complex_id":"84","stop_name":"85 St-Forest Pkwy","daytime_routes":"J","line":"Jamaica","structure":"Elevated","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.86001,40.692435]}}]}

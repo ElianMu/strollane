@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/2562069564","addr:housenumber":"205","addr:street":"Prospect Park West","amenity":"pharmacy","name":"Oak Park Pharmacy","opening_hours":"Mo-Fr 09:00-19:00; Sa 09:00-19:00; Su off","shop":"chemist","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.980032,40.660582]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"D26","station_id":"42","complex_id":"42","stop_name":"Prospect Park","daytime_routes":"B Q S","line":"Broadway - Brighton","structure":"Open Cut","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.962246,40.661614]}}]}

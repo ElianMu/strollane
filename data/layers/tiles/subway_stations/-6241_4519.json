@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"M10","station_id":"114","complex_id":"114","stop_name":"Central Av","daytime_routes":"M","line":"Myrtle Av","structure":"Elevated","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.927397,40.697857]}}]}

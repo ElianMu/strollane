@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G13","station_id":"266","complex_id":"266","stop_name":"Elmhurst Av","daytime_routes":"M R","line":"Queens Blvd","structure":"Subway","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.882017,40.742454]}}]}

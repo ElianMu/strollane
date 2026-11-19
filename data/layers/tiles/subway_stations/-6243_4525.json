@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"F09","station_id":"274","complex_id":"606","stop_name":"Court Sq-23 St","daytime_routes":"E F","line":"Queens Blvd","structure":"Subway","ada":"2","ada_notes":"Manhattan-bound only","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.946,40.747846]}}]}

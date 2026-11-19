@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/7403143585","addr:housenumber":"323","addr:street":"Ralph Avenue","amenity":"restaurant","cuisine":"breakfast;pancake","name":"IHOP","opening_hours":"Mo-Su 10:00-22:00","website":"https://www.ihop.com/en","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.917599,40.626286]}}]}

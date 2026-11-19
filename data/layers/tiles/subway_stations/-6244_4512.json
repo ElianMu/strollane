@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"D31","station_id":"47","complex_id":"47","stop_name":"Newkirk Plaza","daytime_routes":"B Q","line":"Broadway - Brighton","structure":"Open Cut","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.962793,40.635082]}}]}

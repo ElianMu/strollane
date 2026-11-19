@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R41","station_id":"35","complex_id":"35","stop_name":"59 St","daytime_routes":"N R","line":"4th Av","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.017881,40.641362]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"712","station_id":"456","complex_id":"456","stop_name":"61 St-Woodside","daytime_routes":"7","line":"Flushing","structure":"Elevated","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.902984,40.74563]}}]}

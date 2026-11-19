@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"L15","station_id":"126","complex_id":"126","stop_name":"Jefferson St","daytime_routes":"L","line":"Canarsie","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.922913,40.706607]}}]}

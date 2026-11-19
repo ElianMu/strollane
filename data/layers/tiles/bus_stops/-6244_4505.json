@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/10015140161","bench":"no","highway":"bus_stop","name":"Brighton Beach Avenue & Ocean Parkway","network":"NYC Transit","operator":"MTA","route_ref":"B1;B68","shelter":"no","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.967566,40.576236]}}]}

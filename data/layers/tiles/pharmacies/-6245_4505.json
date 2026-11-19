@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/8583567932","addr:housenumber":"3100","addr:street":"Ocean Parkway","amenity":"pharmacy","name":"Boardwalk RX Corp","opening_hours":"Mo-Fr 09:00-19:00; Sa-Su 09:00-17:00","wheelchair":"yes","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.969445,40.57622]}}]}
