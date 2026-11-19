@@ -5,7 +5,7 @@ Keep OSM fields/canonical IDs; rebuild only permit associations and permit-only
 records, using unambiguous name matches and build_place_index.permit_matches (same normalized address, or no house number on
 the OSM place and under 40 m).
 
-Manhattan only: records with an "area" (Brooklyn, western Queens) are left as they are; rebuild those with
+Manhattan only: records with an "area" (Brooklyn, Queens) are left as they are; rebuild those with
 scripts/build_area_places.py, which links their permits with the same rule.
 """
 import hashlib

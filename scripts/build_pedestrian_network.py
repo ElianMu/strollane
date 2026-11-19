@@ -49,7 +49,7 @@ def oneway_for_foot(d):
     return 'yes' in as_list(d.get('oneway:foot'))
 
 
-# The public Overpass servers answer 502/504/429 when busy (seen 2026-11-17 for western Queens): each is tried in turn,
+# The public Overpass servers answer 502/504/429 when busy (seen 2026-11-17 for Queens): each is tried in turn,
 # three rounds with a growing pause. Finished sub-queries stay in osmnx's cache, so a retry does not repeat them.
 OVERPASS_SERVERS = ['https://overpass-api.de/api', 'https://overpass.kumi.systems/api', 'https://overpass.private.coffee/api']
 
@@ -90,6 +90,11 @@ def main():
         boundary = box_polygon(*box)
     else:
         boundary = ox.geocode_to_gdf(PLACE).geometry.iloc[0]
+        if area != 'manhattan':  # the area's own outline: its box reaches into neighbouring boroughs and counties
+            from shapely.geometry import mapping
+            with open(os.path.join(ROOT, 'data', 'pedestrian', f'{area}-boundary.json'), 'w') as f:
+                json.dump({'place': PLACE, 'source': 'OpenStreetMap boundary via Nominatim (OSMnx geocode_to_gdf), simplified 0.0002 degrees',
+                           'geometry': mapping(boundary.simplify(0.0002))}, f, separators=(',', ':'))
     print('Downloading OSM walk network (Overpass)…', flush=True)
     G = download_walk_graph(boundary)
     raw_nodes, raw_edges = G.number_of_nodes(), G.number_of_edges()

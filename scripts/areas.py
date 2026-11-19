@@ -4,13 +4,13 @@ Manhattan's own build (scripts/streetwise_indicators.py and the scripts that rea
 this file. It is the single place where a new area is described for scripts/download_area_sources.py and
 scripts/build_pedestrian_network.py --area.
 
-Western Queens is not an administrative unit in any of these sources, so it is a box inside Queens. The box is a
-working definition: Newtown Creek to the south, the East River to the west, Ditmars Boulevard / Astoria Park to the north
-and about 90th Street (Jackson Heights) to the east, so it holds Long Island City, Astoria, Sunnyside, Woodside and
-Jackson Heights. Its east edge was chosen so the joined network still fits the 512 MB server (about 0.6 MB per 1,000
-routing edges, measured 2026-11-17). Its id stays 'lic' (the first box was Long Island City alone), so file names and
-segment IDs do not change. Sources are downloaded for Queens (or for the box, where a source can filter by geometry)
-and cut to the box afterwards.
+Queens is the whole borough (Queens County; LION borocode 4), as Brooklyn is. It was first a box around Long Island City,
+then western Queens (to Jackson Heights), while the router cost about 0.6 MB per 1,000 edges; with the router's columns
+(routing/compact.py, 2026-11-18: about 0.32 MB per 1,000 edges) the whole borough fits the 512 MB server. Its id stays
+'lic', so file names and segment IDs do not change. The box is the borough's bounding box (Rockaway Point to Little
+Neck, Long Island City to Glen Oaks); it reaches into Brooklyn, the Bronx and Nassau County, so records are kept by
+borough (borocode / borough fields) or by the OSM boundary of Queens County (data/pedestrian/lic-boundary.json, written
+by scripts/build_pedestrian_network.py), never by the box alone.
 """
 
 AREAS = {
@@ -22,13 +22,13 @@ AREAS = {
         'borocode': '3', 'lpc_boro': 'Brooklyn', 'parks_borough': 'B', 'borough_upper': 'BROOKLYN',
         'osm_place': 'Brooklyn, Kings County, New York, United States',
     },
-    'lic': {  # western Queens; the id is historical (see above)
-        'label': 'Western Queens (Long Island City, Astoria, Sunnyside, Woodside, Jackson Heights; working box inside Queens, LION borocode 4)',
-        'short': 'Western Queens',
-        'box': (-73.9650, 40.7280, -73.8700, 40.7850),
-        'clip_to_box': True,
+    'lic': {  # Queens; the id is historical (see above)
+        'label': 'Queens (Queens County, LION borocode 4)',
+        'short': 'Queens',
+        'box': (-73.9630, 40.5410, -73.7000, 40.8010),
+        'clip_to_box': False,
         'borocode': '4', 'lpc_boro': 'Queens', 'parks_borough': 'Q', 'borough_upper': 'QUEENS',
-        'osm_place': None,  # no OSM boundary to geocode: the walk network is cut by the box
+        'osm_place': 'Queens County, New York, United States',
     },
 }
 

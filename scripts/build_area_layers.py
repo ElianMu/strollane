@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add Brooklyn and western Queens to the map layers (data/layers), next to Manhattan's features.
+"""Add Brooklyn and Queens to the map layers (data/layers), next to Manhattan's features.
 
 scripts/build_urban_layers.py builds the 1 km tiles for Manhattan from live downloads. This script adds the other areas
 from files already downloaded (python3 scripts/download_area_sources.py --layers) and from the area walk graphs, with
@@ -35,7 +35,7 @@ from build_area_places import SegmentArea  # noqa: E402
 
 ROOT = U.ROOT
 CACHE = os.path.join(ROOT, 'data', 'cache', 'sources')
-NAME = {'manhattan': 'Manhattan', 'brooklyn': 'Brooklyn', 'lic': 'western Queens'}
+NAME = {'manhattan': 'Manhattan', 'brooklyn': 'Brooklyn', 'lic': 'Queens'}
 MANHATTAN_ONLY = {'building_footprints', 'pluto_lots', 'activity_places', 'noise_complaints', 'sidewalk_surface'}
 ROAD_TYPE = {1: 'Street', 2: 'Highway', 3: 'Bridge', 4: 'Tunnel', 5: 'Boardwalk', 6: 'Path/Trail', 7: 'Step street', 8: 'Driveway', 9: 'Ramp',
              10: 'Alley', 13: 'U-turn', 14: 'Ferry route'}
@@ -233,7 +233,7 @@ def merge_tiles(tileset, area, feats):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--area', choices=[a for a in AREAS], action='append', help='default: Brooklyn and western Queens')
+    ap.add_argument('--area', choices=[a for a in AREAS], action='append', help='default: Brooklyn and Queens')
     areas = ap.parse_args().area or list(AREAS)
     t0 = time.time()
     area_of = SegmentArea()
@@ -257,8 +257,8 @@ def main():
             d['feature_count'] = ts['features']
             d['coverage'] = ', '.join(NAME[a] for a in ts['areas'])
     catalog['areas'] = meta
-    catalog['note'] = (catalog.get('note') or '').split(' Brooklyn and western Queens:')[0] + (
-        ' Brooklyn and western Queens: added by scripts/build_area_layers.py; building footprints, tax lots, activity places, '
+    catalog['note'] = (catalog.get('note') or '').split(' Brooklyn and Queens:')[0] + (
+        ' Brooklyn and Queens: added by scripts/build_area_layers.py; building footprints, tax lots, activity places, '
         'noise complaints and sidewalk surface are Manhattan only.')
     with open(os.path.join(U.OUT, 'catalog.json'), 'w') as fh:
         json.dump(catalog, fh, indent=1, ensure_ascii=False)

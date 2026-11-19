@@ -119,7 +119,7 @@ function routeCardDetails(r){
 function renderRouteCards(){
  const root=$('routeCards'),routes=state.routes,more=$('routeMore');
  if(!routes.length){routeStory.showAll=false;$('routeCount').textContent='';if(more)more.classList.add('hidden');renderAlongWalk();
-  root.innerHTML=`<div class="empty-route"><strong>${state.routingBusy?'Finding walks…':'No walks yet'}</strong><p>${state.routingBusy?'Searching the walking network of Manhattan, Brooklyn and western Queens.':'Describe how you want to walk, or tap a few chips.'}</p></div>`;if(typeof renderNavStart==='function')renderNavStart();return}
+  root.innerHTML=`<div class="empty-route"><strong>${state.routingBusy?'Finding walks…':'No walks yet'}</strong><p>${state.routingBusy?'Searching the walking network of Manhattan, Brooklyn and Queens.':'Describe how you want to walk, or tap a few chips.'}</p></div>`;if(typeof renderNavStart==='function')renderNavStart();return}
  if(typeof storyEnsurePlaces==='function')storyEnsurePlaces();
  const story=storyBuild(routes.map(x=>x.raw)),shownSet=new Set(story.shown);
  const shownRaw=routes.filter(x=>shownSet.has(x.id)).map(x=>x.raw);

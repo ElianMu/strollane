@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Join the Manhattan, Brooklyn and western Queens walk networks into the one network the router uses.
+"""Join the Manhattan, Brooklyn and Queens walk networks into the one network the router uses.
 
     python3 scripts/merge_networks.py
     python3 scripts/compile_network.py --area nyc
@@ -11,8 +11,8 @@ data/pedestrian/nyc-walk-graph.json.gz and nyc-edge-scores.json.gz in the same f
 The networks are separate OSMnx downloads, joined on OSM node IDs, which are global: a bridge or a street that crosses
 an area boundary appears in both downloads with the same nodes, so the joined network is continuous there. Where the
 same directed edge (u, v, key) is in more than one network, the copy from the first area in AREAS is kept, with that
-area's scores; the order puts each street with the area whose street segments scored it (the western Queens box also
-covers Manhattan's east edge and part of Greenpoint, which Manhattan and Brooklyn score). Node attributes come from the
+area's scores; the order puts each street with the area whose street segments scored it (walk graphs cut by an
+OSM boundary keep edges that cross it, so neighbouring areas share border streets). Node attributes come from the
 first network that has the node. Routable = the largest strongly connected component of the JOINED network, recomputed
 here, as build_pedestrian_network.py does for one area.
 
@@ -111,7 +111,7 @@ def main():
     gmeta = {**{k: m0[k] for k in ('source', 'osmnx_version', 'edge_fields', 'node_fields', 'edge_id', 'oneway_rule') if k in m0},
              'network_version': f'nyc3-{digest}', 'built_at': built, 'areas': AREAS,
              'area_network_versions': {a: graphs[a]['metadata']['network_version'] for a in AREAS},
-             'boundary': 'Manhattan, Brooklyn and the western Queens box (scripts/areas.py), joined on OSM node IDs',
+             'boundary': 'Manhattan, Brooklyn and Queens (scripts/areas.py), joined on OSM node IDs',
              'boundary_bounds': [min(graphs[a]['metadata']['boundary_bounds'][0] for a in AREAS), min(graphs[a]['metadata']['boundary_bounds'][1] for a in AREAS),
                                  max(graphs[a]['metadata']['boundary_bounds'][2] for a in AREAS), max(graphs[a]['metadata']['boundary_bounds'][3] for a in AREAS)],
              'counts': {'nodes': len(nodes), 'edges': len(edges), 'geometries': len(geoms), 'components': n_comp, 'main_component_nodes': main_nodes,

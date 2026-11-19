@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add Brooklyn and western Queens to the discovery place index (data/places), next to Manhattan's records.
+"""Add Brooklyn and Queens to the discovery place index (data/places), next to Manhattan's records.
 
 Reads only files already downloaded by scripts/download_area_sources.py --places (no network):
     data/cache/sources/<area>/places_osm.json   OpenStreetMap places, the query and tags of scripts/build_place_index.py
@@ -11,7 +11,7 @@ plus the citywide DOHMH inspection file already in the repo (data/inspections/do
 
 Every record is built by the same functions as Manhattan's (scripts/build_place_index.py) and kept only when it lies in
 the area's box, its nearest NYC LION street segment is in that area (the boxes reach into Manhattan, and Brooklyn's box
-and the western Queens box share a strip along Newtown Creek), and it is within 150 m of the joined walk network, so each one can be
+and Queens share Newtown Creek and the Brooklyn–Queens line), and it is within 150 m of the joined walk network, so each one can be
 routed to. Records get "area" and "boro";
 Manhattan's records are not changed. Rerunning replaces an area's records. An OpenStreetMap element already in the
 Manhattan index (a few at the river edges) stays there once.
@@ -41,6 +41,17 @@ PREFIX_AREA = {'MN': 'manhattan', 'BK': 'brooklyn', 'QN': 'lic'}
 CELL = 0.002  # degrees, about 170 m north–south
 
 
+def inside_outline(lon, lat, polygons):
+    """Point in a GeoJSON MultiPolygon's coordinates (even-odd rule over every ring, so holes count)."""
+    inside = False
+    for polygon in polygons:
+        for ring in polygon:
+            for (x1, y1), (x2, y2) in zip(ring, ring[1:] + ring[:1]):
+                if (y1 > lat) != (y2 > lat) and lon < (x2 - x1) * (lat - y1) / (y2 - y1) + x1:
+                    inside = not inside
+    return inside
+
+
 class SegmentArea:
     """Which study area a point belongs to: that of its nearest LION street segment vertex (segment IDs carry the
     borough: MN-, BK-, QN-), from data/dimensions/<area>/segments.geojson."""
@@ -52,8 +63,21 @@ class SegmentArea:
                 a = PREFIX_AREA[f['properties']['id'][:2]]
                 for lon, lat in f['geometry']['coordinates']:
                     self.grid.setdefault((int(lon // CELL), int(lat // CELL)), []).append((lon, lat, a))
+        # An area whose box reaches beyond its borough into a county with no LION segments (Queens: Nassau County) also
+        # needs its own outline, else a point just over the line would take the nearest Queens street.
+        self.outlines = {}
+        for area in ('brooklyn', 'lic'):
+            path = os.path.join(ROOT, 'data', 'pedestrian', f'{area}-boundary.json')
+            if os.path.exists(path):
+                g = json.load(open(path))['geometry']
+                self.outlines[area] = [g['coordinates']] if g['type'] == 'Polygon' else g['coordinates']
 
     def __call__(self, lon, lat):
+        a = self._nearest(lon, lat)
+        outline = self.outlines.get(a)
+        return a if outline is None or inside_outline(lon, lat, outline) else None
+
+    def _nearest(self, lon, lat):
         gx, gy = int(lon // CELL), int(lat // CELL)
         for r in (1, 2, 4):
             best = None
@@ -168,7 +192,7 @@ def build_area(area, routable, taken, built, area_of):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--area', choices=list(BORO), action='append', help='default: Brooklyn and western Queens')
+    ap.add_argument('--area', choices=list(BORO), action='append', help='default: Brooklyn and Queens')
     areas = ap.parse_args().area or list(BORO)
     t0 = time.time()
     for area in areas:

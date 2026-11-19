@@ -169,7 +169,7 @@ function addGroupLayers(){
   paint:{'fill-extrusion-color':T.building.neutral,'fill-extrusion-opacity':T.building.extrusionOpacity, // fill-extrusion-opacity is camera-only in MapLibre (no data expressions, unlike fill-opacity)
    'fill-extrusion-height':['*',0.3048,['coalesce',['to-number',['get',T.building.height.prop]],35]],
    'fill-extrusion-base':0,'fill-extrusion-vertical-gradient':true}},'ud-z-polys');
- // Brooklyn and western Queens have no PLUTO footprints here (kept out to stay under GitHub Pages' 1 GB). The basemap's
+ // Brooklyn and Queens have no PLUTO footprints here (kept out to stay under GitHub Pages' 1 GB). The basemap's
  // own vector tiles carry building outlines, about half with a height (metres), in every borough; they give those areas
  // the same 3D massing. One 3D source at a time (syncBuildings3D): PLUTO while the view is centred on Manhattan, the
  // basemap's elsewhere, so no building is drawn twice where the two overlap.

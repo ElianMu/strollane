@@ -26,7 +26,7 @@ const I18N_ZH = {
  // navigation and menus
  'Plan walk': '规划步行', 'Start & destination': '起点与终点', 'Customize walk': '自定义步行', 'Time & 12 dimensions': '时间与 12 个维度',
  'Explore urban data': '浏览城市数据', 'Explore Urban Data': '浏览城市数据', 'NYC GIS layers': '纽约 GIS 图层', 'Map layers': '地图图层', 'Weather & legend': '天气与图例',
- 'Map': '地图', 'Dark': '深色', 'Light': '浅色', 'Reset map view': '重置地图视图', 'Back to Manhattan, Brooklyn & W. Queens': '回到曼哈顿、布鲁克林和西皇后区', 'Data legend': '数据图例',
+ 'Map': '地图', 'Dark': '深色', 'Light': '浅色', 'Reset map view': '重置地图视图', 'Back to Manhattan, Brooklyn & Queens': '回到曼哈顿、布鲁克林和皇后区', 'Data legend': '数据图例',
  'Show or hide': '显示或隐藏', 'Data sources': '数据来源', 'Status & coverage': '状态与覆盖范围', 'About': '关于', 'This prototype': '本原型',
  'Export to Kepler': '导出到 Kepler', 'GIS data': 'GIS 数据', 'Kepler studio': 'Kepler 工作台', 'Menu': '菜单', 'Back': '返回', '← Map': '← 地图',
  'Weather loading…': '天气加载中…', 'Weather…': '天气…', 'Find routes →': '查找路线 →', '⚙ Prefs': '⚙ 偏好', 'Navigate': '导航', 'Edit': '编辑', 'New': '新建',
@@ -37,7 +37,7 @@ const I18N_ZH = {
  // planning
  '01 / HOW DO YOU WANT TO WALK?': '01 / 你想怎么走？', 'Find your': '找到属于你的', 'kind': '那种', 'of walk.': '步行。',
  'Not just the shortest way. Your way through the city.': '不只是最短的路，而是你穿过城市的方式。',
- 'Made for people new to New York: get to know a neighbourhood in Manhattan, Brooklyn or western Queens on a walk of 20 minutes or more.': '为刚到纽约的人而做：用一段 20 分钟以上的步行，认识曼哈顿、布鲁克林或西皇后区的一个街区。',
+ 'Made for people new to New York: get to know a neighbourhood in Manhattan, Brooklyn or Queens on a walk of 20 minutes or more.': '为刚到纽约的人而做：用一段 20 分钟以上的步行，认识曼哈顿、布鲁克林或皇后区的一个街区。',
  'WHAT MATTERS ON THIS WALK': '这次步行你在意什么',
  'Or describe the walk in your own words. From and To fill in from your sentence.': '也可以用自己的话描述这次步行，中文也可以。用中文描述时，起点和终点请在下方选择。',
  'Voice or text — you can edit the transcript.': '语音或文字均可，识别结果可以修改。',
@@ -63,7 +63,7 @@ const I18N_ZH = {
  'Strollane turns your words into priorities; unmentioned dimensions stay neutral.': 'Strollane 把你的话转成偏好；没提到的维度保持中性。',
  '✧ Your interpreted priorities appear here after planning.': '✧ 规划后，这里会显示解析出的偏好。',
  'Fine-tune (12 dimensions)': '微调（12 个维度）', 'EXPERIENCE DIMENSION': '体验维度', 'PREFERENCE': '偏好', '✎ Adjust preferences': '✎ 调整偏好',
- 'Weights indicate user preference (0–100), not objective city quality. Default 50 = not expressed. Route scores are relative ranks across Manhattan, Brooklyn and western Queens together, computed from public NYC and OpenStreetMap records: proxies, not validated measures of how a street feels.': '权重表示你的偏好（0–100），不是城市的客观质量。默认 50 表示未表达偏好。路线分数是曼哈顿、布鲁克林和西皇后区放在一起的相对排名，由纽约公开数据和 OpenStreetMap 记录算出：它们是替代指标，并非经过验证的街道感受度量。',
+ 'Weights indicate user preference (0–100), not objective city quality. Default 50 = not expressed. Route scores are relative ranks across Manhattan, Brooklyn and Queens together, computed from public NYC and OpenStreetMap records: proxies, not validated measures of how a street feels.': '权重表示你的偏好（0–100），不是城市的客观质量。默认 50 表示未表达偏好。路线分数是曼哈顿、布鲁克林和皇后区放在一起的相对排名，由纽约公开数据和 OpenStreetMap 记录算出：它们是替代指标，并非经过验证的街道感受度量。',
  // constraints
  '04 / WALK OPTIONS': '04 / 步行选项', '04 / WALKING CONSTRAINTS': '04 / 步行限制', 'MAX WALKING TIME · A HARD LIMIT': '最长步行时间 · 硬性上限', 'Custom': '自定义',
  'Custom maximum (minutes)': '自定义上限（分钟）', 'Default 100 min. Type any whole number of minutes (10 or more); the slider extends to match.': '默认 100 分钟。可输入任意整数分钟（不少于 10），滑杆会随之延长。',

@@ -240,8 +240,8 @@ def read_json(handler, limit):
 def validate_point(p, label):
     if not isinstance(p, dict) or type(p.get('lat')) not in (int, float) or type(p.get('lon')) not in (int, float):
         raise ValueError(f'{label} must be {{"lat": number, "lon": number}}')
-    if not (-74.1 <= p['lon'] <= -73.80 and 40.55 <= p['lat'] <= 40.92):  # Manhattan, Brooklyn, western Queens; snapping does the fine check
-        raise ValueError(f'{label} is outside the routing area (Manhattan, Brooklyn and western Queens)')
+    if not (-74.1 <= p['lon'] <= -73.69 and 40.53 <= p['lat'] <= 40.92):  # Manhattan, Brooklyn, Queens; snapping does the fine check
+        raise ValueError(f'{label} is outside the routing area (Manhattan, Brooklyn and Queens)')
     return {'lat': float(p['lat']), 'lon': float(p['lon'])}
 
 
@@ -544,8 +544,8 @@ class Handler(SimpleHTTPRequestHandler):
                                  'score_version': served_score_version(),
                                  'interpretation_contract': 'strict-paired-v3-independent',
                                  'features': {'itinerary': True, 'menu_verify': 'official website only (no menu API connected)',
-                                              'routing_coverage': 'OSM pedestrian graph of Manhattan, Brooklyn and western Queens, joined',
-                                              'place_search': 'Discovery index for Manhattan, Brooklyn and western Queens + NYC DOHMH food permits + NYC Parks and public restrooms (citywide discovery; new unsnapped points are search only)',
+                                              'routing_coverage': 'OSM pedestrian graph of Manhattan, Brooklyn and Queens, joined',
+                                              'place_search': 'Discovery index for Manhattan, Brooklyn and Queens + NYC DOHMH food permits + NYC Parks and public restrooms (citywide discovery; new unsnapped points are search only)',
                                               'food_recommendations': True, 'menu_ocr_available': bool(menu_check.shutil.which('tesseract')),
                                               'citywide_official_discovery': True},
                                  'providers': providers.configured()})
@@ -599,7 +599,7 @@ class Handler(SimpleHTTPRequestHandler):
                 res = S.search(near, cats, radius_m=radius, limit=max(1, min(50, int(qs.get('limit') or 20))), query=(qs.get('q') or '')[:60] or None,
                                cuisine=(qs.get('cuisine') or '')[:40] or None, include_closed=qs.get('include_closed') == '1')
                 self.send_json(200, {'results': res, 'count': len(res), 'radius_m': radius, 'categories': cats,
-                                     'note': 'Straight-line pre-selection; walking distance comes from the router. Outside Manhattan, Brooklyn and western Queens, results are search only.'})
+                                     'note': 'Straight-line pre-selection; walking distance comes from the router. Outside Manhattan, Brooklyn and Queens, results are search only.'})
                 return
             if parts == ['hotels', 'search']:
                 near = {'lat': float(qs['lat']), 'lon': float(qs['lon'])}

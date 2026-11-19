@@ -1,4 +1,4 @@
-"""Rank Manhattan, Brooklyn and western Queens on ONE scale (approved by the project owner on 2026-11-17).
+"""Rank Manhattan, Brooklyn and Queens on ONE scale (approved by the project owner on 2026-11-17).
 
     python3 -m scripts.dimensions.combine_areas
 
@@ -8,7 +8,7 @@ raw value exactly as it is and re-ranks: for each scored indicator, a segment's 
 segments of the three areas (same rule as scoring.percentile: ties take the lowest rank, "lower is better" reversed,
 N/A stays N/A). Dimension scores are then the equal-weight mean of the available indicator percentiles, as before.
 
-So a score of 80 means "better than 80 % of street segments in Manhattan, Brooklyn and western Queens together",
+So a score of 80 means "better than 80 % of street segments in Manhattan, Brooklyn and Queens together",
 and a Brooklyn 80 and a Manhattan 80 mean the same thing. Routes that cross the East River can compare them.
 
 Each area's files in data/dimensions/<area>/ are rewritten in place with the combined percentiles and scores. Their
@@ -30,7 +30,7 @@ from . import scoring, spec
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, 'data', 'dimensions')
 AREAS = ['manhattan', 'brooklyn', 'lic']
-AREA_NAME = {'manhattan': 'Manhattan', 'brooklyn': 'Brooklyn', 'lic': 'western Queens'}  # 'lic' is the western Queens box (scripts/areas.py)
+AREA_NAME = {'manhattan': 'Manhattan', 'brooklyn': 'Brooklyn', 'lic': 'Queens'}  # 'lic' is Queens (scripts/areas.py)
 COMBINED = os.path.join(OUT, 'combined.json')
 
 
@@ -99,7 +99,7 @@ def main():
         m['raw_calculation_version'] = raw_version
         m['calculation_version'] = version
         m['combined_at'] = built_at
-        m['comparison_scope'] = (f'Percentiles are ranked among the {n_all:,} street segments of Manhattan, Brooklyn and western Queens '
+        m['comparison_scope'] = (f'Percentiles are ranked among the {n_all:,} street segments of Manhattan, Brooklyn and Queens '
                                  f'together ({", ".join(f"{sizes[x]:,} {AREA_NAME[x]}" for x in AREAS)}); this area has {n:,}. One scale for all three areas '
                                  '(scripts/dimensions/combine_areas.py).')
         for d in m['dimensions']:
