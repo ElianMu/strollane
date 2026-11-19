@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G26","station_id":"283","complex_id":"283","stop_name":"Greenpoint Av","daytime_routes":"G","line":"Crosstown","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.954449,40.731352]}}]}

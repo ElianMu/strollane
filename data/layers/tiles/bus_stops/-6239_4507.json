@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/6784029124","bench":"yes","highway":"bus_stop","name":"Flatbush Avenue & NPS Ryan Visitor Center","network":"NYC Transit","operator":"MTA","route_ref":"Q35","shelter":"no","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.89828,40.588045]}}]}

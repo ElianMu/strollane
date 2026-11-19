@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R44","station_id":"38","complex_id":"38","stop_name":"86 St","daytime_routes":"R","line":"4th Av","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.028398,40.622687]}}]}

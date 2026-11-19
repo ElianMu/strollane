@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/11158142752","highway":"bus_stop","name":"Old Fulton Street & Hicks Street","network":"NYC Transit","operator":"Metropolitan Transportation Authority","route_ref":"B25","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.992739,40.702032]}}]}

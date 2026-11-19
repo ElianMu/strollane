@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"252","station_id":"347","complex_id":"347","stop_name":"Saratoga Av","daytime_routes":"3","line":"Eastern Pky","structure":"Elevated","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.916327,40.661453]}}]}

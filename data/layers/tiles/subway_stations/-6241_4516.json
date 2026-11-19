@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"250","station_id":"345","complex_id":"345","stop_name":"Crown Hts-Utica Av","daytime_routes":"3 4","line":"Eastern Pky","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.932942,40.668897]}}]}

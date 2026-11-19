@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/4813805532","addr:housenumber":"1904","addr:street":"Surf Avenue","amenity":"bar","name":"The Coney Island Sandbar","website":"https://www.coneyislandsandbar.com/","wheelchair":"yes","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.983966,40.574958]}}]}

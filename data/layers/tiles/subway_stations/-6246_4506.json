@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"D43","station_id":"58","complex_id":"58","stop_name":"Coney Island-Stillwell Av","daytime_routes":"D F N Q","line":"Sea Beach / West End / Culver / Brighton","structure":"Viaduct","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.981233,40.577422]}}]}

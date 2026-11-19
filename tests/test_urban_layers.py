@@ -69,12 +69,28 @@ class Catalog_(unittest.TestCase):
 
 
 class GeographicAccuracy(unittest.TestCase):
-    def test_all_coordinates_in_manhattan_lon_lat(self):
-        """Catches swapped lon/lat and unconverted State Plane feet (the historic districts source is EPSG:2263)."""
+    def test_all_coordinates_in_their_area(self):
+        """Catches swapped lon/lat and unconverted State Plane feet (the historic districts source is EPSG:2263).
+        Manhattan features lie in the Manhattan envelope; Brooklyn / western Queens features (scripts/build_area_layers.py,
+        property "area") have their centre in that area's box and no vertex far outside it."""
+        import sys; sys.path.insert(0, str(ROOT / 'scripts')); from areas import AREAS
         for tid in CAT['tilesets']:
-            for f in C.features(tid)[:4000]:
+            for f in C.features(tid):
+                area = f['properties'].get('area')
+                w, s, e, n = (W, S, E, N) if not area else (lambda b: (b[0] - .02, b[1] - .02, b[2] + .02, b[3] + .02))(AREAS[area]['box'])
                 for lon, lat in coords(f['geometry']):
-                    self.assertTrue(W <= lon <= E and S <= lat <= N, (tid, lon, lat))
+                    self.assertTrue(w <= lon <= e and s <= lat <= n, (tid, area, lon, lat))
+
+    def test_area_layers_cover_brooklyn_and_western_queens(self):
+        self.assertEqual(set(CAT.get('areas', {})), {'brooklyn', 'lic'})
+        only = {'building_footprints', 'pluto_lots', 'activity_places', 'noise_complaints', 'sidewalk_surface'}
+        for tid, ts in CAT['tilesets'].items():
+            self.assertEqual(ts['areas'], ['manhattan'] if tid in only else ['manhattan', 'brooklyn', 'lic'], tid)
+        for tid in ('parks', 'street_trees', 'subway_stations', 'lion_centerline'):
+            got = {f['properties'].get('area', 'manhattan') for f in C.features(tid)}
+            self.assertEqual(got, {'manhattan', 'brooklyn', 'lic'}, tid)
+        for tid in only:
+            self.assertFalse(any(f['properties'].get('area') for f in C.features(tid)), tid)
 
     def test_historic_districts_reprojected_and_real(self):
         hd = C.features('historic_districts')

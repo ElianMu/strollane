@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/5656134337","addr:housenumber":"350","addr:street":"Moffat Street","amenity":"theatre","name":"The Muse","opening_hours":"Mo-Su 09:30-22:00","website":"https://themusebrooklyn.com","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.902138,40.691619]}}]}

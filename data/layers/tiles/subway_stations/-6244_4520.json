@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"M16","station_id":"101","complex_id":"101","stop_name":"Marcy Av","daytime_routes":"M J Z","line":"Jamaica","structure":"Elevated","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.957757,40.708359]}}]}

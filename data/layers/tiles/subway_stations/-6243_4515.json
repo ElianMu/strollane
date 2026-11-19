@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"242","station_id":"354","complex_id":"354","stop_name":"Sterling St","daytime_routes":"2 5","line":"Nostrand","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.95085,40.662742]}}]}

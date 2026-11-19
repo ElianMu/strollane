@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"231","station_id":"334","complex_id":"334","stop_name":"Clark St","daytime_routes":"2 3","line":"Clark St","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.993086,40.697466]}}]}

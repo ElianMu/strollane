@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G28","station_id":"284","complex_id":"284","stop_name":"Nassau Av","daytime_routes":"G","line":"Crosstown","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.951277,40.724635]}}]}

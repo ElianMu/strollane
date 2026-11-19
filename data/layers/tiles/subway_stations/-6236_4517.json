@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"A57","station_id":"189","complex_id":"189","stop_name":"Grant Av","daytime_routes":"A","line":"Liberty Av","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.86505,40.677044]}}]}

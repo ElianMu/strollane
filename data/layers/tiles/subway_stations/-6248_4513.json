@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R40","station_id":"34","complex_id":"34","stop_name":"53 St","daytime_routes":"R","line":"4th Av","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.014034,40.645069]}}]}

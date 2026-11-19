@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/11117528164","addr:housenumber":"590","addr:street":"Grandview Avenue","amenity":"pharmacy","name":"Grandview Pharmacy","opening_hours":"Mo-Fr 09:00-19:00; Sa 09:00-16:00","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.905728,40.708408]}}]}

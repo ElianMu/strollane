@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"BGT069","gardenname":"Serenity Community Garden","address":"4402 Ave. L","status":"Active","juris":"BQLT","area":"brooklyn"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-73.932979,40.622912],[-73.932653,40.623124],[-73.932999,40.623102],[-73.932979,40.622912]]]]}}]}

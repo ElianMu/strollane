@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"247","station_id":"359","complex_id":"359","stop_name":"Flatbush Av-Brooklyn College","daytime_routes":"2 5","line":"Nostrand","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.947642,40.632836]}}]}

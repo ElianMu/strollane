@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G22","station_id":"281","complex_id":"606","stop_name":"Court Sq","daytime_routes":"G","line":"Crosstown","structure":"Subway","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.943832,40.746554]}}]}

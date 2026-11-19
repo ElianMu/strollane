@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/2568578852","addr:housenumber":"54","addr:street":"Rockaway Avenue","amenity":"bar","name":"All Night Skate","opening_hours":"Mo-Th 14:00-02:00, Fr 14:00-03:00, Sa 12:00-03:00, Su 12:00-02:00","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.911693,40.681858]}}]}

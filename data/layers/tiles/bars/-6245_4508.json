@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/13563215324","addr:housenumber":"257","addr:street":"Avenue U","amenity":"bar","name":"Joe's Bar & Grill","opening_hours":"Mo-Su 00:00-04:00","wheelchair":"yes","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.974653,40.596945]}}]}

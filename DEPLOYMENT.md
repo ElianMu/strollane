@@ -82,3 +82,12 @@ Place recommendations for Brooklyn and western Queens (after the joined network,
 
 A place is kept when it is in its area's box, its nearest LION street segment belongs to that area (the boxes reach into
 Manhattan) and it is within 150 m of the walk network. `tests/test_area_places.py` checks the result.
+
+Map layers for Brooklyn and western Queens (data/layers; 53 of the 58 tilesets):
+
+    python3 scripts/download_area_sources.py --layers             # 19 sources per area (needs open internet)
+    python3 scripts/build_area_layers.py                          # merges each area into the tiles; Manhattan's features unchanged
+
+Building footprints (and the height / age views), tax lots, activity places, 311 noise complaints and sidewalk surface
+stay Manhattan only, to keep the published site well under GitHub Pages' 1 GB (it is about 790 MB with all three
+areas). `tests/test_urban_layers.py` checks every feature against its own area.

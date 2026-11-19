@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"D34","station_id":"50","complex_id":"50","stop_name":"Avenue M","daytime_routes":"Q","line":"Broadway - Brighton","structure":"Open Cut","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.959399,40.617618]}}]}

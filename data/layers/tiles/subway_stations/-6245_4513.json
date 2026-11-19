@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"F27","station_id":"243","complex_id":"243","stop_name":"Church Av","daytime_routes":"F G","line":"6th Av - Culver","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.979678,40.644041]}}]}

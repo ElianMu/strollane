@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"way/250169338","addr:housenumber":"560","addr:street":"New York Avenue","amenity":"library","name":"Brooklyn Public Library","operator":"Brooklyn Public Library","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.948133,40.661204]}}]}

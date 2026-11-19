@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"B22","station_id":"69","complex_id":"69","stop_name":"25 Av","daytime_routes":"D","line":"West End","structure":"Elevated","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.986829,40.597704]}}]}

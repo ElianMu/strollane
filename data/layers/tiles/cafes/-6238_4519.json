@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/5364870785","addr:housenumber":"60-47","addr:street":"Myrtle Avenue","amenity":"cafe","cuisine":"tapas","name":"DADA","opening_hours":"Tu-Th,Su 08:00-02:00, Fr,Sa 08:00-04:00","wheelchair":"limited","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.896627,40.700736]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R32","station_id":"28","complex_id":"28","stop_name":"Union St","daytime_routes":"R","line":"4th Av","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.98311,40.677316]}}]}

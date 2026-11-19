@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"way/1009399891","leisure":"playground","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.931447,40.583858]}},{"type":"Feature","properties":{"feature_id":"way/1009399892","leisure":"playground","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.931353,40.583923]}}]}

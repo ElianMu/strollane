@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"B23","station_id":"70","complex_id":"70","stop_name":"Bay 50 St","daytime_routes":"D","line":"West End","structure":"Elevated","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.983765,40.588841]}}]}

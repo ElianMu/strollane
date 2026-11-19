@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"11509876172-11558798454-0","osm_way_ids":"1243622406","highway":"footway","footway":"traffic_island","surface":"asphalt","length_m":3.1,"area":"brooklyn"},"geometry":{"type":"LineString","coordinates":[[-73.949117,40.597376],[-73.949122,40.597404]]}}]}

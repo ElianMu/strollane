@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"L28","station_id":"137","complex_id":"137","stop_name":"East 105 St","daytime_routes":"L","line":"Canarsie","structure":"At Grade","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.899485,40.650573]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"F34","station_id":"249","complex_id":"249","stop_name":"Avenue P","daytime_routes":"F","line":"6th Av - Culver","structure":"Elevated","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.973022,40.608944]}}]}

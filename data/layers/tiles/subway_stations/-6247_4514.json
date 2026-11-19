@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"R36","station_id":"32","complex_id":"32","stop_name":"36 St","daytime_routes":"D N R","line":"4th Av","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-74.003549,40.655144]}}]}

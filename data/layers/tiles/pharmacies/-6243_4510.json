@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/4471336897","addr:housenumber":"3002","addr:street":"Avenue M","amenity":"pharmacy","name":"Navar Pharmacy","opening_hours":"Su-Th 09:00-22:00; Fr 09:00-15:00","website":"https://www.navarpharmacy.com/","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.94532,40.619495]}}]}

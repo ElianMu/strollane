@@ -37,6 +37,12 @@ Heat-aware routing (`routing/weather.py`) uses tree and park evidence per street
 Queens it comes from the map build (`data/pedestrian/area-segment-evidence.json.gz`, park share ×100 to match Manhattan's
 0–100 field), giving evidence on 98 % of edge geometries.
 
+Map layers (2026-11-18): 53 of the 58 tilesets in `data/layers` now also cover Brooklyn (550,566 features) and western
+Queens (111,384), built by `scripts/build_area_layers.py` from the same datasets and fields as Manhattan's. A feature
+belongs to an area when its centre is in the area's box and its nearest LION segment is in that area. Building footprints,
+tax lots, activity places, 311 noise complaints and sidewalk surface are Manhattan only (marked so in the layer panel).
+The page's street-centerline layer loads Manhattan, Brooklyn and western Queens from the NYC service in turn.
+
 Memory: `scripts/check_capacity.py` peak with the joined network and the place index is 407 MB (2026-11-18), under its
 448 MB ceiling (512 MB instance); it was 380 MB with the Long Island City box alone.
 

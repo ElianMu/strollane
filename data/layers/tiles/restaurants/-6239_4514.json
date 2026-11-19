@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/12160254243","addr:housenumber":"1663","addr:street":"Linden Boulevard","amenity":"fast_food","cuisine":"burger","name":"Burger King","website":"https://www.bk.com/store-locator/store/restaurant_26188","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.900617,40.657415]}}]}

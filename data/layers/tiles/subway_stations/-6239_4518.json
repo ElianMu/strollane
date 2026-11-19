@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"L20","station_id":"130","complex_id":"130","stop_name":"Wilson Av","daytime_routes":"L","line":"Canarsie","structure":"Subway","ada":"2","ada_notes":"Manhattan-bound only","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.904046,40.688764]}}]}

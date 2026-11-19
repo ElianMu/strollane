@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/2568554170","addr:housenumber":"62","addr:street":"Water Street","amenity":"pharmacy","name":"The Modern Chemist","opening_hours":"Mo-Fr 08:00-20:00; Sa 10:00-19:00; Su 10:00-18:00","shop":"chemist","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.991592,40.703166]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"D35","station_id":"51","complex_id":"51","stop_name":"Kings Hwy","daytime_routes":"B Q","line":"Broadway - Brighton","structure":"Open Cut","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.957734,40.60867]}}]}

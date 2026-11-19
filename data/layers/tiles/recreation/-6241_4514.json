@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"way/1088200919","leisure":"swimming_pool","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.925786,40.649363]}},{"type":"Feature","properties":{"feature_id":"relation/15730136","leisure":"pitch","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.932932,40.652806]}}]}

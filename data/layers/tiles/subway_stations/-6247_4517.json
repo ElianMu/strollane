@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"F21","station_id":"237","complex_id":"237","stop_name":"Carroll St","daytime_routes":"F G","line":"6th Av - Culver","structure":"Subway","ada":"0","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.995048,40.680303]}}]}

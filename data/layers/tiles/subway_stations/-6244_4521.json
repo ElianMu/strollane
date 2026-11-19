@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"L08","station_id":"120","complex_id":"120","stop_name":"Bedford Av","daytime_routes":"L","line":"Canarsie","structure":"Subway","ada":"1","ada_notes":"NaN","area":"brooklyn"},"geometry":{"type":"Point","coordinates":[-73.956872,40.717304]}}]}
