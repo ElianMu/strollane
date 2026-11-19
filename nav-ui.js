@@ -124,15 +124,19 @@ function beginNavigation(route,opts={}){
 function setDataLayersForNav(on){
  if(!state.mapLayersReady)return;
  for(const id of ['journey-found','route-alts','route-names'])if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',on?'none':'visible');
- if(state.map.getLayer('udg-buildings-fill')&&typeof UrbanStyle!=='undefined'){
+ if(typeof UrbanStyle!=='undefined'){
   const base=UrbanStyle.T.building.extrusionOpacity;
-  state.map.setPaintProperty('udg-buildings-fill','fill-extrusion-opacity',on?base*0.8:base); // context, but still clearly 3D
-  if(on&&navLowPowerDevice){
-   navBuildingHeightBackup=state.map.getPaintProperty('udg-buildings-fill','fill-extrusion-height');
-   state.map.setPaintProperty('udg-buildings-fill','fill-extrusion-height',0); // flat 2D footprint, not hidden
-  }else if(!on&&navBuildingHeightBackup!=null){
-   state.map.setPaintProperty('udg-buildings-fill','fill-extrusion-height',navBuildingHeightBackup);navBuildingHeightBackup=null;
+  if(on&&navLowPowerDevice)navBuildingHeightBackup={};
+  // PLUTO massing in Manhattan, the base map's elsewhere (urban-layers.js syncBuildings3D): both dim the same way
+  for(const id of ['udg-buildings-fill','basemap-buildings-3d']){
+   if(!state.map.getLayer(id))continue;
+   state.map.setPaintProperty(id,'fill-extrusion-opacity',on?base*0.8:base); // context, but still clearly 3D
+   if(on&&navLowPowerDevice){
+    navBuildingHeightBackup[id]=state.map.getPaintProperty(id,'fill-extrusion-height');
+    state.map.setPaintProperty(id,'fill-extrusion-height',0); // flat 2D footprint, not hidden
+   }else if(!on&&navBuildingHeightBackup&&navBuildingHeightBackup[id]!=null)state.map.setPaintProperty(id,'fill-extrusion-height',navBuildingHeightBackup[id]);
   }
+  if(!on)navBuildingHeightBackup=null;
  }
  if(on){
   applyNavLayerPriority();
