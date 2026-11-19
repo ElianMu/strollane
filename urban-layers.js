@@ -28,7 +28,7 @@ function applyUrbanDefaults(c){if(urbanData.defaultsApplied)return;urbanData.def
  for(const d of c.datasets)if(d.status==='CONNECTED'&&d.default_visible!==false)toggleUrbanDataset(d.id,true,true);renderActiveCount();renderUrbanLegend();}
 async function ensureUrbanCatalog(){
  if(urbanData.catalog)return urbanData.catalog;
- urbanData.loading=urbanData.loading||streetwiseJson('./data/layers/catalog.json',{signal:AbortSignal.timeout(20000)});
+ urbanData.loading=urbanData.loading||streetwiseJson('./data/layers/catalog.json',{cache:'no-cache',signal:AbortSignal.timeout(20000)}); // revalidate: GitHub Pages lets browsers reuse it for 10 minutes
  try{const c=await urbanData.loading;for(const d of c.remote_datasets||[])if(!c.datasets.some(x=>x.id===d.id))c.datasets.push(d);UrbanGeo.setProjection(c.projection);urbanData.catalog=c;c.datasets.forEach(d=>urbanData.byId.set(d.id,d));applyUrbanDefaults(c);}
  catch(e){urbanData.loading=null;throw e;}
  return urbanData.catalog;
@@ -37,6 +37,7 @@ function tileUrl(tileset,key){return `./data/layers/tiles/${tileset}/${key}.json
 function tilesFor(tileset,box){const m=urbanData.catalog.tilesets[tileset].tiles;return UrbanGeo.tileKeys(box,urbanData.catalog.tile_size_m).filter(k=>m[k]);}
 function tileRecordCount(tileset,box){const m=urbanData.catalog.tilesets[tileset].tiles;return tilesFor(tileset,box).reduce((s,k)=>s+m[k],0);}
 // At most 12 tile requests in flight: a whole-island view must not fire thousands of requests at once.
+const OVERVIEW_TILES=24; // above this many tiles in view, a layer with an overview file uses it
 const tileQueue={active:0,waiting:[]};
 function queuedJson(url){return new Promise((res,rej)=>{const run=()=>{tileQueue.active++;streetwiseJson(url).then(res,rej).finally(()=>{tileQueue.active--;tileQueue.waiting.shift()?.();});};
  tileQueue.active<12?run():tileQueue.waiting.push(run);});}
@@ -342,7 +343,16 @@ async function loadUrbanDataset(id){
   }else{
    if(!state.mapReady){done(emptyFC(),'Map not ready','waiting');return}
    const b=flatMapBounds(state.map),box=UrbanGeo.lonLatBox(b.getWest(),b.getSouth(),b.getEast(),b.getNorth()),n=tileRecordCount(d.tileset,box);
-   const tiles=tilesFor(d.tileset,box).length;
+   const tiles=tilesFor(d.tileset,box).length,ov=urbanData.catalog.tilesets[d.tileset]?.overview;
+   // A wide view of a sparse layer reads one city-wide overview file (scripts/build_layer_overviews.py) instead of
+   // hundreds of 1 km tiles, which was slow and drew 429s from GitHub Pages; zoomed in, the full tiles load as before.
+   if(ov&&tiles>OVERVIEW_TILES){
+    setUrbanStatus(id,'Loading…','loading');
+    const url=`./data/layers/overview/${d.tileset}.json?v=${urbanData.catalog.built_at||''}`;
+    if(!urbanData.tiles.has(url))urbanData.tiles.set(url,streetwiseJson(url,{signal:AbortSignal.timeout(30000)}).then(fc=>fc.features).catch(e=>{urbanData.tiles.delete(url);throw e;}));
+    const inView=(await urbanData.tiles.get(url)).filter(f=>{if(!UrbanGeo.matchesFilter(f,d.filter))return false;const bb=UrbanGeo.bboxOf(UrbanGeo.project(f.geometry));return bb[0]<=box[2]&&bb[2]>=box[0]&&bb[1]<=box[3]&&bb[3]>=box[1];});
+    done({type:'FeatureCollection',features:inView},inView.length?`Overview · ${inView.length.toLocaleString()} in view · zoom in for details`:'No features in view',inView.length?'loaded':'empty');return;
+   }
    // Sparse datasets load at any zoom (parks, landmarks, stations); dense ones wait for a closer view.
    if(n>1100&&(state.map.getZoom()<d.min_zoom_view&&n>5000||tiles>40)){done(emptyFC(),`Zoom in to load (${n.toLocaleString()} records in view)`,'waiting');return}
    setUrbanStatus(id,'Loading…','loading');
@@ -408,7 +418,7 @@ function urbanFeatureHtml(d,props){
  const title=props.name||props.LPC_NAME||props.area_name||props.signname||props.gardenname||props.plazaname||props.facility_name||props.building_name||props.stop_name||props.genusspecies||props.complaint_type||props.street_name||props.street||d.name;
  const rel=props.distance_to_route_m!=null&&routeName()?`${esc(routeName())} · ${props.distance_to_route_m} m from the route`:routeName()?`${esc(routeName())} (current view; distance not computed)`:'No route selected';
  return `<dl class="inspector-ids"><dt>Dataset</dt><dd>${esc(d.name)}</dd><dt>Feature</dt><dd>${esc(title)}</dd><dt>Record ID</dt><dd>${esc(props.feature_id)}</dd></dl>
-  <dl class="inspector-fields">${d.attributes.map(k=>`<dt>${esc(k)}</dt><dd>${v(props[k])}</dd>`).join('')}</dl>
+  ${props.overview?'<p class="urban-note">City-wide overview: zoom in to see every field of this record.</p>':`<dl class="inspector-fields">${d.attributes.map(k=>`<dt>${esc(k)}</dt><dd>${v(props[k])}</dd>`).join('')}</dl>`}
   <dl class="inspector-ids"><dt>Data source</dt><dd>${esc(d.source)}</dd><dt>Data period</dt><dd>${esc(d.time_range||'—')}</dd><dt>Last updated</dt><dd>${esc(d.last_updated||'unknown')}</dd><dt>Related route</dt><dd>${rel}</dd><dt>Scoring</dt><dd>${d.used_in_scoring?'Used in scoring':'Context only'}</dd></dl>
   ${d.historical?'<p class="urban-warn">Historical record — not a real-time safety or condition prediction.</p>':''}${d.note?`<p class="urban-note">${esc(d.note)}</p>`:''}
   <a class="urban-source" href="${esc(d.source_url)}" target="_blank" rel="noopener noreferrer">View source ↗</a>`;

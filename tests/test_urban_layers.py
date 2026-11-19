@@ -81,6 +81,23 @@ class GeographicAccuracy(unittest.TestCase):
                 for lon, lat in coords(f['geometry']):
                     self.assertTrue(w <= lon <= e and s <= lat <= n, (tid, area, lon, lat))
 
+    def test_overviews_match_their_tilesets(self):
+        """data/layers/overview/<tileset>.json (scripts/build_layer_overviews.py) holds every feature of a sparse layer once,
+        with the fields its dataset filters read, so a city-wide view needs one request instead of hundreds of tiles."""
+        made = {t: ts['overview'] for t, ts in CAT['tilesets'].items() if 'overview' in ts}
+        self.assertGreaterEqual(len(made), 25)
+        self.assertIn('parks', made); self.assertNotIn('street_trees', made)
+        for tid, meta in made.items():
+            fc = json.loads((ROOT / 'data' / 'layers' / 'overview' / f'{tid}.json').read_text())
+            ids = [f['properties']['feature_id'] for f in fc['features']]
+            self.assertEqual(len(ids), len(set(ids)), tid)
+            self.assertEqual(set(ids), {f['properties']['feature_id'] for f in C.features(tid)}, tid)
+            self.assertEqual(meta['features'], len(ids), tid)
+        flt = [d for d in CAT['datasets'] if d.get('filter') and d.get('tileset') in made]
+        for d in flt:
+            fc = json.loads((ROOT / 'data' / 'layers' / 'overview' / f"{d['tileset']}.json").read_text())
+            self.assertTrue(any(all(f['properties'].get(k) in v for k, v in d['filter'].items()) for f in fc['features']), d['id'])
+
     def test_area_layers_cover_brooklyn_and_western_queens(self):
         self.assertEqual(set(CAT.get('areas', {})), {'brooklyn', 'lic'})
         only = {'building_footprints', 'pluto_lots', 'activity_places', 'noise_complaints', 'sidewalk_surface'}
