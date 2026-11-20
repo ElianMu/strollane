@@ -11,7 +11,7 @@
    are kept. A place with no match gets no entry: nothing is guessed or substituted.
 
    Output: {items: {placeId: [thumbPath, filePage, author, license, wikidataId, via]}} where thumbPath is the part
-   after https://upload.wikimedia.org/wikipedia/commons/thumb/ of a 330 px thumbnail, and via is
+   after https://upload.wikimedia.org/wikipedia/commons/thumb/ (Commons may serve it from thumb.wikimedia.org too) of a 330 px thumbnail, and via is
    'wd' | 'lpc' | 'name' (how the entry was found) + ':p18' | ':wiki' (where the image came from). */
 const PP = {MATCH_M: 150, WIDTH: 330, FREE: /^(CC[ -]?BY|CC0|CC-BY|Public domain|PD)/i,
  BOX: [-74.26, 40.49, -73.69, 40.92], TILES: 8, UA: 'STROLLANE-NYC-photo-index/1.0 (Columbia GSAPP course project)'};
@@ -123,8 +123,8 @@ async function buildPlacePhotoIndex(places, {fetch: fetchFn = fetch, log = () =>
    const lic = ppStrip(info.extmetadata?.LicenseShortName?.value), auth = ppAuthor(info.extmetadata?.Artist?.value);
    const pd = /public domain|^PD|^CC0/i.test(lic);
    if (!PP.FREE.test(lic) || (!auth && !pd)) continue;
-   const thumb = info.thumburl.replace(/^https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/thumb\//, '');
-   if (thumb === info.thumburl) continue; // not a Commons thumbnail
+   const thumb = info.thumburl.replace(/^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\/thumb\//, '').replace(/\?.*$/, '');
+   if (thumb === info.thumburl || !/^[0-9a-f]\/[0-9a-f]{2}\//.test(thumb)) continue; // not a Commons thumbnail
    const t = (back[pg.title] || pg.title).replace(/^File:/, '');
    meta.set(t, [thumb, info.descriptionurl.replace(/^https:\/\/commons\.wikimedia\.org\/wiki\//, ''), auth, lic]);
   }
