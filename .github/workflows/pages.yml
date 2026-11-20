@@ -1,0 +1,49 @@
+# Publishes the website to GitHub Pages with only the files the browser loads.
+#
+# The repository also holds the API server's data (routing network, crime and tree databases, area work files), which
+# GitHub Pages never needs. With all of Queens the whole tree is over Pages' 1 GB site limit, so this workflow copies the
+# repository into _site without those folders and deploys that. Pages must be set to "Source: GitHub Actions"
+# (Settings → Pages). The API server on Render still deploys from the full repository.
+name: Deploy website (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy the web files into _site
+        run: |
+          mkdir _site
+          tar --exclude=./.git --exclude=./.github --exclude=./_site \
+              --exclude=./data/urban --exclude=./data/cache --exclude=./data/dimensions/work --exclude=./data/pedestrian \
+              --exclude=./tests --exclude=./scripts --exclude=./routing --exclude='*.py' \
+              -cf - . | tar -xf - -C _site
+          mkdir -p _site/data/pedestrian
+          cp data/pedestrian/score-indicators.json _site/data/pedestrian/
+          touch _site/.nojekyll
+          du -sh _site
+          size=$(du -sm _site | cut -f1)
+          if [ "$size" -gt 990 ]; then echo "::error::_site is ${size} MB; GitHub Pages allows 1 GB"; exit 1; fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
