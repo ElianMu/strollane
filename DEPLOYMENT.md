@@ -92,3 +92,25 @@ Map layers for Brooklyn and western Queens (data/layers; 53 of the 58 tilesets):
 Building footprints (and the height / age views), tax lots, activity places, 311 noise complaints and sidewalk surface
 stay Manhattan only, to keep the published site well under GitHub Pages' 1 GB (it is about 790 MB with all three
 areas). `tests/test_urban_layers.py` checks every feature against its own area.
+
+## Website deploy (GitHub Pages, from a workflow)
+
+With all of Queens the repository is larger than GitHub Pages' 1 GB site limit, so `.github/workflows/pages.yml`
+publishes a copy without the API server's own data (`data/urban`, `data/pedestrian` except `score-indicators.json`,
+`data/cache`, `tests`, `scripts`, `routing`, `*.py`): about 815 MB on 2026-11-19. The workflow stops if the copy is
+over 990 MB. Settings → Pages → Build and deployment → Source must be **GitHub Actions**. Render still deploys the
+API from the whole repository.
+
+## Walker feedback (routing/feedback.py)
+
+Reports are stored as JSON lines on the `feedback-data` branch (`feedback/reports-YYYY-MM.jsonl`) because the Render
+Free disk is wiped on every restart. The API host needs one environment variable:
+
+    FEEDBACK_GITHUB_TOKEN   fine-grained GitHub token, repository ElianMu/strollane only, permission Contents: read and write
+    FEEDBACK_REPO           optional, default ElianMu/strollane
+
+Without the token `/api/feedback` answers 503 `feedback_disabled` and routing ignores feedback. A report holds a
+segment ID, a dimension, a direction (worse / better than the score shown), that score, the UTC hour and the New York
+time-of-day bucket: no location, account, free text or IP address. Rules (MIN_REPORTS, MIN_DAYS, MIN_AGREEMENT,
+MAX_DELTA, SHRINK, HALF_LIFE_DAYS, TIME_SENSITIVE) are at the top of `routing/feedback.py`; `tests/test_feedback.py`
+checks them.
