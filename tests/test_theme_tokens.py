@@ -13,7 +13,8 @@ import re
 import unittest
 
 CSS = pathlib.Path(__file__).resolve().parent.parent / 'styles.css'
-DATA_COLOURS = {'#56585a'}  # Explore "N/A" swatch = EXPLORE_NA in explore-map.js
+DATA_COLOURS = {'#56585a',  # Explore "N/A" swatch = EXPLORE_NA in explore-map.js
+                '#0a0b0c'}  # stop number on a map photo (.mc-seq) = the City Walk stop marker on the map (journey-ui.js), same in both themes
 COLOUR_PROP = re.compile(r'^(--[\w-]+|background[\w-]*|color|fill|stroke|caret-color|outline(-color)?|accent-color|'
                          r'border([\w-]*-color|-top|-right|-bottom|-left|-block[\w-]*|-inline[\w-]*)?|'
                          r'box-shadow|text-shadow|-?webkit-[\w-]*|filter|text-decoration-color)$')

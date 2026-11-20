@@ -18,6 +18,14 @@ here, as build_pedestrian_network.py does for one area.
 
 Nothing is invented: every edge, geometry and score is copied from an input file; only indices and the component
 labels are new.
+
+Shared paths (data/pedestrian/foot-paths.json, scripts/download_foot_paths.py): OSMnx's walk network drops every
+highway=cycleway, also those OpenStreetMap opens to people on foot (foot=yes / designated / permissive). They are added
+here as they are mapped: each way is cut at the nodes it shares with the network or with another such way, an existing
+edge that one of its nodes lies inside gets its pieces between those nodes added beside it (the edge itself stays, as
+the LION matching refers to it by ID; the pieces copy its tags and score), and the new path edges carry no score
+(src 'none', coverage 0: N/A, never 0). Among them is the Cross Bay Bridge path, the Rockaway peninsula's only walkable
+link to the rest of Queens.
 """
 import gzip
 import hashlib
@@ -31,6 +39,9 @@ P = os.path.join(ROOT, 'data', 'pedestrian')
 AREAS = ['manhattan', 'brooklyn', 'lic']
 OUT_GRAPH, OUT_SCORES = os.path.join(P, 'nyc-walk-graph.json.gz'), os.path.join(P, 'nyc-edge-scores.json.gz')
 OUT_EVIDENCE = os.path.join(P, 'area-segment-evidence.json.gz')
+FOOT_PATHS = os.path.join(P, 'foot-paths.json')
+UNSCORED = {'s': [None] * 12, 'o': None, 'c': [0.0] * 12, 'src': 'none', 'q': 'unscored', 'kind': 'path', 'frac': 0.0, 'm': []}
+FOOT_PATH_TAGS = ('highway', 'name', 'foot', 'bridge', 'tunnel', 'layer', 'surface', 'incline', 'wheelchair', 'covered')
 
 
 def scores_path(area):
@@ -127,6 +138,91 @@ def stitch_borders(graphs, scores):
     return done
 
 
+def add_foot_paths(nodes, edges, geoms, gscores, seen_edges):
+    """Add the shared paths open to walkers (see the module notes). Returns what was added, for the metadata."""
+    if not os.path.exists(FOOT_PATHS):
+        return None
+    doc = json.load(open(FOOT_PATHS, encoding='utf-8'))
+    ways = doc['ways']
+    uses = {}
+    for w in ways:
+        for n in set(w['nodes']):
+            uses[n] = uses.get(n, 0) + 1
+    # a way node that is not a network node but lies inside a network edge (same coordinates): split that edge there
+    wanted = {}
+    for w in ways:
+        for n, c in zip(w['nodes'], w['coords']):
+            if str(n) not in nodes:
+                wanted[(c[0], c[1])] = n
+    cuts = {}
+    for ei, e in enumerate(edges):
+        if e[4]:
+            continue
+        line = geoms[e[3]]
+        for vi in range(1, len(line) - 1):
+            n = wanted.get((line[vi][0], line[vi][1]))
+            if n is not None:
+                cuts.setdefault(ei, []).append((vi, n, line[vi]))
+    split, split_edges = 0, 0
+    for ei, at in cuts.items():
+        # several joins inside one edge: the pieces between consecutive join points, each added beside the edge
+        e = edges[ei]
+        line, pts, two_way = geoms[e[3]], sorted(at), (e[1], e[0], e[2]) in seen_edges
+        bounds = [(0, e[0])] + [(vi, n) for vi, n, c in pts] + [(len(line) - 1, e[1])]
+        for (i0, n0), (i1, n1) in zip(bounds, bounds[1:]):
+            piece = line[i0:i1 + 1]
+            if len(piece) < 2 or n0 == n1:
+                continue
+            ln = round(e[5] * metres(piece) / max(metres(line), 1e-9), 2)
+            gi = len(geoms)
+            geoms.append(piece); gscores.append(gscores[e[3]])
+            key = 0
+            while (n0, n1, key) in seen_edges or (n1, n0, key) in seen_edges:
+                key += 1
+            edges.append([n0, n1, key, gi, 0, ln, e[6], e[7]])
+            seen_edges.add((n0, n1, key))
+            split_edges += 1
+            if two_way:  # a one-way edge (oneway:foot) keeps its direction
+                edges.append([n1, n0, key, gi, 1, ln, e[6], e[7]])
+                seen_edges.add((n1, n0, key))
+                split_edges += 1
+        for vi, n, c in pts:
+            nodes.setdefault(str(n), [c[0], c[1], 2, 0])
+            split += 1
+    added_ways, added_edges, degree = 0, 0, {}
+    for w in ways:
+        ids, coords = w['nodes'], w['coords']
+        anchors = [i for i, n in enumerate(ids) if i in (0, len(ids) - 1) or str(n) in nodes or uses[n] > 1]
+        tags = {k: w['tags'][k] for k in FOOT_PATH_TAGS if k in w['tags']}
+        tags['highway'] = 'cycleway'
+        before = added_edges
+        for a, b in zip(anchors, anchors[1:]):
+            u, v = ids[a], ids[b]
+            # a node the network already has keeps the network's coordinates: OSM nodes are sometimes moved between
+            # downloads (node 486876695 on the Williamsburg Bridge by 1 m), and the route check needs edges that join
+            line = [nodes[str(n)][:2] if str(n) in nodes else c for n, c in zip(ids[a:b + 1], coords[a:b + 1])]
+            if u == v and len(line) < 3:
+                continue
+            k = 0
+            while (u, v, k) in seen_edges or (v, u, k) in seen_edges:
+                k += 1
+            gi = len(geoms)
+            geoms.append(line); gscores.append(dict(UNSCORED))
+            length = round(metres(line), 2)
+            edges.append([u, v, k, gi, 0, length, [w['id']], tags])
+            edges.append([v, u, k, gi, 1, length, [w['id']], tags])
+            seen_edges.update({(u, v, k), (v, u, k)})
+            for n, c in ((u, line[0]), (v, line[-1])):
+                nodes.setdefault(str(n), [c[0], c[1], 0, 0])
+                degree[str(n)] = degree.get(str(n), 0) + 1
+            added_edges += 2
+        added_ways += added_edges > before
+    for n, d in degree.items():  # street_count: physical streets meeting at the node, the new paths included
+        nodes[n][2] += d
+    return {'source': doc['metadata']['source'], 'retrieved_at': doc['metadata']['retrieved_at'], 'ways': added_ways,
+            'directed_edges': added_edges, 'network_edges_split': split, 'edges_added_by_splits': split_edges}
+
+
 def main():
     graphs = {a: json.load(gzip.open(os.path.join(P, f'{a}-walk-graph.json.gz'), 'rt', encoding='utf-8')) for a in AREAS}
     scores = {a: json.load(gzip.open(scores_path(a), 'rt', encoding='utf-8')) for a in AREAS}
@@ -156,12 +252,14 @@ def main():
             edges.append([u, v, k, gmap[key], rev, length, osmids, tags])
             from_area[a]['edges'] += 1
 
+    foot_paths = add_foot_paths(nodes, edges, geoms, gscores, seen_edges)
     comp, n_comp = strongly_connected(list(map(int, nodes)), [(e[0], e[1]) for e in edges])
     for k, v in nodes.items():
         v[3] = comp[int(k)]
     main_nodes = sum(1 for v in nodes.values() if v[3] == 0)
 
-    digest = hashlib.sha1(json.dumps([graphs[a]['metadata']['network_version'] for a in AREAS]).encode()).hexdigest()[:8]
+    digest = hashlib.sha1(json.dumps([graphs[a]['metadata']['network_version'] for a in AREAS]
+                                     + ([foot_paths['retrieved_at']] if foot_paths else [])).encode()).hexdigest()[:8]
     built = datetime.now(timezone.utc).isoformat(timespec='seconds')
     m0 = graphs['manhattan']['metadata']
     gmeta = {**{k: m0[k] for k in ('source', 'osmnx_version', 'edge_fields', 'node_fields', 'edge_id', 'oneway_rule') if k in m0},
@@ -173,7 +271,7 @@ def main():
              'counts': {'nodes': len(nodes), 'edges': len(edges), 'geometries': len(geoms), 'components': n_comp, 'main_component_nodes': main_nodes,
                         'by_area': from_area},
              'merge': 'scripts/merge_networks.py: first area wins for a directed edge present in several downloads; components recomputed on the joined network.',
-             'stitched_at_borders': stitched}
+             'stitched_at_borders': stitched, 'foot_paths': foot_paths}
     routable_len, cov = 0.0, [0.0] * 12
     seen_g = set()
     for u, v, k, gi, rev, length, *_ in edges:

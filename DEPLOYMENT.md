@@ -64,12 +64,15 @@ After a new download or a scoring change, in this order (all standard library ex
     python3 scripts/match_area.py --area brooklyn                   # same for lic
     python3 scripts/measure_direct_edges.py --area brooklyn         # * same for lic
     python3 scripts/transfer_dimension_scores.py --area brooklyn    # same for lic
+    python3 scripts/download_foot_paths.py                        # shared paths open to walkers (needs Overpass)
     python3 scripts/merge_networks.py
     python3 scripts/compile_network.py --area nyc
     python3 scripts/build_waterfront_features.py                    # * numpy, shapely
     python3 scripts/build_score_indicators.py
 
-`tests/test_joined_network.py` and `tests/test_netpack.py` fail if a step is skipped.
+`tests/test_joined_network.py` and `tests/test_netpack.py` fail if a step is skipped. `download_foot_paths.py` adds the
+`highway=cycleway` ways OpenStreetMap opens to walkers, which OSMnx's walk network leaves out; without them the Rockaway
+peninsula and the Williamsburg Bridge's Manhattan approach are cut off (METHODOLOGY.md, Shared paths).
 
 After changing an area's box in `scripts/areas.py`, download that area again with `--refresh` (kept Overpass tiles are
 per box) and remove `data/dimensions/work/<area>/` before `area_build`: its stage files belong to the old segment set.

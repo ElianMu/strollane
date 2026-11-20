@@ -48,12 +48,27 @@ class JoinedNetwork(unittest.TestCase):
         for a in AREAS:
             for e in graphs[a]['edges']:
                 first.setdefault((e[0], e[1], e[2]), (a, e))
-        self.assertEqual(len(JG['edges']), len(first), 'each directed edge once')
+        # plus the shared paths open to walkers (merge_networks.add_foot_paths): their own edges, and one more edge for
+        # each network edge (and one for its reverse twin, when it has one) split where one of them joins
+        fp = JG['metadata']['foot_paths']
+        foot_ways = {w['id'] for w in json.load(open(P / 'foot-paths.json', encoding='utf-8'))['ways']}
+        added = [e for e in JG['edges'] if e[6] and e[6][0] in foot_ways and e[7].get('highway') == 'cycleway']
+        self.assertEqual(len(added), fp['directed_edges'])
+        self.assertEqual(len(JG['edges']), len(first) + fp['directed_edges'] + fp['edges_added_by_splits'], 'each directed edge once')
+        split = 0
         for e in JG['edges'][::53]:
+            if e in added:
+                self.assertIsNone(JS['geoms'][e[3]]['o'], 'a shared path carries no score (N/A, never 0)')
+                self.assertEqual(JS['geoms'][e[3]]['src'], 'none')
+                continue
+            if (e[0], e[1], e[2]) not in first:
+                split += 1  # one half of a network edge split where a shared path joins it
+                continue
             a, src = first[(e[0], e[1], e[2])]
             self.assertEqual(e[4:], src[4:], 'reversal flag, length, ways and tags copied')
             self.assertEqual(JG['geoms'][e[3]], graphs[a]['geoms'][src[3]])
             self.assertEqual(JS['geoms'][e[3]], scores[a][src[3]], 'scores copied from the area the edge came from')
+        self.assertLess(split, len(JG['edges'][::53]) * .01)
         self.assertEqual(JG['metadata']['counts']['by_area']['manhattan']['skipped_duplicates'], 0, 'Manhattan keeps all of its edges')
 
     def test_scores_are_one_scale(self):
@@ -89,14 +104,26 @@ class JoinedNetwork(unittest.TestCase):
         for route in r['routes']:
             self.assertEqual(route['validation']['blocking_issues'], [], route['objective'])
 
-    def test_williamsburg_bridge_gap_is_known(self):
-        """Known limit (METHODOLOGY.md): the Williamsburg Bridge walkway stops over the river in Manhattan's 2026-10-23 OSM
-        download, so walks between the Lower East Side and Williamsburg detour. If this fails, the gap has been fixed:
-        update the documentation and turn this into a crossing test."""
-        dist, names = shortest((-73.9868, 40.7177), (-73.9634, 40.7112))
-        self.assertFalse(any('Williamsburg' in n for n in names))
-        self.assertGreater(dist, 5000)
+    def test_rockaway_peninsula_is_routable(self):
+        """The Cross Bay Bridge path and the Flatbush Avenue Greenway are highway=cycleway open to walkers, which OSMnx's
+        walk network leaves out; until 2026-11-20 the Rockaway peninsula was its own component of 8,649 nodes and every
+        walk there failed. Added from data/pedestrian/foot-paths.json by scripts/merge_networks.py."""
+        for o, d, via, max_km in (((-73.8366, 40.5794), (-73.8378, 40.6573), 'Cross Bay Bridge', 13.0),  # Rockaway Park → Howard Beach
+                                  ((-73.8200, 40.5850), (-73.8240, 40.6050), 'Cross Bay Bridge', 3.5),   # Beach 94th St → Broad Channel
+                                  ((-73.8760, 40.5660), (-73.8920, 40.5900), 'Flatbush Avenue Greenway', 5.0)):  # Jacob Riis → Floyd Bennett
+            dist, names = shortest(o, d)
+            self.assertIn(via, names)
+            self.assertLess(dist, max_km * 1000, via)
 
+    def test_williamsburg_bridge_crossing(self):
+        """The Williamsburg Bridge's Manhattan approach is a shared path (highway=cycleway, foot=designated); until
+        2026-11-20 it was missing and walks between the Lower East Side and Williamsburg detoured about 7.7 km."""
+        dist, names = shortest((-73.9868, 40.7177), (-73.9634, 40.7112))
+        self.assertTrue(any('Williamsburg' in n for n in names))
+        self.assertLess(dist, 3000)
+        r = PLANNER.plan({'lon': -73.9868, 'lat': 40.7177}, {'lon': -73.9634, 'lat': 40.7112}, {'weights': {'Nature': 60}})
+        for route in r['routes']:
+            self.assertEqual(route['validation']['blocking_issues'], [], route['objective'])
 
 if __name__ == '__main__':
     unittest.main()

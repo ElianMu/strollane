@@ -21,11 +21,13 @@ without the server's own data (`.github/workflows/pages.yml`, about 815 MB of Gi
   bridges and their landings; `scripts/merge_networks.py` splits an edge where another download ends inside it (6 such
   points, listed in the joined network's metadata: the Queensboro and Manhattan Bridges among them).
   `tests/test_joined_network.py` walks the Queensboro, Brooklyn, Manhattan and Pulaski Bridge crossings.
-* Not routable: the Rockaway peninsula. In the OpenStreetMap walk data it has no walkable link to the rest of Queens
-  (it forms its own component of 8,649 nodes), so a start or destination there gets the "more than 150 m from any walkable
-  path" message instead of a route. Roosevelt Island and Randall's Island are now routable through Queens.
-* Route benchmark, Brooklyn and Queens set (19 trips × 12 dimensions, `benchmarks/ROUTE_BENCHMARK_AREAS.md`): +6.7 points
-  mean gain for a 4.2 % mean detour; eastern Queens trips (Flushing, Forest Hills, Jamaica) +8.7 points.
+* The Rockaway peninsula is routable since 2026-11-20, over the Cross Bay Bridge path (see Shared paths below); before
+  that it had no walkable link to the rest of Queens in the walk data. Roosevelt Island and Randall's Island are routable
+  through Queens.
+* Route benchmark, Brooklyn and Queens set (19 trips × 12 dimensions, `benchmarks/ROUTE_BENCHMARK_AREAS.md`): +7.2 points
+  mean gain for a 4.3 % mean detour; eastern Queens trips (Flushing, Forest Hills, Jamaica) +9.3 points (2026-11-20, with
+  the shared paths; before them +6.7 for 4.2 %). Mean scored share along these routes 96 % (98 % before: the paths carry
+  no score).
 * Map layers cover all of Queens for the same 53 tilesets as Brooklyn (696,507 Queens features, 297,744 of them street
   trees). Place recommendations: 12,170 Queens records within 150 m of the walk network.
 
@@ -46,11 +48,19 @@ verified to reproduce Manhattan's 77,522 committed mapping rows exactly), `scrip
 Scored share of routable length: Brooklyn 98.3 %, western Queens 98.8 % (Spatial Comfort 78.3 %: the ramp survey does not reach
 directly measured edges there).
 
-River crossings checked on the joined network: Brooklyn Bridge, Manhattan Bridge, Queensboro Bridge and Pulaski Bridge
-connect. **The Williamsburg Bridge does not**: in Manhattan's OSM download of 2026-10-23 its walkway ends over the river
-without reaching Delancey Street, so walks between the Lower East Side and Williamsburg detour (about 7.7 km instead of
-about 2.3 km). Whether that is a closure tagged in OpenStreetMap or a tagging gap was not checked. A fresh Manhattan
-download would show; `tests/test_joined_network.py` fails once it is fixed.
+River crossings checked on the joined network: Brooklyn Bridge, Manhattan Bridge, Queensboro Bridge, Pulaski Bridge,
+Williamsburg Bridge, Cross Bay Bridge and the Marine Parkway Bridge approach connect (`tests/test_joined_network.py`).
+
+**Shared paths (2026-11-20).** OSMnx's `network_type="walk"` drops every `highway=cycleway`, including the ones
+OpenStreetMap opens to people on foot (`foot=yes / designated / permissive`). Three gaps came from that: the Williamsburg
+Bridge's Manhattan approach (walks between the Lower East Side and Williamsburg detoured about 7.7 km instead of about
+2.2 km), the Cross Bay Bridge path (the Rockaway peninsula was its own component of 8,649 nodes and could not be routed
+to at all) and the Flatbush Avenue Greenway to the Marine Parkway Bridge. `scripts/download_foot_paths.py` fetches those
+ways (902 in the three boxes on 2026-11-20) and `scripts/merge_networks.py` adds them: each way is cut where it meets the
+network or another such way, a network edge one of its nodes lies inside is split there (404 cuts), and where a node
+already in the network was moved in OpenStreetMap since its download, the network's position is kept. The new edges
+carry no score (N/A, coverage 0), so the scored share of routable length went from 98.5 % to 96.9 %. A cycleway with no
+foot tag, or `foot=no`, is not added.
 
 The western Queens box also covers Manhattan's east edge, Roosevelt Island and part of Greenpoint; those streets come from
 the Manhattan and Brooklyn downloads. A few dozen western Queens edges touch Manhattan nodes, mostly the Queensboro Bridge walkway
