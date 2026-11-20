@@ -206,3 +206,5 @@ function wireWalkerSays(root,r){
   .then(x=>x.json()).then(j=>{const el=box.querySelector('[data-k="walker-says-streets"]');if(el&&j.segments)el.innerHTML=walkerSaysStreets(j.segments,r);}).catch(()=>{});
 }
 
+/* "Rate walk" in the walk action bar, next to Start Navigation: opens the same post-walk rating dialog. */
+if(typeof document!=='undefined')document.getElementById('rateWalk')?.addEventListener('click',()=>openWalkRating());

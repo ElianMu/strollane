@@ -171,7 +171,10 @@ const run=s=>vm.runInContext(s,context);
  {const fb=w.document.querySelector('#walkerFeedback');
   assert(fb&&!fb.closest('details'),'walker feedback is outside the collapsed technical details');
   assert(fb.textContent.includes('What walkers said')&&fb.querySelector('[data-k="rate-now"]'),'what walkers said and rate-now on every route');
-  assert.equal(w.document.querySelector('#navStart').nextElementSibling,fb.closest('.walker-feedback-near'),'feedback sits right under Start Navigation');
+  const bar=w.document.querySelector('#navStart').closest('.walk-actions');
+  assert(bar&&bar.querySelector('#rateWalk')&&bar.querySelector('#shareWalk')&&bar.querySelector('#routePreviewBtn'),'Start Navigation, 3D preview, Share and Rate walk share the fixed action bar');
+  assert(!bar.closest('.right-scroll'),'the action bar stays outside the scrolling list');
+  assert(fb.closest('.walker-feedback-near').compareDocumentPosition(w.document.querySelector('#refineQuick'))&4,'walker feedback comes before refine and places');
   // ending navigation by hand near the end asks for the rating (once); ending early does not
   run('var __asked=0;promptWalkCheck=()=>{__asked++;};var __eng=(p)=>({progress:p,transition(){}})');const asked=()=>run('__asked');
   run('nav.route={route_id:"r",distance_m:2000};nav.temporary=false;nav.checkAsked=null');
@@ -624,7 +627,7 @@ const run=s=>vm.runInContext(s,context);
   run("setLanguage('zh',false)");
   assert.equal(d.documentElement.lang,'zh-Hans');assert.equal(q('#langToggle [data-lang-label]').textContent,'EN');
   assert.equal(pill.dataset.dim,'Nature');assert(/自然 Nature/.test(pill.textContent),'gloss + name, data key untouched');
-  assert(/休闲散步者/.test(act.textContent)&&/安静、有绿意/.test(act.textContent));assert(d.body.textContent.includes('起点')&&d.body.textContent.includes('分享这条路线'));
+  assert(/休闲散步者/.test(act.textContent)&&/安静、有绿意/.test(act.textContent));assert(d.body.textContent.includes('起点')&&d.body.textContent.includes('分享')&&d.body.textContent.includes('评价路线'));
   assert.equal(box.value,typed,'what is typed in the request box is never rewritten');
   assert.equal(box.getAttribute('placeholder'),run('I18N_ZH')[box.getAttribute('data-i18n-en-placeholder')],'placeholder translated, original kept on the element');
   // text the app writes later is translated too; built sentences are left in English, whole

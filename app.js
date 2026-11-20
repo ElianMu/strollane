@@ -796,7 +796,10 @@ function renderPOIs(){
   const list=activePOIs(),pending=planner.poiStatus==='Not loaded'||/^Fetching/.test(planner.poiStatus||'');
   $('poiCount').textContent=pending?'':`${list.length} NEAR ROUTE`; // a count only once the lookup has answered: "0 near route" before that was not a finding
   if(!list.length){$('poiList').innerHTML=`<p class="status-empty">${esc(planner.poiStatus==='Not loaded'?(state.routes.length?'Places near this walk have not been looked up yet.':'Generate or select a route to discover POIs.'):planner.poiStatus||'No named OSM POIs confirmed near route.')}</p>`;return}
-  $('poiList').innerHTML=`<small>${esc(planner.poiStatus)}</small>`+list.map((p,i)=>`<button class="poi-item" type="button" data-poi="${i}"><span><strong>${esc(p.name)}</strong><small>${esc(poiDimension(p.tags))} · OpenStreetMap</small></span><span class="poi-distance">${p.distance} m ↗</span></button>`).join('');
+  const POI_FIRST=6;
+  $('poiList').innerHTML=list.map((p,i)=>`<button class="poi-item${i>=POI_FIRST?' more-hidden':''}" type="button" data-poi="${i}"><span><strong>${esc(p.name)}</strong><small>${esc(poiDimension(p.tags))}</small></span><span class="poi-distance">${p.distance} m ↗</span></button>`).join('')
+   +(list.length>POI_FIRST?`<button type="button" class="poi-more">Show all places<span> (${list.length})</span></button>`:'')+`<small class="poi-source">OpenStreetMap · ${esc(planner.poiStatus)}</small>`;
+  $('poiList').querySelector('.poi-more')?.addEventListener('click',e=>{$('poiList').querySelectorAll('.more-hidden').forEach(x=>x.classList.remove('more-hidden'));e.currentTarget.remove();});
   $('poiList').querySelectorAll('[data-poi]').forEach(el=>el.addEventListener('click',()=>{
     const p=list[+el.dataset.poi];if(state.mapReady)state.map.flyTo({center:[p.lon,p.lat],zoom:16.4,duration:500});toast(`${p.name} · ${p.distance} m from route geometry`);
   }));
