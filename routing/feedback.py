@@ -148,8 +148,9 @@ def delta_for(summary, bucket):
 class GitHubStore:
     """Reports as JSON lines in feedback/reports-YYYY-MM.jsonl on one branch of a GitHub repository (contents API)."""
 
-    def __init__(self, repo, token, branch='feedback-data', api='https://api.github.com'):
+    def __init__(self, repo, token, branch='feedback-data', api='https://api.github.com', folder='feedback', name='reports'):
         self.repo, self.token, self.branch, self.api = repo, token, branch, api
+        self.folder, self.name = folder, name  # walk checks (routing/walkcheck.py) use folder 'walk-checks'
 
     def _call(self, method, path, body=None):
         req = urllib.request.Request(f'{self.api}/repos/{self.repo}/{path}', method=method,
@@ -170,7 +171,7 @@ class GitHubStore:
 
     def load(self):
         try:
-            listing = self._call('GET', f'contents/feedback?ref={self.branch}')
+            listing = self._call('GET', f'contents/{self.folder}?ref={self.branch}')
         except urllib.error.HTTPError as e:
             if e.code == 404:  # no branch or no reports yet
                 return []
@@ -179,7 +180,7 @@ class GitHubStore:
         for item in sorted(listing, key=lambda x: x['name']):
             if not item['name'].endswith('.jsonl'):
                 continue
-            f = self._call('GET', f"contents/feedback/{item['name']}?ref={self.branch}")
+            f = self._call('GET', f"contents/{self.folder}/{item['name']}?ref={self.branch}")
             for line in base64.b64decode(f['content']).decode().splitlines():
                 if line.strip():
                     reports.append(json.loads(line))
@@ -187,7 +188,7 @@ class GitHubStore:
 
     def append(self, report):
         self._ensure_branch()
-        path = f"feedback/reports-{report['at'][:7]}.jsonl"
+        path = f"{self.folder}/{self.name}-{report['at'][:7]}.jsonl"
         for attempt in range(4):  # another report may land between read and write (409): read again
             try:
                 try:
@@ -197,7 +198,7 @@ class GitHubStore:
                     if e.code != 404:
                         raise
                     text, sha = '', None
-                body = {'message': f"feedback: {report['segment_id']} {report['dimension']} {report['direction']}",
+                body = {'message': f"{self.folder}: " + ' '.join(str(report.get(k)) for k in ('segment_id', 'dimension', 'direction', 'user_type', 'match') if k in report),
                         'content': base64.b64encode((text + json.dumps(report, separators=(',', ':')) + '\n').encode()).decode(),
                         'branch': self.branch}
                 if sha:

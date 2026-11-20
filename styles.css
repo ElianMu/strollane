@@ -1231,6 +1231,26 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .walker-buttons button:hover{border-color:var(--lime)}
 .walker-route label{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--g9d);margin-top:7px}
 .walker-route select{border:1px solid var(--g3d);background:var(--g14);color:var(--gee);border-radius:6px;padding:6px;font-size:11px}
+.walk-check{border:1px solid var(--g33);border-radius:8px;padding:10px 11px;margin:10px 0;background:var(--g11)}
+.walk-check>summary{cursor:pointer;font-size:11px;font-weight:700}
+.walk-check-type{display:block;font-size:10px;color:var(--g9d);margin-top:6px}
+.walk-check-q{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:11px;margin-top:9px}
+.walk-check-q small{flex-basis:100%;font-size:9.5px;color:var(--g9d)}
+.walk-check-scale{display:inline-flex;gap:4px}
+.walk-check-scale button{min-width:32px;min-height:30px;border:1px solid var(--g4a);background:var(--g14);color:var(--gee);border-radius:6px;font-size:11px;font-weight:700}
+.walk-check-scale button[aria-pressed=true]{background:var(--lime);color:var(--g00);border-color:var(--lime)}
+.walk-check-code{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--g9d);margin-top:9px}
+.walk-check-hint{display:block;font-size:9.5px;color:var(--g9d);margin-top:6px}
+.walk-check-dims{margin-top:8px;padding-top:6px;border-top:1px solid var(--g33)}.walk-check-dims small{font-size:9.5px;color:var(--g9d)}
+.walk-check-code textarea{width:100%;border:1px solid var(--g3d);background:var(--g14);color:var(--gee);border-radius:6px;padding:6px;font-size:11px;resize:vertical}
+.walk-check-q b{color:var(--lime)}
+.walk-check-code input{width:110px;border:1px solid var(--g3d);background:var(--g14);color:var(--gee);border-radius:6px;padding:6px;font-size:11px}
+.walk-check-send{margin-top:9px;border:1px solid var(--lime);background:transparent;color:var(--lime);border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700}
+.walk-check-send:disabled{opacity:.45}
 .walker-status,.walker-note{display:block;font-size:9.5px;line-height:1.55;color:var(--g9d);margin-top:4px}
 /* who the mobile composer is for (AUDIENCE.md lead audience) */
 .m-composer-for{margin:-4px 2px 9px;font-size:12px;line-height:1.4;color:var(--muted)}
+
+/* Evaluation dashboard links (evaluation.html) */
+.eval-link{display:inline-grid;place-items:center;text-decoration:none;font-size:13px}
+.mobile-more-body a.more-link{display:flex;align-items:center;gap:8px;width:100%;color:var(--ge4);font-size:12px;padding:10px;border-radius:7px;text-decoration:none}.mobile-more-body a.more-link:hover{background:var(--g21)}.mobile-more-body a.more-link small{margin-left:auto;color:var(--g9d);font-size:10px}

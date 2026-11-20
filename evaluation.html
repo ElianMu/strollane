@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STROLLANE · NYC — Evaluation / 效果评估</title>
+  <meta name="description" content="How walkers rated STROLLANE walks, and how their ratings compare with the scores the system predicted. Real answers only." />
+  <link rel="icon" href="./icon-192.png?v=2" />
+  <style>
+    :root{--bg:#fff;--fg:#141414;--muted:#6b6b66;--line:#e2e2dd;--card:#fafaf8;--accent:#141414;--bar:#3b6e4f;--bar2:#9fc9d6;--warn:#8a5a14;--font:'Inter','Noto Sans SC','PingFang SC',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55}
+    header{padding:28px 28px 8px;max-width:1120px;margin:0 auto}header a{color:var(--muted);font-size:12px;text-decoration:none}
+    h1{font-size:30px;letter-spacing:-.8px;margin:6px 0 2px;font-weight:650}h1 small{font-size:16px;color:var(--muted);font-weight:500}
+    .lede{color:var(--muted);max-width:780px;margin:6px 0 0}
+    main{max-width:1120px;margin:0 auto;padding:8px 28px 48px}
+    .status{margin:18px 0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:13px}
+    .empty{padding:48px 16px;text-align:center;border:1px dashed var(--line);border-radius:12px;margin:18px 0}.empty strong{display:block;font-size:20px}.empty p{color:var(--muted);margin:6px auto 0;max-width:560px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:18px 0}
+    .card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--card)}.card h3{margin:0 0 2px;font-size:13px;font-weight:650}.card .sub{color:var(--muted);font-size:11.5px}
+    .kpi{font-size:30px;font-weight:650;letter-spacing:-.6px;margin:4px 0 0}.kpi small{font-size:13px;color:var(--muted);font-weight:500}
+    section{margin:30px 0}section>h2{font-size:18px;margin:0 0 4px;font-weight:650}section>p.sub{color:var(--muted);margin:0 0 10px;font-size:12.5px;max-width:820px}
+    table{border-collapse:collapse;width:100%;font-size:12.5px}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600;font-size:11.5px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+    .dist{display:flex;align-items:flex-end;gap:4px;height:70px;margin-top:8px}.dist div{flex:1;background:var(--bar);border-radius:3px 3px 0 0;min-height:1px;position:relative}.dist span{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
+    .dist-axis{display:flex;gap:4px;font-size:10px;color:var(--muted)}.dist-axis span{flex:1;text-align:center}
+    .scatters{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+    svg text{font-family:var(--font);font-size:10px;fill:var(--muted)}
+    ul.lim{margin:6px 0 0;padding-left:18px;color:var(--fg);font-size:12.5px}ul.lim li{margin:3px 0}
+    .warn{color:var(--warn)}
+    footer{max-width:1120px;margin:0 auto;padding:0 28px 40px;color:var(--muted);font-size:11.5px}
+  </style>
+</head>
+<body>
+  <header>
+    <a href="./">← STROLLANE · NYC</a>
+    <h1>Evaluation <small>效果评估</small></h1>
+    <p class="lede">Route recommendation → real walk → walker feedback → evaluation. Every figure on this page is computed
+      from answers walkers sent after a walk, compared with the scores the system predicted for the route they walked.
+      Nothing here is simulated. 每个数字都来自用户走完后的真实反馈，并与系统对同一条路线的预测分数对比，没有任何模拟数据。</p>
+  </header>
+  <main id="eval">
+    <div class="status" id="evalStatus">Loading evaluation data… 正在加载评估数据…</div>
+  </main>
+  <footer>Data: <code>GET /api/evaluation</code> (routing/walkcheck.py). Method and limits: RESEARCH_PROTOCOL.md.</footer>
+  <script src="./api-config.js?v=30"></script>
+  <script src="./evaluation.js?v=2"></script>
+</body>
+</html>

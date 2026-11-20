@@ -1,95 +1,122 @@
-# STROLLANE · NYC — user validation protocol (draft, not yet run)
+# STROLLANE · NYC — user validation protocol (ready to run, not yet run)
 
-**Status: a plan. No participant has been recruited, no response collected, and nothing in this repository simulates
-user feedback.** The audience groups below are hypotheses to test, not findings.
+**Status: a plan with the tools to run it. No participant has been recruited and no answer collected. Nothing in
+this repository simulates user feedback.** The three user types (`AUDIENCE.md`) are hypotheses to test, not findings.
 
 ## 1. Why
 
-The route scores are ranks of proxies computed from public records (`METHODOLOGY.md`). The route benchmark shows the
-engine can raise its own score for a requested dimension; it cannot show that a walker perceives a "greener" or
-"quieter" walk, or trusts the recommendation. That is the question the critique raised ("Why do you think that's
-nice?", "survey people as they use this") and the one this study answers.
+The route scores are ranks of proxies computed from public records (`METHODOLOGY.md`). The route benchmarks show that
+the engine raises its own score for a requested dimension; they cannot show that a walker perceives a greener, quieter
+or more interesting walk, or trusts the recommendation. That is the critique's question ("Why do you think that's
+nice?", "survey people as they use this"), and the one this study answers, separately for each user type.
 
 ## 2. Questions
 
-1. **Understanding** — after reading *Why this route?*, can a participant say what the recommendation is based on?
-2. **Trust before walking** — would they choose the recommended route over the shortest one, and why or why not?
-3. **Match after walking** — did the walk feel the way the chosen priority promised, and which stretches did or did not?
-4. **Proxy validity** — does the perceived difference between two routes go in the same direction as the score
-   difference, starting with Nature and Quiet & Relax?
-5. **Audience** — does the lead audience chosen in `AUDIENCE.md` (people new to New York) actually want this, and for
-   which of its three use cases? Do long-time residents respond differently?
+1. **Understanding**: after reading *Why this route?*, can a participant say what the recommendation is based on?
+2. **Trust before walking**: would they take the recommended walk over the shortest one, and why or why not?
+3. **Match after walking**: did the walk give them what their entry promised (landmarks, a new neighbourhood, a quiet
+   green walk), and which stretches did or did not?
+4. **Proxy validity**: does the perceived difference between two walks go in the same direction as the score
+   difference, for the dimensions each entry switches on?
+5. **Type fit**: does each type find its entry useful? Do the types differ in how much they value the walk and whether
+   the extra distance was worth it?
 
-## 3. Design
+## 3. Participants
 
-- **Participants**: 8–12 for a first round. Recruit mainly from the lead audience in `AUDIENCE.md` (people in their
-  first year in New York), plus two or three long-time residents as a comparison. Record only: group, how long in NYC
-  (banded), how often they walk for leisure (banded).
-- **Trips**: use trips from `benchmarks/od_pairs.json` in the medium and long buckets, where the benchmark shows the
-  priority actually changes the route. Short trips mostly return the shortest path and cannot test anything.
-- **Comparison**: each participant walks **two routes for the same trip**: the shortest route and the priority route,
-  in counterbalanced order, **without being told which is which** until the end. Walking only the recommended route
-  cannot separate "the route is green" from "I was told it is green".
-- **Conditions to record** (they change perceived quiet and greenery): date, start time, weather, season/leaf state.
-- **Link to the system**: note the `route_signature` of each route (a field of the `/api/routes` response) plus `score_version` and `network_version`, so every answer traces to an exact route and score build.
+12 people for a first round, **4 per user type**:
 
-## 4. Instruments
+| Type | Who | Entry they use | Dimensions behind it |
+|---|---|---|---|
+| Tourist | Visitors in NYC for under two weeks, or residents taking a visiting friend round | **Tourist** | Architecture, Culture (+ stops at historic buildings and culture venues) |
+| Curious Local | Residents of 1+ years, in a neighbourhood they say they have not walked | **Curious Local** | Urban Vibrancy, Food & Retail, Architecture (a loop) |
+| Leisure Walker | Residents who walk for leisure at least weekly, after work (17:00–21:00) | **Leisure Walker** | Quiet & Relax, Nature (a loop) |
 
-Five-point scales (1 = not at all, 5 = very) unless noted. Keep both parts under three minutes.
+Record only: type, years in NYC (banded: <1, 1–3, 3+), leisure walks per week (banded: 0, 1–2, 3+). Give each person a
+study code (P01–P12). It is the only identifier, and it is what joins their app answers to the interview notes.
 
-**Before walking** (after choosing a priority and seeing the routes)
+## 4. Walks
 
-| # | Question | 中文 |
-|---|---|---|
-| B1 | What kind of walk do you want right now? (free text) | 你现在想要怎样的一段步行？ |
-| B2 | In your own words, why does the app recommend this route? (free text) | 用你自己的话说，应用为什么推荐这条路线？ |
-| B3 | How clear is the reason for the recommendation? | 推荐理由有多清楚？ |
-| B4 | How much do you trust that this route is greener / quieter than the shortest one? | 你有多相信这条路线比最短路线更绿 / 更安静？ |
-| B5 | Which would you walk if you were alone: recommended, shortest, or neither? Why? | 如果只有你自己，你会走哪条？为什么？ |
+- **Comparison, within each person**: two walks of the same trip. One is the walk their entry gives. The other is the
+  shortest route between the same start and end (for a loop, the shortest loop through the same stops). Walk them in
+  counterbalanced order (P01 recommended first, P02 shortest first, …) and **do not say which is which until the end**.
+  Walking only the recommended one cannot separate "the walk is green" from "I was told it is green".
+- **Trips**: 1.5–3 km, where the benchmarks show a priority changes the route (`benchmarks/ROUTE_BENCHMARK_AREAS.md`
+  by length). Tourist and Leisure Walker trips come from `benchmarks/od_pairs.json` and `od_pairs_areas.json`. Curious
+  Local loops start at a point the participant picks in a neighbourhood they have not walked.
+- **Time**: Leisure Walkers after work (the "evening" bucket of `routing/feedback.py`), the others in daylight.
+- **Record conditions**: date, start time, weather, leaf state. They change perceived greenery and quiet.
 
-**After each walk** (asked twice, once per route)
+## 5. Instruments
 
-| # | Question | 中文 |
-|---|---|---|
-| A1 | How green did this walk feel? | 这段路感觉有多绿？ |
-| A2 | How quiet did this walk feel? | 这段路感觉有多安静？ |
-| A3 | How pleasant was it overall? | 整体有多愉快？ |
-| A4 | Which stretch matched what you wanted? Which did not? (free text, street names or landmarks) | 哪一段符合你的期待？哪一段不符合？ |
+Five-point scales (1 = not at all, 5 = very) unless noted. Keep each part under three minutes.
 
-**After both walks**
+**Before walking** (interview, after they tap their entry and see the walk)
 
 | # | Question | 中文 |
 |---|---|---|
-| C1 | Which of the two walks was greener / quieter? (first, second, no difference) | 两段路哪一段更绿 / 更安静？ |
-| C2 | (After the reveal) Does the app's recommendation match your experience? | （揭晓后）应用的推荐与你的感受一致吗？ |
-| C3 | Was the extra distance worth it? | 多走的路值得吗？ |
-| C4 | Would you use this again? For what kind of walk? | 你会再用吗？用在什么样的步行上？ |
-| C5 | What made you doubt the recommendation, if anything? (free text) | 有什么让你怀疑过推荐结果？ |
+| B1 | In your own words, why does the app recommend this walk? (free text) | 用你自己的话说，应用为什么推荐这段路？ |
+| B2 | How clear is the reason? | 推荐理由有多清楚？ |
+| B3 | How much do you trust that it gives you what you asked for (landmarks / a new neighbourhood / quiet and green)? | 你有多相信它能给你想要的（地标 / 新街区 / 安静有绿意）？ |
 
-## 5. Analysis
+**After each walk** (interview, asked twice)
 
-- **Direction agreement** (C1 vs the sign of the score difference between the two routes), reported as a count out
-  of N with the score gap beside each case. With 8–12 people this is descriptive, not a significance test.
-- **Perceived gap vs score gap**: A1/A2 difference between the two routes plotted against the score difference. Look
-  for the smallest score gap people notice; compare it with the 5-point wording threshold in `route-story.js`.
-- **Understanding**: code B2 answers as correct / partly / wrong against the indicators actually used.
-- Report null and negative results as they are. If people cannot tell the routes apart, that is the finding.
+| # | Question | 中文 |
+|---|---|---|
+| A1 | Tourist: how much historic architecture and culture did you notice? · Curious Local: how much did you learn about the neighbourhood? · Leisure Walker: how quiet and green did it feel? | 游客：注意到多少历史建筑和文化？· 好奇的本地人：对这个街区了解了多少？· 休闲散步者：感觉有多安静、多绿？ |
+| A2 | How pleasant was it overall? | 整体有多愉快？ |
+| A3 | Which stretch matched what you wanted, and which did not? (free text, street names or landmarks) | 哪一段符合期待？哪一段不符合？ |
 
-## 6. Privacy and ethics
+**After both walks, in the app**: the participant opens *Why this route* on the recommended walk and answers the
+**post-walk check** ("After your walk: did it match what you asked for?"), entering their study code:
 
-- No names, emails, device identifiers, GPS traces or precise locations. The trip is one of the fixed benchmark trips,
-  so the route is known without tracking anyone.
-- Participation is voluntary; walks are in daylight on public streets; participants can stop at any time.
+| Field | Question | Stored as |
+|---|---|---|
+| match | How well did it match what you asked for? (1 not at all – 5 exactly) | `match` |
+| worth | Was the extra distance worth it? (yes / no; not asked without a detour) | `worth_detour` |
+| compared | Of your two walks, which fitted your request better? (this one / the other one / no difference; shown once a study code is entered) | `compared_with_shortest` |
+
+The app adds the user type (from the entry used), the priorities that were on, and the route's signature, score and
+network versions, length and detour. The participant can also report single streets that felt different from their
+score ("Walked here? Did it match?", `routing/feedback.py`); those reports feed the walker-feedback loop, not this
+study's tables.
+
+**Debrief** (interview, after the reveal)
+
+| # | Question | 中文 |
+|---|---|---|
+| D1 | Does the app's recommendation match your experience? | 推荐与你的感受一致吗？ |
+| D2 | Would you use this entry again? For what kind of walk? | 你还会用这个入口吗？用在什么样的步行上？ |
+| D3 | What made you doubt the recommendation, if anything? (free text) | 有什么让你怀疑过推荐？ |
+
+## 6. Analysis
+
+- **Per type** (`python3 scripts/summarize_walk_checks.py --study-only`, after `git fetch origin feedback-data`):
+  number of checks, mean match and its 1–5 spread, detour worth it (yes / no), and which walk fitted better (this /
+  shortest / same). With 4 people per type this is descriptive, not a significance test.
+- **Direction agreement**: `compared_with_shortest` against the sign of the score gap on the entry's dimensions
+  between the two walks, as a count out of 4 per type, with the score gap beside each case.
+- **Perceived gap vs score gap**: the A1 difference between the two walks against the score difference, to find the
+  smallest gap people notice. Compare it with the 5-point wording threshold in `route-story.js`.
+- **Understanding**: B1 coded as correct / partly / wrong against the indicators actually used.
+- Report null and negative results as they are. If a type cannot tell its walks apart, that is the finding for that type.
+
+## 7. Privacy and ethics
+
+- No names, emails, device identifiers, GPS traces or precise locations, in the app or the notes. The app stores the
+  study code, answers, walk type, priorities and route versions (`routing/walkcheck.py`). Free text stays in the
+  interviewer's notes.
+- Participation is voluntary, walks are on public streets, and participants can stop at any time. Leisure Walker walks
+  after dark use lit streets only, with the interviewer present.
 - Before recruiting, confirm with the course instructor whether this needs IRB review or falls under class-project
   practice. Do not publish results beyond the course until that is settled.
 
-## 7. Collecting the answers (technical options)
+## 8. Tools in the app
 
-The site is static (GitHub Pages) with a stateless API, so there is nowhere to store responses today.
+| What | Where | Stored |
+|---|---|---|
+| Post-walk check (all users; study code optional) | *Why this route* → "After your walk"; prompted on arrival in navigation | `POST /api/walk-checks` → `walk-checks/checks-YYYY-MM.jsonl` on the `feedback-data` branch |
+| Per-type summary (counts and means only) | `GET /api/walk-checks/summary`, `scripts/summarize_walk_checks.py` | read only |
+| Street-level reports | Explore street inspector, *Why this route* | `POST /api/feedback` (`routing/feedback.py`) |
 
-1. **External form (recommended first)** — a Google Form or Qualtrics survey. An optional "Tell us how this walk felt"
-   link on the route card can pre-fill `route_signature`, `score_version`, chosen priorities and trip id as URL parameters. No
-   backend change, no personal data sent by the app. Not implemented yet: it needs the form to exist first.
-2. **Paper or interview** — for the first 8–12 people this is enough and gives better free-text answers.
-3. **Own endpoint** — a `POST /api/feedback` writing to a small store. Only worth building if a larger second round
-   is planned; it adds storage, consent text and abuse handling.
+Both stores need `FEEDBACK_GITHUB_TOKEN` on the API host (`DEPLOYMENT.md`). Without it the forms say answers are not
+switched on, and nothing is kept.
