@@ -1291,3 +1291,8 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .poi-more{margin-top:8px;width:100%;border:1px dashed var(--line-strong);background:transparent;color:var(--text);border-radius:8px;padding:8px;font-size:11.5px;font-weight:700}
 .poi-source{display:block;color:var(--g8c);font-size:10px;margin-top:8px;line-height:1.5}
 .walker-feedback-near .walker-rate-now{background:transparent!important;color:var(--text)!important;border:1px solid var(--line-strong)!important;box-shadow:none!important}
+.nav-start-why{display:block;font-size:11px;line-height:1.45;color:var(--caution-text);margin:-2px 2px 0}
+.sheet-quick-start{display:none}
+#rightPanel.bar-offscreen:has(#navStart:not(.hidden):not(:disabled)) .sheet-quick-start{display:block;position:absolute;left:12px;top:6px;border:0;border-radius:8px;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;padding:7px 12px}
+/* notices on a phone sit above the walk action bar, not over Start Navigation */
+@media(max-width:740px){body:has(#rightPanel:not([data-level="hidden"]):not(.bar-offscreen) .walk-actions #navStart:not(.hidden)) .toast{bottom:calc(150px + env(safe-area-inset-bottom))}}

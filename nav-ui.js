@@ -37,7 +37,9 @@ function renderNavStart(){
  const btn=$('navStart'),r=activeRouteObject();if(!btn)return;
  const v=r?.validation,ok=Boolean(r&&r.constraints?.feasible!==false&&r.maneuvers?.length&&(!v||v.navigation_allowed));
  btn.classList.toggle('hidden',!r||nav.engine!=null);btn.disabled=!ok;
- btn.title=!r?'':!r.maneuvers?.length?'This route has no turn instructions (plan it again).':v&&!v.navigation_allowed?`Blocked: ${v.blocking_issues.join(' ')}`:'Start live walking navigation';
+ btn.title=!r?'':!r.maneuvers?.length?'This route has no turn instructions (plan it again).':v&&!v.navigation_allowed?`Blocked: ${v.blocking_issues.join(' ')}`:r.constraints?.feasible===false?'This walk is over your limits.':'Start live walking navigation';
+ // the reason must be visible, not only a hover tooltip (phones have no hover)
+ const why=$('navStartWhy');if(why){why.textContent=r&&!ok?`${btn.title.replace(/^Blocked: /,'Can’t start: ')} Pick another walk or change your time.`:'';why.classList.toggle('hidden',!(r&&!ok)||btn.classList.contains('hidden'));}
  renderValidation(r);
 }
 const VSTATUS={pass:'Pass',pass_with_warnings:'Pass with warnings',fail:'Fail',not_checked:'Not checked',warning:'Warning'};
