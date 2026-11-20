@@ -242,3 +242,22 @@ class InterpretFailures(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ReplyLanguage(unittest.TestCase):
+    """reply_language 'zh' asks the model for Chinese clarifications / unsupported reasons; nothing else changes."""
+    def sent_prompt(self, doc):
+        seen = {}
+        def fake(req, timeout=None):
+            seen['body'] = json.loads(req.data.decode())
+            return completion({'weights': {'Nature': 90}, 'directions': {'Nature': 'high'}, 'constraints': {}})
+        with mock.patch.object(server, 'KEY', FAKE_KEY), mock.patch.object(server.request, 'urlopen', side_effect=fake):
+            status, body = server.interpret(doc)
+        self.assertEqual(status, 200)
+        return seen['body']['messages'][-1]['content']
+
+    def test_chinese_interface_asks_for_chinese_text(self):
+        self.assertIn('Simplified Chinese', self.sent_prompt({**DOC, 'reply_language': 'zh'}))
+
+    def test_english_by_default(self):
+        self.assertNotIn('Chinese', self.sent_prompt(dict(DOC)))

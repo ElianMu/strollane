@@ -250,7 +250,7 @@ async function interpretIntent(q){
   // proof that AI is disabled. Attempt the real parse when configuration is unknown.
   if(location.protocol!=='file:' && planner.llmConfigured!==false){
     try{
-      const r=await streetwiseFetch('/api/interpret',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:input,weights:planner.weights,budget:state.budget,constraints:planner.constraints,crime:planner.crime||null,waterfront:planner.waterfront||null,weather:weatherWindow(state.budget),history:planner.conversations.slice(-8)}),signal:AbortSignal.timeout(planner.llmConfigured===null?65000:32000)});
+      const r=await streetwiseFetch('/api/interpret',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:input,weights:planner.weights,budget:state.budget,constraints:planner.constraints,crime:planner.crime||null,waterfront:planner.waterfront||null,weather:weatherWindow(state.budget),history:planner.conversations.slice(-8),reply_language:typeof i18n!=='undefined'&&i18n.lang==='zh'?'zh':'en'}),signal:AbortSignal.timeout(planner.llmConfigured===null?65000:32000)});
       if(!r.ok){const j=await r.json().catch(()=>({}));const why=j.reason?[j.reason.stage,j.reason.http_status,j.reason.type,j.reason.code].filter(Boolean).join(' · '):'';
         console.warn('LLM response rejected:',j.reason||{status:r.status});
         throw new Error(`LLM service ${r.status}${why?` (${why})`:''}`);}
@@ -303,9 +303,28 @@ async function checkInterpreter(){
 // Messages written in research notation (scores, formulas, interpreted weights) go to the full log under Technical
 // details; the conversation under the routes keeps the user's words and plain replies (questions, errors, results).
 const TECH_CHAT=/Personalized score|weighted experience|Route scores:|interpretation:|data coverage|OSM edges?|detour penalty|Hard limits used/i;
+/* Fixed assistant messages written by the page itself, in Chinese when the interface is Chinese. The AI's own text
+   (clarifications, unsupported reasons) is asked for in Chinese at the source (reply_language). Text that matches no
+   rule is shown as it is. */
+const ZH_CHAT=[
+ [/ The displayed previous route has not been recalculated\./g,'当前显示的路线没有重新计算。'],
+ [/ Nothing was changed\./g,'没有做任何更改。'],
+ [/ The rest of your request is planned as usual\./g,'你请求的其余部分照常规划。'],
+ [/^AI interpretation: (.*)\. Checking feasible pedestrian paths…$/,'AI 理解：$1。正在查找可走的步行路线…'],
+ [/^Limited local interpretation: (.*)\. Checking feasible pedestrian paths…$/,'简单规则理解：$1。正在查找可走的步行路线…'],
+ [/^AI journey interpretation: (.*)\.$/,'AI 行程理解：$1。'],
+ [/^Limited local journey interpretation: (.*)\.$/,'简单规则行程理解：$1。'],
+ [/^No explicit preference change recognized( by limited local preview)?\. I’ll check route options using current settings\.$/,'没有识别到明确的偏好变化，将按当前设置查找路线。'],
+ [/^Updated: (.*)\. Re-planning…$/,'已更新：$1。正在重新规划…'],
+ [/^My hotel set to (.*?)\. Use it as start, return point or search anchor\.$/,'已把酒店设为 $1。可以把它作为起点、返回点或搜索中心。'],
+ [/^My hotel set to (.*?)\. It will be used as start \/ return point when you ask\.$/,'已把酒店设为 $1。你需要时会用作起点或返回点。'],
+ [/^My hotel set to (.*)\.$/,'已把酒店设为 $1。'],
+ [/^Hotel search unavailable: /,'酒店搜索暂时不可用：'],
+];
+function zhChat(t){let s=String(t||'');for(const [re,to] of ZH_CHAT)s=s.replace(re,to);return s;}
 function appendChat(role,message){
   planner.conversations.push({role,content:message,tech:role==='assistant'&&TECH_CHAT.test(message)});$('conversationSection').classList.remove('hidden');
-  const row=m=>`<div class="chat-message ${m.role==='user'?'user-message':'assistant-message'}"><div class="chat-name">${m.role==='user'?'YOU':'✦ STROLLANE'}</div><div class="chat-copy">${esc(m.content)}</div></div>`;
+  const row=m=>`<div class="chat-message ${m.role==='user'?'user-message':'assistant-message'}"><div class="chat-name">${m.role==='user'?'YOU':'✦ STROLLANE'}</div><div class="chat-copy">${esc(m.role==='assistant'&&typeof i18n!=='undefined'&&i18n.lang==='zh'?zhChat(m.content):m.content)}</div></div>`;
   $('chatHistory').innerHTML=planner.conversations.filter(m=>!m.tech).map(row).join('');
   if($('chatLog'))$('chatLog').innerHTML=planner.conversations.map(row).join('');
   $('chatHistory').scrollTop=$('chatHistory').scrollHeight;

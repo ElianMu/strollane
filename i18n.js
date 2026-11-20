@@ -208,6 +208,12 @@ function setLanguage(lang, remember = true) {
   b.setAttribute('aria-pressed', String(lang === 'zh'));
  }
  if (remember) { try { localStorage.setItem('strollane.lang', lang); } catch (e) { /* private mode: the choice lasts for this visit */ } }
+ // sentences built from data (walk descriptions, City Walk stops, map photo captions) are composed in the chosen
+ // language, so draw them again
+ try {
+  if (typeof state !== 'undefined' && state.routes?.length && typeof renderRouteCards === 'function') { renderRouteCards(); if (typeof updateWhyRoute === 'function') updateWhyRoute(); }
+  if (typeof journey !== 'undefined' && journey.plan && typeof renderCityWalk === 'function') renderCityWalk();
+ } catch (e) { console.warn('[i18n] redraw', e); }
  return lang;
 }
 function toggleLanguage() {

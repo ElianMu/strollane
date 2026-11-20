@@ -181,6 +181,12 @@ const run=s=>vm.runInContext(s,context);
   run('nav.engine=__eng(400);exitNavigation()');assert.equal(asked(),0,'20% walked: no prompt');
   run('nav.route={route_id:"r",distance_m:2000}');run('nav.engine=__eng(1700);exitNavigation()');assert.equal(asked(),1,'85% walked: prompt');
   run('nav.route={route_id:"r",distance_m:2000};nav.checkAsked="r"');run('nav.engine=__eng(2000);exitNavigation()');assert.equal(asked(),1,'already asked on arrival: no second prompt');}
+ // Chinese interface: walk names, sentences and "why" are composed in Chinese, and back in English after switching back
+ {run("setLanguage('zh',false)");const zh=w.document.querySelector('#routeCards').textContent;
+  assert(/(最快|最佳匹配|另一条路|你的路线|最绿|最安静)/.test(zh),'walk names in Chinese');
+  assert(/(比最快的路线|最直接的走法|你想要|还没有设置偏好|比曼哈顿)/.test(zh),'walk sentences in Chinese');
+  assert(!/than the fastest way|The most direct way|You asked for/.test(zh),'no English sentence left on the cards');
+  run("setLanguage('en',false)");assert(/Fastest|Best match|Another way|Your walk|Greenest|Quietest/.test(w.document.querySelector('#routeCards').textContent),'English again');}
  // "What these scores measure": the router's own indicator definitions (static file), shown only for the user's
  // priorities and only when the file's score_version equals the route's. Numbers come from the route response.
  assert(!w.document.querySelector('#whyRoute .why-measures'),'no indicator text before the definitions file has loaded (network is blocked here)');

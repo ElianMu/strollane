@@ -1040,7 +1040,8 @@ def interpret(doc):
         'response_format': RESPONSE_FORMAT,
         'messages': [
             {'role': 'system', 'content': SYSTEM},
-            {'role': 'user', 'content': 'Current state: '+json.dumps(context, ensure_ascii=False)+'\nRecent conversation: '+json.dumps(history[-8:], ensure_ascii=False)+'\nLatest instruction: '+message}
+            {'role': 'user', 'content': 'Current state: '+json.dumps(context, ensure_ascii=False)+'\nRecent conversation: '+json.dumps(history[-8:], ensure_ascii=False)+'\nLatest instruction: '+message
+             + ('\nThe walker is using the Chinese interface: write `clarification` and every `unsupported[].reason` in Simplified Chinese. Keep all other fields exactly as the schema says (dimension names, enums and numbers stay as they are).' if doc.get('reply_language') == 'zh' else '')}
         ]
     }
     try:
