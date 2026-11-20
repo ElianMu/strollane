@@ -806,6 +806,21 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as e:
                 self.send_json(502, {'error': f'Answer not saved: the store did not answer ({str(e)[:120]}).'})
             return
+        if self.path == '/api/feedback/lookup':
+            # Walker street reports for the streets of one route, so a walker sees them before walking.
+            try:
+                doc = read_json(self, 20000)
+                ids = doc.get('segment_ids')
+                if not isinstance(ids, list) or len(ids) > 600 or not all(isinstance(x, str) and len(x) <= 40 for x in ids):
+                    raise ValueError('segment_ids must be a list of at most 600 segment IDs')
+                book = get_planner().feedback
+                book.refresh_in_background()
+                self.send_json(200, {'enabled': book.enabled, 'segments': {x: book.for_segment(x) for x in dict.fromkeys(ids) if book.for_segment(x)}})
+            except (ValueError, TypeError, json.JSONDecodeError) as e:
+                self.send_json(400, {'error': str(e)})
+            except RuntimeError as e:
+                self.send_json(503, {'error': str(e)})
+            return
         if self.path == '/api/feedback':
             # A walker's report that a street felt worse or better than its score on one dimension. Nothing personal is
             # kept: the client address is used only in memory, for the rate limit (routing/feedback.py FeedbackBook.allow).

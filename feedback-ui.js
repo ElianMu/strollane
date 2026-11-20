@@ -106,7 +106,7 @@ function walkCheckBox(r){
  if(!r)return '';
  const detour=Number(r.detour_percentage)||0,type=walkCheckType(),pri=walkCheckPriorities();
  const extra=Object.keys(pri).filter(n=>n!=='Nature'&&n!=='Quiet & Relax'&&pri[n].direction==='high');
- return `<details class="walk-check" data-route="${esc(r.route_id)}"><summary>After your walk: rate it (optional)</summary>
+ return `<details class="walk-check" data-route="${esc(r.route_id)}" open><summary>Rate this walk (optional)</summary>
   <small class="walk-check-type">Walk type: ${esc(WALK_TYPE_LABEL[type])}${Object.keys(pri).length?' · '+esc(Object.keys(pri).join(', ')):''}</small>
   ${WALK_RATINGS.map(([k,q])=>`<div class="walk-check-q">${esc(q)}${k==='overall'?' <b>*</b>':''} ${walkScale(k)}</div>`).join('')}
   <small class="walk-check-hint">1 not at all · 5 very. Only the first is required.</small>
@@ -149,11 +149,60 @@ function wireWalkCheck(root,r){
    if(!res.ok)throw new Error(j.code==='feedback_disabled'?'feedback is not switched on for this server yet.':(j.error||`HTTP ${res.status}`));
    status.textContent=j.check?.predicted?'Thanks, saved, with this route\'s predicted scores for comparison.':'Thanks, saved (the route could not be verified, so it is left out of the prediction comparison).';
    box.querySelectorAll('button,input,textarea').forEach(x=>x.disabled=true);
+   if(typeof loadWalkerEvaluation==='function')loadWalkerEvaluation(true);
   }catch(e){status.textContent='Not saved: '+e.message;send.disabled=st.rate.overall==null;}
  });
 }
-/** After arriving: point the walker to the form (the route's Why panel holds it). */
-function promptWalkCheck(){
- if(typeof toast==='function')toast('You have arrived. How was the walk? Rate it under “Why this route”.');
- const box=document.querySelector('#whyRoute .walk-check');if(box)box.open=true;
+/** The rating form in a dialog, right away: on arrival in navigation, or from "I walked this – rate it now". */
+function openWalkRating(r){
+ r=r||(typeof state!=='undefined'?state.routes.find(x=>x.id===state.activeRoute)?.raw:null);
+ const overlay=document.getElementById('modalOverlay');
+ if(!r||!overlay){if(typeof toast==='function')toast('Choose a route first.');return;}
+ const over=document.getElementById('modalOverline');if(over)over.textContent='AFTER YOUR WALK';
+ document.getElementById('modalTitle').textContent='How was your walk?';
+ const c=document.getElementById('modalContent');c.innerHTML=walkCheckBox(r);wireWalkCheck(c,r);
+ overlay.classList.remove('hidden');
+ c.querySelector('[data-rate="overall"]')?.focus();
 }
+function promptWalkCheck(){openWalkRating();}
+
+/* Before walking: what walkers said, about walks of this type and about the streets of this route. */
+const walkerSays={evaluation:null,loading:null};
+function loadWalkerEvaluation(force){
+ if(force)walkerSays.evaluation=null;
+ if(walkerSays.evaluation)return Promise.resolve(walkerSays.evaluation);
+ if(walkerSays.loading)return walkerSays.loading;
+ walkerSays.loading=streetwiseFetch('/api/evaluation',{signal:AbortSignal.timeout(30000)}).then(r=>r.json()).then(d=>(walkerSays.evaluation=d)).catch(()=>null).finally(()=>{walkerSays.loading=null;});
+ return walkerSays.loading;
+}
+function routeSegmentIds(r){const ids=new Set();for(const e of r.edges||[])for(const m of e.matched_segments||[])if(m.segment_id)ids.add(m.segment_id);return [...ids].slice(0,600);}
+function walkerSaysRatings(d,type){
+ if(!d)return '<small class="walker-status">Loading what walkers said…</small>';
+ if(!d.n)return `<p class="walker-says-empty">No walker has rated a walk yet${d.enabled===false?'':'. Be the first: rate this one when you finish'}.</p>`;
+ const t=d.by_user_type?.[type],r=d.ratings,f=(v)=>v==null?'—':Number(v).toFixed(1);
+ return `<div class="data-pair"><span>All rated walks (${d.n})</span><span>overall ${f(r.overall.mean)} · match ${f(r.match.mean)} / 5</span></div>
+  ${t?`<div class="data-pair"><span>${esc(WALK_TYPE_LABEL[type])} walks (${t.n})</span><span>overall ${f(t.mean_overall)} · match ${f(t.mean_match)} / 5</span></div>`:''}
+  ${r.quiet.n||r.green.n?`<div class="data-pair"><span>Felt quiet · green</span><span>${f(r.quiet.mean)} · ${f(r.green.mean)} / 5</span></div>`:''}`;
+}
+function walkerSaysStreets(segs,r){
+ const names=new Map();for(const e of r.edges||[])for(const m of e.matched_segments||[])if(m.segment_id&&!names.has(m.segment_id))names.set(m.segment_id,m.street_name||m.segment_id);
+ const rows=Object.entries(segs||{}).flatMap(([id,dims])=>Object.entries(dims).map(([k,x])=>({id,k,x}))).sort((a,b)=>b.x.n-a.x.n).slice(0,5);
+ if(!rows.length)return '';
+ return `<div class="walker-says-streets"><small>Streets on this route walkers reported:</small>${rows.map(({id,k,x})=>`<div class="data-pair"><span>${esc(names.get(id)||id)} · ${esc(walkerLabelOf(k))}</span><span>${x.worse} worse · ${x.better} better${x.status==='applied'?` · routing ${x.delta>0?'+':''}${x.delta}`:''}</span></div>`).join('')}</div>`;
+}
+/** The block at the top of "Why this route". */
+function walkerSaysBox(r){
+ if(!r)return '';
+ return `<section class="walker-says" aria-label="What walkers said"><div class="walker-says-head"><strong>What walkers said</strong><a href="./evaluation.html" target="_blank" rel="noopener">All results</a></div>
+  <div data-k="walker-says-ratings">${walkerSaysRatings(walkerSays.evaluation,walkCheckType())}</div><div data-k="walker-says-streets"></div>
+  <button type="button" class="walker-rate-now" data-k="rate-now">I walked this – rate it now</button></section>`;
+}
+function wireWalkerSays(root,r){
+ const box=root.querySelector('.walker-says');if(!box)return;
+ box.querySelector('[data-k="rate-now"]').addEventListener('click',()=>openWalkRating(r));
+ loadWalkerEvaluation().then(d=>{const el=box.querySelector('[data-k="walker-says-ratings"]');if(el&&d)el.innerHTML=walkerSaysRatings(d,walkCheckType());});
+ const ids=routeSegmentIds(r);
+ if(ids.length)streetwiseFetch('/api/feedback/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({segment_ids:ids}),signal:AbortSignal.timeout(30000)})
+  .then(x=>x.json()).then(j=>{const el=box.querySelector('[data-k="walker-says-streets"]');if(el&&j.segments)el.innerHTML=walkerSaysStreets(j.segments,r);}).catch(()=>{});
+}
+
