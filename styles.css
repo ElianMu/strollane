@@ -1130,6 +1130,7 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 .walk-pill[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .walk-activity{border-color:var(--text-primary);font-weight:700;display:inline-flex;flex-direction:column;align-items:flex-start;justify-content:center;border-radius:12px;padding:4px 11px;line-height:1.2;white-space:nowrap}
 .walk-activity-tag{font-size:10px;font-weight:500;color:var(--text-secondary)}
+.walk-presets:not(.m-walk-presets) .walk-activity{flex:1 1 0;min-width:0;white-space:normal;text-align:left}
 .walk-activity[aria-pressed=true] .walk-activity-tag{color:inherit;opacity:.8}
 .walk-pill-break{flex-basis:100%;height:0}
 .rc-basis{display:block;margin-top:6px;text-align:left}
