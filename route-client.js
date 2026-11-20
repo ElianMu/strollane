@@ -250,16 +250,22 @@ function whyMeasures(r){
  }).join('');
  return `<div class="why-measures"><div class="why-measures-title">What these scores measure</div>${blocks}<small>${esc(doc.value_note)} They are computed from the records listed above (retrieved ${esc(doc.data_version)}): proxies for how a street may feel, not observations of how this walk feels. Score build ${esc(doc.score_version)}.</small></div>`;
 }
+/** The visible walker-feedback section under the walk options (feedback-ui.js): what walkers said, and rate now. */
+function renderWalkerFeedbackSlot(raw){
+ const slot=$('walkerFeedback');if(!slot||typeof walkerSaysBox!=='function')return;
+ if(!raw){slot.innerHTML='<p class="status-empty">Create a walk to see what walkers said about it. After you walk it, rate it here.</p>';return;}
+ slot.innerHTML=walkerSaysBox(raw);wireWalkerSays(slot,raw);
+}
 function updateWhyRoute(){
  const x=state.routes.find(r=>r.id===state.activeRoute),root=$('whyRoute');
- if(!x){root.textContent=planner.constraints.stepFree?'Step-free access cannot be verified, so no route is recommended.':planner.routeResponse?planner.lastExplanation:'No selected route yet.';if(typeof renderWeatherRoute==='function')renderWeatherRoute();return}
+ if(!x){renderWalkerFeedbackSlot(null);root.textContent=planner.constraints.stepFree?'Step-free access cannot be verified, so no route is recommended.':planner.routeResponse?planner.lastExplanation:'No selected route yet.';if(typeof renderWeatherRoute==='function')renderWeatherRoute();return}
  const p=x.raw.personalized_score;
  const crimeMetric=x.raw.independent_metrics?.crime;
  const crimeInfo=crimeMetric?`<div class="data-pair"><span>Historical reported complaints</span><span>${crimeMetric.count} within ${crimeMetric.corridor_m} m</span></div><div class="data-pair"><span>Reports per route km</span><span>${crimeMetric.reported_incidents_per_route_km}</span></div><small>${esc(crimeMetric.from)} – ${esc(crimeMetric.to_exclusive)} (end exclusive). ${esc((crimeMetric.law_categories||[]).join(' + '))}. Approximate NYPD historical locations; no population denominator or present personal-risk prediction. <a href="${esc(crimeMetric.source_urls[0])}" target="_blank" rel="noopener">NYPD source</a></small>`:'';
  const parts=Object.entries(p.components).sort((a,b)=>b[1].weight-a[1].weight).slice(0,6).map(([d,c])=>`<div class="data-pair"><span>${esc(dimLabel(d))} · weight ${c.weight}${c.direction==='low'?' · less':''}</span><span>${scoreText(c.route_score)} → fit ${c.adjusted_fit}</span></div>`).join('');
- root.innerHTML=`${typeof walkerSaysBox==='function'?walkerSaysBox(x.raw):''}<p>${esc(x.raw.ranking_explanation)}</p>${crimeInfo}${parts}${p.weather_adjustment!=null?`<div class="data-pair"><span>Weather (heat) adjustment</span><span>−${p.weather_adjustment}</span></div>`:''}<small>${esc(p.formula)}. ${p.preferences_expressed?'Weights come from your request.':'No preference expressed yet, so all 12 dimensions count equally.'}</small>${typeof walkerFeedbackWhy==='function'?walkerFeedbackWhy(x.raw):''}${whyMeasures(x.raw)}`;
+ root.innerHTML=`<p>${esc(x.raw.ranking_explanation)}</p>${crimeInfo}${parts}${p.weather_adjustment!=null?`<div class="data-pair"><span>Weather (heat) adjustment</span><span>−${p.weather_adjustment}</span></div>`:''}<small>${esc(p.formula)}. ${p.preferences_expressed?'Weights come from your request.':'No preference expressed yet, so all 12 dimensions count equally.'}</small>${typeof walkerFeedbackWhy==='function'?walkerFeedbackWhy(x.raw):''}${whyMeasures(x.raw)}`;
  if(typeof wireWalkerRoute==='function')wireWalkerRoute(root,x.raw);
- if(typeof wireWalkerSays==='function')wireWalkerSays(root,x.raw);
+ renderWalkerFeedbackSlot(x.raw);
  if(!scoreBasis.doc&&!scoreBasis.failed)loadScoreBasis().then(d=>{if(d&&state.activeRoute===x.id)updateWhyRoute();});
  if(typeof renderWeatherRoute==='function'){renderWeatherRoute();renderWeatherPanel();}
 }

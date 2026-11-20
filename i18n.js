@@ -55,6 +55,7 @@ const I18N_ZH = {
  'What walkers said': '其他步行者怎么说', 'All results': '全部结果', 'I walked this – rate it now': '我走完了，马上评价', 'How was your walk?': '这段路走得怎么样？',
  'Rate this walk (optional)': '给这段路打分（可选）', 'Choose a route first.': '请先选择一条路线。', 'No walker has rated a walk yet.': '还没有步行者评价过。',
  'Streets on this route walkers reported:': '这条路线上被步行者反馈过的街道：',
+ 'WALKER FEEDBACK': '步行者反馈', 'All results ↗': '全部结果 ↗', 'Create a walk to see what walkers said about it. After you walk it, rate it here.': '生成一条路线，就能看到其他步行者的评价；走完后在这里打分。',
  'Evaluation': '效果评估', 'No evaluation data yet': '暂无评估数据',
  'Tourist': '游客', 'Curious Local': '好奇的本地人', 'Leisure Walker': '休闲散步者',
  'Architecture & landmarks': '建筑与地标', 'A new neighbourhood': '一个没去过的街区', 'Quiet & green': '安静、有绿意',
