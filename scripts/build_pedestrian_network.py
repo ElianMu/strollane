@@ -83,10 +83,6 @@ def main():
     ox.settings.use_cache = True
     ox.settings.cache_folder = os.path.join(ROOT, 'data', 'cache', 'osmnx')
     ox.settings.log_console = False
-    # Small sub-queries (about 50 km² each instead of one query for a whole borough): a busy public Overpass server
-    # answers each within its time limit, and every finished one stays in the cache, so a retry resumes where it stopped.
-    ox.settings.max_query_area_size = 50 * 1000 * 1000
-    ox.settings.requests_timeout = 300
     ox.settings.useful_tags_way = sorted(set(ox.settings.useful_tags_way + EXTRA_TAGS))
     t0 = time.time()
     if box:  # an area with no OSM boundary of its own (Long Island City): the box of scripts/areas.py
@@ -110,8 +106,13 @@ def main():
         G = download_walk_graph(boundary.buffer(0.004))
         inside = prep(boundary)
         out = {n for n, d in G.nodes(data=True) if not inside.contains(Point(d['x'], d['y']))}
+        is_bridge = lambda d: 'yes' in (d.get('bridge') if isinstance(d.get('bridge'), list) else [d.get('bridge')])
+        # A bridge's landing beyond the outline can be an untagged ramp (the Queensboro Bridge's path in Manhattan), so
+        # the edges touching the far end of a bridge that crosses the outline are kept too.
+        landings = {n for u, v, d in G.edges(data=True) if is_bridge(d) and (u in out) != (v in out) for n in (u, v) if n in out}
+        landings |= {n for u, v, d in G.edges(data=True) if is_bridge(d) and u in out and v in out for n in (u, v)}
         drop = [(u, v, k) for u, v, k, d in G.edges(keys=True, data=True)
-                if u in out and v in out and 'yes' not in (d.get('bridge') if isinstance(d.get('bridge'), list) else [d.get('bridge')])]
+                if u in out and v in out and not is_bridge(d) and u not in landings and v not in landings]
         G.remove_edges_from(drop)
         G.remove_nodes_from([n for n in out if G.degree(n) == 0])
         print(f'  kept bridges beyond the outline; dropped {len(drop):,} edges with both ends outside it', flush=True)
