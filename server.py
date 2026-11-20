@@ -1098,6 +1098,13 @@ if __name__ == '__main__':
     for dataset in ('crime','trees','context','segments'):
         started=time.monotonic();database(dataset)
         print('Indexed snapshot ready:',dataset,round(time.monotonic()-started,2),'seconds',flush=True)
-    crime.edge_field(network,crime.validate({'direction':'high'}))
-    print('Default complaint-density field ready; accepting traffic.',flush=True)
+    # The default complaint-density field (about 6 s here, much longer on a 0.1-CPU host) is only needed by routes that
+    # use Access & Safety's complaint layer, so it is built in the background after the port opens; a request that
+    # needs it first simply builds it (crime.edge_field caches the result).
+    def warm_complaints():
+        started=time.monotonic()
+        crime.edge_field(network,crime.validate({'direction':'high'}))
+        print('Default complaint-density field ready:',round(time.monotonic()-started,2),'seconds',flush=True)
+    threading.Thread(target=warm_complaints,daemon=True).start()
+    print('Accepting traffic.',flush=True)
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
