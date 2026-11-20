@@ -38,7 +38,8 @@ const ppStrip = (h) => String(h || '').replace(/<[^>]*>/g, ' ').replace(/&amp;/g
 function ppAuthor(html) {
  const a = /<a\b[^>]*>(.*?)<\/a>/is.exec(String(html || ''));
  const t = ppStrip(a ? a[1] : html).replace(/\s*\(.*$/, '').replace(/^(Photo|Photograph|Image)( by)?:?\s*/i, '').trim();
- return t.slice(0, 80);
+ // a link to a source file (a derivative work) is not a name
+ return /\.(jpe?g|png|gif|tiff?|svg)$/i.test(t) ? '' : t.slice(0, 80);
 }
 
 async function ppJson(fetchFn, url, opts) {
