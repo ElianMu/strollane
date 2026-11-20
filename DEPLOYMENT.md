@@ -109,7 +109,9 @@ Free disk is wiped on every restart. The API host needs one environment variable
     FEEDBACK_GITHUB_TOKEN   fine-grained GitHub token, repository ElianMu/strollane only, permission Contents: read and write
     FEEDBACK_REPO           optional, default ElianMu/strollane
 
-Without the token `/api/feedback` answers 503 `feedback_disabled` and routing ignores feedback. A report holds a
+Without the token `/api/feedback` answers 503 `feedback_disabled` and routing ignores feedback.
+The same token stores post-walk checks (`routing/walkcheck.py`, `POST /api/walk-checks`) in
+`walk-checks/checks-YYYY-MM.jsonl` on the same branch; `scripts/summarize_walk_checks.py` summarises them per user type. A report holds a
 segment ID, a dimension, a direction (worse / better than the score shown), that score, the UTC hour and the New York
 time-of-day bucket: no location, account, free text or IP address. Rules (MIN_REPORTS, MIN_DAYS, MIN_AGREEMENT,
 MAX_DELTA, SHRINK, HALF_LIFE_DAYS, TIME_SENSITIVE) are at the top of `routing/feedback.py`; `tests/test_feedback.py`

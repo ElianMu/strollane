@@ -794,6 +794,33 @@ class RoutePlanner:
             ps['utility'] = round(ps['utility'] - adj, 1)
             ps['formula'] += f" − {wx.CONFIG['heat']['rank_points']:g} × heat level × heat-exposed share (weather)"
 
+    def data_scores(self, route_id=None, snapshot=None):
+        """The route's 12 dimension scores from the data alone (length-weighted, as build_route computes them, without
+        walker-feedback adjustments), recomputed from this server's network: from the route this process planned, or
+        from a client snapshot whose signature checks out. Used to compare a walker's ratings with what was predicted
+        (routing/walkcheck.py). Returns None when the route cannot be verified."""
+        with self.lock:
+            r = self.nav_routes.get(route_id) if route_id else None
+        try:
+            if r is None and snapshot:
+                r = self.route_from_snapshot(snapshot)
+        except RoutingError:
+            return None
+        if not r:
+            return None
+        num, scored = [0.0] * 12, [0.0] * 12
+        lengths = {str(e['edge_id']): e['traversed_length_m'] for e in r.get('edges', [])}
+        for eid in r['ordered_edge_ids']:
+            i = self.net.by_id.get(str(eid))
+            if i is None:
+                return None
+            s, length = self.net.gscores[self.net.edges.G[i]], lengths.get(str(eid), self.net.edges.L[i])
+            for j in range(12):
+                if s['s'][j] is not None:
+                    w = length * s['c'][j]
+                    num[j] += w * s['s'][j]; scored[j] += w
+        return {DIMENSIONS[j]: (round(num[j] / scored[j]) if scored[j] else None) for j in range(12)}
+
     # --- navigation readiness ------------------------------------------------------------------------------
     def route_from_snapshot(self, snap):
         """Rebuild a route's geometry from this server's own network for a client-held snapshot (ordered edge IDs +

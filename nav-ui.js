@@ -210,6 +210,7 @@ function onNavEvent(ev){
   speak(nav.voiceLang==='zh'?ev.maneuver.instruction_zh:ev.maneuver.instruction_text);
   if(nav.temporary&&nav.queue.length){const next=nav.queue.shift();toast('At the start — now following your planned walk.');beginNavigation(next);return;}
   clearNavSession();renderNav();
+  if(typeof promptWalkCheck==='function')promptWalkCheck();
  }else if(ev.type==='off_route'){
   speak(nav.voiceLang==='zh'?'您已偏离路线，正在重新规划。':'You are off route. Recalculating.');reroute();
  }else if(ev.type==='state'){if(ev.to==='NAVIGATING')nav.rerouteFails=0;renderNav();}

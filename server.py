@@ -198,6 +198,17 @@ _rate, _rate_lock = {}, threading.Lock()
 TRUSTED_PROXY_HOPS = max(0, int(os.environ.get('TRUSTED_PROXY_HOPS', '1' if os.environ.get('RENDER') else '0')))
 
 
+_WALK_CHECKS = None
+
+
+def walk_checks():
+    global _WALK_CHECKS
+    if _WALK_CHECKS is None:
+        from routing.walkcheck import WalkCheckBook
+        _WALK_CHECKS = WalkCheckBook.from_env()
+    return _WALK_CHECKS
+
+
 def client_ip(handler):
     """The caller's address as seen by the nearest trusted proxy. A client can put anything at the start of
     X-Forwarded-For; only the last TRUSTED_PROXY_HOPS entries were appended by our own proxies."""
@@ -568,6 +579,14 @@ class Handler(SimpleHTTPRequestHandler):
             i = net.by_id.get(unquote(self.path[len('/api/edges/'):]))
             self.send_json(200, net.edge_object(i)) if i is not None else self.send_json(404, {'error': 'Unknown OSM edge ID (expected "u-v-key")'})
             return
+        if self.path == '/api/evaluation':
+            # Evaluation dashboard data (routing/walkcheck.py evaluate): ratings, predicted vs perceived, sample size,
+            # sources, missing values and limits, all from stored walk feedback. Comments are counted, not returned.
+            book = walk_checks()
+            book.refresh()
+            self.send_json(200, {'enabled': book.enabled, 'generated_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+                                 **book.evaluate(), **({'store_error': book.error} if book.error else {})})
+            return
         if self.path.startswith('/api/feedback/segments/'):
             # Walker reports on one street segment and what they change (routing/feedback.py).
             try:
@@ -762,6 +781,30 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json(200, result)
             except (ValueError, TypeError, json.JSONDecodeError) as e:
                 self.send_json(400, {'error': str(e)})
+            return
+        if self.path == '/api/walk-checks':
+            # After a walk: how well it matched the request (RESEARCH_PROTOCOL.md). Never changes scores or routes.
+            from routing import walkcheck as wc
+            book = walk_checks()
+            try:
+                if not book.enabled:
+                    self.send_json(503, {'error': 'Walk checks are not configured on this server (FEEDBACK_GITHUB_TOKEN).', 'code': 'feedback_disabled'}); return
+                doc = read_json(self, 60000)
+                predicted = None
+                if isinstance(doc, dict):
+                    try:  # the prediction is recomputed here from the route, never taken from the client
+                        predicted = get_planner().data_scores(doc.get('route_id'), doc.get('route_snapshot'))
+                    except RuntimeError:
+                        predicted = None
+                check = wc.make_check(doc, predicted)
+                if not book.allow(client_ip(self), check['route_signature'] or check['route_id']):
+                    self.send_json(429, {'error': 'Thanks: this walk already has your answer (or 10 answers in the last hour).'}); return
+                book.add(check)
+                self.send_json(201, {'saved': True, 'check': check})
+            except (ValueError, TypeError, json.JSONDecodeError) as e:
+                self.send_json(400, {'error': str(e)})
+            except Exception as e:
+                self.send_json(502, {'error': f'Answer not saved: the store did not answer ({str(e)[:120]}).'})
             return
         if self.path == '/api/feedback':
             # A walker's report that a street felt worse or better than its score on one dimension. Nothing personal is
