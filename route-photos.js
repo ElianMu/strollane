@@ -80,6 +80,75 @@ async function photosFetch(places) {
  for (const t of titles) if (!routePhotos.cache.has(want[t])) routePhotos.cache.set(want[t], {none: true});
  return found;
 }
+/* Places with no Wikidata ID in the place index (most NYC LPC landmark records): find the entry by the place's own
+   name on Wikidata, then keep it only if that entry's coordinates (P625) are within 150 m of the place and it has an
+   image (P18); failing that, an entry placed within 150 m whose label names the same place. No match → no photo. Results cached per place id for the session. */
+const PHOTO_MATCH_KM = 0.15;
+const photoIds = {cache: new Map(), pending: new Set()};
+function photoSearchNames(name) {
+ const n = String(name || '').replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim();
+ const first = n.split(/,| and /i)[0].trim();
+ return [...new Set([n, first].filter((x) => x.length > 2))];
+}
+/** The Wikidata ID to use for a place: its own (`wd`/`wikidata`), else one resolved by name + location, else null. */
+function photoIdFor(p) { return p?.wd || p?.wikidata || photoIds.cache.get(p?.id) || null; }
+/** Resolve IDs for places that lack one, then load their photos; `done` runs when new photos arrive. */
+function photosResolve(places, done) {
+ if (!photosEnabled()) return;
+ const ready = [], todo = [];
+ for (const p of places || []) {
+  if (!p || p.lat == null || p.lon == null) continue;
+  const wd = photoIdFor(p);
+  if (wd) ready.push({...p, wd});
+  else if (p.id && !photoIds.cache.has(p.id) && !photoIds.pending.has(p.id)) todo.push(p);
+ }
+ if (ready.length) photosLoad(ready, done);
+ for (const p of todo) {
+  photoIds.pending.add(p.id);
+  photoResolveOne(p).then((wd) => {
+   photoIds.cache.set(p.id, wd || null); photoIds.pending.delete(p.id);
+   if (wd) photosLoad([{...p, wd}], done);
+  }).catch(() => { photoIds.cache.set(p.id, null); photoIds.pending.delete(p.id); });
+ }
+}
+/** Words that name the place, without generic ones ("church", "the", "st"), for comparing a nearby entry's label. */
+const PHOTO_STOP = new Set(['the','of','and','a','an','at','in','on','st','saint','street','church','building','house','new','york','nyc','s']);
+function photoWords(name) {
+ return new Set(String(name || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/['’]s\b/g, '').split(/[^a-z0-9]+/).filter((w) => w.length > 1 && !PHOTO_STOP.has(w)));
+}
+/** Same place by name: the shorter word set is (almost) all in the longer one, and at least two words are shared
+    (one is enough only when both names have a single word). */
+function photoSameName(a, b) {
+ const A = photoWords(a), B = photoWords(b), [s, l] = A.size <= B.size ? [A, B] : [B, A];
+ if (!s.size) return false;
+ const shared = [...s].filter((w) => l.has(w)).length;
+ return shared >= Math.min(2, s.size) && shared / s.size >= 0.75;
+}
+async function photoResolveOne(p) {
+ const ids = new Set();
+ for (const q of photoSearchNames(p.name)) {
+  const r = await fetch(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(q)}&language=en&type=item&limit=7&format=json&origin=*`).then((x) => x.json());
+  (r.search || []).forEach((h) => ids.add(h.id));
+  if (ids.size) break;
+ }
+ // entries placed within 150 m of the stop, used only when their label names the same place (Wikidata often words
+ // it differently: "St. Joseph of the Holy Family's Church" for "Church of St. Joseph of the Holy Family")
+ const near = new Set();
+ const g = await fetch(`https://www.wikidata.org/w/api.php?action=query&list=geosearch&gscoord=${p.lat}|${p.lon}&gsradius=${Math.round(PHOTO_MATCH_KM * 1000)}&gslimit=30&format=json&origin=*`).then((x) => x.json()).catch(() => ({}));
+ (g.query?.geosearch || []).forEach((h) => { if (!ids.has(h.title)) near.add(h.title); });
+ const all = [...ids, ...near].slice(0, 50);
+ if (!all.length) return null;
+ const wd = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${all.join('|')}&props=claims|labels&languages=en&format=json&origin=*`).then((x) => x.json());
+ let best = null;
+ for (const id of all) {
+  const e = wd.entities?.[id] || {}, c = e.claims || {}, at = c.P625?.[0]?.mainsnak?.datavalue?.value;
+  if (!at || !c.P18) continue;
+  if (near.has(id) && !photoSameName(p.name, e.labels?.en?.value)) continue;
+  const km = photoKm({lat: p.lat, lon: p.lon}, {lat: at.latitude, lon: at.longitude});
+  if (km <= PHOTO_MATCH_KM && (!best || km < best.km)) best = {id, km};
+ }
+ return best ? best.id : null;
+}
 const photoEsc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 /** A row of photos, each with the place name and its credit (author · licence, linked to the Commons page). */
 function photoFigures(photos, cls) {
@@ -90,4 +159,4 @@ function photoFigures(photos, cls) {
  }).join('')}</div>`;
 }
 
-if (typeof window !== 'undefined') { window.routePhotos = routePhotos; Object.assign(routePhotos, {for: photosFor, load: photosLoad, figures: photoFigures, LIMITS: PHOTO}); }
+if (typeof window !== 'undefined') { window.routePhotos = routePhotos; Object.assign(routePhotos, {for: photosFor, load: photosLoad, resolve: photosResolve, idFor: photoIdFor, figures: photoFigures, LIMITS: PHOTO}); }
