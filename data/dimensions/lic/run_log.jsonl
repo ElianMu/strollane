@@ -61,3 +61,24 @@
 {"at": "2026-11-18T02:24:20+00:00", "stage": "sub_n", "status": "done", "segments": 6439, "valid": 6439, "min": 0.0, "median": 0.0, "max": 16.0, "seconds": 0.0}
 {"at": "2026-11-18T02:24:20+00:00", "stage": "sub_m", "status": "done", "segments": 6439, "valid": 6439, "min": 3.843942759928243, "median": 527.76272393849, "max": 1500.0, "seconds": 0.0}
 {"at": "2026-11-18T02:24:21+00:00", "stage": "export", "status": "done", "segments": 6439, "calculation_version": "strollane-12x24-v1+4661aeacbe", "dimensions": {"Architecture": "1/1", "Nature": "2/3", "Culture": "1/1", "Quiet & Relax": "2/2", "Spatial Comfort": "3/3", "Urban Vibrancy": "1/1", "Food & Retail": "1/1", "Scenic & Visual": "2/2", "Walkability": "2/2", "Access & Safety": "2/2", "Environment": "1/2", "Transit Connectivity": "2/2"}}
+{"at": "2026-11-19T23:45:01+00:00", "stage": "lpc_k", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 0.0, "max": 6.060954272655382, "seconds": 0.2}
+{"at": "2026-11-19T23:45:04+00:00", "stage": "tree_km", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 41.863368130270636, "max": 1117.0505851992411, "seconds": 2.9}
+{"at": "2026-11-19T23:45:05+00:00", "stage": "park_pct", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 0.0, "max": 1.0, "seconds": 1.0}
+{"at": "2026-11-19T23:45:06+00:00", "stage": "cult_k", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 0.0, "max": 4.184892407482188, "seconds": 0.4}
+{"at": "2026-11-19T23:45:06+00:00", "stage": "noise_k", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 3.3446018583723967, "max": 7208.104286641414, "seconds": 0.8}
+{"at": "2026-11-19T23:45:06+00:00", "stage": "width_ft", "status": "done", "segments": 40997, "valid": 39980, "min": 4.0, "median": 30.0, "max": 125.0, "seconds": 0.0}
+{"at": "2026-11-19T23:45:30+00:00", "stage": "sidewalk_pct", "status": "done", "segments": 40997, "valid": 40122, "min": 0.0, "median": 0.25, "max": 1.0, "seconds": 23.8}
+{"at": "2026-11-19T23:45:33+00:00", "stage": "seat_access_m", "status": "done", "segments": 40997, "valid": 40997, "min": 7.415996616613969, "median": 500.0, "max": 500.0, "seconds": 3.1}
+{"at": "2026-11-19T23:45:34+00:00", "stage": "ramp_coverage", "status": "done", "segments": 40997, "valid": 37171, "min": 0.0, "median": 1.0, "max": 1.0, "seconds": 0.7}
+{"at": "2026-11-19T23:45:34+00:00", "stage": "vibr_idx", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 1.7205006896112023, "max": 4.164519973942794, "seconds": 0.4}
+{"at": "2026-11-19T23:45:35+00:00", "stage": "food_k", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 0.0, "max": 30.76142095254988, "seconds": 0.1}
+{"at": "2026-11-19T23:45:35+00:00", "stage": "scenic_k", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 0.0, "max": 10.169370375505501, "seconds": 0.1}
+{"at": "2026-11-19T23:45:41+00:00", "stage": "waterfront_access_m", "status": "done", "segments": 40997, "valid": 40997, "min": 2.8375644082582543, "median": 3000.0, "max": 3000.0, "seconds": 6.6}
+{"at": "2026-11-19T23:45:41+00:00", "stage": "inter_n", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 19.0, "max": 56.0, "seconds": 0.2}
+{"at": "2026-11-19T23:46:01+00:00", "stage": "route_directness", "status": "done", "segments": 40997, "valid": 38326, "min": 1.001611156346516, "median": 1.3299110030066295, "max": 3.5688164606189154, "seconds": 19.9}
+{"at": "2026-11-19T23:46:02+00:00", "stage": "crash_k", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 0.03523693765672166, "max": 13.820959399755532, "seconds": 0.1}
+{"at": "2026-11-19T23:46:04+00:00", "stage": "crime_k", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 25.926807813335003, "max": 1632.564597986913, "seconds": 2.7}
+{"at": "2026-11-19T23:46:05+00:00", "stage": "hwy_m", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 661.732735463946, "max": 1500.0, "seconds": 0.4}
+{"at": "2026-11-19T23:46:05+00:00", "stage": "sub_n", "status": "done", "segments": 40997, "valid": 40997, "min": 0.0, "median": 0.0, "max": 16.0, "seconds": 0.0}
+{"at": "2026-11-19T23:46:05+00:00", "stage": "sub_m", "status": "done", "segments": 40997, "valid": 40997, "min": 3.843942759928243, "median": 1449.9766931663876, "max": 1500.0, "seconds": 0.0}
+{"at": "2026-11-19T23:46:09+00:00", "stage": "export", "status": "done", "segments": 40997, "calculation_version": "strollane-12x24-v1+c3c98c02df", "dimensions": {"Architecture": "1/1", "Nature": "2/3", "Culture": "1/1", "Quiet & Relax": "2/2", "Spatial Comfort": "3/3", "Urban Vibrancy": "1/1", "Food & Retail": "1/1", "Scenic & Visual": "2/2", "Walkability": "2/2", "Access & Safety": "2/2", "Environment": "1/2", "Transit Connectivity": "2/2"}}

@@ -83,6 +83,10 @@ def main():
     ox.settings.use_cache = True
     ox.settings.cache_folder = os.path.join(ROOT, 'data', 'cache', 'osmnx')
     ox.settings.log_console = False
+    # Small sub-queries (about 50 km² each instead of one query for a whole borough): a busy public Overpass server
+    # answers each within its time limit, and every finished one stays in the cache, so a retry resumes where it stopped.
+    ox.settings.max_query_area_size = 50 * 1000 * 1000
+    ox.settings.requests_timeout = 300
     ox.settings.useful_tags_way = sorted(set(ox.settings.useful_tags_way + EXTRA_TAGS))
     t0 = time.time()
     if box:  # an area with no OSM boundary of its own (Long Island City): the box of scripts/areas.py
