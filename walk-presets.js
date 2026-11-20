@@ -10,17 +10,18 @@
    the box holds exactly that generated sentence, planning uses the app's existing manual path (no AI interpretation
    call), so the weights planned with are exactly the ones the pills set.
 
-   Order: the three dimensions featured for the lead audience first, then the rest by mean gain in the route
+   Order: three featured dimensions first, then the rest by mean gain in the route
    benchmark (see WALK_PRESET_ORDER below; tests/test_route_benchmark.py fails if it drifts from the benchmark).
    Each pill's tooltip names the indicators its score is built from, read from data/pedestrian/score-indicators.json
    (the router's real definitions, loaded by route-client.js); nothing about the data is hard-coded here. */
 
-// The three dimensions the lead audience's first use case leans on (AUDIENCE.md) come first; the other nine follow in
+// Three featured dimensions (the leisure walker's two and the tourist's first) come first; the other nine follow in
 // order of mean gain in the route benchmark (benchmarks/ROUTE_BENCHMARK.md). tests/test_route_benchmark.py checks both.
 const WALK_FEATURED = ['Nature', 'Quiet & Relax', 'Architecture'];
 const WALK_PRESET_ORDER = [...WALK_FEATURED, 'Spatial Comfort', 'Transit Connectivity', 'Access & Safety',
  'Food & Retail', 'Walkability', 'Culture', 'Environment', 'Urban Vibrancy', 'Scenic & Visual'];
-/* Walk activities: the three use cases written for the lead audience (AUDIENCE.md), as one-tap starting points.
+/* Walk activities: one entry per user type (AUDIENCE.md: tourist, curious local, leisure walker), each with the request
+   that type of walker would make, as a one-tap starting point.
    An activity is only a named bundle of EXISTING dimensions, each set to the same importance a pill sets (80). It adds
    no dimension, score, weight or route of its own. What kind of walk comes out is decided by machinery that already
    exists: with no destination the app recommends a walk past real places chosen from those priorities (journey.js
@@ -28,15 +29,18 @@ const WALK_PRESET_ORDER = [...WALK_FEATURED, 'Spatial Comfort', 'Transit Connect
    ranked by them. Choosing an activity replaces the pills chosen before it; changing a pill afterwards turns the
    choice back into plain priorities. */
 const WALK_ACTIVITIES = [
- {key: 'neighbourhood', title: 'Know a neighbourhood', lead: 'Get to know a neighbourhood', loop: true,
-  dims: ['Nature', 'Quiet & Relax', 'Architecture'],
-  about: 'A loop from where you are, past parks and historic buildings, along greener and quieter streets. About an hour.'},
- {key: 'nicer-way', title: 'The nicer way', lead: 'Take the nicer way', needsEnd: true,
-  dims: ['Quiet & Relax', 'Nature', 'Spatial Comfort'],
-  about: 'Between two places you already go, by quieter, greener streets with more sidewalk, for a modest detour. Needs a destination.'},
- {key: 'with-a-point', title: 'A walk with a point', lead: 'A walk with a point',
-  dims: ['Culture', 'Food & Retail'],
-  about: 'A walk that passes cultural venues and shopping streets worth knowing.'},
+ {key: 'tourist', title: 'Tourist', tag: 'Architecture & landmarks',
+  ask: 'Show me NYC\'s historic architecture and cultural landmarks.', lead: 'Historic architecture and cultural landmarks',
+  dims: ['Architecture', 'Culture'],
+  about: 'Past landmarked buildings, historic districts and cultural venues (museums, theatres, galleries), from where you are. Add a destination if you have one.'},
+ {key: 'curious-local', title: 'Curious Local', tag: 'A new neighbourhood', loop: true, needsStart: true,
+  ask: 'Take me through a neighborhood I\'ve never explored.', lead: 'Through a neighbourhood I have not explored',
+  dims: ['Urban Vibrancy', 'Food & Retail', 'Architecture'],
+  about: 'A loop through the neighbourhood you start in: its main streets, food and shops, and its buildings. Set From to a neighbourhood you have not walked yet.'},
+ {key: 'leisure', title: 'Leisure Walker', tag: 'Quiet & green', loop: true,
+  ask: 'Find me a quiet, green walk after work.', lead: 'A quiet, green walk',
+  dims: ['Quiet & Relax', 'Nature'],
+  about: 'A loop from where you are along quieter, greener streets and through parks. Quiet uses evening walker reports where there are any.'},
 ];
 
 const WALK_PRESET_WEIGHT = 80; // same as mobile-ui.js QUICK_WEIGHT
@@ -117,7 +121,7 @@ function chooseWalkActivity(key) {
  if (typeof window.strollaneRenderChips === 'function') window.strollaneRenderChips();
  syncWalkPresetRequest();
  renderWalkPresets();
- if (!wasOn && a.needsEnd && !walkHasDestination() && typeof toast === 'function') toast('Choose where you are going (To). Without a destination I will recommend a walk instead.');
+ if (!wasOn && a.needsStart && typeof toast === 'function' && !(typeof getPlace === 'function' && getPlace('start'))) toast('Set From to a neighbourhood you have not walked yet. Otherwise the loop starts where you are.');
  if (typeof state !== 'undefined' && state.routes.length && typeof queueMapReplan === 'function') queueMapReplan();
  return !wasOn;
 }
@@ -146,8 +150,11 @@ function renderWalkPresets() {
   for (const a of WALK_ACTIVITIES) {
    if (!a.dims.every((d) => walkPresetDims().includes(d))) continue; // registry check: only existing dimensions
    const b = document.createElement('button'); b.type = 'button'; b.className = 'walk-pill walk-activity'; b.dataset.activity = a.key;
-   b.textContent = a.title; b.setAttribute('aria-pressed', String(active === a));
-   b.title = `${a.about} Sets ${a.dims.join(', ')} to ${WALK_PRESET_WEIGHT}.`;
+   const t = document.createElement('span'); t.className = 'walk-activity-title'; t.textContent = a.title;
+   const g = document.createElement('span'); g.className = 'walk-activity-tag'; g.textContent = a.tag;
+   b.append(t, g); b.setAttribute('aria-pressed', String(active === a));
+   b.setAttribute('aria-label', `${a.title}: ${a.ask}`);
+   b.title = `“${a.ask}” ${a.about} Sets ${a.dims.join(', ')} to ${WALK_PRESET_WEIGHT}.`;
    b.addEventListener('click', () => chooseWalkActivity(a.key));
    root.appendChild(b);
   }

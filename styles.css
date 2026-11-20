@@ -1128,7 +1128,9 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 .walk-pill{flex:none;min-height:26px;padding:0 9px;border:1px solid var(--border-strong);border-radius:999px;background:transparent;color:var(--text-primary);font-size:11.5px;font-weight:600;white-space:nowrap}
 .walk-pill:hover{border-color:var(--text-secondary)}
 .walk-pill[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.walk-activity{border-color:var(--text-primary);font-weight:700}
+.walk-activity{border-color:var(--text-primary);font-weight:700;display:inline-flex;flex-direction:column;align-items:flex-start;justify-content:center;border-radius:12px;padding:4px 11px;line-height:1.2;white-space:nowrap}
+.walk-activity-tag{font-size:10px;font-weight:500;color:var(--text-secondary)}
+.walk-activity[aria-pressed=true] .walk-activity-tag{color:inherit;opacity:.8}
 .walk-pill-break{flex-basis:100%;height:0}
 .rc-basis{display:block;margin-top:6px;text-align:left}
 .rc-basis-row{display:block;font-size:11px;line-height:1.4;color:var(--text-secondary)}
@@ -1150,6 +1152,8 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
  .m-walk-presets::-webkit-scrollbar{display:none}
  .m-walk-presets .walk-pill-break{flex:none;flex-basis:auto;width:1px;height:22px;align-self:center;background:var(--border-strong)}
  .m-walk-presets .walk-pill{min-height:36px;padding:0 13px;font-size:13px}
+ .m-walk-presets .walk-activity{min-height:44px;padding:4px 14px}
+ .m-walk-presets .walk-activity-tag{font-size:11px}
  body[data-mview="typing"] .m-walk-presets,body[data-mview="busy"] .m-walk-presets{display:none}
 }
 
@@ -1227,3 +1231,5 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .walker-route label{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--g9d);margin-top:7px}
 .walker-route select{border:1px solid var(--g3d);background:var(--g14);color:var(--gee);border-radius:6px;padding:6px;font-size:11px}
 .walker-status,.walker-note{display:block;font-size:9.5px;line-height:1.55;color:var(--g9d);margin-top:4px}
+/* who the mobile composer is for (AUDIENCE.md lead audience) */
+.m-composer-for{margin:-4px 2px 9px;font-size:12px;line-height:1.4;color:var(--muted)}

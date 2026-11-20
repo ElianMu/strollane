@@ -261,37 +261,40 @@ const run=s=>vm.runInContext(s,context);
  assert.equal(run("planner.weights['Culture']"),80);
  for(const d of ['Nature','Quiet & Relax','Culture'])pillFor(d).click();
  assert.equal(run("['Nature','Quiet & Relax','Culture'].every(d=>planner.weights[d]===50&&planner.origins[d]==='default')"),true,'tapping again returns a dimension to not-expressed');
- // Walk activities: three one-tap starting points for the lead audience. Each is only a bundle of existing dimensions
- // at the pills' weight; it adds no dimension and no route of its own, and a later pill change dissolves it.
+ // Walk activities: one per user type (tourist, curious local, leisure walker). Each is only a bundle of existing
+ // dimensions at the pills' weight; it adds no dimension and no route of its own, and a later pill change dissolves it.
  {const acts=()=>[...presetRoots[0].querySelectorAll('.walk-activity')],act=k=>acts().find(b=>b.dataset.activity===k);
-  assert.deepEqual(acts().map(b=>b.dataset.activity),['neighbourhood','nicer-way','with-a-point']);
+  assert.deepEqual(acts().map(b=>b.dataset.activity),['tourist','curious-local','leisure']);
+  assert.deepEqual(acts().map(b=>b.querySelector('.walk-activity-title').textContent),['Tourist','Curious Local','Leisure Walker']);
+  assert.deepEqual(acts().map(b=>b.getAttribute('aria-label')),["Tourist: Show me NYC's historic architecture and cultural landmarks.","Curious Local: Take me through a neighborhood I've never explored.",'Leisure Walker: Find me a quiet, green walk after work.']);
   assert(run('WALK_ACTIVITIES.every(a=>a.dims.every(d=>DIMENSIONS.some(x=>x.name===d)))'),'activities use registered dimensions only');
   assert(presetRoots[0].firstElementChild.classList.contains('walk-activity'),'activities lead the row');
   run("for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';}walkPresets.activity=null;renderWalkPresets()");box.value='';
   run("planner.weights['Culture']=65;planner.origins['Culture']='manual'");   // a slider the visitor moved themselves
   pillFor('Walkability').click();                                             // a pill chosen before the activity
   const endMode=run('journey.endMode');run("journey.endMode='round'");           // returning to the start: the activity says so
-  act('neighbourhood').click();
-  assert.equal(run('walkActivity().key'),'neighbourhood');
-  assert.equal(run("['Nature','Quiet & Relax','Architecture'].every(d=>planner.weights[d]===80&&planner.origins[d]==='manual')"),true);
+  act('leisure').click();
+  assert.equal(run('walkActivity().key'),'leisure');
+  assert.equal(run("['Quiet & Relax','Nature'].every(d=>planner.weights[d]===80&&planner.origins[d]==='manual')"),true);
   assert.equal(run("planner.weights['Walkability']"),50,'pills chosen before the activity are released');
   assert.equal(run("planner.weights['Culture']"),65,'a weight the visitor set by slider is left alone');
-  assert.equal(box.value,'Get to know a neighbourhood: a loop from here, favouring Nature, Quiet & Relax, Architecture.');
+  assert.equal(box.value,'A quiet, green walk: a loop from here, favouring Quiet, Nature.'.replace('Quiet,',run("walkPresetLabel('Quiet & Relax')")+','));
   assert(run('isWalkPresetRequest(document.querySelector("#intentText").value)'),'planned without an AI call');
-  assert(/around|\bloop\b/.test(box.value)&&run('ROUND_TRIP_RE.test(document.querySelector("#intentText").value)'),'"a loop" is what the existing recommender reads as coming back to the start');
-  assert.equal(act('neighbourhood').getAttribute('aria-pressed'),'true');
-  run("journey.endMode='open'");run('syncWalkPresetRequest()');assert.equal(box.value,'Get to know a neighbourhood: favouring Nature, Quiet & Relax, Architecture.','an open-ended walk the visitor chose is not called a loop');
+  assert(run('ROUND_TRIP_RE.test(document.querySelector("#intentText").value)'),'"a loop" is what the existing recommender reads as coming back to the start');
+  assert.equal(act('leisure').getAttribute('aria-pressed'),'true');
+  run("journey.endMode='open'");run('syncWalkPresetRequest()');assert(!/loop/.test(box.value),'an open-ended walk the visitor chose is not called a loop');
   run(`journey.endMode=${JSON.stringify(endMode)}`);
-  if(run('walkHasDestination()')){run('syncWalkPresetRequest()');assert.equal(box.value,'Get to know a neighbourhood: favouring Nature, Quiet & Relax, Architecture.','with a destination chosen it is a walk there, not a loop');}
-  act('nicer-way').click();
-  assert.equal(run('walkActivity().key'),'nicer-way');assert.equal(run("planner.weights['Architecture']"),50,'switching activity releases the previous one');
-  assert.equal(run("['Quiet & Relax','Nature','Spatial Comfort'].every(d=>planner.weights[d]===80)"),true);
-  assert.equal(box.value,'Take the nicer way: favouring Quiet & Relax, Nature, Comfort.');
-  pillFor('Culture').click();                                                 // 65 → pill toggles it on at 80
+  act('tourist').click();
+  assert.equal(run('walkActivity().key'),'tourist');assert.equal(run("planner.weights['Nature']"),50,'switching activity releases the previous one');
+  assert.equal(run("['Architecture','Culture'].every(d=>planner.weights[d]===80)"),true);
+  assert(box.value.startsWith('Historic architecture and cultural landmarks: '));assert(!/loop/.test(box.value),'the tourist walk is not a loop');
+  assert.equal(run("JSON.stringify(recommendedInterests())"),'["historic","culture"]','recommended stops: historic buildings and culture venues');
+  pillFor('Nature').click();
   assert.equal(run('walkActivity()'),null,'changing a pill turns the activity back into plain priorities');
   assert(box.value.startsWith('Prioritise: '));assert.equal(acts().filter(b=>b.getAttribute('aria-pressed')==='true').length,0);
-  act('with-a-point').click();assert.equal(box.value,'A walk with a point: favouring Culture, Food & Retail.');
-  act('with-a-point').click();assert.equal(run('walkActivity()'),null);assert.equal(run("planner.weights['Culture']"),50,'tapping the active activity again clears it');
+  act('curious-local').click();assert(box.value.startsWith('Through a neighbourhood I have not explored: '));
+  assert.equal(run("['Urban Vibrancy','Food & Retail','Architecture'].every(d=>planner.weights[d]===80)"),true);
+  act('curious-local').click();assert.equal(run('walkActivity()'),null);assert.equal(run("planner.weights['Urban Vibrancy']"),50,'tapping the active activity again clears it');
   assert.equal(run('chooseWalkActivity("moonwalk")'),false);assert.equal(run('DIMENSIONS.length'),12);
   run("for(const d of DIMENSIONS){planner.weights[d.name]=50;planner.origins[d.name]='default';planner.directions[d.name]='high';}walkPresets.activity=null;renderWalkPresets()");box.value=box.defaultValue;}
  assert.equal(run('walkPresetRequest()'),'');assert.equal(run('DIMENSIONS.length'),12);assert.equal(run('toggleWalkPreset("Hidden gems")'),false);
@@ -605,12 +608,12 @@ const run=s=>vm.runInContext(s,context);
   assert.equal(run('i18n.lang'),'en');assert.equal(q('#langToggle [data-lang-label]').textContent,'中文');
   assert.equal(Object.keys(run('I18N_DIMENSIONS_ZH')).join('|'),run("DIMENSIONS.map(d=>d.name).join('|')"),'a gloss for each of the 12 registered names, no others');
   for(const n of run('DIMENSIONS.map(d=>d.name)'))assert(run('I18N_ZH')[n].endsWith(' '+n),'the unchanged English name stays on screen: '+n);
-  const pill=[...d.querySelectorAll('[data-walk-presets] .walk-pill[data-dim]')].find(b=>b.dataset.dim==='Nature'),act=d.querySelector('.walk-activity[data-activity=neighbourhood]');
+  const pill=[...d.querySelectorAll('[data-walk-presets] .walk-pill[data-dim]')].find(b=>b.dataset.dim==='Nature'),act=d.querySelector('.walk-activity[data-activity=leisure]');
   const box=q('#intentText'),typed=box.value;
   run("setLanguage('zh',false)");
   assert.equal(d.documentElement.lang,'zh-Hans');assert.equal(q('#langToggle [data-lang-label]').textContent,'EN');
   assert.equal(pill.dataset.dim,'Nature');assert(/自然 Nature/.test(pill.textContent),'gloss + name, data key untouched');
-  assert(/认识一个街区/.test(act.textContent));assert(d.body.textContent.includes('起点')&&d.body.textContent.includes('分享这条路线'));
+  assert(/休闲散步者/.test(act.textContent)&&/安静、有绿意/.test(act.textContent));assert(d.body.textContent.includes('起点')&&d.body.textContent.includes('分享这条路线'));
   assert.equal(box.value,typed,'what is typed in the request box is never rewritten');
   assert.equal(box.getAttribute('placeholder'),run('I18N_ZH')[box.getAttribute('data-i18n-en-placeholder')],'placeholder translated, original kept on the element');
   // text the app writes later is translated too; built sentences are left in English, whole
