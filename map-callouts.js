@@ -46,7 +46,7 @@ function calloutPlace(a, others, route, box, w, h, gap, placed) {
  const mid = route.length ? {x: route.reduce((s, p) => s + p.x, 0) / route.length, y: route.reduce((s, p) => s + p.y, 0) / route.length} : a;
  const hit = (r, p) => r.x < p.x + p.w + 6 && p.x < r.x + r.w + 6 && r.y < p.y + p.h + 6 && p.y < r.y + r.h + 6;
  let best = null;
- for (const g of [gap, gap * 1.6]) for (const [dx, dy] of dirs) {
+ for (const g of [gap, gap * 1.6, gap * 2.4]) for (const [dx, dy] of dirs) {
   const n = Math.hypot(dx, dy), ox = dx / n * g, oy = dy / n * g;
   const r = {x: a.x + ox - (dx < 0 ? w : dx > 0 ? 0 : w / 2), y: a.y + oy - (dy < 0 ? h : dy > 0 ? 0 : h / 2), w, h};
   if (r.x < box.x0 || r.y < box.y0 || r.x + w > box.x1 || r.y + h > box.y1) continue;
@@ -54,7 +54,7 @@ function calloutPlace(a, others, route, box, w, h, gap, placed) {
   if (others.some((o) => o.x > r.x - 4 && o.x < r.x + w + 4 && o.y > r.y - 4 && o.y < r.y + h + 4)) continue;
   const onRoute = route.filter((p) => p.x > r.x - 3 && p.x < r.x + w + 3 && p.y > r.y - 3 && p.y < r.y + h + 3).length;
   const toward = (r.x + w / 2 - a.x) * (a.x - mid.x) + (r.y + h / 2 - a.y) * (a.y - mid.y) < 0 ? 1 : 0;
-  const score = onRoute * 10 + toward * 3 + (g > gap ? 2 : 0) + (dx && dy ? 0.5 : 0);
+  const score = onRoute * 10 + toward * 3 + (g / gap - 1) * 3 + (dx && dy ? 0.5 : 0);
   if (!best || score < best.score) best = {r, score};
  }
  return best ? best.r : null;
@@ -161,7 +161,10 @@ function calloutsFollow() {
   el.style.transform = `translate(${Math.round(x)}px,${Math.round(y)}px)`;
   // the line meets the card at the nearest point of its edge
   const ex = Math.max(x, Math.min(a.x, x + w)), ey = Math.max(y, Math.min(a.y, y + h));
-  lines.push(`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}"/><circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="4"/>`);
+  // start the line at a ring around the place, so the place's own map marker (a stop number) stays visible
+  const L = Math.hypot(ex - a.x, ey - a.y) || 1, R = it.seq != null ? 13 : 6, sx = a.x + (ex - a.x) / L * R, sy = a.y + (ey - a.y) / L * R;
+  const seg = `x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}"`;
+  lines.push(`<line class="halo" ${seg}/><line ${seg}/><circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="${R}"/>`);
  });
  mapCallouts.svg.innerHTML = lines.join('');
 }
