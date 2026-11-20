@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"A61","station_id":"192","complex_id":"192","stop_name":"Rockaway Blvd","daytime_routes":"A","line":"Liberty Av","structure":"Elevated","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.843853,40.680429]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H12","station_id":"200","complex_id":"200","stop_name":"Beach 90 St","daytime_routes":"A S","line":"Rockaway","structure":"Viaduct","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.813641,40.588034]}}]}

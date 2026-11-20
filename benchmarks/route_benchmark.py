@@ -23,7 +23,7 @@ Deterministic for a given network_version + score_version: the search has no ran
 `runs` list (tests/test_route_benchmark.py checks this).
 
 Usage:  python3 benchmarks/route_benchmark.py              # Manhattan trips: route_benchmark.json + ROUTE_BENCHMARK.md
-        python3 benchmarks/route_benchmark.py --set areas  # Brooklyn, western Queens, river crossings (od_pairs_areas.json):
+        python3 benchmarks/route_benchmark.py --set areas  # Brooklyn, Queens, river crossings (od_pairs_areas.json):
                                                            #   route_benchmark_areas.json + ROUTE_BENCHMARK_AREAS.md
         python3 benchmarks/route_benchmark.py --no-write   # print the summary only
 
@@ -83,7 +83,7 @@ def run_one(planner, pair, dim):
 
 
 SETS = {'manhattan': ('od_pairs.json', 'route_benchmark.json', 'ROUTE_BENCHMARK.md', 'Manhattan trips'),
-        'areas': ('od_pairs_areas.json', 'route_benchmark_areas.json', 'ROUTE_BENCHMARK_AREAS.md', 'Brooklyn, western Queens and East River crossings')}
+        'areas': ('od_pairs_areas.json', 'route_benchmark_areas.json', 'ROUTE_BENCHMARK_AREAS.md', 'Brooklyn, Queens and East River crossings')}
 
 
 def run(pairs=None, dimensions=None, pair_file='od_pairs.json'):
@@ -136,7 +136,7 @@ def markdown(result, s):
              f"scores `{result['score_version']}` · {result['pairs']} trips × {len(s['by_dimension'])} single-dimension preferences "
              f"(weight {result['weight']}) · limits: {result['constraints']['max_minutes']} min, {result['constraints']['max_detour_pct']}% detour.", '',
              '"Gain" = the preference route\'s score on the requested dimension minus the shortest route\'s score (0–100 ranks over '
-             f"Manhattan, Brooklyn and western Queens together). {result['claim_points']} points is the smallest difference the app describes in words (`route-story.js`). "
+             f"Manhattan, Brooklyn and Queens together). {result['claim_points']} points is the smallest difference the app describes in words (`route-story.js`). "
              'These are the router\'s own scores: a gain shows the engine moved its metric, **not** that a walker perceives the '
              'difference. The trip set is hand-picked, not a random sample.', '',
              '## By dimension', '', head] + [row(d, x) for d, x in s['by_dimension'].items()] + [row('**All**', s['all'])]

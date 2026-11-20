@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H04-lic-289","stop_name":"Broad Channel","daytime_routes":"A S","line":"Rockaway","division":"IND","entrance_type":"Stair","entry_allowed":"YES","exit_allowed":"YES","station_id":"199","gtfs_stop_id":"H04","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.815982,40.608063]}}]}

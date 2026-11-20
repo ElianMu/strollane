@@ -1,36 +1,15 @@
 {
  "title": "STROLLANE · NYC — street-level 12 Experience Dimensions",
  "area": "lic",
- "area_label": "Western Queens (Long Island City, Astoria, Sunnyside, Woodside, Jackson Heights; working box inside Queens, LION borocode 4)",
- "area_polygon": [
-  [
-   -73.965,
-   40.728
-  ],
-  [
-   -73.87,
-   40.728
-  ],
-  [
-   -73.87,
-   40.785
-  ],
-  [
-   -73.965,
-   40.785
-  ],
-  [
-   -73.965,
-   40.728
-  ]
- ],
- "segments": 6439,
+ "area_label": "Queens (Queens County, LION borocode 4)",
+ "area_polygon": null,
+ "segments": 40997,
  "spec_version": "strollane-12x24-v1",
- "calculation_version": "strollane-12x24-v1+nyc3-8829299a21",
- "built_at": "2026-11-18T02:24:21+00:00",
+ "calculation_version": "strollane-12x24-v1+nyc3-80d4e2f969",
+ "built_at": "2026-11-20T02:14:55+00:00",
  "crs_processing": "EPSG:32618",
  "crs_output": "EPSG:4326",
- "comparison_scope": "Percentiles are ranked among the 42,791 street segments of Manhattan, Brooklyn and western Queens together (10,533 Manhattan, 25,819 Brooklyn, 6,439 western Queens); this area has 6,439. One scale for all three areas (scripts/dimensions/combine_areas.py).",
+ "comparison_scope": "Percentiles are ranked among the 77,349 street segments of Manhattan, Brooklyn and Queens together (10,533 Manhattan, 25,819 Brooklyn, 40,997 Queens); this area has 40,997. One scale for all three areas (scripts/dimensions/combine_areas.py).",
  "score_method": "Each scored indicator → percentile rank 0–100 among segments of the comparison area that have a value (ties take the lowest rank; \"lower is better\" indicators reversed as 100 − rank). Dimension score = equal-weight mean of the indicator percentiles available on that segment. N/A when none is available; missing values are never 0. Validation/context indicators never enter a score.",
  "dimensions": [
   {
@@ -50,7 +29,7 @@
    ],
    "model_coverage": "1/1",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -75,7 +54,7 @@
    ],
    "model_coverage": "2/3",
    "status": "partial",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -95,7 +74,7 @@
    ],
    "model_coverage": "1/1",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -118,7 +97,7 @@
    ],
    "model_coverage": "2/2",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -144,7 +123,7 @@
    ],
    "model_coverage": "3/3",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -165,7 +144,7 @@
    ],
    "model_coverage": "1/1",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -185,7 +164,7 @@
    ],
    "model_coverage": "1/1",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -208,7 +187,7 @@
    ],
    "model_coverage": "2/2",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -231,7 +210,7 @@
    ],
    "model_coverage": "2/2",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -254,7 +233,7 @@
    ],
    "model_coverage": "2/2",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -277,7 +256,7 @@
    ],
    "model_coverage": "1/2",
    "status": "partial",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   },
   {
@@ -300,7 +279,7 @@
    ],
    "model_coverage": "2/2",
    "status": "computed",
-   "segments_with_score": 6439,
+   "segments_with_score": 40997,
    "segment_coverage": 1.0
   }
  ],
@@ -321,18 +300,18 @@
     "sigma_m": 100
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
     "Distance is to the landmark lot polygon (0 inside the lot); each lot (incl. multi-part lots) counted once per sample."
    ],
-   "computed_at": "2026-11-18T02:24:12+00:00",
-   "seconds": 0.0,
+   "computed_at": "2026-11-20T02:13:39+00:00",
+   "seconds": 0.2,
    "stats": {
     "min": 0.0,
     "p50": 0.0,
-    "max": 1.841,
-    "mean": 0.057
+    "max": 6.061,
+    "mean": 0.033
    },
    "sources": [
     "LPC Individual Landmark Lots"
@@ -353,18 +332,18 @@
     "min_length_m": 80
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
     "Each tree is assigned to its single nearest walkable segment within 30 m so trees at corners are not double-counted."
    ],
-   "computed_at": "2026-11-18T02:24:13+00:00",
-   "seconds": 0.3,
+   "computed_at": "2026-11-20T02:13:43+00:00",
+   "seconds": 3.8,
    "stats": {
     "min": 0.0,
-    "p50": 34.435,
-    "max": 675.0,
-    "mean": 46.164
+    "p50": 41.863,
+    "max": 1117.051,
+    "mean": 52.849
    },
    "sources": [
     "NYC Parks Forestry Tree Points (structure = Full)"
@@ -391,18 +370,18 @@
     ]
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
     "Samples every 20 m at offsets 0, ±20, ±40 m."
    ],
-   "computed_at": "2026-11-18T02:24:13+00:00",
-   "seconds": 0.1,
+   "computed_at": "2026-11-20T02:13:44+00:00",
+   "seconds": 1.1,
    "stats": {
     "min": 0.0,
     "p50": 0.0,
     "max": 1.0,
-    "mean": 0.02
+    "mean": 0.044
    },
    "sources": [
     "NYC Parks Properties"
@@ -447,18 +426,18 @@
     "sigma_m": 150
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "72 cultural POIs (museum, gallery, theatre, arts centre, cinema, library, music venue, concert hall)."
+    "323 cultural POIs (museum, gallery, theatre, arts centre, cinema, library, music venue, concert hall)."
    ],
-   "computed_at": "2026-11-18T02:24:13+00:00",
-   "seconds": 0.1,
+   "computed_at": "2026-11-20T02:13:44+00:00",
+   "seconds": 0.4,
    "stats": {
     "min": 0.0,
     "p50": 0.0,
-    "max": 2.761,
-    "mean": 0.169
+    "max": 4.185,
+    "mean": 0.093
    },
    "sources": [
     "OpenStreetMap POIs via Overpass API"
@@ -480,18 +459,18 @@
     "sigma_m": 50
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "41145 geolocated noise complaints in the 12-month window."
+    "158115 geolocated noise complaints in the 12-month window."
    ],
-   "computed_at": "2026-11-18T02:24:13+00:00",
-   "seconds": 0.2,
+   "computed_at": "2026-11-20T02:13:45+00:00",
+   "seconds": 0.9,
    "stats": {
     "min": 0.0,
-    "p50": 8.41,
-    "max": 1259.702,
-    "mean": 18.683
+    "p50": 3.345,
+    "max": 7208.104,
+    "mean": 11.335
    },
    "sources": [
     "NYC 311 Service Requests — Noise*"
@@ -509,18 +488,18 @@
    ],
    "params": {},
    "status": "computed",
-   "valid_segments": 6296,
-   "coverage": 0.9778,
+   "valid_segments": 39980,
+   "coverage": 0.9752,
    "notes": [
     "N/A where LION records no roadway width (common on park paths and step streets)."
    ],
-   "computed_at": "2026-11-18T02:24:13+00:00",
+   "computed_at": "2026-11-20T02:13:45+00:00",
    "seconds": 0.0,
    "stats": {
-    "min": 6.0,
+    "min": 4.0,
     "p50": 30.0,
-    "max": 80.0,
-    "mean": 33.375
+    "max": 125.0,
+    "mean": 32.694
    },
    "sources": [
     "NYC Street Centerline (LION) — NYC DCP"
@@ -550,18 +529,18 @@
     ]
    },
    "status": "computed",
-   "valid_segments": 6325,
-   "coverage": 0.9823,
+   "valid_segments": 40122,
+   "coverage": 0.9787,
    "notes": [
     "N/A on park paths and step streets (LION types 6, 7): they have no curbside sidewalk to measure."
    ],
-   "computed_at": "2026-11-18T02:24:16+00:00",
-   "seconds": 2.8,
+   "computed_at": "2026-11-20T02:14:17+00:00",
+   "seconds": 31.4,
    "stats": {
     "min": 0.0,
     "p50": 0.25,
     "max": 1.0,
-    "mean": 0.259
+    "mean": 0.234
    },
    "sources": [
     "NYC Planimetric Database: Sidewalk"
@@ -582,19 +561,19 @@
     "cap_m": 500
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "129 of 336 Manhattan seats linked to the OSM pedestrian network (≤100 m snap).",
+    "920 of 1027 Manhattan seats linked to the OSM pedestrian network (≤100 m snap).",
     "Midpoint joins the network at its nearest walk-graph node; values ≥ 500 m are capped at 500."
    ],
-   "computed_at": "2026-11-18T02:24:16+00:00",
-   "seconds": 0.3,
+   "computed_at": "2026-11-20T02:14:20+00:00",
+   "seconds": 3.7,
    "stats": {
-    "min": 19.108,
+    "min": 7.416,
     "p50": 500.0,
     "max": 500.0,
-    "mean": 429.806
+    "mean": 394.503
    },
    "sources": [
     "NYC DOT Seating Locations",
@@ -616,18 +595,18 @@
     "radius_m": 20
    },
    "status": "computed",
-   "valid_segments": 5439,
-   "coverage": 0.8447,
+   "valid_segments": 37171,
+   "coverage": 0.9067,
    "notes": [
     "Eligible nodes = segment end nodes joining ≥3 walkable segments, at least one a roadway (a crossing). N/A when a segment has no eligible crossing node."
    ],
-   "computed_at": "2026-11-18T02:24:16+00:00",
-   "seconds": 0.1,
+   "computed_at": "2026-11-20T02:14:21+00:00",
+   "seconds": 1.0,
    "stats": {
     "min": 0.0,
     "p50": 1.0,
     "max": 1.0,
-    "mean": 0.928
+    "mean": 0.899
    },
    "sources": [
     "NYC DOT Pedestrian Ramp Locations",
@@ -648,18 +627,18 @@
     "radius_m": 150
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
     "H = Shannon entropy of activity types ÷ ln(number of types present) (0–1)."
    ],
-   "computed_at": "2026-11-18T02:24:16+00:00",
-   "seconds": 0.0,
+   "computed_at": "2026-11-20T02:14:22+00:00",
+   "seconds": 0.4,
    "stats": {
     "min": 0.0,
-    "p50": 2.335,
+    "p50": 1.721,
     "max": 4.165,
-    "mean": 2.19
+    "mean": 1.539
    },
    "sources": [
     "OpenStreetMap POIs via Overpass API"
@@ -702,18 +681,18 @@
     "sigma_m": 50
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "5135 food, drink and shop POIs."
+    "19005 food, drink and shop POIs."
    ],
-   "computed_at": "2026-11-18T02:24:16+00:00",
-   "seconds": 0.0,
+   "computed_at": "2026-11-20T02:14:22+00:00",
+   "seconds": 0.1,
    "stats": {
     "min": 0.0,
-    "p50": 0.517,
-    "max": 26.477,
-    "mean": 1.971
+    "p50": 0.0,
+    "max": 30.761,
+    "mean": 0.962
    },
    "sources": [
     "OpenStreetMap POIs via Overpass API"
@@ -735,18 +714,18 @@
     "sigma_m": 100
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "141 viewpoints, artworks, fountains, memorials and monuments."
+    "590 viewpoints, artworks, fountains, memorials and monuments."
    ],
-   "computed_at": "2026-11-18T02:24:16+00:00",
-   "seconds": 0.0,
+   "computed_at": "2026-11-20T02:14:22+00:00",
+   "seconds": 0.1,
    "stats": {
     "min": 0.0,
     "p50": 0.0,
-    "max": 4.895,
-    "mean": 0.155
+    "max": 10.169,
+    "mean": 0.098
    },
    "sources": [
     "OpenStreetMap POIs via Overpass API"
@@ -770,18 +749,18 @@
     "entrance_water_m": 60
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "110 valid entrances: connected walk-graph nodes inside public waterfront space (open WPAA or a park within 30 m of river/bay) and within 60 m of open water. Capped at 3000 m."
+    "316 valid entrances: connected walk-graph nodes inside public waterfront space (open WPAA or a park within 30 m of river/bay) and within 60 m of open water. Capped at 3000 m."
    ],
-   "computed_at": "2026-11-18T02:24:19+00:00",
-   "seconds": 2.5,
+   "computed_at": "2026-11-20T02:14:29+00:00",
+   "seconds": 6.5,
    "stats": {
     "min": 2.838,
     "p50": 3000.0,
     "max": 3000.0,
-    "mean": 2446.768
+    "mean": 2641.161
    },
    "sources": [
     "Waterfront Public Access Areas (WPAA)",
@@ -804,18 +783,18 @@
     "radius_m": 250
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "2982 LION junctions (≥3 walkable segments)."
+    "20333 LION junctions (≥3 walkable segments)."
    ],
-   "computed_at": "2026-11-18T02:24:19+00:00",
-   "seconds": 0.0,
+   "computed_at": "2026-11-20T02:14:29+00:00",
+   "seconds": 0.2,
    "stats": {
     "min": 0.0,
     "p50": 19.0,
     "max": 56.0,
-    "mean": 19.465
+    "mean": 19.292
    },
    "sources": [
     "NYC Street Centerline (LION) — NYC DCP"
@@ -840,18 +819,18 @@
     "min_pairs": 3
    },
    "status": "computed",
-   "valid_segments": 5837,
-   "coverage": 0.9065,
+   "valid_segments": 38323,
+   "coverage": 0.9348,
    "notes": [
     "Origin = walk-graph node nearest the midpoint; destinations = node closest to 375 m in each 45° sector of the 250–500 m ring; pairs unreachable within 1.5 km excluded; N/A with fewer than 3 feasible pairs."
    ],
-   "computed_at": "2026-11-18T02:24:20+00:00",
-   "seconds": 0.8,
+   "computed_at": "2026-11-20T02:14:51+00:00",
+   "seconds": 21.9,
    "stats": {
-    "min": 1.03,
-    "p50": 1.4,
-    "max": 3.379,
-    "mean": 1.734
+    "min": 1.002,
+    "p50": 1.33,
+    "max": 3.569,
+    "mean": 1.385
    },
    "sources": [
     "OpenStreetMap pedestrian network (OSMnx walk graph)"
@@ -873,18 +852,18 @@
     "sigma_m": 40
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "1503 pedestrian-injury/fatal crashes in the 3-year window. Not adjusted for pedestrian volume."
+    "6177 pedestrian-injury/fatal crashes in the 3-year window. Not adjusted for pedestrian volume."
    ],
-   "computed_at": "2026-11-18T02:24:20+00:00",
-   "seconds": 0.0,
+   "computed_at": "2026-11-20T02:14:51+00:00",
+   "seconds": 0.1,
    "stats": {
     "min": 0.0,
-    "p50": 0.286,
-    "max": 13.124,
-    "mean": 0.698
+    "p50": 0.035,
+    "max": 13.821,
+    "mean": 0.446
    },
    "sources": [
     "NYPD Motor Vehicle Collisions — Crashes"
@@ -906,18 +885,18 @@
     "sigma_m": 100
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "47204 felony + misdemeanor complaint reports. Report density is a proxy, not personal risk."
+    "151616 felony + misdemeanor complaint reports. Report density is a proxy, not personal risk."
    ],
-   "computed_at": "2026-11-18T02:24:20+00:00",
-   "seconds": 0.6,
+   "computed_at": "2026-11-20T02:14:53+00:00",
+   "seconds": 2.7,
    "stats": {
     "min": 0.0,
-    "p50": 47.105,
-    "max": 998.997,
-    "mean": 80.037
+    "p50": 25.927,
+    "max": 1632.565,
+    "mean": 44.953
    },
    "sources": [
     "NYPD Complaint Data Historic (qgea-i56i) + Current YTD (5uac-w243)"
@@ -937,18 +916,18 @@
     "cap_m": 1500
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "570 LION expressway / ramp centerlines (types 2, 9)."
+    "2949 LION expressway / ramp centerlines (types 2, 9)."
    ],
-   "computed_at": "2026-11-18T02:24:20+00:00",
-   "seconds": 0.1,
+   "computed_at": "2026-11-20T02:14:54+00:00",
+   "seconds": 0.3,
    "stats": {
     "min": 0.0,
-    "p50": 515.394,
+    "p50": 661.733,
     "max": 1500.0,
-    "mean": 579.898
+    "mean": 730.783
    },
    "sources": [
     "NYC Street Centerline (LION) — NYC DCP"
@@ -1012,18 +991,18 @@
     "radius_m": 400
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [
-    "182 entry-permitted entrances."
+    "675 entry-permitted entrances."
    ],
-   "computed_at": "2026-11-18T02:24:20+00:00",
+   "computed_at": "2026-11-20T02:14:54+00:00",
    "seconds": 0.0,
    "stats": {
     "min": 0.0,
     "p50": 0.0,
     "max": 16.0,
-    "mean": 2.221
+    "mean": 0.805
    },
    "sources": [
     "MTA Subway Entrances and Exits: 2024 (entry allowed)"
@@ -1043,16 +1022,16 @@
     "cap_m": 1500
    },
    "status": "computed",
-   "valid_segments": 6439,
+   "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [],
-   "computed_at": "2026-11-18T02:24:20+00:00",
+   "computed_at": "2026-11-20T02:14:54+00:00",
    "seconds": 0.0,
    "stats": {
     "min": 3.844,
-    "p50": 527.763,
+    "p50": 1449.977,
     "max": 1500.0,
-    "mean": 645.097
+    "mean": 1068.816
    },
    "sources": [
     "MTA Subway Entrances and Exits: 2024 (entry allowed)"
@@ -1068,16 +1047,16 @@
    "qa": {
     "source": "lion",
     "file": "data/cache/sources/lic/streets_v4.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:30+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 7284,
-    "records_kept": 6501,
+    "records_read": 44569,
+    "records_kept": 40997,
     "excluded_types": "2 highway, 3 bridge, 4 tunnel, 9 ramp, 13/14 ferry & other non-walkable",
-    "scope": "borocode = '4' touching the area box",
+    "scope": "borocode = '4'",
     "misplaced_outside_area_box": 0,
-    "width_missing": 144,
-    "expressway_ramp_lines": 570,
+    "width_missing": 1017,
+    "expressway_ramp_lines": 2949,
     "duplicate_ids": 0
    },
    "status": "loaded"
@@ -1089,13 +1068,13 @@
    "qa": {
     "source": "lpc",
     "file": "data/cache/sources/lic/lpc.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:29+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 20,
-    "records_kept": 20,
+    "records_read": 86,
+    "records_kept": 86,
     "invalid_repaired": 0,
-    "scope": "BORO='Queens' landmark lots touching the area box",
+    "scope": "BORO='Queens' landmark lots",
     "note": "each lot kept whole (multi-part lots counted once)"
    },
    "status": "loaded"
@@ -1107,13 +1086,13 @@
    "qa": {
     "source": "trees",
     "file": "data/cache/sources/lic/forestry_trees.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:28+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 55007,
-    "records_kept": 55007,
+    "records_read": 451521,
+    "records_kept": 451521,
     "dropped_invalid_or_outside": 0,
-    "duplicate_coordinates": 0,
+    "duplicate_coordinates": 16,
     "filter": "tpstructure = 'Full'"
    },
    "status": "loaded"
@@ -1125,13 +1104,13 @@
    "qa": {
     "source": "parks",
     "file": "data/cache/sources/lic/parks.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:29+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 125,
-    "records_kept": 125,
-    "invalid_repaired": 0,
-    "scope": "borough = 'Q' touching the area box"
+    "records_read": 478,
+    "records_kept": 478,
+    "invalid_repaired": 1,
+    "scope": "borough = 'Q'"
    },
    "status": "loaded"
   },
@@ -1149,13 +1128,13 @@
    "qa": {
     "source": "osm",
     "file": "data/cache/sources/lic/osm.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:29+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 14253,
-    "records_kept": 14252,
-    "dropped_invalid_or_outside": 1,
-    "duplicate_coordinates": 7,
+    "records_read": 80032,
+    "records_kept": 80030,
+    "dropped_invalid_or_outside": 2,
+    "duplicate_coordinates": 18,
     "query": "amenity|shop|tourism|leisure|historic, nodes/ways/relations (centres)"
    },
    "status": "loaded"
@@ -1167,14 +1146,14 @@
    "qa": {
     "source": "osm_walk",
     "file": "data/pedestrian/lic-walk-graph.json.gz",
-    "file_retrieved_at": "2026-11-18T01:54:15+00:00",
+    "file_retrieved_at": "2026-11-20T02:11:32+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 34308,
-    "records_kept": 34308,
-    "nodes": 10870,
-    "network_version": "osm-walk-20261117-9c339819",
-    "nodes_outside_largest_component": 211
+    "records_read": 439532,
+    "records_kept": 439532,
+    "nodes": 138207,
+    "network_version": "osm-walk-20261120-d1035109",
+    "nodes_outside_largest_component": 13940
    },
    "status": "loaded"
   },
@@ -1185,14 +1164,14 @@
    "qa": {
     "source": "noise",
     "file": "data/cache/sources/lic/noise.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:29+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 41145,
-    "records_kept": 41145,
+    "records_read": 158115,
+    "records_kept": 158115,
     "dropped_invalid_or_outside": 0,
-    "duplicate_coordinates": 32309,
-    "time_window": "2025-11-18 → 2026-11-18 (12 months before retrieval)",
+    "duplicate_coordinates": 122688,
+    "time_window": "2025-11-19 → 2026-11-20 (12 months before retrieval)",
     "filter": "complaint_type starts with 'Noise', borough = QUEENS"
    },
    "status": "loaded"
@@ -1204,12 +1183,12 @@
    "qa": {
     "source": "sidewalks",
     "file": "data/cache/sources/lic/sidewalks.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:30+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 3534,
-    "records_kept": 3534,
-    "invalid_repaired": 2,
+    "records_read": 26632,
+    "records_kept": 26632,
+    "invalid_repaired": 12,
     "scope": "area bounding box"
    },
    "status": "loaded"
@@ -1225,8 +1204,8 @@
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
     "records_read": 1027,
-    "records_kept": 336,
-    "dropped_invalid_or_outside": 691,
+    "records_kept": 1027,
+    "dropped_invalid_or_outside": 0,
     "duplicate_coordinates": 1,
     "filter": "boroname = 'Queens'",
     "citywide_records": 5702
@@ -1240,11 +1219,11 @@
    "qa": {
     "source": "ramps",
     "file": "data/cache/sources/lic/ramps.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:30+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 15998,
-    "records_kept": 15998,
+    "records_read": 121478,
+    "records_kept": 121478,
     "dropped_invalid_or_outside": 0,
     "duplicate_coordinates": 0,
     "duplicate_ramp_ids": 0
@@ -1266,14 +1245,14 @@
    "qa": {
     "source": "collisions",
     "file": "data/cache/sources/lic/collisions.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:28+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 1503,
-    "records_kept": 1503,
+    "records_read": 6177,
+    "records_kept": 6177,
     "dropped_invalid_or_outside": 0,
-    "duplicate_coordinates": 355,
-    "time_window": "2023-11-19 → 2026-11-18 (3 years before retrieval)",
+    "duplicate_coordinates": 1468,
+    "time_window": "2023-11-20 → 2026-11-20 (3 years before retrieval)",
     "filter": "pedestrians injured > 0 OR pedestrians killed > 0, borough = QUEENS"
    },
    "status": "loaded"
@@ -1289,9 +1268,9 @@
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
     "records_read": 151622,
-    "records_kept": 47204,
-    "dropped_invalid_or_outside": 104418,
-    "duplicate_coordinates": 41031,
+    "records_kept": 151616,
+    "dropped_invalid_or_outside": 6,
+    "duplicate_coordinates": 124679,
     "time_window": "2025-01-01 / 2026-06-30",
     "borough_all_law_classes": 181045,
     "filter": "borough = QUEENS, law IN (FELONY, MISDEMEANOR)"
@@ -1347,11 +1326,11 @@
    "qa": {
     "source": "subway",
     "file": "data/cache/sources/lic/subway.json",
-    "file_retrieved_at": "2026-11-18T02:23:45+00:00",
+    "file_retrieved_at": "2026-11-19T23:35:30+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 182,
-    "records_kept": 182,
+    "records_read": 675,
+    "records_kept": 675,
     "dropped_invalid_or_outside": 0,
     "duplicate_coordinates": 0,
     "filter": "entry_allowed = 'YES', inside the area box"
@@ -1360,9 +1339,9 @@
   }
  },
  "windows": {
-  "noise": "2025-11-18 → 2026-11-18 (12 months before retrieval)",
-  "collisions": "2023-11-19 → 2026-11-18 (3 years before retrieval)",
-  "retrieved_at": "2026-11-18T02:10:53+00:00"
+  "noise": "2025-11-19 → 2026-11-20 (12 months before retrieval)",
+  "collisions": "2023-11-20 → 2026-11-20 (3 years before retrieval)",
+  "retrieved_at": "2026-11-20T00:24:01+00:00"
  },
  "id_scheme": "segment_id = \"QN-\" + LION physicalid (+ \"-n\" when several LION records share one).",
  "files": {
@@ -1372,21 +1351,21 @@
  "validation": {},
  "value_note": "Scores are relative ranks within the comparison area, not calibrated experience scores. N/A = not measurable, never 0.",
  "area_definition": {
-  "label": "Western Queens (Long Island City, Astoria, Sunnyside, Woodside, Jackson Heights; working box inside Queens, LION borocode 4)",
-  "short": "Western Queens",
+  "label": "Queens (Queens County, LION borocode 4)",
+  "short": "Queens",
   "box": [
-   -73.965,
-   40.728,
-   -73.87,
-   40.785
+   -73.963,
+   40.541,
+   -73.7,
+   40.801
   ],
-  "clip_to_box": true,
+  "clip_to_box": false,
   "borocode": "4",
   "lpc_boro": "Queens",
   "parks_borough": "Q",
   "borough_upper": "QUEENS",
-  "osm_place": null
+  "osm_place": "Queens County, New York, United States"
  },
- "raw_calculation_version": "strollane-12x24-v1+4661aeacbe",
- "combined_at": "2026-11-18T02:24:27+00:00"
+ "raw_calculation_version": "strollane-12x24-v1+c3c98c02df",
+ "combined_at": "2026-11-20T02:15:01+00:00"
 }

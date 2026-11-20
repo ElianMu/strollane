@@ -1,6 +1,6 @@
 """Canonical NYC place store for the agent tools (GET /api/places/search, GET /api/places/<id>, ratings, hotel rooms).
 
-Sources: data/places (discovery index for Manhattan, Brooklyn and western Queens: OpenStreetMap, NYC LPC, NYC restrooms, DOHMH permits, Wikidata) and
+Sources: data/places (discovery index for Manhattan, Brooklyn and Queens: OpenStreetMap, NYC LPC, NYC restrooms, DOHMH permits, Wikidata) and
 data/inspections/dohmh.json.gz (DOHMH food permits in all five boroughs). Every field is copied from a source or left None;
 `data_sources` lists where each place's facts come from.
 
@@ -11,7 +11,7 @@ quality_status is set by rules on evidence, never for looks:
   limited_data      no address, website or hours in any source
   unverified        listed by a source, nothing more confirmed
 routing_coverage: 'manhattan_network' when the place snaps to the pedestrian graph (the name is historical: the graph now joins
-Manhattan, Brooklyn and western Queens), otherwise 'search_only'.
+Manhattan, Brooklyn and Queens), otherwise 'search_only'.
 """
 import gzip, json, math, os, re, threading
 from array import array
@@ -127,7 +127,7 @@ class PlaceStore:
 
     def _outside(self):
         """DOHMH food permits outside the discovery index (search only). Permits already in the index (Manhattan, and the
-        Brooklyn / western Queens permits scripts/build_area_places.py added) only refresh their inspection fields."""
+        Brooklyn / Queens permits scripts/build_area_places.py added) only refresh their inspection fields."""
         if self.dohmh_meta is None and os.path.exists(DOHMH):
             with self._outside_lock:
                 if self.dohmh_meta is None:
@@ -253,7 +253,7 @@ class PlaceStore:
     # ---------------------------------------------------------------- search
     def search(self, near, categories, radius_m=1200, limit=20, query=None, cuisine=None, include_closed=False):
         """Places of the given categories within radius_m of near (straight-line pre-selection; walking distance is the
-        router's job). Manhattan, Brooklyn and western Queens come from the discovery index; food elsewhere in NYC from DOHMH (search only)."""
+        router's job). Manhattan, Brooklyn and Queens come from the discovery index; food elsewhere in NYC from DOHMH (search only)."""
         q = re.sub(r'[^a-z0-9 ]', '', (query or '').lower()).strip()
         out, seen = [], set()
         pools = [c for c in categories if c in self.rows]

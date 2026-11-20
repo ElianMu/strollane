@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G11","station_id":"264","complex_id":"264","stop_name":"Woodhaven Blvd","daytime_routes":"M R","line":"Queens Blvd","structure":"Subway","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.869229,40.733106]}}]}

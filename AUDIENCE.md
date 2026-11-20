@@ -7,7 +7,7 @@ be tested and, if wrong, changed.
 ## Lead audience: people new to New York
 
 People in their first year in the city (new students, recent movers) who have free time and want to get to know a
-neighbourhood in Manhattan, Brooklyn or western Queens on foot.
+neighbourhood in Manhattan, Brooklyn or Queens on foot.
 
 Why this group, on the evidence available:
 
@@ -21,7 +21,7 @@ Why this group, on the evidence available:
   on street-by-street differences needs.
 - **They can be reached for validation.** A first round of 8–12 walk-along participants can be recruited among new
   students, so the trust question the critique raised can actually be tested with this group.
-- **Coverage fits.** Scores and walking routes cover Manhattan, Brooklyn and western Queens (Long Island City to Jackson Heights), where this group
+- **Coverage fits.** Scores and walking routes cover Manhattan, Brooklyn and Queens (all of Queens since 2026-11-19, except the Rockaway peninsula), where this group
   explores first, with place recommendations (food, cafés, sights) in all three.
 
 ## Use cases built around the lead audience

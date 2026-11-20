@@ -49,7 +49,7 @@ def oneway_for_foot(d):
     return 'yes' in as_list(d.get('oneway:foot'))
 
 
-# The public Overpass servers answer 502/504/429 when busy (seen 2026-11-17 for western Queens): each is tried in turn,
+# The public Overpass servers answer 502/504/429 when busy (seen 2026-11-17 for Queens): each is tried in turn,
 # three rounds with a growing pause. Finished sub-queries stay in osmnx's cache, so a retry does not repeat them.
 OVERPASS_SERVERS = ['https://overpass-api.de/api', 'https://overpass.kumi.systems/api', 'https://overpass.private.coffee/api']
 
@@ -90,8 +90,34 @@ def main():
         boundary = box_polygon(*box)
     else:
         boundary = ox.geocode_to_gdf(PLACE).geometry.iloc[0]
+        if area != 'manhattan':  # the area's own outline: its box reaches into neighbouring boroughs and counties
+            from shapely.geometry import mapping
+            with open(os.path.join(ROOT, 'data', 'pedestrian', f'{area}-boundary.json'), 'w') as f:
+                json.dump({'place': PLACE, 'source': 'OpenStreetMap boundary via Nominatim (OSMnx geocode_to_gdf), simplified 0.0002 degrees',
+                           'geometry': mapping(boundary.simplify(0.0002))}, f, separators=(',', ':'))
     print('Downloading OSM walk network (Overpass)…', flush=True)
-    G = download_walk_graph(boundary)
+    if area != 'manhattan' and not box:
+        # A bridge that leaves the borough can end on a stretch whose nodes are all outside it (the Queensboro Bridge's
+        # last 190 m over Manhattan's shore), and truncate_by_edge drops that stretch, so the joined network loses the
+        # crossing. Download a little beyond the outline (0.004 degrees, about 350 m), then keep only edges with a node
+        # inside it, plus bridges: other boroughs' and counties' streets stay out.
+        from shapely.geometry import Point
+        from shapely.prepared import prep
+        G = download_walk_graph(boundary.buffer(0.004))
+        inside = prep(boundary)
+        out = {n for n, d in G.nodes(data=True) if not inside.contains(Point(d['x'], d['y']))}
+        is_bridge = lambda d: 'yes' in (d.get('bridge') if isinstance(d.get('bridge'), list) else [d.get('bridge')])
+        # A bridge's landing beyond the outline can be an untagged ramp (the Queensboro Bridge's path in Manhattan), so
+        # the edges touching the far end of a bridge that crosses the outline are kept too.
+        landings = {n for u, v, d in G.edges(data=True) if is_bridge(d) and (u in out) != (v in out) for n in (u, v) if n in out}
+        landings |= {n for u, v, d in G.edges(data=True) if is_bridge(d) and u in out and v in out for n in (u, v)}
+        drop = [(u, v, k) for u, v, k, d in G.edges(keys=True, data=True)
+                if u in out and v in out and not is_bridge(d) and u not in landings and v not in landings]
+        G.remove_edges_from(drop)
+        G.remove_nodes_from([n for n in out if G.degree(n) == 0])
+        print(f'  kept bridges beyond the outline; dropped {len(drop):,} edges with both ends outside it', flush=True)
+    else:
+        G = download_walk_graph(boundary)
     raw_nodes, raw_edges = G.number_of_nodes(), G.number_of_edges()
 
     # Pedestrian access: drop legally closed edges; a directed copy against an oneway:foot restriction is dropped too.

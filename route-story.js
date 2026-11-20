@@ -3,7 +3,7 @@
 
    Nothing here is new data. Every word comes from numbers the engine already returned for these routes
    (the 12 dimension scores, coverage, distance, time, edges and street names) or from the real place index
-   (data/places/*.json records that carry a Wikidata ID). Scores are ranks across Manhattan, Brooklyn and western Queens together (0–100), so the
+   (data/places/*.json records that carry a Wikidata ID). Scores are ranks across Manhattan, Brooklyn and Queens together (0–100), so the
    wording is always comparative ("greener than the fastest way"), never absolute ("green"). A claim is made only
    when both routes have that dimension measured on ≥ 60 % of their length, and only beyond a 5-point difference.
 
@@ -222,7 +222,7 @@ function storyBuild(routes) {
     const main = Object.entries(storyStreets(r)).sort((a, b) => b[1] - a[1])[0];
     const parts = [];
     if (main && main[1] > 150) parts.push(`Mostly along ${main[0]}.`);
-    if (order.length) parts.push(`${storyCap(storyJoin(order.map((t) => STORY_WORDS[t.d].more)))} than a typical street in Manhattan, Brooklyn and western Queens.`);
+    if (order.length) parts.push(`${storyCap(storyJoin(order.map((t) => STORY_WORDS[t.d].more)))} than a typical street in Manhattan, Brooklyn and Queens.`);
     return parts.join(' ') || null;
    }
    if (isFastest) {
@@ -267,7 +267,7 @@ function storyBuild(routes) {
      const trails = others.every((o) => { const x = storyScore(o, a.dim); return x != null && (a.low ? v - x : x - v) >= STORY.MORE; });
      return trails ? `${a.low ? w.more : w.less} than the others` : `similar ${w.noun} to the others`;
     }
-    return v >= STORY.TYPICAL ? `${w.more} than a typical street in Manhattan, Brooklyn and western Queens` : v <= 100 - STORY.TYPICAL ? `${w.less} than a typical street in Manhattan, Brooklyn and western Queens` : `about typical ${w.noun} for Manhattan, Brooklyn and western Queens`;
+    return v >= STORY.TYPICAL ? `${w.more} than a typical street in Manhattan, Brooklyn and Queens` : v <= 100 - STORY.TYPICAL ? `${w.less} than a typical street in Manhattan, Brooklyn and Queens` : `about typical ${w.noun} for Manhattan, Brooklyn and Queens`;
    });
    const asked = storyJoin(asks.slice(0, 2).map((a) => (a.low ? 'less ' : '') + STORY_WORDS[a.dim].ask));
    why = parts.every((x) => x.startsWith('similar')) ? `You asked for ${asked}: ${isFastest ? 'about the same as the other options' : 'about the same as the fastest way'}${parts.length > 1 ? ' on both' : ''}.` : `You asked for ${asked}: ${storyJoin(parts)}.`;

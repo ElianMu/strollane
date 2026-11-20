@@ -327,3 +327,20 @@ class Adjacency:
 
     def __contains__(self, node):
         return self.get(node, None) is not None
+
+
+class WayPool:
+    """The pack's OSM way-id lists as one flat column: pool[w] returns the list (a new one each time; callers only
+    read it). 260,000 small Python lists of large integers cost about 30 MB; the columns cost about 4."""
+
+    def __init__(self, ways):
+        self.flat, self.off = array('q'), array('i', [0])
+        for w in ways:
+            self.flat.extend(w)
+            self.off.append(len(self.flat))
+
+    def __len__(self):
+        return len(self.off) - 1
+
+    def __getitem__(self, w):
+        return list(self.flat[self.off[w]:self.off[w + 1]])

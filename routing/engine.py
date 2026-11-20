@@ -1,16 +1,18 @@
 """STREETWISE pedestrian routing engine (standard library only).
 
-Routes are computed on the joined OSM pedestrian graph of Manhattan, Brooklyn and western Queens
+Routes are computed on the joined OSM pedestrian graph of Manhattan, Brooklyn and Queens
 (data/pedestrian/nyc-walk-graph.json.gz, scripts/merge_networks.py; read from nyc-network.bin.gz when current) and scored with
 the 12 experience scores transferred to each OSM edge (data/pedestrian/edge-scores.json.gz). NYC LION is never
 routed on; it only supplies scores through street_osm_edge_mapping. Every route keeps its ordered edge list, and
 its geometry, distance and scores are all derived from that one list.
 """
 import gzip, hashlib, heapq, json, math, os, threading, time, uuid
+from datetime import datetime, timezone
 from array import array
 from collections import OrderedDict
 from .geometry_store import PackedPolylines, ProjectedPolylines
-from .compact import Adjacency, EdgeIds, EdgeTable, GeomIndex, NodeTable, PackedScores, intern_edges
+from .compact import Adjacency, EdgeIds, EdgeTable, GeomIndex, NodeTable, WayPool, PackedScores, intern_edges
+from . import feedback as fb
 from . import netpack
 
 try:
@@ -72,7 +74,7 @@ class PedestrianNetwork:
         self.by_geom = GeomIndex(self.edges, len(self.geoms))
         # Metric polylines and a 100 m bucket index of routable edge geometries (both endpoints in the main component).
         self.gxy = ProjectedPolylines(self.geoms, xy)
-        self.glen = [sum(math.dist(a, b) for a, b in zip(g, g[1:])) for g in self.gxy]
+        self.glen = array('d', (sum(math.dist(a, b) for a, b in zip(g, g[1:])) for g in self.gxy))
         self.index = {}
         for i, (u, v, k, gi, rev, *_rest) in enumerate(self.edges):
             if rev or self.nodes[u][3] != 0 or self.nodes[v][3] != 0:
@@ -98,7 +100,7 @@ class PedestrianNetwork:
             if os.path.exists(streets):
                 with open(streets, encoding='utf-8') as f: feats = json.load(f)['features']
             evidence = {f['properties']['id']: f['properties'] for f in feats}
-        extra = os.path.join(ROOT, 'data', 'pedestrian', 'area-segment-evidence.json.gz')  # Brooklyn and western Queens (scripts/merge_networks.py)
+        extra = os.path.join(ROOT, 'data', 'pedestrian', 'area-segment-evidence.json.gz')  # Brooklyn and Queens (scripts/merge_networks.py)
         if os.path.exists(extra):
             with gzip.open(extra, 'rt') as f: evidence = {**evidence, **json.load(f)['records']}
         self.segment_names = {sid: (p.get('name'), p.get('source_segment_id')) for sid, p in evidence.items()}
@@ -144,7 +146,7 @@ class PedestrianNetwork:
         tags = header['tags']
         for t in tags:
             t['_steps'] = 'steps' in as_list(t.get('highway'))
-        ways = header['ways']
+        ways = WayPool(header.pop('ways'))
         U, V, K, G, R, L, W, T = (A[c] for c in ('e_u', 'e_v', 'e_k', 'e_gi', 'e_rev', 'e_len', 'e_ways', 'e_tags'))
         self.edges = EdgeTable(ids, U, V, K, G, R, L, W, T, ways, tags)
         self.gscores = netpack.scores_from_pack(header, A, len(DIMENSIONS))
@@ -251,8 +253,8 @@ class PedestrianNetwork:
             if best and best[0] <= r * 100:
                 break
         if not best or best[0] > MAX_SNAP_M:
-            raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan, Brooklyn and western Queens pedestrian network'
-                               + (' that avoids stairs.' if allowed else '. Roosevelt, Randall\'s and Governors Island connect only through other boroughs and are not routable.'))
+            raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan, Brooklyn and Queens pedestrian network'
+                               + (' that avoids stairs.' if allowed else '. Governors Island (ferry only) and the Rockaway peninsula (no walkable link to the rest of Queens in the OpenStreetMap walk data) are not routable.'))
         d, i, along = best
         geo_len = self.glen[self.edges.G[i]] or 1
         return {'edge': i, 'offset_m': along / geo_len * self.edges.L[i], 'snap_distance_m': round(d, 1),
@@ -465,10 +467,40 @@ class RoutePlanner:
         self.nav_routes = OrderedDict()
         self.nav_sizes = {}
         self.lock = threading.Lock()
+        self.feedback = fb.FeedbackBook.from_env()  # walker reports (routing/feedback.py); disabled without a store
+        self._overlays = {}
 
-    def edge_utility(self, gi, weights):
-        """0..1 preference fit of one edge; missing dimensions count as neutral 0.5 (never as good or bad)."""
+    def feedback_overlay(self, bucket):
+        """{gi: {dimension index: delta}} from the walker reports that pass routing/feedback.py's checks, for routes
+        planned in this time-of-day bucket. An edge matched to several street segments takes their mean delta (a segment
+        without reports counts as 0). Cached until the reports change."""
+        book = self.feedback
+        key = (id(book.summary), bucket)
+        if key in self._overlays:
+            return self._overlays[key]
+        seg_delta = {}
+        for seg, dims in book.summary.items():
+            d = {fb.DIMENSION_KEYS.index(k): fb.delta_for(v, bucket) for k, v in dims.items()}  # same order as DIMENSIONS
+            d = {j: x for j, x in d.items() if x}
+            if d:
+                seg_delta[seg] = d
+        overlay = {}
+        if seg_delta:
+            for gi, m in enumerate(self.net.gscores.m):
+                hit = [seg_delta.get(x, {}) for x in m]
+                if any(hit):
+                    js = {j for h in hit for j in h}
+                    overlay[gi] = {j: sum(h.get(j, 0.0) for h in hit) / len(hit) for j in js}
+        self._overlays = {key: overlay}
+        return overlay
+
+    def edge_utility(self, gi, weights, overlay=None):
+        """0..1 preference fit of one edge; missing dimensions count as neutral 0.5 (never as good or bad). `overlay`
+        adds the walker-feedback adjustment (feedback_overlay) to a dimension's score, never past 0 or 100."""
         sv, cv = self.net.gscores.scores(gi)
+        adj = overlay.get(gi) if overlay else None
+        if adj:
+            sv = [v if v is None or j not in adj else max(0.0, min(100.0, v + adj[j])) for j, v in enumerate(sv)]
         num = den = 0.0
         for j, d in enumerate(DIMENSIONS):
             if d not in weights:
@@ -492,6 +524,9 @@ class RoutePlanner:
         o = net.snap(origin['lon'], origin['lat'], 'Origin', no_steps)
         d = net.snap(destination['lon'], destination['lat'], 'Destination', no_steps)
         weights, expressed = preference_weights(preferences)
+        self.feedback.refresh_in_background()
+        bucket = fb.ny_bucket(datetime.now(timezone.utc))
+        overlay = self.feedback_overlay(bucket)
         crime_pref = crime_field = None
         if (preferences or {}).get('crime') is not None:
             from . import crime
@@ -527,7 +562,7 @@ class RoutePlanner:
 
         def net_utility(gi):
             if gi not in util_cache:
-                util_cache[gi] = self.edge_utility(gi, weights)
+                util_cache[gi] = self.edge_utility(gi, weights, overlay)
             return util_cache[gi]
 
         def weather_cost(i):
@@ -597,7 +632,7 @@ class RoutePlanner:
 
         routes = []
         for objective, name, steps in candidates:
-            r = self.build_route(objective, name, steps, o, d, origin, destination)
+            r = self.build_route(objective, name, steps, o, d, origin, destination, overlay, bucket)
             if any(overlap(r, x) > .85 for x in routes):
                 continue  # same path found by another objective: keep one copy, never relabel duplicates
             routes.append(r)
@@ -647,7 +682,7 @@ class RoutePlanner:
             'feasible_count': sum(r['constraints']['feasible'] for r in ranked),
             'routes': ranked, 'compute_seconds': round(time.time() - t0, 2), 'weather_routing': wctx,
             'notes': ['Walking time uses a fixed 4.8 km/h planning pace; no live pedestrian or traffic data.',
-                      'Scores are relative ranks among the street segments of Manhattan, Brooklyn and western Queens (0–100), not calibrated experience scores. N/A dimensions are excluded, never counted as zero.'],
+                      'Scores are relative ranks among the street segments of Manhattan, Brooklyn and Queens (0–100), not calibrated experience scores. N/A dimensions are excluded, never counted as zero.'],
         }
 
     def remember(self, routes):
@@ -661,11 +696,13 @@ class RoutePlanner:
             while len(self.nav_routes)>200 or sum(self.nav_sizes.values())>4*1024*1024:
                 rid,_=self.nav_routes.popitem(last=False);self.nav_sizes.pop(rid,None)
 
-    def build_route(self, objective, name, steps, o, d, origin, destination):
-        """Route Object: geometry, distance and scores all come from the same ordered edge list."""
+    def build_route(self, objective, name, steps, o, d, origin, destination, overlay=None, bucket=None):
+        """Route Object: geometry, distance and scores all come from the same ordered edge list. With walker feedback
+        applied (overlay), dimension_scores use the adjusted values and dimension_scores_from_data keeps the data's."""
         net = self.net
         coords, edges, total = [], [], 0.0
-        num, scored = [0.0] * 12, [0.0] * 12
+        num, scored, num0 = [0.0] * 12, [0.0] * 12, [0.0] * 12
+        touched = {}
         for i, a, b in steps:
             seg = net.clip(i, a, b)
             if coords and seg and coords[-1] == seg[0]:
@@ -676,12 +713,32 @@ class RoutePlanner:
             e = net.edge_object(i, traversed=length, offsets=(a, b))
             e['partial'] = a > 0.01 or b < net.edges.L[i] - 0.01
             edges.append(e)
-            s = net.gscores[net.edges.G[i]]
+            gi = net.edges.G[i]
+            s = net.gscores[gi]
+            adj = overlay.get(gi) if overlay else None
+            if adj:
+                for x in s['m']:
+                    touched[x] = touched.get(x, 0.0) + length
             for j in range(12):
                 if s['s'][j] is not None:
                     w = length * s['c'][j]
-                    num[j] += w * s['s'][j]; scored[j] += w
+                    v = s['s'][j]
+                    num0[j] += w * v
+                    if adj and j in adj:
+                        v = max(0.0, min(100.0, v + adj[j]))
+                    num[j] += w * v; scored[j] += w
         dims = {DIMENSIONS[j]: (round(num[j] / scored[j]) if scored[j] else None) for j in range(12)}
+        applied = []
+        for seg, metres in touched.items():
+            for k, summ in self.feedback.for_segment(seg).items():
+                delta = fb.delta_for(summ, bucket)
+                if delta:
+                    applied.append({'segment_id': seg, 'street_name': net.segment_names.get(seg, (None,))[0], 'dimension': k,
+                                    'delta': delta, 'reports': summ['n'], 'days': summ['days'], 'metres_on_route': round(metres)})
+        walker = {'applied': sorted(applied, key=lambda a: -abs(a['delta'])), 'time_bucket': bucket,
+                  'rule': fb.RULE}
+        if applied:
+            walker['dimension_scores_from_data'] = {DIMENSIONS[j]: (round(num0[j] / scored[j]) if scored[j] else None) for j in range(12)}
         cov = {DIMENSIONS[j]: round(scored[j] / total, 3) if total else 0.0 for j in range(12)}
         have = [v for v in dims.values() if v is not None]
         rid = 'rt-' + uuid.uuid4().hex[:10]
@@ -697,6 +754,7 @@ class RoutePlanner:
             'data_coverage': {'by_dimension': cov, 'mean': round(sum(cov.values()) / 12, 3),
                               'low_coverage_dimensions': [k for k, v in cov.items() if v < LOW_COVERAGE]},
             'network_version': net.network_version, 'score_version': net.score_version,
+            'walker_feedback': walker,
             'navigation': {'state': 'planned', 'progress_m': 0.0, 'remaining_m': round(total, 1),
                            'remaining_min': round(duration, 1), 'off_route': False, 'current_edge_id': edges[0]['edge_id'] if edges else None,
                            'progress_endpoint': '/api/navigation/progress'},

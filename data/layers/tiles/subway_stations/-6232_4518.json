@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"A65","station_id":"195","complex_id":"195","stop_name":"Ozone Park-Lefferts Blvd","daytime_routes":"A","line":"Liberty Av","structure":"Elevated","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.825798,40.685951]}}]}

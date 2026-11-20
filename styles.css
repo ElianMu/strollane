@@ -1218,3 +1218,12 @@ html[lang^=zh] .intro-row h1 br{display:none}
 
 /* Layers built for Manhattan only (catalog coverage), next to layers that cover all three areas. */
 .urban-only{font-size:.72em;font-weight:500;opacity:.7;margin-left:.35em;white-space:nowrap}
+/* Walker feedback (feedback-ui.js) */
+.walker-feedback,.walker-route{border:1px solid var(--g33);border-radius:8px;padding:10px 11px;margin:10px 0;background:var(--g11)}
+.walker-feedback h4{margin:0 0 7px;font-size:11px}.walker-route>summary{cursor:pointer;font-size:11px;font-weight:700}
+.walker-buttons{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
+.walker-buttons button{flex:1 1 140px;border:1px solid var(--g4a);background:var(--g14);color:var(--gee);border-radius:6px;padding:7px 8px;font-size:10.5px;font-weight:700;text-align:left}
+.walker-buttons button:hover{border-color:var(--lime)}
+.walker-route label{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--g9d);margin-top:7px}
+.walker-route select{border:1px solid var(--g3d);background:var(--g14);color:var(--gee);border-radius:6px;padding:6px;font-size:11px}
+.walker-status,.walker-note{display:block;font-size:9.5px;line-height:1.55;color:var(--g9d);margin-top:4px}

@@ -77,7 +77,7 @@ class RouteBenchmark(unittest.TestCase):
             self.assertTrue(set(names(block)) <= set(DIMENSIONS), 'an activity may only bundle registered dimensions')
 
     def test_areas_benchmark_is_current_and_clean(self):
-        """benchmarks/route_benchmark_areas.json (Brooklyn, western Queens, river crossings) is from the current network and
+        """benchmarks/route_benchmark_areas.json (Brooklyn, Queens, river crossings) is from the current network and
         scores, covers every trip in od_pairs_areas.json, and no preference route fails route QA."""
         d = json.loads((ROOT / 'benchmarks' / 'route_benchmark_areas.json').read_text())
         net = rb.get_planner().net
@@ -86,7 +86,7 @@ class RouteBenchmark(unittest.TestCase):
         self.assertEqual({r['pair'] for r in d['runs']}, {p['id'] for p in pairs})
         self.assertEqual(d['summary']['errors'], 0)
         self.assertEqual(d['summary']['all']['blocking_issues'], 0)
-        self.assertEqual(set(d['summary']['by_area']), {'Brooklyn', 'Western Queens', 'Across the river'})
+        self.assertEqual(set(d['summary']['by_area']), {'Brooklyn', 'Western Queens', 'Eastern Queens', 'Across the river'})
 
     def test_summary_survives_unscored_runs(self):
         self.assertEqual(rb.summarise([{'dimension': 'Nature', 'error': 'x'}]), {'runs': 1, 'scored': 0})

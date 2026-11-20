@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One small city-wide file per sparse map layer, for zoomed-out views (data/layers/overview/<tileset>.json).
 
-The map keeps each layer in 1 km tiles. With Manhattan, Brooklyn and western Queens on one map, a city-wide view covers
+The map keeps each layer in 1 km tiles. With Manhattan, Brooklyn and Queens on one map, a city-wide view covers
 hundreds of tiles per layer: the page skipped the layer ("Zoom in to load") or sent so many requests that GitHub Pages
 answered 429. For point and polygon layers small enough to draw city-wide, this writes all features in one file, with
 only what a zoomed-out map needs: feature_id, a name, area, the fields a dataset filter reads (catalog "filter") and, for

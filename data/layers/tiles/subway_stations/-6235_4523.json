@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G10","station_id":"263","complex_id":"263","stop_name":"63 Dr-Rego Park","daytime_routes":"M R","line":"Queens Blvd","structure":"Subway","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.861604,40.729846]}}]}

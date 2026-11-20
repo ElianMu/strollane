@@ -11,7 +11,7 @@ function setupJourneyUI(){
    placeholder:'Search any NYC address, place or business',
    onSelect:p=>{setJourneyPlace(kind,p);resetRoutes();syncMapData();
     if(p.routing_coverage==='search_only')return toast('This source point has no verified walking access; discovery only.');
- if(!inRoutingCoverage(p))return toast(`${p.name} is in ${p.borough||'NYC'}: place search covers all five boroughs, but walking routes cover Manhattan, Brooklyn and western Queens only.`);
+ if(!inRoutingCoverage(p))return toast(`${p.name} is in ${p.borough||'NYC'}: place search covers all five boroughs, but walking routes cover Manhattan, Brooklyn and Queens only.`);
     if(state.mapReady)state.map.flyTo({center:[p.lon,p.lat],zoom:15,duration:450});},
    onClear:()=>{state[kind]=null;state[kind==='start'?'customStart':'customEnd']=null;resetRoutes();syncMapData();}});
  }
@@ -32,7 +32,7 @@ function setupJourneyUI(){
 function addNamedStop(p,required=true){
  if(journey.named.some(n=>n.place.id===p.id))return toast(`${p.name} is already a stop.`);
  if(p.routing_coverage==='search_only')return toast('This source point has no verified walking access; discovery only.');
- if(!inRoutingCoverage(p))return toast(`${p.name} is outside walking-route coverage (Manhattan, Brooklyn, western Queens); it cannot be routed.`);
+ if(!inRoutingCoverage(p))return toast(`${p.name} is outside walking-route coverage (Manhattan, Brooklyn, Queens); it cannot be routed.`);
  journey.removed.delete(p.id);journey.named.push({place:p,required,order:null,visitMin:VISIT_MIN[p.cat]??20,visitEstimated:true});journey.active=true;
  if(journey.endMode==='fixed'&&!getPlace('end'))setEndMode('open');
  renderJourneyPanel();syncMapData();document.dispatchEvent(new CustomEvent('strollane:ends-changed',{detail:{kind:'stops'}}));toast(`Added ${p.name}. Plan My Walk to route it.`);

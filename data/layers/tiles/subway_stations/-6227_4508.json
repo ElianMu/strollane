@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H10","station_id":"208","complex_id":"208","stop_name":"Beach 25 St","daytime_routes":"A","line":"Rockaway","structure":"Viaduct","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.761353,40.600066]}}]}

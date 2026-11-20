@@ -71,7 +71,7 @@ class Catalog_(unittest.TestCase):
 class GeographicAccuracy(unittest.TestCase):
     def test_all_coordinates_in_their_area(self):
         """Catches swapped lon/lat and unconverted State Plane feet (the historic districts source is EPSG:2263).
-        Manhattan features lie in the Manhattan envelope; Brooklyn / western Queens features (scripts/build_area_layers.py,
+        Manhattan features lie in the Manhattan envelope; Brooklyn / Queens features (scripts/build_area_layers.py,
         property "area") have their centre in that area's box and no vertex far outside it."""
         import sys; sys.path.insert(0, str(ROOT / 'scripts')); from areas import AREAS
         for tid in CAT['tilesets']:

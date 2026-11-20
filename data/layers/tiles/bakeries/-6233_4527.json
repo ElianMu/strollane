@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/2956614141","addr:housenumber":"29-42","addr:street":"Union Street","amenity":"cafe","cuisine":"coffee_shop","name":"Paris Baguette","shop":"bakery","website":"http://www.parisbaguetteusa.com/","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.826916,40.771126]}}]}

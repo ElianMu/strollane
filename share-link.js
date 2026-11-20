@@ -48,7 +48,7 @@ function shareLinkEncode(st, base) {
  return (base || (location.origin + location.pathname)) + SHARE_PREFIX + q.toString();
 }
 
-/** Parse a fragment. Returns the state, or null for anything that is not a complete, valid request inside the routing area (Manhattan, Brooklyn, western Queens):
+/** Parse a fragment. Returns the state, or null for anything that is not a complete, valid request inside the routing area (Manhattan, Brooklyn, Queens):
     a link is outside input, so every field is checked and nothing is guessed. */
 function shareLinkParse(hash) {
  if (typeof hash !== 'string' || !hash.startsWith(SHARE_PREFIX)) return null;

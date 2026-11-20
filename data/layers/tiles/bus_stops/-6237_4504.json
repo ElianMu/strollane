@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/5123508987","bench":"yes","highway":"bus_stop","name":"Beach 169th Street & Rockaway Point Boulevard","network":"NYC Transit","route_ref":"Q22;Q35","shelter":"yes","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.882661,40.567157]}}]}

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/11842350440","amenity":"bench","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.838865,40.708699]}},{"type":"Feature","properties":{"feature_id":"node/11842350441","amenity":"bench","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.838814,40.708612]}}]}

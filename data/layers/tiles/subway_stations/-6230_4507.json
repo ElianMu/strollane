@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H06","station_id":"204","complex_id":"204","stop_name":"Beach 67 St","daytime_routes":"A","line":"Rockaway","structure":"Viaduct","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.796924,40.590927]}}]}

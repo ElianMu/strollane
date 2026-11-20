@@ -28,7 +28,7 @@ const P=require(path.join(__dirname,'..','places.js'));
  // One provider down: results still come from the other, and the failure is reported.
  failGeo=true;const part=await P.searchPlaces('Brooklyn Museum',{});failGeo=false;
  if(!process.env.LIVE){assert(part.places.length>0);assert(part.errors.some(e=>/GeoSearch/.test(e)));}
- // Walking-route coverage: Manhattan and Brooklyn whole; Queens only inside the western Queens box; other boroughs never.
+ // Walking-route coverage: Manhattan and Brooklyn whole; Queens only inside the Queens box; other boroughs never.
  const cov=(borough,lat,lon)=>P.inRoutingCoverage({borough,lat,lon});
  assert.equal(cov('Brooklyn',40.6710,-73.9633),true,'Brooklyn Museum');assert.equal(cov('Manhattan',40.7484,-73.9857),true,'Empire State Building');
  assert.equal(cov('Queens',40.7447,-73.9485),true,'Court Square, LIC');assert.equal(cov('Queens',40.7597,-73.8296),false,'Flushing Main Street');

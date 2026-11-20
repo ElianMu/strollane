@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Join the Manhattan, Brooklyn and western Queens walk networks into the one network the router uses.
+"""Join the Manhattan, Brooklyn and Queens walk networks into the one network the router uses.
 
     python3 scripts/merge_networks.py
     python3 scripts/compile_network.py --area nyc
@@ -11,8 +11,8 @@ data/pedestrian/nyc-walk-graph.json.gz and nyc-edge-scores.json.gz in the same f
 The networks are separate OSMnx downloads, joined on OSM node IDs, which are global: a bridge or a street that crosses
 an area boundary appears in both downloads with the same nodes, so the joined network is continuous there. Where the
 same directed edge (u, v, key) is in more than one network, the copy from the first area in AREAS is kept, with that
-area's scores; the order puts each street with the area whose street segments scored it (the western Queens box also
-covers Manhattan's east edge and part of Greenpoint, which Manhattan and Brooklyn score). Node attributes come from the
+area's scores; the order puts each street with the area whose street segments scored it (walk graphs cut by an
+OSM boundary keep edges that cross it, so neighbouring areas share border streets). Node attributes come from the
 first network that has the node. Routable = the largest strongly connected component of the JOINED network, recomputed
 here, as build_pedestrian_network.py does for one area.
 
@@ -72,9 +72,65 @@ def strongly_connected(nodes, edges):
     return {n: rank[c] for n, c in comp.items()}, len(comps)
 
 
+def metres(line):
+    from math import cos, hypot, radians
+    return sum(hypot((b[0] - a[0]) * 111320 * cos(radians((a[1] + b[1]) / 2)), (b[1] - a[1]) * 110540) for a, b in zip(line, line[1:]))
+
+
+def stitch_borders(graphs, scores):
+    """Split an edge of one area at a node where another area's network stops.
+
+    Each area's download is cut at its own boundary, so on a long bridge the two downloads can each end at a node that
+    the other one only passes through: the Queensboro Bridge path in the Queens download ends at node 2089938148 near
+    the Manhattan shore, which in the Manhattan download is a vertex inside its edge 593215787–3785591409. Joining on
+    node IDs alone then leaves the bridge broken. For every dead end of one download that is not a node of any other but
+    is an interior vertex of another download's edge (same OSM node, same coordinates), that edge and its reverse twin
+    are split there into two edges. Geometry and scores are the original edge's (both halves keep its score record);
+    the length is shared out in proportion to the measured lengths of the two halves."""
+    node_sets = {a: set(g['nodes']) for a, g in graphs.items()}
+    where = {}
+    for a, g in graphs.items():
+        for ei, e in enumerate(g['edges']):
+            if e[4]:
+                continue
+            line = g['geoms'][e[3]]
+            for vi in range(1, len(line) - 1):
+                where.setdefault(tuple(line[vi]), []).append((a, ei, vi))
+    cuts = []
+    for a, g in graphs.items():
+        for n, v in g['nodes'].items():
+            if v[2] != 1 or any(n in node_sets[b] for b in graphs if b != a):
+                continue
+            for b, ei, vi in where.get((v[0], v[1]), ()):
+                if b != a:
+                    cuts.append((b, ei, vi, int(n), v))
+    done = []
+    # several cuts on one edge: the later vertex first, so each earlier cut still indexes the remaining first half
+    for b, ei, vi, n, nv in sorted(cuts, key=lambda c: (c[0], c[1], -c[2])):
+        g, sg = graphs[b], scores[b]['geoms']
+        u, v, k, gi, rev, length, osmids, tags = g['edges'][ei]
+        line = g['geoms'][gi]
+        first, second = line[:vi + 1], line[vi:]
+        share = metres(first) / max(metres(first) + metres(second), 1e-9)
+        ga, gb = len(g['geoms']), len(g['geoms']) + 1
+        g['geoms'] += [first, second]
+        sg += [sg[gi], sg[gi]]
+        la, lb = round(length * share, 2), round(length * (1 - share), 2)
+        twin = next((j for j, t in enumerate(g['edges']) if t[0] == v and t[1] == u and t[2] == k and t[3] == gi and t[4] == 1), None)
+        g['edges'][ei] = [u, n, k, ga, 0, la, osmids, tags]
+        g['edges'].append([n, v, k, gb, 0, lb, osmids, tags])
+        if twin is not None:
+            g['edges'][twin] = [v, n, k, gb, 1, lb, osmids, tags]
+            g['edges'].append([n, u, k, ga, 1, la, osmids, tags])
+        g['nodes'].setdefault(str(n), [nv[0], nv[1], 2, 0])
+        done.append({'area': b, 'edge': f'{u}-{v}-{k}', 'at_node': n, 'name': tags.get('name')})
+    return done
+
+
 def main():
     graphs = {a: json.load(gzip.open(os.path.join(P, f'{a}-walk-graph.json.gz'), 'rt', encoding='utf-8')) for a in AREAS}
     scores = {a: json.load(gzip.open(scores_path(a), 'rt', encoding='utf-8')) for a in AREAS}
+    stitched = stitch_borders(graphs, scores)
     versions = {a: scores[a]['metadata']['score_version'] for a in AREAS}
     if len(set(versions.values())) != 1:
         sys.exit(f'edge scores are on different scales: {versions}. Rerun the transfer for every area.')
@@ -111,12 +167,13 @@ def main():
     gmeta = {**{k: m0[k] for k in ('source', 'osmnx_version', 'edge_fields', 'node_fields', 'edge_id', 'oneway_rule') if k in m0},
              'network_version': f'nyc3-{digest}', 'built_at': built, 'areas': AREAS,
              'area_network_versions': {a: graphs[a]['metadata']['network_version'] for a in AREAS},
-             'boundary': 'Manhattan, Brooklyn and the western Queens box (scripts/areas.py), joined on OSM node IDs',
+             'boundary': 'Manhattan, Brooklyn and Queens (scripts/areas.py), joined on OSM node IDs',
              'boundary_bounds': [min(graphs[a]['metadata']['boundary_bounds'][0] for a in AREAS), min(graphs[a]['metadata']['boundary_bounds'][1] for a in AREAS),
                                  max(graphs[a]['metadata']['boundary_bounds'][2] for a in AREAS), max(graphs[a]['metadata']['boundary_bounds'][3] for a in AREAS)],
              'counts': {'nodes': len(nodes), 'edges': len(edges), 'geometries': len(geoms), 'components': n_comp, 'main_component_nodes': main_nodes,
                         'by_area': from_area},
-             'merge': 'scripts/merge_networks.py: first area wins for a directed edge present in several downloads; components recomputed on the joined network.'}
+             'merge': 'scripts/merge_networks.py: first area wins for a directed edge present in several downloads; components recomputed on the joined network.',
+             'stitched_at_borders': stitched}
     routable_len, cov = 0.0, [0.0] * 12
     seen_g = set()
     for u, v, k, gi, rev, length, *_ in edges:
