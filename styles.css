@@ -1264,3 +1264,4 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .walker-feedback-slot .walker-says{margin:0}
 .section-row a.small-count{text-decoration:none;color:var(--text-secondary)}
 .cw-photo{margin:2px 0 4px;max-width:260px}.cw-photo .rp-photo img{height:120px}.cw-photo .rp-photo figcaption strong{display:none} /* stop photo: the stop name sits right below it */
+.walker-feedback-near{margin:12px 0 4px;padding:12px 12px 4px;border:1px solid var(--line);border-radius:10px}.walker-feedback-near .walker-feedback-slot{margin-top:6px}

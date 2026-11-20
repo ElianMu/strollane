@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
-  <link rel="stylesheet" href="./styles.css?v=80" />
+  <link rel="stylesheet" href="./styles.css?v=81" />
 </head>
 <body>
 <div class="site-shell">
@@ -228,13 +228,12 @@
         <button type="button" id="routeMore" class="route-more hidden" aria-expanded="false">More routes</button>
         <div class="route-dots hidden" id="routeDots" aria-hidden="true"></div>
         <button type="button" id="navStart" class="primary-cta nav-start hidden"><span>➤ Start Navigation</span><span class="cta-arrow">↗</span></button>
+        <section class="walker-feedback-near" aria-label="Walker feedback"><div class="section-row"><div class="section-overline">WALKER FEEDBACK</div><a class="small-count" href="./evaluation.html" target="_blank" rel="noopener">All results ↗</a></div>
+        <div id="walkerFeedback" class="walker-feedback-slot"><p class="status-empty">Create a walk to see what walkers said about it. After you walk it, rate it here.</p></div></section>
         <button type="button" id="routePreviewBtn" class="route-preview-btn hidden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18l6-12 4 7 3-4 5 9z"/></svg><span>3D map preview</span></button>
         <button type="button" id="shareWalk" class="route-preview-btn share-walk hidden" title="Copy a link that plans this walk again: start, destination and priorities only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="5" r="2.6"/><circle cx="18" cy="19" r="2.6"/></svg><span>Share this walk</span></button>
         <div class="m-only m-route-fromto" id="mRouteFromTo"></div>
         <div class="m-only" id="mRefineSlot"></div>
-        <div class="subtle-divider"></div>
-        <div class="section-row"><div class="section-overline">WALKER FEEDBACK</div><a class="small-count" href="./evaluation.html" target="_blank" rel="noopener">All results ↗</a></div>
-        <div id="walkerFeedback" class="walker-feedback-slot"><p class="status-empty">Create a walk to see what walkers said about it. After you walk it, rate it here.</p></div>
         <div class="subtle-divider"></div>
         <div class="section-row"><div class="section-overline">ALONG THIS WALK</div><span id="poiCount" class="small-count">0 VERIFIED</span></div>
         <div id="alongWalk" class="along-walk hidden" aria-live="polite"></div>
@@ -307,7 +306,7 @@
 <script src="./journey-ui.js?v=34"></script>
 <script src="./voice.js?v=28"></script>
 <script src="./nav-engine.js?v=30"></script>
-<script src="./nav-ui.js?v=37"></script>
+<script src="./nav-ui.js?v=38"></script>
 <script src="./ar-nav.js?v=3"></script>
 <script src="./route-preview.js?v=4"></script>
 <script src="./share-link.js?v=3"></script>

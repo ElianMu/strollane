@@ -170,7 +170,14 @@ const run=s=>vm.runInContext(s,context);
  // Walker feedback sits in its own visible section under the walk options, not inside Technical details.
  {const fb=w.document.querySelector('#walkerFeedback');
   assert(fb&&!fb.closest('details'),'walker feedback is outside the collapsed technical details');
-  assert(fb.textContent.includes('What walkers said')&&fb.querySelector('[data-k="rate-now"]'),'what walkers said and rate-now on every route');}
+  assert(fb.textContent.includes('What walkers said')&&fb.querySelector('[data-k="rate-now"]'),'what walkers said and rate-now on every route');
+  assert.equal(w.document.querySelector('#navStart').nextElementSibling,fb.closest('.walker-feedback-near'),'feedback sits right under Start Navigation');
+  // ending navigation by hand near the end asks for the rating (once); ending early does not
+  run('var __asked=0;promptWalkCheck=()=>{__asked++;};var __eng=(p)=>({progress:p,transition(){}})');const asked=()=>run('__asked');
+  run('nav.route={route_id:"r",distance_m:2000};nav.temporary=false;nav.checkAsked=null');
+  run('nav.engine=__eng(400);exitNavigation()');assert.equal(asked(),0,'20% walked: no prompt');
+  run('nav.route={route_id:"r",distance_m:2000}');run('nav.engine=__eng(1700);exitNavigation()');assert.equal(asked(),1,'85% walked: prompt');
+  run('nav.route={route_id:"r",distance_m:2000};nav.checkAsked="r"');run('nav.engine=__eng(2000);exitNavigation()');assert.equal(asked(),1,'already asked on arrival: no second prompt');}
  // "What these scores measure": the router's own indicator definitions (static file), shown only for the user's
  // priorities and only when the file's score_version equals the route's. Numbers come from the route response.
  assert(!w.document.querySelector('#whyRoute .why-measures'),'no indicator text before the definitions file has loaded (network is blocked here)');
