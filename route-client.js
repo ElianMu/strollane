@@ -142,6 +142,7 @@ function renderRouteCards(){
  if(!scoreBasis.doc&&!scoreBasis.failed)loadScoreBasis().then(d=>{if(d&&state.routes.length)renderRouteCards();}); // then cardBasis() can name the indicators
  if(typeof photosLoad==='function'){const sel=routes.find(x=>x.id===state.activeRoute);const want=[...shownRaw,...(sel?[sel.raw]:[])].flatMap(r=>(storyPlacesNear(r)||[]).slice(0,10));photosLoad(want,()=>renderRouteCards());}
  if(typeof renderNavStart==='function')renderNavStart();
+ if(typeof calloutsRefresh==='function')calloutsRefresh();
 }
 /** Up to 3 photos of real places this walk passes (its "via" place first), each with author and licence. */
 /** Up to 3 photos of real places this walk passes: its "via" place, then places only this walk passes, then shared ones;
@@ -268,6 +269,7 @@ function updateWhyRoute(){
  renderWalkerFeedbackSlot(x.raw);
  if(!scoreBasis.doc&&!scoreBasis.failed)loadScoreBasis().then(d=>{if(d&&state.activeRoute===x.id)updateWhyRoute();});
  if(typeof renderWeatherRoute==='function'){renderWeatherRoute();renderWeatherPanel();}
+ if(typeof calloutsRefresh==='function')calloutsRefresh();
 }
 // --- Route edges: list in Route Intelligence and clickable on the map -------------------------------------
 function routeEdgesGeojson(){

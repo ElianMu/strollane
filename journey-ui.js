@@ -118,6 +118,7 @@ function renderCityWalk(){
   <div class="cw-refine">${[['museums','More museums'],['historic','More historic'],['coffee','Add coffee'],['cappuccino','Find cappuccino'],['restaurant','Add restaurant'],['hotel','Return to hotel'],['less','Less walking'],['extend','Extend time']].map(([k,l])=>`<button type="button" class="mini-outline" data-refine="${k}">${l}</button>`).join('')}</div>
   <small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small>`;
  if(photoWant.length&&typeof photosResolve==='function')photosResolve(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
+ if(typeof calloutsRefresh==='function')calloutsRefresh();
  root.querySelectorAll('[data-refine]').forEach(b=>b.addEventListener('click',()=>refineWalk(b.dataset.refine)));
  root.querySelectorAll('[data-cw-remove]').forEach(b=>b.addEventListener('click',()=>{journey.removed.add(b.dataset.cwRemove);journey.named=journey.named.filter(n=>n.place.id!==b.dataset.cwRemove);planJourney(true);}));
  root.querySelectorAll('[data-cw-replace]').forEach(b=>b.addEventListener('click',()=>{journey.removed.add(b.dataset.cwId);delete journey.replaced[b.dataset.cwReplace];planJourney(true);}));
