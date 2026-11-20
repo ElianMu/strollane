@@ -140,26 +140,35 @@ function renderRouteCards(){
  const tech=$('routeTechNote');if(tech)tech.textContent=`Routes are computed on the OSM pedestrian graph (${planner.routeResponse?.network_version||''}) and ranked by personalized utility = weighted experience − detour penalty. Experience scores are relative ranks within Manhattan (${planner.routeResponse?.score_version||''}); the Explore Urban Data map uses a newer score build with more indicators (see METHODOLOGY.md). ${constraintSummary()}`;
  renderAlongWalk();
  if(!scoreBasis.doc&&!scoreBasis.failed)loadScoreBasis().then(d=>{if(d&&state.routes.length)renderRouteCards();}); // then cardBasis() can name the indicators
- if(typeof photosLoad==='function'){const sel=routes.find(x=>x.id===state.activeRoute);const want=[...shownRaw,...(sel?[sel.raw]:[])].flatMap(r=>(storyPlacesNear(r)||[]).slice(0,10));photosLoad(want,()=>renderRouteCards());}
+ if(typeof placePhotosEnsure==='function'){const sel=routes.find(x=>x.id===state.activeRoute);const want=[...shownRaw,...(sel?[sel.raw]:[])].flatMap(r=>routePhotoPlaces(r).slice(0,10));placePhotosEnsure(want,()=>renderRouteCards());}
  if(typeof renderNavStart==='function')renderNavStart();
  if(typeof calloutsRefresh==='function')calloutsRefresh();
 }
 /** Up to 3 photos of real places this walk passes (its "via" place first), each with author and licence. */
 /** Up to 3 photos of real places this walk passes: its "via" place, then places only this walk passes, then shared ones;
     a photo already on an earlier card is used again only when nothing else is left (so the cards look different). */
+/** Places with a (possible) photo along a route: the well-known places of route-story.js first, then every place in
+    the photo index within 50 m of the line (landmarks, museums, parks, hotels, shops…), without duplicates. */
+function routePhotoPlaces(r){
+ const story=(typeof storyPlacesNear==='function'?storyPlacesNear(r):null)||[],seen=new Set(),out=[];
+ const add=(p)=>{const k=p.wd||p.id||p.name;if(!k||seen.has(k)||seen.has(p.name))return;seen.add(k);seen.add(p.name);out.push(p);};
+ story.forEach(add);(typeof photoPlacesNear==='function'?photoPlacesNear(r):[]).forEach(add);
+ return out.slice(0,14);
+}
+const photoKey=(x)=>x.thumb;
 function cardPhotos(r,st,shown=[],used=new Set()){
- if(typeof photosFor!=='function')return'';
- const places=(storyPlacesNear(r)||[]).slice(0,10),others=new Set(shown.filter(o=>o!==r).flatMap(o=>(storyPlacesNear(o)||[]).map(p=>p.wd)));
- const ranked=[...places.filter(p=>p.name===st.via),...places.filter(p=>p.name!==st.via&&!others.has(p.wd)),...places.filter(p=>p.name!==st.via&&others.has(p.wd))];
- const photos=photosFor(ranked),fresh=photos.filter(x=>!used.has(x.wd)),pick=(fresh.length?fresh:photos).slice(0,3);
- pick.forEach(x=>used.add(x.wd));
+ if(typeof placePhoto!=='function')return'';
+ const places=routePhotoPlaces(r).slice(0,10),others=new Set(shown.filter(o=>o!==r).flatMap(o=>routePhotoPlaces(o).map(p=>p.wd||p.id)));
+ const ranked=[...places.filter(p=>p.name===st.via),...places.filter(p=>p.name!==st.via&&!others.has(p.wd||p.id)),...places.filter(p=>p.name!==st.via&&others.has(p.wd||p.id))];
+ const photos=ranked.map(placePhoto).filter(x=>x&&x.kind!=='street'),fresh=photos.filter(x=>!used.has(photoKey(x))),pick=(fresh.length?fresh:photos).slice(0,3);
+ pick.forEach(x=>used.add(photoKey(x)));
  return photoFigures(pick,'rc-photos');
 }
 /** "Along this walk": how the selected route feels, stretch by stretch (from its own edge scores). */
 function renderAlongWalk(){
  const box=$('alongWalk');if(!box)return;
  const x=state.routes.find(r=>r.id===state.activeRoute),lines=x&&typeof storyStretches==='function'?storyStretches(x.raw):[];
- const photos=x&&typeof photosFor==='function'?photosFor((storyPlacesNear(x.raw)||[]).slice(0,10)).slice(0,6):[];
+ const photos=x&&typeof placePhoto==='function'?routePhotoPlaces(x.raw).map(placePhoto).filter(p=>p&&p.kind!=='street').slice(0,6):[];
  const street=x&&typeof streetPhotoFigures==='function'?streetPhotoFigures(x.raw):'';
  if(x&&typeof streetPhotosLoad==='function')streetPhotosLoad(x.raw,()=>{if(state.activeRoute===x.id)renderAlongWalk();}); // street-photos.js: asks once per route
  box.innerHTML=lines.map(l=>`<p>${esc(l)}</p>`).join('')+street+(photos.length?photoFigures(photos,'along-photos'):'');box.classList.toggle('hidden',!lines.length&&!photos.length&&!street);

@@ -158,3 +158,86 @@ def along_route(coords, opener=request.urlopen, now=time.time):
         if photo and all(photo['image_id'] != x['image_id'] for x in photos):
             photos.append({**photo, 'at_m': p['at_m']})
     return {**base, 'configured': True, 'photos': photos, 'checked_points': len(points), 'failed_points': failed}
+
+
+PLACE_RADIUS_M = 30      # a street photo "of a place" must be taken within this distance of it
+PLACE_FACING_DEG = 50    # ... and preferably looking at it (camera heading within this of the direction to it)
+MAX_PLACES = 8
+
+
+def validate_places(places):
+    if not isinstance(places, list) or not 1 <= len(places) <= MAX_PLACES:
+        raise ValueError(f'places must be a list of 1 to {MAX_PLACES} {{id, lon, lat}} objects')
+    out = []
+    for p in places:
+        if not isinstance(p, dict) or not isinstance(p.get('id'), str) or not 0 < len(p['id']) <= 80:
+            raise ValueError('each place needs an id (string)')
+        lon, lat = p.get('lon'), p.get('lat')
+        if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) for v in (lon, lat)):
+            raise ValueError('each place needs lon and lat numbers')
+        if not (NYC_BOX[0] <= lon <= NYC_BOX[2] and NYC_BOX[1] <= lat <= NYC_BOX[3]):
+            raise ValueError('places must be inside the area this app covers')
+        out.append({'id': p['id'], 'lon': float(lon), 'lat': float(lat)})
+    return out
+
+
+def choose_for_place(images, place):
+    """The street-level photo to show for a place, or None: taken within PLACE_RADIUS_M, never a panorama, looking
+    at the place first (heading within PLACE_FACING_DEG of the direction from the camera to the place), then nearest,
+    then newest. It shows the street at the place, not necessarily the place itself; the caller must say so."""
+    best = None
+    for im in images if isinstance(images, list) else []:
+        if not isinstance(im, dict) or im.get('is_pano') or not im.get('thumb_1024_url') or not im.get('id'):
+            continue
+        geom = (im.get('computed_geometry') or im.get('geometry') or {}).get('coordinates')
+        if not (isinstance(geom, list) and len(geom) >= 2 and all(isinstance(v, (int, float)) for v in geom[:2])):
+            continue
+        cam, at = (geom[0], geom[1]), (place['lon'], place['lat'])
+        dist = metres(cam, at)
+        captured = im.get('captured_at')
+        if dist > PLACE_RADIUS_M or not isinstance(captured, (int, float)) or isinstance(captured, bool):
+            continue
+        heading = im.get('computed_compass_angle', im.get('compass_angle'))
+        facing = isinstance(heading, (int, float)) and dist >= 3 and angle_diff(heading, bearing(cam, at)) <= PLACE_FACING_DEG
+        key = (0 if facing else 1, round(dist / 10), -captured)
+        if best is None or key < best[0]:
+            creator = im.get('creator') if isinstance(im.get('creator'), dict) else {}
+            best = (key, {
+                'image_id': str(im['id']), 'thumb': im['thumb_1024_url'], 'distance_m': round(dist, 1),
+                'captured_on': time.strftime('%Y-%m-%d', time.gmtime(captured / 1000)), 'faces_place': facing,
+                'username': str(creator.get('username') or '') or None,
+                'page': 'https://www.mapillary.com/app/?pKey=' + parse.quote(str(im['id']), safe=''),
+            })
+    return best[1] if best else None
+
+
+def at_places(places, opener=request.urlopen, now=time.time):
+    """{'configured', 'photos': {place_id: photo}, 'failed', 'attribution', ...}: a street-level photo taken at each
+    place (for places with no photo of their own). Places with no photo within PLACE_RADIUS_M are left out."""
+    base = {'source': 'Mapillary', 'license': 'CC BY-SA 4.0', 'attribution': ATTRIBUTION, 'radius_m': PLACE_RADIUS_M}
+    if not configured():
+        return {**base, 'configured': False, 'photos': {}, 'failed': 0}
+    out, failed = {}, 0
+    for p in validate_places(places):
+        key = ('place', round(p['lon'], 5), round(p['lat'], 5))
+        with _lock:
+            hit = _cache.get(key)
+        if hit and now() - hit[0] < CACHE_SECONDS:
+            photo = hit[1]
+        else:
+            try:
+                q = parse.urlencode({'lat': f"{p['lat']:.6f}", 'lng': f"{p['lon']:.6f}", 'radius': PLACE_RADIUS_M, 'limit': 40, 'fields': FIELDS})
+                req = request.Request(f'{API}?{q}', headers={'Authorization': 'OAuth ' + token(), 'User-Agent': 'STROLLANE-NYC/1.0'})
+                with opener(req, timeout=6) as resp:
+                    doc = json.loads(resp.read(2_000_000).decode('utf-8'))
+                photo = choose_for_place(doc.get('data') if isinstance(doc, dict) else [], p)
+            except Exception:
+                failed += 1
+                continue
+            with _lock:
+                if len(_cache) > 4000:
+                    _cache.clear()
+                _cache[key] = (now(), photo)
+        if photo:
+            out[p['id']] = photo
+    return {**base, 'configured': True, 'photos': out, 'failed': failed}

@@ -97,9 +97,10 @@ function renderCityWalk(){
   }).join('');
   const p=placeCache[s.id],hrs=p?.hours||s.hours;
   // a real photo of this stop (Wikimedia Commons via Wikidata, with author + licence), only for places in the index
-  const phPlace=p?{id:s.id,name:s.name,lat:s.lat??p.lat,lon:s.lon??p.lon,wd:typeof photoIdFor==='function'?photoIdFor({...p,id:s.id}):p.wikidata}:null;
+  // a real photo of every stop where one exists: photo index → Wikidata → street view at the stop (route-photos.js)
+  const phPlace=s.role!=='end'&&(s.lat??p?.lat)!=null?{id:s.id,name:s.name,lat:s.lat??p?.lat,lon:s.lon??p?.lon,wd:p?.wd||p?.wikidata||s.wd||null}:null;
   if(phPlace)photoWant.push(phPlace);
-  const ph=phPlace&&phPlace.wd&&typeof photosFor==='function'?photosFor([phPlace])[0]:null;const open=s.open_at_arrival!=null?s.open_at_arrival:hrs?isOpenAt(hrs,new Date(Date.now()+s.arrival_min*60000)):null;
+  const ph=phPlace&&typeof placePhoto==='function'?placePhoto(phPlace):null;const open=s.open_at_arrival!=null?s.open_at_arrival:hrs?isOpenAt(hrs,new Date(Date.now()+s.arrival_min*60000)):null;
   return `<li class="cw-stop ${s.role==='end'?'end':''}"><span class="cw-seq">${s.role==='end'?'■':s.seq}</span><span class="cw-body">${ph?photoFigures([ph],'cw-photo'):''}<strong>${esc(s.name)}</strong>
    <small>${esc([s.category,s.address].filter(Boolean).join(' · '))}</small>
    <small>Arrive ~${clockAt(s.arrival_min)} · +${(s.leg_in_m/1000).toFixed(2)} km / ${Math.round(s.leg_in_min)} min walk${s.visit_min?` · stay ${s.visit_min} min (est.)`:''}${s.slot_label?` · for “${esc(s.slot_label)}”`:''}${s.required?'':' · optional'}</small>
@@ -117,7 +118,7 @@ function renderCityWalk(){
   ${it.skipped.length?`<p class="soft-copy">Skipped: ${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}
   <div class="cw-refine">${[['museums','More museums'],['historic','More historic'],['coffee','Add coffee'],['cappuccino','Find cappuccino'],['restaurant','Add restaurant'],['hotel','Return to hotel'],['less','Less walking'],['extend','Extend time']].map(([k,l])=>`<button type="button" class="mini-outline" data-refine="${k}">${l}</button>`).join('')}</div>
   <small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small>`;
- if(photoWant.length&&typeof photosResolve==='function')photosResolve(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
+ if(photoWant.length&&typeof placePhotosEnsure==='function')placePhotosEnsure(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
  if(typeof calloutsRefresh==='function')calloutsRefresh();
  root.querySelectorAll('[data-refine]').forEach(b=>b.addEventListener('click',()=>refineWalk(b.dataset.refine)));
  root.querySelectorAll('[data-cw-remove]').forEach(b=>b.addEventListener('click',()=>{journey.removed.add(b.dataset.cwRemove);journey.named=journey.named.filter(n=>n.place.id!==b.dataset.cwRemove);planJourney(true);}));

@@ -18,7 +18,7 @@ for (const c of PHOTO_CATEGORIES) {
 const seen = new Set(), uniq = places.filter((p) => !seen.has(p.id) && seen.add(p.id));
 const {items, counts} = await buildPlacePhotoIndex(uniq, {fetch, node: true, log: (m) => console.log(m)});
 const out = {version: 1, built: new Date().toISOString(), categories: PHOTO_CATEGORIES,
- rules: 'scripts/place-photos-core.js', thumb_base: 'https://upload.wikimedia.org/wikipedia/commons/thumb/', page_base: 'https://commons.wikimedia.org/wiki/',
- fields: ['thumb', 'page', 'author', 'license', 'wikidata', 'via'], counts, items};
+ rules: 'scripts/place-photos-core.js', thumb_base: 'https://upload.wikimedia.org/wikipedia/commons/thumb/',
+ fields: ['thumb', 'author', 'license', 'wikidata', 'via', 'lat', 'lon', 'name'], counts, items};
 fs.writeFileSync(path.join(root, 'data/places/photos.json'), JSON.stringify(out));
 console.log(`wrote data/places/photos.json: ${counts.photo} places`);

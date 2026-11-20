@@ -24,17 +24,13 @@ function calloutPlaces() {
  if (plan?.stops?.length) {
   return plan.stops.filter((s) => s.role !== 'end' && s.lat != null).map((s) => {
    const p = (typeof placeCache !== 'undefined' && placeCache[s.id]) || {};
-   const wd = typeof photoIdFor === 'function' ? photoIdFor({...p, ...s, id: s.id}) : (s.wd || p.wikidata);
-   return {key: s.id, lat: s.lat, lon: s.lon, name: s.name, seq: s.seq, wd, rank: s.seq,
+   return {key: s.id, id: s.id, lat: s.lat, lon: s.lon, name: s.name, seq: s.seq, wd: p.wd || p.wikidata || s.wd || null, rank: s.seq,
     note: [s.slot_label ? `for “${s.slot_label}”` : '', s.category].filter(Boolean).join(' · ')};
   });
  }
  const r = state.routes.find((x) => x.id === state.activeRoute)?.raw;
- if (!r || typeof storyPlacesNear !== 'function') return [];
- const near = (storyPlacesNear(r) || []).filter((p) => p.wd).slice(0, 12);
- const c = r.geometry?.coordinates || [];
- const along = (p) => { let best = 0, bd = Infinity; c.forEach(([x, y], i) => { const d = (x - p.lon) ** 2 + (y - p.lat) ** 2; if (d < bd) { bd = d; best = i; } }); return best; };
- return near.map((p, i) => ({key: p.wd, lat: p.lat, lon: p.lon, name: p.name, wd: p.wd, rank: i, at: along(p),
+ if (!r || typeof routePhotoPlaces !== 'function') return [];
+ return routePhotoPlaces(r).map((p, i) => ({key: p.id || p.wd, id: p.id || p.wd, lat: p.lat, lon: p.lon, name: p.name, wd: p.wd || null, rank: i,
   note: p.wdesc ? p.wdesc.replace(/ in (Manhattan|Brooklyn|Queens|New York City|New York)(, [^,]+)*$/i, '') : ''}));
 }
 
@@ -110,7 +106,7 @@ function calloutBox(map) {
 }
 
 function calloutCard(it, w) {
- const p = it.photo, credit = [p.author, p.license].filter(Boolean).join(' · ');
+ const p = it.photo, credit = p.kind === 'street' ? ['Street view here', p.date, p.author, 'Mapillary'].filter(Boolean).join(' · ') : [p.author, p.license].filter(Boolean).join(' · ');
  const ih = Math.round(w * 0.62);
  return `<figure class="map-callout" data-key="${calloutEsc(it.key)}" style="width:${w}px"><img src="${calloutEsc(p.thumb)}" alt="${calloutEsc(it.name)}" style="height:${ih}px" decoding="async" referrerpolicy="no-referrer"><figcaption>${it.seq != null ? `<span class="mc-seq">${calloutEsc(it.seq)}</span>` : ''}<strong>${calloutEsc(it.name)}</strong>${it.note ? `<small>${calloutEsc(it.note)}</small>` : ''}<a href="${calloutEsc(p.page)}" target="_blank" rel="noopener" title="${calloutEsc(credit)} — Wikimedia Commons">${calloutEsc(credit)}</a></figcaption></figure>`;
 }
@@ -130,11 +126,12 @@ function calloutsEnsureRoot(map) {
 /** Rebuild the cards for the selected walk (call after route, stop or photo changes). */
 function calloutsRefresh() {
  const map = typeof state !== 'undefined' ? state.map : null;
- if (!map || typeof map.project !== 'function' || typeof photosFor !== 'function') return;
+ if (!map || typeof map.project !== 'function' || typeof placePhoto !== 'function') return;
  const root = calloutsEnsureRoot(map), places = calloutPlaces();
- if (typeof photosResolve === 'function') photosResolve(places.filter((p) => p.lat != null).map((p) => ({id: p.key, name: p.name, lat: p.lat, lon: p.lon, wd: p.wd})), () => calloutsRefresh());
- else if (typeof photosLoad === 'function') photosLoad(places.filter((p) => p.wd), () => calloutsRefresh());
- const withPhoto = places.map((p) => { const wd = p.wd || (typeof photoIdFor === 'function' ? photoIdFor({id: p.key}) : null); const ph = wd ? photosFor([{wd, name: p.name}])[0] : null; return ph ? {...p, photo: ph} : null; }).filter(Boolean);
+ placePhotosEnsure(places, () => calloutsRefresh());
+ // a street view only stands in for a City Walk stop (a stop the walk is built around); along an ordinary route
+ // only real photos of the places themselves are drawn
+ const withPhoto = places.map((p) => { const ph = placePhoto(p); return ph && (ph.kind !== 'street' || p.seq != null) ? {...p, photo: ph} : null; }).filter(Boolean);
  const key = withPhoto.map((p) => p.key + p.photo.thumb).join('|') + (calloutPhone() ? 'm' : 'd');
  if (key !== mapCallouts.key) {
   mapCallouts.key = key; mapCallouts.items = withPhoto;

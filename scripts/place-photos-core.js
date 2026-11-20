@@ -10,24 +10,43 @@
    Only freely licensed files (CC BY / CC BY-SA / CC0 / public domain) with a named author (or public domain / CC0)
    are kept. A place with no match gets no entry: nothing is guessed or substituted.
 
-   Output: {items: {placeId: [thumbPath, filePage, author, license, wikidataId, via]}} where thumbPath is the part
+   Output: {items: {placeId: [thumbPath, author, license, wikidataId, via, lat, lon, name]}} where thumbPath is the part
    after https://upload.wikimedia.org/wikipedia/commons/thumb/ (Commons may serve it from thumb.wikimedia.org too) of a 330 px thumbnail, and via is
    'wd' | 'lpc' | 'name' (how the entry was found) + ':p18' | ':wiki' (where the image came from). */
 const PP = {MATCH_M: 150, WIDTH: 330, FREE: /^(CC[ -]?BY|CC0|CC-BY|Public domain|PD)/i,
  BOX: [-74.26, 40.49, -73.69, 40.92], TILES: 8, UA: 'STROLLANE-NYC-photo-index/1.0 (Columbia GSAPP course project)'};
-const PP_STOP = new Set(['the', 'of', 'and', 'a', 'an', 'at', 'in', 'on', 'st', 'saint', 'street', 'church', 'building', 'house', 'new', 'york', 'nyc', 's', 'former', 'old']);
+const PP_STOP = new Set(['the', 'of', 'and', 'a', 'an', 'at', 'in', 'on', 'st', 'saint', 'street', 'church', 'building', 'house', 'houses', 'new', 'york', 'nyc', 's', 'former', 'old',
+ 'branch', 'public', 'borough', 'queens', 'brooklyn', 'manhattan', 'bronx', 'n', 'y', 'inc', 'hotel', 'company', 'co']);
 
 function ppWords(name) {
  return new Set(String(name || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/['’]s\b/g, '')
   .split(/[^a-z0-9]+/).filter((w) => w.length > 1 && !PP_STOP.has(w)));
 }
-/** Same place by name: two distinctive words shared and ≥ 75 % of the shorter name; one-word names must match whole. */
-function ppSameName(a, b) {
- const A = ppWords(a), B = ppWords(b), [s, l] = A.size <= B.size ? [A, B] : [B, A];
- if (!s.size) return false;
- const shared = [...s].filter((w) => l.has(w)).length;
- if (s.size === 1) return shared === 1 && l.size === 1;
- return shared >= 2 && shared / s.size >= 0.75;
+/** Words that name a part of, or a thing inside, a bigger place: a name that adds one of these is a different
+    thing (a park's tablet is not the park; a park's zoo is not the park). */
+const PP_PART = new Set(['tablet', 'plaque', 'monument', 'memorial', 'statue', 'sculpture', 'bust', 'fountain', 'flagpole', 'marker', 'tree', 'trees', 'section',
+ 'improvement', 'gate', 'gates', 'entrance', 'playground', 'pool', 'station', 'bench', 'mural', 'carousel', 'bandshell', 'boathouse', 'zoo', 'reservoir',
+ 'lake', 'pond', 'arch', 'bridge', 'tower', 'stairs', 'steps', 'wall', 'clock', 'sign', 'lamppost', 'pavilion', 'comfort', 'dog', 'run', 'field', 'court',
+ 'courts', 'garage', 'annex', 'addition', 'wing', 'interior', 'lobby', 'parsonage', 'rectory', 'school', 'chapel', 'cemetery', 'grandiflora']);
+/** Same place by name. `ours` is the place's own name, `label` the candidate entry's label:
+    - at least 75 % of our place's distinctive words are in the label (and two or more of them; one-word names must
+      match whole), and
+    - neither name adds a word naming a part of something bigger (PP_PART) that the other lacks. */
+function ppSameName(ours, label) {
+ // a name in two languages or with a second name ("Holyrood Episcopal Church-Iglesia Santa Cruz") may match by either part
+ const parts = String(ours || '').split(/\s+[-–\/]\s+|\s*\/\s*|-(?=[A-Z])/).map((x) => x.trim()).filter(Boolean);
+ if (parts.length > 1 && parts.some((x) => ppSameOne(x, label))) return true;
+ return ppSameOne(ours, label);
+}
+function ppSameOne(ours, label) {
+ const A = ppWords(ours), B = ppWords(label);
+ if (!A.size || !B.size) return false;
+ const shared = [...A].filter((w) => B.has(w)).length;
+ if (A.size === 1 || B.size === 1) return A.size === B.size && shared === 1;
+ if (shared < 2 || shared / A.size < 0.75) return false;
+ for (const w of A) if (!B.has(w) && PP_PART.has(w)) return false;
+ for (const w of B) if (!A.has(w) && PP_PART.has(w)) return false;
+ return true;
 }
 function ppMetres(a, b) {
  const k = Math.PI / 180, x = (b.lon - a.lon) * Math.cos((a.lat + b.lat) / 2 * k);
@@ -127,13 +146,13 @@ async function buildPlacePhotoIndex(places, {fetch: fetchFn = fetch, log = () =>
    const thumb = info.thumburl.replace(/^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\/thumb\//, '').replace(/\?.*$/, '');
    if (thumb === info.thumburl || !/^[0-9a-f]\/[0-9a-f]{2}\//.test(thumb)) continue; // not a Commons thumbnail
    const t = (back[pg.title] || pg.title).replace(/^File:/, '');
-   meta.set(t, [thumb, info.descriptionurl.replace(/^https:\/\/commons\.wikimedia\.org\/wiki\//, ''), auth, lic]);
+   meta.set(t, [thumb, auth, lic]);
   }
  });
  const items = {}, counts = {places: places.length, matched: found.size, photo: 0, wd: 0, lpc: 0, name: 0, p18: 0, wiki: 0};
  for (const p of places) {
   const f = found.get(p.id); if (!f) continue; const im = img.get(f.wd); if (!im) continue; const m = meta.get(im.file); if (!m) continue;
-  items[p.id] = [...m, f.wd, `${f.via}:${im.from}`]; counts.photo++; counts[f.via]++; counts[im.from]++;
+  items[p.id] = [...m, f.wd, `${f.via}:${im.from}`, Math.round(p.lat * 1e6) / 1e6, Math.round(p.lon * 1e6) / 1e6, p.name]; counts.photo++; counts[f.via]++; counts[im.from]++;
  }
  log(`places with a photo: ${counts.photo}/${places.length}`);
  return {items, counts};
