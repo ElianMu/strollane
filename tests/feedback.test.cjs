@@ -36,5 +36,16 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'feedback-u
  assert.equal(JSON.stringify(body.priorities),'{"Nature":{"weight":80,"direction":"high"},"Quiet & Relax":{"weight":80,"direction":"high"},"Architecture":{"weight":70,"direction":"high"}}');
  assert.equal(body.route_snapshot.ordered_edge_ids.length,2);assert(!('predicted' in body),'the client never sends a prediction');
  assert.equal(run("walkCheckPayload(r2,{rate:{overall:2},worth:null,compared:'this'},'','')").compared_with_shortest,null,'comparison only with a study code');
+ // Before walking: what walkers said (ratings of walks of this type, reported streets on this route).
+ assert(run('walkerSaysRatings({n:0,enabled:true},"leisure")').includes('No walker has rated a walk yet. Be the first'));
+ const said=run('walkerSaysRatings({n:5,ratings:{overall:{mean:4.2},match:{mean:3.8},quiet:{n:3,mean:4},green:{n:0,mean:null}},by_user_type:{leisure:{n:2,mean_overall:4.5,mean_match:4}}},"leisure")');
+ assert(said.includes('All rated walks (5)')&&said.includes('overall 4.2 · match 3.8')&&said.includes('Leisure Walker walks (2)')&&said.includes('4.0 · —'));
+ ctx.r3={edges:[{matched_segments:[{segment_id:'QN-1',street_name:'31 Ave'}]},{matched_segments:[{segment_id:'QN-2',street_name:'Steinway St'}]}]};
+ assert.equal(run('JSON.stringify(routeSegmentIds(r3))'),'["QN-1","QN-2"]');
+ const st=run("walkerSaysStreets({'QN-1':{quiet:{n:4,worse:3,better:1,status:'applied',delta:-6.5}}},r3)");
+ assert(st.includes('31 Ave · Quiet &amp; Relax')&&st.includes('3 worse · 1 better · routing -6.5'));
+ assert.equal(run("walkerSaysStreets({},r3)"),'');
+ assert(run('walkerSaysBox(r3)').includes('I walked this – rate it now'));
+ assert(run('walkCheckBox(r2)').includes('<details class="walk-check" data-route="rt-2" open>'),'the rating form opens ready to answer');
  console.log('feedback UI ok');
 })().catch(e=>{console.error(e);process.exit(1);});

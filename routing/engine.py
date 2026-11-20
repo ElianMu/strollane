@@ -74,18 +74,35 @@ class PedestrianNetwork:
         self.by_geom = GeomIndex(self.edges, len(self.geoms))
         # Metric polylines and a 100 m bucket index of routable edge geometries (both endpoints in the main component).
         self.gxy = ProjectedPolylines(self.geoms, xy)
-        self.glen = array('d', (sum(math.dist(a, b) for a, b in zip(g, g[1:])) for g in self.gxy))
-        self.index = {}
-        for i, (u, v, k, gi, rev, *_rest) in enumerate(self.edges):
-            if rev or self.nodes[u][3] != 0 or self.nodes[v][3] != 0:
+        # One pass over the raw coordinate columns gives each geometry's metric length and the 100 m bucket index of
+        # routable edges (forward edge, both endpoints in the main component). Same arithmetic and the same ascending
+        # edge lists per cell as projecting every polyline through self.gxy, without materialising 390,000 lists at
+        # start-up (about 12 s of the 20 s it took on 2026-11-20).
+        E = self.edges
+        tail_off = bytearray(1 if comp[p] != 0 else 0 for p in (self.nodes.pos(E.node_ids[u]) for u in E.U))
+        geom_edge = array('i', [-1]) * len(self.geoms)
+        for i, (rev, gi) in enumerate(zip(E.R, E.G)):
+            if not rev and not tail_off[i] and not self.head_off[i]:
+                geom_edge[gi] = i
+        co, off = self.geoms.coordinates, self.geoms.offsets
+        glen = array('d', bytes(8 * len(self.geoms)))
+        index = {}
+        dist = math.dist
+        for g in range(len(self.geoms)):
+            pts = [(co[j] * MX, co[j + 1] * MY) for j in range(off[g], off[g + 1], 2)]
+            glen[g] = sum(dist(a, b) for a, b in zip(pts, pts[1:]))
+            i = geom_edge[g]
+            if i < 0:
                 continue
-            geom = self.gxy[gi]
-            for a, b in zip(geom, geom[1:]):
+            for a, b in zip(pts, pts[1:]):
                 for bx in range(int(min(a[0], b[0]) // 100), int(max(a[0], b[0]) // 100) + 1):
                     for by in range(int(min(a[1], b[1]) // 100), int(max(a[1], b[1]) // 100) + 1):
-                        cell = self.index.setdefault((bx, by), [])
+                        cell = index.setdefault((bx, by), [])
                         if not cell or cell[-1] != i:
                             cell.append(i)
+        for cell in index.values():
+            cell.sort()
+        self.glen, self.index = glen, index
         self._step_free = None
         streets = os.path.join(ROOT, 'data', 'manhattan-streets.json')
         compact = os.path.join(ROOT, 'data', 'pedestrian', 'segment-evidence.json.gz')

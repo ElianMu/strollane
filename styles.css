@@ -1254,3 +1254,11 @@ html[lang^=zh] .intro-row h1 br{display:none}
 /* Evaluation dashboard links (evaluation.html) */
 .eval-link{display:inline-grid;place-items:center;text-decoration:none;font-size:13px}
 .mobile-more-body a.more-link{display:flex;align-items:center;gap:8px;width:100%;color:var(--ge4);font-size:12px;padding:10px;border-radius:7px;text-decoration:none}.mobile-more-body a.more-link:hover{background:var(--g21)}.mobile-more-body a.more-link small{margin-left:auto;color:var(--g9d);font-size:10px}
+
+/* What walkers said (before walking) and the rating dialog (feedback-ui.js) */
+.walker-says{border:1px solid var(--g33);border-radius:8px;padding:10px 11px;margin:0 0 12px;background:var(--g11)}
+.walker-says-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}.walker-says-head strong{font-size:12px}.walker-says-head a{font-size:10px;color:var(--lime)}
+.walker-says-empty{font-size:10.5px;color:var(--g9d);margin:4px 0}.walker-says-streets{margin-top:6px}.walker-says-streets small{font-size:9.5px;color:var(--g9d)}
+.walker-rate-now{width:100%;margin-top:9px;border:1px solid var(--lime);background:var(--lime);color:var(--g0b);border-radius:7px;padding:9px 10px;font-size:11.5px;font-weight:800}
+.modal .walk-check{border:0;background:transparent;padding:0;margin:4px 0 0}.modal .walk-check>summary{display:none}
+.modal .walk-check-q{font-size:12.5px}.modal .walk-check-scale button{min-width:40px;min-height:38px;font-size:13px}

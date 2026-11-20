@@ -853,7 +853,7 @@ async function autoLocateStart(){
 function downloadGeoJSON(name,fc){const blob=new Blob([JSON.stringify(fc,null,2)],{type:'application/geo+json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
 const modalOverlay=$('modalOverlay');
 function openModal(kind){
-  modalOverlay.classList.remove('hidden');const c=$('modalContent');$('modalTitle').textContent=kind==='export'?'Explore this data in Kepler.gl.':kind==='data'?'The 12 Urban Data Domains.':'What is real, and what comes next.';
+  modalOverlay.classList.remove('hidden');if($('modalOverline'))$('modalOverline').textContent='PROJECT NOTES / TRANSPARENCY';const c=$('modalContent');$('modalTitle').textContent=kind==='export'?'Explore this data in Kepler.gl.':kind==='data'?'The 12 Urban Data Domains.':'What is real, and what comes next.';
   if(kind==='export'){
     state.datasets.experience={type:'FeatureCollection',features:experienceFeatures()};
     const items=[['experience','Computed sections (NULL validated scores)'],['streets','Manhattan NYC centerlines (all pages)'],['trees','2015 tree records (current view)'],['lpc','LPC polygons (current view)']];

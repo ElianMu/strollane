@@ -105,3 +105,37 @@ class Server(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class Lookup(unittest.TestCase):
+    def test_street_reports_for_a_route_before_walking(self):
+        import json, threading, urllib.request
+        from http.server import ThreadingHTTPServer
+        import server
+        from routing import feedback as fb
+        p = server.get_planner()
+        book = fb.FeedbackBook()
+        rows = [{'v': 1, 'id': str(d), 'at': f'2026-11-{10 + d}T20:00:00+00:00', 'segment_id': 'QN-1', 'dimension': 'quiet',
+                 'direction': 'worse', 'rated': 70, 'bucket': 'midday'} for d in range(3)]
+        book.summary = fb.aggregate(rows, datetime(2026, 11, 20, tzinfo=timezone.utc))
+        old = p.feedback
+        p.feedback = book
+        httpd = ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
+        threading.Thread(target=httpd.serve_forever, daemon=True).start()
+        try:
+            def post(body):
+                req = urllib.request.Request(f'http://127.0.0.1:{httpd.server_port}/api/feedback/lookup', data=json.dumps(body).encode(),
+                                             headers={'Content-Type': 'application/json'}, method='POST')
+                try:
+                    with urllib.request.urlopen(req) as r:
+                        return r.status, json.load(r)
+                except urllib.error.HTTPError as e:
+                    return e.code, json.load(e)
+            st, j = post({'segment_ids': ['QN-1', 'QN-2']})
+            self.assertEqual(st, 200)
+            self.assertEqual(list(j['segments']), ['QN-1'], 'only streets with reports come back')
+            self.assertEqual(j['segments']['QN-1']['quiet']['n'], 3)
+            self.assertEqual(post({'segment_ids': 'QN-1'})[0], 400)
+            self.assertEqual(post({'segment_ids': ['x'] * 601})[0], 400)
+        finally:
+            httpd.shutdown(); p.feedback = old
