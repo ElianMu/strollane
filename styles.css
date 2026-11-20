@@ -1296,3 +1296,23 @@ html[lang^=zh] .intro-row h1 br{display:none}
 #rightPanel.bar-offscreen:has(#navStart:not(.hidden):not(:disabled)) .sheet-quick-start{display:block;position:absolute;left:12px;top:6px;border:0;border-radius:8px;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;padding:7px 12px}
 /* notices on a phone sit above the walk action bar, not over Start Navigation */
 @media(max-width:740px){body:has(#rightPanel:not([data-level="hidden"]):not(.bar-offscreen) .walk-actions #navStart:not(.hidden)) .toast{bottom:calc(150px + env(safe-area-inset-bottom))}}
+/* Photo callouts on the map (map-callouts.js): real photos of places the walk passes, tied to them by a line */
+.map-callouts{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.map-callouts.hidden{display:none}
+.mc-lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.mc-lines line{stroke:var(--text);stroke-width:2;stroke-linecap:round}
+.mc-lines line.halo{stroke:var(--bg);stroke-width:5;opacity:.85}
+.mc-lines circle{fill:none;stroke:var(--text);stroke-width:2}
+.map-callout{position:absolute;left:0;top:0;margin:0;pointer-events:auto;cursor:pointer;background:var(--bg);color:var(--text);border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;box-shadow:0 8px 22px color-mix(in srgb,var(--shadow) 28%,transparent);will-change:transform;transition:box-shadow .15s}
+.map-callout:hover{box-shadow:0 10px 28px color-mix(in srgb,var(--shadow) 40%,transparent)}
+.map-callout img{display:block;width:100%;object-fit:cover;background:var(--g24)}
+.map-callout figcaption{display:grid;grid-template-columns:auto 1fr;column-gap:6px;row-gap:2px;padding:6px 8px 7px;align-items:start}
+.map-callout figcaption>*:not(.mc-seq){grid-column:2}
+.map-callout figcaption:not(:has(.mc-seq))>*{grid-column:1/-1}
+.mc-seq{grid-row:1/3;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#0a0b0c;color:#d8f365;font-size:10px;font-weight:700;margin-top:1px}
+.map-callout strong{font-size:11.5px;line-height:1.25;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.map-callout small{font-size:10px;line-height:1.3;color:var(--g9d);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.map-callout a{font-size:8.5px;color:var(--g8c);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto}
+.map-callout a:hover{text-decoration:underline}
+@media(max-width:740px){.map-callout figcaption{padding:5px 7px 6px}.map-callout strong{font-size:11px}.map-callout small{display:none}}
+#mapPhotosToggle[aria-pressed="false"]{opacity:.55}
