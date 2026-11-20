@@ -34,13 +34,18 @@ const PP_PART = new Set(['tablet', 'plaque', 'monument', 'memorial', 'statue', '
     - neither name adds a word naming a part of something bigger (PP_PART) that the other lacks. */
 function ppSameName(ours, label) {
  // a name in two languages or with a second name ("Holyrood Episcopal Church-Iglesia Santa Cruz") may match by either part
- const parts = String(ours || '').split(/\s+[-–\/]\s+|\s*\/\s*|-(?=[A-Z])/).map((x) => x.trim()).filter(Boolean);
+ const parts = String(ours || '').split(/\s+[-–]\s+|-(?=[A-Z][a-z])/).map((x) => x.trim()).filter(Boolean);
  if (parts.length > 1 && parts.some((x) => ppSameOne(x, label))) return true;
  return ppSameOne(ours, label);
 }
 function ppSameOne(ours, label) {
  const A = ppWords(ours), B = ppWords(label);
  if (!A.size || !B.size) return false;
+ // house numbers must agree: every number in our name is in the label, and a label number needs one in ours
+ // ("858 West End Avenue" is not "840 West End Avenue"; "Edgecombe Avenue" is not "555 Edgecombe Avenue")
+ const num = (S) => [...S].filter((w) => /^\d+$/.test(w));
+ const nA = num(A), nB = num(B);
+ if (nA.some((n) => !B.has(n)) || (nB.length && !nA.length)) return false;
  const shared = [...A].filter((w) => B.has(w)).length;
  if (A.size === 1 || B.size === 1) return A.size === B.size && shared === 1;
  if (shared < 2 || shared / A.size < 0.75) return false;

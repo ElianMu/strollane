@@ -1,5 +1,15 @@
 'use strict';
 
+/** A short, plain-language version of an error for walkers; the technical detail goes to the console. */
+function plainError(e) {
+  const m = String((e && e.message) || e || '');
+  if (m) console.warn('[STROLLANE]', m);
+  if (/timeout|timed out|abort/i.test(m)) return 'The server took too long to answer. Please try again in a moment.';
+  if (/failed to fetch|network|load failed|HTTP 5\d\d|\b50[234]\b|unreachable/i.test(m)) return 'The route server is not answering right now. Please try again in a moment.';
+  if (/HTTP 4\d\d/.test(m)) return 'That request could not be handled. Try changing it a little.';
+  return m && m.length <= 120 && !/[{}<>]|Error:|undefined|null|NaN|\.py|\bat\b \w+\.js/.test(m) ? m : 'Something went wrong. Please try again in a moment.';
+}
+
 const STREETWISE_API_BASE =
   location.hostname === 'elianmu.github.io'
     ? 'https://streetwise-api.onrender.com'

@@ -239,7 +239,7 @@ function cardBasis(r){
   const v=r.dimension_scores[d],sv=shortest&&shortest!==r?shortest.dimension_scores[d]:null;
   const versus=shortest===r?' · shortest route':sv!=null?` · shortest route ${scoreText(sv)}`:'';
   const by=doc.dimensions[d].filter(i=>i.role==='up'||i.role==='down').map(i=>i.label+(i.role==='down'?' (less is better)':'')).join(' · ');
-  return `<span class="rc-basis-row"><b>${esc(dimLabel(d))} ${scoreText(v)}</b>${esc(versus)}${c.direction==='low'?' · you asked for less':''}<i>Measured by: ${esc(by)}</i></span>`;
+  return `<span class="rc-basis-row"><b>${esc(dimLabel(d))} ${scoreText(v)}</b>${esc(versus)}${c.direction==='low'?' · you asked for less':''}<i>Based on: ${esc(by)}</i></span>`;
  }).join('');
  return `<span class="rc-basis" aria-label="What this is based on">${rows}</span>`;
 }

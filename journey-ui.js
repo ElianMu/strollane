@@ -10,7 +10,7 @@ function setupJourneyUI(){
   placeInputs[kind]=attachPlaceSearch($(kind==='start'?'searchStart':'searchEnd'),{
    placeholder:'Search any NYC address, place or business',
    onSelect:p=>{setJourneyPlace(kind,p);resetRoutes();syncMapData();
-    if(p.routing_coverage==='search_only')return toast('This source point has no verified walking access; discovery only.');
+    if(p.routing_coverage==='search_only')return toast('This place can be found here, but walking routes do not reach it yet.');
  if(!inRoutingCoverage(p))return toast(`${p.name} is in ${p.borough||'NYC'}: place search covers all five boroughs, but walking routes cover Manhattan, Brooklyn and Queens only.`);
     if(state.mapReady)state.map.flyTo({center:[p.lon,p.lat],zoom:15,duration:450});},
    onClear:()=>{state[kind]=null;state[kind==='start'?'customStart':'customEnd']=null;resetRoutes();syncMapData();}});
@@ -31,7 +31,7 @@ function setupJourneyUI(){
 }
 function addNamedStop(p,required=true){
  if(journey.named.some(n=>n.place.id===p.id))return toast(`${p.name} is already a stop.`);
- if(p.routing_coverage==='search_only')return toast('This source point has no verified walking access; discovery only.');
+ if(p.routing_coverage==='search_only')return toast('This place can be found here, but walking routes do not reach it yet.');
  if(!inRoutingCoverage(p))return toast(`${p.name} is outside walking-route coverage (Manhattan, Brooklyn, Queens); it cannot be routed.`);
  journey.removed.delete(p.id);journey.named.push({place:p,required,order:null,visitMin:VISIT_MIN[p.cat]??20,visitEstimated:true});journey.active=true;
  if(journey.endMode==='fixed'&&!getPlace('end'))setEndMode('open');
@@ -117,7 +117,7 @@ function renderCityWalk(){
   <ol class="cw-stops">${stopRows}</ol>
   ${it.skipped.length?`<p class="soft-copy">Skipped: ${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}
   <div class="cw-refine">${[['museums','More museums'],['historic','More historic'],['coffee','Add coffee'],['cappuccino','Find cappuccino'],['restaurant','Add restaurant'],['hotel','Return to hotel'],['less','Less walking'],['extend','Extend time']].map(([k,l])=>`<button type="button" class="mini-outline" data-refine="${k}">${l}</button>`).join('')}</div>
-  <small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small>`;
+  <details class="cw-how"><summary>How this plan was made</summary><small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small></details>`;
  if(photoWant.length&&typeof placePhotosEnsure==='function')placePhotosEnsure(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
  if(typeof calloutsRefresh==='function')calloutsRefresh();
  root.querySelectorAll('[data-refine]').forEach(b=>b.addEventListener('click',()=>refineWalk(b.dataset.refine)));
