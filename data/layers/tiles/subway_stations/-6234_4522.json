@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G08","station_id":"261","complex_id":"261","stop_name":"Forest Hills-71 Av","daytime_routes":"E F M R","line":"Queens Blvd","structure":"Subway","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.844521,40.721691]}}]}

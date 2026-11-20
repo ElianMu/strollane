@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H13-lic-295","stop_name":"Beach 98 St","daytime_routes":"A S","line":"Rockaway","division":"IND","entrance_type":"Stair","entry_allowed":"YES","exit_allowed":"YES","station_id":"201","gtfs_stop_id":"H13","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.820334,40.585558]}}]}

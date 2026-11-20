@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"F01","station_id":"254","complex_id":"254","stop_name":"Jamaica-179 St","daytime_routes":"F","line":"Queens Blvd","structure":"Subway","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.783817,40.712646]}}]}

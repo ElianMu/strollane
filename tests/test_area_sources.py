@@ -18,8 +18,20 @@ import download_area_sources as D  # noqa: E402
 import streetwise_indicators as si  # noqa: E402
 from areas import AREAS, in_box, touches_box  # noqa: E402
 
-LIC = AREAS['lic']['box']
+# The clipping path (clip_to_box) is checked with the western Queens box the 'lic' area had until 2026-11-19; the area is
+# now all of Queens (scripts/areas.py), which, like Brooklyn, is filtered by borough instead.
+WESTERN = {**AREAS['lic'], 'label': 'Western Queens (test box)', 'box': (-73.9650, 40.7280, -73.8700, 40.7850), 'clip_to_box': True, 'osm_place': None}
+LIC = WESTERN['box']
 INSIDE, OUTSIDE = (-73.94, 40.75), (-73.80, 40.70)   # one point in the LIC box, one elsewhere in Queens
+_patch = mock.patch.dict(AREAS, {'lic': WESTERN})
+
+
+def setUpModule():
+    _patch.start()
+
+
+def tearDownModule():
+    _patch.stop()
 BK = (-73.95, 40.65)                                 # in Brooklyn, outside the Manhattan box of the original build
 
 

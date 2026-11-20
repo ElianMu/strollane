@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"705","station_id":"449","complex_id":"449","stop_name":"111 St","daytime_routes":"7","line":"Flushing","structure":"Elevated","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.855334,40.75173]}}]}

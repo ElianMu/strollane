@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H07","station_id":"205","complex_id":"205","stop_name":"Beach 60 St","daytime_routes":"A","line":"Rockaway","structure":"Viaduct","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.788522,40.592374]}}]}

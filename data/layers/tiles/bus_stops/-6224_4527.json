@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"node/6047392846","highway":"bus_stop","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.72809,40.767417]}},{"type":"Feature","properties":{"feature_id":"node/6047392847","highway":"bus_stop","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.729683,40.768453]}}]}

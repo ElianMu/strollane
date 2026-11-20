@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H08","station_id":"206","complex_id":"206","stop_name":"Beach 44 St","daytime_routes":"A","line":"Rockaway","structure":"Viaduct","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.776013,40.592943]}}]}

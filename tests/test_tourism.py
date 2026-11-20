@@ -105,9 +105,11 @@ class B_Places(unittest.TestCase):
                 self.assertTrue(h['hotel']['dof_hotel_lot'] or any(b['source']=='NYC LPC' for b in h['verification_basis']))
 
     def test_outside_the_walk_network_is_search_only(self):
-        res = S.search({'lat': 40.7590, 'lon': -73.8300}, ['restaurants'], radius_m=400, limit=10)  # Flushing, Queens
+        res = S.search({'lat': 40.8448, 'lon': -73.8648}, ['restaurants'], radius_m=400, limit=10)  # Morris Park, the Bronx
         self.assertTrue(res)
-        self.assertTrue(all(r['routing_coverage'] == 'search_only' and r['borough'] == 'Queens' for r in res))
+        self.assertTrue(all(r['routing_coverage'] == 'search_only' and r['borough'] == 'Bronx' for r in res))
+        res = S.search({'lat': 40.7590, 'lon': -73.8300}, ['restaurants'], radius_m=400, limit=10)  # Flushing: all of Queens is routable now
+        self.assertTrue(any(r['routing_coverage'] != 'search_only' for r in res))
         res = S.search({'lat': 40.6782, 'lon': -73.9442}, ['restaurants'], radius_m=400, limit=10)  # Crown Heights, Brooklyn
         self.assertTrue(res and all(r['borough'] == 'Brooklyn' for r in res))
         self.assertTrue(any(r['routing_coverage'] == 'manhattan_network' for r in res), 'Brooklyn is in the index now')

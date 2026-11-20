@@ -37,7 +37,13 @@ class JoinedNetwork(unittest.TestCase):
 
     def test_every_edge_and_score_is_copied_from_its_area(self):
         graphs = {a: load(P / f'{a}-walk-graph.json.gz') for a in AREAS}
-        scores = {a: load(P / ('edge-scores.json.gz' if a == 'manhattan' else f'{a}-edge-scores.json.gz'))['geoms'] for a in AREAS}
+        scores = {a: load(P / ('edge-scores.json.gz' if a == 'manhattan' else f'{a}-edge-scores.json.gz')) for a in AREAS}
+        # bridges each download ends on midway are split where the other download stops (merge_networks.stitch_borders)
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('merge_networks', ROOT / 'scripts' / 'merge_networks.py')
+        mn = importlib.util.module_from_spec(spec); spec.loader.exec_module(mn)
+        self.assertEqual(mn.stitch_borders(graphs, scores), JG['metadata']['stitched_at_borders'])
+        scores = {a: scores[a]['geoms'] for a in AREAS}
         first = {}
         for a in AREAS:
             for e in graphs[a]['edges']:

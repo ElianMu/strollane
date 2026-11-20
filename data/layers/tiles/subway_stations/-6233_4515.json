@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H03","station_id":"198","complex_id":"198","stop_name":"Howard Beach-JFK Airport","daytime_routes":"A","line":"Rockaway","structure":"At Grade","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.830301,40.660476]}}]}

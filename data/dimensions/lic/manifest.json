@@ -6,7 +6,7 @@
  "segments": 40997,
  "spec_version": "strollane-12x24-v1",
  "calculation_version": "strollane-12x24-v1+nyc3-80d4e2f969",
- "built_at": "2026-11-19T23:46:06+00:00",
+ "built_at": "2026-11-20T02:14:55+00:00",
  "crs_processing": "EPSG:32618",
  "crs_output": "EPSG:4326",
  "comparison_scope": "Percentiles are ranked among the 77,349 street segments of Manhattan, Brooklyn and Queens together (10,533 Manhattan, 25,819 Brooklyn, 40,997 Queens); this area has 40,997. One scale for all three areas (scripts/dimensions/combine_areas.py).",
@@ -305,7 +305,7 @@
    "notes": [
     "Distance is to the landmark lot polygon (0 inside the lot); each lot (incl. multi-part lots) counted once per sample."
    ],
-   "computed_at": "2026-11-19T23:45:01+00:00",
+   "computed_at": "2026-11-20T02:13:39+00:00",
    "seconds": 0.2,
    "stats": {
     "min": 0.0,
@@ -337,8 +337,8 @@
    "notes": [
     "Each tree is assigned to its single nearest walkable segment within 30 m so trees at corners are not double-counted."
    ],
-   "computed_at": "2026-11-19T23:45:04+00:00",
-   "seconds": 2.9,
+   "computed_at": "2026-11-20T02:13:43+00:00",
+   "seconds": 3.8,
    "stats": {
     "min": 0.0,
     "p50": 41.863,
@@ -375,8 +375,8 @@
    "notes": [
     "Samples every 20 m at offsets 0, ±20, ±40 m."
    ],
-   "computed_at": "2026-11-19T23:45:05+00:00",
-   "seconds": 1.0,
+   "computed_at": "2026-11-20T02:13:44+00:00",
+   "seconds": 1.1,
    "stats": {
     "min": 0.0,
     "p50": 0.0,
@@ -431,8 +431,8 @@
    "notes": [
     "323 cultural POIs (museum, gallery, theatre, arts centre, cinema, library, music venue, concert hall)."
    ],
-   "computed_at": "2026-11-19T23:45:06+00:00",
-   "seconds": 0.3,
+   "computed_at": "2026-11-20T02:13:44+00:00",
+   "seconds": 0.4,
    "stats": {
     "min": 0.0,
     "p50": 0.0,
@@ -464,8 +464,8 @@
    "notes": [
     "158115 geolocated noise complaints in the 12-month window."
    ],
-   "computed_at": "2026-11-19T23:45:06+00:00",
-   "seconds": 0.7,
+   "computed_at": "2026-11-20T02:13:45+00:00",
+   "seconds": 0.9,
    "stats": {
     "min": 0.0,
     "p50": 3.345,
@@ -493,7 +493,7 @@
    "notes": [
     "N/A where LION records no roadway width (common on park paths and step streets)."
    ],
-   "computed_at": "2026-11-19T23:45:06+00:00",
+   "computed_at": "2026-11-20T02:13:45+00:00",
    "seconds": 0.0,
    "stats": {
     "min": 4.0,
@@ -534,8 +534,8 @@
    "notes": [
     "N/A on park paths and step streets (LION types 6, 7): they have no curbside sidewalk to measure."
    ],
-   "computed_at": "2026-11-19T23:45:30+00:00",
-   "seconds": 23.8,
+   "computed_at": "2026-11-20T02:14:17+00:00",
+   "seconds": 31.4,
    "stats": {
     "min": 0.0,
     "p50": 0.25,
@@ -567,13 +567,13 @@
     "920 of 1027 Manhattan seats linked to the OSM pedestrian network (≤100 m snap).",
     "Midpoint joins the network at its nearest walk-graph node; values ≥ 500 m are capped at 500."
    ],
-   "computed_at": "2026-11-19T23:45:33+00:00",
-   "seconds": 3.1,
+   "computed_at": "2026-11-20T02:14:20+00:00",
+   "seconds": 3.7,
    "stats": {
     "min": 7.416,
     "p50": 500.0,
     "max": 500.0,
-    "mean": 394.51
+    "mean": 394.503
    },
    "sources": [
     "NYC DOT Seating Locations",
@@ -600,8 +600,8 @@
    "notes": [
     "Eligible nodes = segment end nodes joining ≥3 walkable segments, at least one a roadway (a crossing). N/A when a segment has no eligible crossing node."
    ],
-   "computed_at": "2026-11-19T23:45:34+00:00",
-   "seconds": 0.7,
+   "computed_at": "2026-11-20T02:14:21+00:00",
+   "seconds": 1.0,
    "stats": {
     "min": 0.0,
     "p50": 1.0,
@@ -632,8 +632,8 @@
    "notes": [
     "H = Shannon entropy of activity types ÷ ln(number of types present) (0–1)."
    ],
-   "computed_at": "2026-11-19T23:45:34+00:00",
-   "seconds": 0.3,
+   "computed_at": "2026-11-20T02:14:22+00:00",
+   "seconds": 0.4,
    "stats": {
     "min": 0.0,
     "p50": 1.721,
@@ -686,7 +686,7 @@
    "notes": [
     "19005 food, drink and shop POIs."
    ],
-   "computed_at": "2026-11-19T23:45:35+00:00",
+   "computed_at": "2026-11-20T02:14:22+00:00",
    "seconds": 0.1,
    "stats": {
     "min": 0.0,
@@ -719,7 +719,7 @@
    "notes": [
     "590 viewpoints, artworks, fountains, memorials and monuments."
    ],
-   "computed_at": "2026-11-19T23:45:35+00:00",
+   "computed_at": "2026-11-20T02:14:22+00:00",
    "seconds": 0.1,
    "stats": {
     "min": 0.0,
@@ -754,13 +754,13 @@
    "notes": [
     "316 valid entrances: connected walk-graph nodes inside public waterfront space (open WPAA or a park within 30 m of river/bay) and within 60 m of open water. Capped at 3000 m."
    ],
-   "computed_at": "2026-11-19T23:45:41+00:00",
-   "seconds": 6.6,
+   "computed_at": "2026-11-20T02:14:29+00:00",
+   "seconds": 6.5,
    "stats": {
     "min": 2.838,
     "p50": 3000.0,
     "max": 3000.0,
-    "mean": 2641.177
+    "mean": 2641.161
    },
    "sources": [
     "Waterfront Public Access Areas (WPAA)",
@@ -788,8 +788,8 @@
    "notes": [
     "20333 LION junctions (≥3 walkable segments)."
    ],
-   "computed_at": "2026-11-19T23:45:41+00:00",
-   "seconds": 0.1,
+   "computed_at": "2026-11-20T02:14:29+00:00",
+   "seconds": 0.2,
    "stats": {
     "min": 0.0,
     "p50": 19.0,
@@ -819,18 +819,18 @@
     "min_pairs": 3
    },
    "status": "computed",
-   "valid_segments": 38326,
+   "valid_segments": 38323,
    "coverage": 0.9348,
    "notes": [
     "Origin = walk-graph node nearest the midpoint; destinations = node closest to 375 m in each 45° sector of the 250–500 m ring; pairs unreachable within 1.5 km excluded; N/A with fewer than 3 feasible pairs."
    ],
-   "computed_at": "2026-11-19T23:46:01+00:00",
-   "seconds": 19.9,
+   "computed_at": "2026-11-20T02:14:51+00:00",
+   "seconds": 21.9,
    "stats": {
     "min": 1.002,
     "p50": 1.33,
     "max": 3.569,
-    "mean": 1.384
+    "mean": 1.385
    },
    "sources": [
     "OpenStreetMap pedestrian network (OSMnx walk graph)"
@@ -857,7 +857,7 @@
    "notes": [
     "6177 pedestrian-injury/fatal crashes in the 3-year window. Not adjusted for pedestrian volume."
    ],
-   "computed_at": "2026-11-19T23:46:02+00:00",
+   "computed_at": "2026-11-20T02:14:51+00:00",
    "seconds": 0.1,
    "stats": {
     "min": 0.0,
@@ -890,7 +890,7 @@
    "notes": [
     "151616 felony + misdemeanor complaint reports. Report density is a proxy, not personal risk."
    ],
-   "computed_at": "2026-11-19T23:46:04+00:00",
+   "computed_at": "2026-11-20T02:14:53+00:00",
    "seconds": 2.7,
    "stats": {
     "min": 0.0,
@@ -921,8 +921,8 @@
    "notes": [
     "2949 LION expressway / ramp centerlines (types 2, 9)."
    ],
-   "computed_at": "2026-11-19T23:46:05+00:00",
-   "seconds": 0.4,
+   "computed_at": "2026-11-20T02:14:54+00:00",
+   "seconds": 0.3,
    "stats": {
     "min": 0.0,
     "p50": 661.733,
@@ -996,7 +996,7 @@
    "notes": [
     "675 entry-permitted entrances."
    ],
-   "computed_at": "2026-11-19T23:46:05+00:00",
+   "computed_at": "2026-11-20T02:14:54+00:00",
    "seconds": 0.0,
    "stats": {
     "min": 0.0,
@@ -1025,7 +1025,7 @@
    "valid_segments": 40997,
    "coverage": 1.0,
    "notes": [],
-   "computed_at": "2026-11-19T23:46:05+00:00",
+   "computed_at": "2026-11-20T02:14:54+00:00",
    "seconds": 0.0,
    "stats": {
     "min": 3.844,
@@ -1146,14 +1146,14 @@
    "qa": {
     "source": "osm_walk",
     "file": "data/pedestrian/lic-walk-graph.json.gz",
-    "file_retrieved_at": "2026-11-19T23:44:16+00:00",
+    "file_retrieved_at": "2026-11-20T02:11:32+00:00",
     "crs_in": "EPSG:4326",
     "crs_out": "EPSG:32618",
-    "records_read": 439584,
-    "records_kept": 439584,
-    "nodes": 138050,
-    "network_version": "osm-walk-20261119-8fca1f25",
-    "nodes_outside_largest_component": 13765
+    "records_read": 439532,
+    "records_kept": 439532,
+    "nodes": 138207,
+    "network_version": "osm-walk-20261120-d1035109",
+    "nodes_outside_largest_component": 13940
    },
    "status": "loaded"
   },
@@ -1171,7 +1171,7 @@
     "records_kept": 158115,
     "dropped_invalid_or_outside": 0,
     "duplicate_coordinates": 122688,
-    "time_window": "2025-11-19 → 2026-11-19 (12 months before retrieval)",
+    "time_window": "2025-11-19 → 2026-11-20 (12 months before retrieval)",
     "filter": "complaint_type starts with 'Noise', borough = QUEENS"
    },
    "status": "loaded"
@@ -1252,7 +1252,7 @@
     "records_kept": 6177,
     "dropped_invalid_or_outside": 0,
     "duplicate_coordinates": 1468,
-    "time_window": "2023-11-20 → 2026-11-19 (3 years before retrieval)",
+    "time_window": "2023-11-20 → 2026-11-20 (3 years before retrieval)",
     "filter": "pedestrians injured > 0 OR pedestrians killed > 0, borough = QUEENS"
    },
    "status": "loaded"
@@ -1339,9 +1339,9 @@
   }
  },
  "windows": {
-  "noise": "2025-11-19 → 2026-11-19 (12 months before retrieval)",
-  "collisions": "2023-11-20 → 2026-11-19 (3 years before retrieval)",
-  "retrieved_at": "2026-11-19T23:44:59+00:00"
+  "noise": "2025-11-19 → 2026-11-20 (12 months before retrieval)",
+  "collisions": "2023-11-20 → 2026-11-20 (3 years before retrieval)",
+  "retrieved_at": "2026-11-20T00:24:01+00:00"
  },
  "id_scheme": "segment_id = \"QN-\" + LION physicalid (+ \"-n\" when several LION records share one).",
  "files": {
@@ -1367,5 +1367,5 @@
   "osm_place": "Queens County, New York, United States"
  },
  "raw_calculation_version": "strollane-12x24-v1+c3c98c02df",
- "combined_at": "2026-11-19T23:46:21+00:00"
+ "combined_at": "2026-11-20T02:15:01+00:00"
 }

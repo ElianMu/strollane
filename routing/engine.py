@@ -254,7 +254,7 @@ class PedestrianNetwork:
                 break
         if not best or best[0] > MAX_SNAP_M:
             raise RoutingError(f'{label} is more than {MAX_SNAP_M:.0f} m from any walkable path in the Manhattan, Brooklyn and Queens pedestrian network'
-                               + (' that avoids stairs.' if allowed else '. Roosevelt, Randall\'s and Governors Island connect only through other boroughs and are not routable.'))
+                               + (' that avoids stairs.' if allowed else '. Governors Island (ferry only) and the Rockaway peninsula (no walkable link to the rest of Queens in the OpenStreetMap walk data) are not routable.'))
         d, i, along = best
         geo_len = self.glen[self.edges.G[i]] or 1
         return {'edge': i, 'offset_m': along / geo_len * self.edges.L[i], 'snap_distance_m': round(d, 1),

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H11","station_id":"209","complex_id":"209","stop_name":"Far Rockaway-Mott Av","daytime_routes":"A","line":"Rockaway","structure":"Viaduct","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.755405,40.603995]}}]}

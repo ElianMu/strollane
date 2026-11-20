@@ -1,6 +1,6 @@
 {
  "calculation_version": "strollane-12x24-v1+nyc3-80d4e2f969",
- "combined_at": "2026-11-19T23:46:21+00:00",
+ "combined_at": "2026-11-20T02:15:01+00:00",
  "areas": [
   "manhattan",
   "brooklyn",
@@ -45,62 +45,62 @@
    "raw_calculation_version": "strollane-12x24-v1+bb10da45e2",
    "change_from_previous_scale": {
     "architecture": {
-     "median_before": 83.5,
+     "median_before": 90.3,
      "median_after": 90.3,
      "moved_over_20": 0.0
     },
     "nature": {
-     "median_before": 33.2,
+     "median_before": 34.0,
      "median_after": 34.0,
      "moved_over_20": 0.0
     },
     "culture": {
-     "median_before": 78.1,
+     "median_before": 86.2,
      "median_after": 86.2,
      "moved_over_20": 0.0
     },
     "quiet": {
-     "median_before": 43.0,
+     "median_before": 37.4,
      "median_after": 37.4,
      "moved_over_20": 0.0
     },
     "spatial_comfort": {
-     "median_before": 46.2,
+     "median_before": 51.2,
      "median_after": 51.2,
      "moved_over_20": 0.0
     },
     "urban_vibrancy": {
-     "median_before": 77.0,
+     "median_before": 85.0,
      "median_after": 85.0,
      "moved_over_20": 0.0
     },
     "food_retail": {
-     "median_before": 68.7,
+     "median_before": 77.1,
      "median_after": 77.1,
      "moved_over_20": 0.0
     },
     "scenic_visual": {
-     "median_before": 75.0,
+     "median_before": 83.1,
      "median_after": 83.1,
      "moved_over_20": 0.0
     },
     "walkability": {
-     "median_before": 55.0,
+     "median_before": 53.3,
      "median_after": 53.3,
      "moved_over_20": 0.0
     },
     "access_safety": {
-     "median_before": 33.4,
+     "median_before": 24.2,
      "median_after": 24.2,
      "moved_over_20": 0.0
     },
     "environment": {
-     "median_before": 32.3,
+     "median_before": 31.7,
      "median_after": 31.7,
      "moved_over_20": 0.0
     },
     "transit_connectivity": {
-     "median_before": 71.8,
+     "median_before": 81.6,
      "median_after": 81.6,
      "moved_over_20": 0.0
     }
@@ -116,7 +116,7 @@
      "moved_over_20": 0.0
     },
     "nature": {
-     "median_before": 28.3,
+     "median_before": 28.8,
      "median_after": 28.8,
      "moved_over_20": 0.0
     },
@@ -126,47 +126,47 @@
      "moved_over_20": 0.0
     },
     "quiet": {
-     "median_before": 54.2,
+     "median_before": 47.0,
      "median_after": 47.0,
      "moved_over_20": 0.0
     },
     "spatial_comfort": {
-     "median_before": 36.9,
+     "median_before": 41.8,
      "median_after": 41.8,
      "moved_over_20": 0.0
     },
     "urban_vibrancy": {
-     "median_before": 39.0,
+     "median_before": 52.0,
      "median_after": 52.0,
      "moved_over_20": 0.0
     },
     "food_retail": {
-     "median_before": 43.1,
+     "median_before": 55.3,
      "median_after": 55.3,
      "moved_over_20": 0.0
     },
     "scenic_visual": {
-     "median_before": 27.0,
+     "median_before": 34.6,
      "median_after": 34.6,
      "moved_over_20": 0.0
     },
     "walkability": {
-     "median_before": 48.2,
+     "median_before": 46.6,
      "median_after": 46.6,
      "moved_over_20": 0.0
     },
     "access_safety": {
-     "median_before": 52.6,
+     "median_before": 39.0,
      "median_after": 39.0,
      "moved_over_20": 0.0
     },
     "environment": {
-     "median_before": 66.5,
+     "median_before": 69.5,
      "median_after": 69.5,
      "moved_over_20": 0.0
     },
     "transit_connectivity": {
-     "median_before": 22.3,
+     "median_before": 31.4,
      "median_after": 31.4,
      "moved_over_20": 0.0
     }

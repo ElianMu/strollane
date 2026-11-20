@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"G06","station_id":"279","complex_id":"279","stop_name":"Sutphin Blvd-Archer Av-JFK Airport","daytime_routes":"E J Z","line":"Queens - Archer","structure":"Subway","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.807969,40.700486]}}]}

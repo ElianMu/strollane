@@ -1,21 +1,271 @@
 {
- "note": "Trips outside Manhattan for benchmarks/route_benchmark.py --set areas: Brooklyn, western Queens (Long Island City to Jackson Heights) and three East River crossings. Coordinates are approximate landmark points (WGS84) used only as trip endpoints; the engine snaps them to the pedestrian network. Hand-picked to spread over neighbourhoods and short, medium and long walks; not a random sample.",
+ "note": "Trips outside Manhattan for benchmarks/route_benchmark.py --set areas: Brooklyn, Queens (western Queens from 2026-11-17; Flushing, Forest Hills and Jamaica added 2026-11-19 when the area became all of Queens) and three East River crossings. Coordinates are approximate landmark points (WGS84) used only as trip endpoints; the engine snaps them to the pedestrian network. Hand-picked to spread over neighbourhoods and short, medium and long walks; not a random sample. The Rockaway peninsula is not in the set: it has no walkable link to the rest of Queens in the OpenStreetMap walk data.",
  "pairs": [
-  {"id": "grandarmy-boroughhall", "area": "Brooklyn", "from": "Grand Army Plaza", "to": "Brooklyn Borough Hall", "o": [-73.9700, 40.6740], "d": [-73.9890, 40.6930]},
-  {"id": "dumbo-cobblehill", "area": "Brooklyn", "from": "DUMBO (York St)", "to": "Cobble Hill Park", "o": [-73.9897, 40.7033], "d": [-73.9958, 40.6862]},
-  {"id": "williamsburg-greenpoint", "area": "Brooklyn", "from": "Bedford Av station", "to": "Greenpoint Av station", "o": [-73.9571, 40.7174], "d": [-73.9542, 40.7310]},
-  {"id": "parkslope-ppw", "area": "Brooklyn", "from": "7th Av & 9th St", "to": "Prospect Park West & 3rd St", "o": [-73.9800, 40.6670], "d": [-73.9720, 40.6700]},
-  {"id": "fortgreene-pratt", "area": "Brooklyn", "from": "Fort Greene Park", "to": "Pratt Institute", "o": [-73.9760, 40.6913], "d": [-73.9632, 40.6913]},
-  {"id": "museum-utica", "area": "Brooklyn", "from": "Brooklyn Museum", "to": "Utica Av station", "o": [-73.9636, 40.6712], "d": [-73.9310, 40.6689]},
-  {"id": "sunsetpark-greenwood", "area": "Brooklyn", "from": "Sunset Park", "to": "Green-Wood Cemetery main gate", "o": [-74.0040, 40.6475], "d": [-73.9944, 40.6585]},
-  {"id": "bushwick-mccarren", "area": "Brooklyn", "from": "Maria Hernandez Park", "to": "McCarren Park", "o": [-73.9230, 40.7032], "d": [-73.9510, 40.7210]},
-  {"id": "courtsq-gantry", "area": "Western Queens", "from": "Court Square", "to": "Gantry Plaza State Park", "o": [-73.9450, 40.7470], "d": [-73.9585, 40.7455]},
-  {"id": "astoriablvd-park", "area": "Western Queens", "from": "Astoria Blvd station", "to": "Astoria Park", "o": [-73.9180, 40.7700], "d": [-73.9230, 40.7790]},
-  {"id": "sunnyside-courtsq", "area": "Western Queens", "from": "46th St–Bliss St station", "to": "Court Square", "o": [-73.9187, 40.7432], "d": [-73.9450, 40.7470]},
-  {"id": "jacksonheights-woodside", "area": "Western Queens", "from": "74th St–Broadway station", "to": "61st St–Woodside station", "o": [-73.8913, 40.7466], "d": [-73.9028, 40.7454]},
-  {"id": "steinway-socrates", "area": "Western Queens", "from": "Steinway St station", "to": "Socrates Sculpture Park", "o": [-73.9180, 40.7566], "d": [-73.9365, 40.7685]},
-  {"id": "pier1-cityhall", "area": "Across the river", "from": "Brooklyn Bridge Park Pier 1", "to": "City Hall Park (Manhattan)", "o": [-73.9965, 40.7020], "d": [-74.0059, 40.7127]},
-  {"id": "gantry-moma", "area": "Across the river", "from": "Gantry Plaza State Park", "to": "MoMA (Manhattan)", "o": [-73.9585, 40.7455], "d": [-73.9776, 40.7614]},
-  {"id": "greenpoint-courtsq", "area": "Across the river", "from": "Greenpoint Av station (Brooklyn)", "to": "Court Square (Queens)", "o": [-73.9542, 40.7310], "d": [-73.9450, 40.7470]}
+  {
+   "id": "grandarmy-boroughhall",
+   "area": "Brooklyn",
+   "from": "Grand Army Plaza",
+   "to": "Brooklyn Borough Hall",
+   "o": [
+    -73.97,
+    40.674
+   ],
+   "d": [
+    -73.989,
+    40.693
+   ]
+  },
+  {
+   "id": "dumbo-cobblehill",
+   "area": "Brooklyn",
+   "from": "DUMBO (York St)",
+   "to": "Cobble Hill Park",
+   "o": [
+    -73.9897,
+    40.7033
+   ],
+   "d": [
+    -73.9958,
+    40.6862
+   ]
+  },
+  {
+   "id": "williamsburg-greenpoint",
+   "area": "Brooklyn",
+   "from": "Bedford Av station",
+   "to": "Greenpoint Av station",
+   "o": [
+    -73.9571,
+    40.7174
+   ],
+   "d": [
+    -73.9542,
+    40.731
+   ]
+  },
+  {
+   "id": "parkslope-ppw",
+   "area": "Brooklyn",
+   "from": "7th Av & 9th St",
+   "to": "Prospect Park West & 3rd St",
+   "o": [
+    -73.98,
+    40.667
+   ],
+   "d": [
+    -73.972,
+    40.67
+   ]
+  },
+  {
+   "id": "fortgreene-pratt",
+   "area": "Brooklyn",
+   "from": "Fort Greene Park",
+   "to": "Pratt Institute",
+   "o": [
+    -73.976,
+    40.6913
+   ],
+   "d": [
+    -73.9632,
+    40.6913
+   ]
+  },
+  {
+   "id": "museum-utica",
+   "area": "Brooklyn",
+   "from": "Brooklyn Museum",
+   "to": "Utica Av station",
+   "o": [
+    -73.9636,
+    40.6712
+   ],
+   "d": [
+    -73.931,
+    40.6689
+   ]
+  },
+  {
+   "id": "sunsetpark-greenwood",
+   "area": "Brooklyn",
+   "from": "Sunset Park",
+   "to": "Green-Wood Cemetery main gate",
+   "o": [
+    -74.004,
+    40.6475
+   ],
+   "d": [
+    -73.9944,
+    40.6585
+   ]
+  },
+  {
+   "id": "bushwick-mccarren",
+   "area": "Brooklyn",
+   "from": "Maria Hernandez Park",
+   "to": "McCarren Park",
+   "o": [
+    -73.923,
+    40.7032
+   ],
+   "d": [
+    -73.951,
+    40.721
+   ]
+  },
+  {
+   "id": "courtsq-gantry",
+   "area": "Western Queens",
+   "from": "Court Square",
+   "to": "Gantry Plaza State Park",
+   "o": [
+    -73.945,
+    40.747
+   ],
+   "d": [
+    -73.9585,
+    40.7455
+   ]
+  },
+  {
+   "id": "astoriablvd-park",
+   "area": "Western Queens",
+   "from": "Astoria Blvd station",
+   "to": "Astoria Park",
+   "o": [
+    -73.918,
+    40.77
+   ],
+   "d": [
+    -73.923,
+    40.779
+   ]
+  },
+  {
+   "id": "sunnyside-courtsq",
+   "area": "Western Queens",
+   "from": "46th St–Bliss St station",
+   "to": "Court Square",
+   "o": [
+    -73.9187,
+    40.7432
+   ],
+   "d": [
+    -73.945,
+    40.747
+   ]
+  },
+  {
+   "id": "jacksonheights-woodside",
+   "area": "Western Queens",
+   "from": "74th St–Broadway station",
+   "to": "61st St–Woodside station",
+   "o": [
+    -73.8913,
+    40.7466
+   ],
+   "d": [
+    -73.9028,
+    40.7454
+   ]
+  },
+  {
+   "id": "steinway-socrates",
+   "area": "Western Queens",
+   "from": "Steinway St station",
+   "to": "Socrates Sculpture Park",
+   "o": [
+    -73.918,
+    40.7566
+   ],
+   "d": [
+    -73.9365,
+    40.7685
+   ]
+  },
+  {
+   "id": "flushing-unisphere",
+   "area": "Eastern Queens",
+   "from": "Flushing–Main St station",
+   "to": "Unisphere (Flushing Meadows)",
+   "o": [
+    -73.8303,
+    40.7596
+   ],
+   "d": [
+    -73.8448,
+    40.7461
+   ]
+  },
+  {
+   "id": "foresthills-kewgardens",
+   "area": "Eastern Queens",
+   "from": "Forest Hills–71st Av station",
+   "to": "Kew Gardens–Union Tpke station",
+   "o": [
+    -73.8445,
+    40.7216
+   ],
+   "d": [
+    -73.8311,
+    40.7141
+   ]
+  },
+  {
+   "id": "jamaica-kingmanor",
+   "area": "Eastern Queens",
+   "from": "Jamaica Center–Parsons/Archer station",
+   "to": "Kew Gardens–Union Tpke station",
+   "o": [
+    -73.8013,
+    40.7022
+   ],
+   "d": [
+    -73.8311,
+    40.7141
+   ]
+  },
+  {
+   "id": "pier1-cityhall",
+   "area": "Across the river",
+   "from": "Brooklyn Bridge Park Pier 1",
+   "to": "City Hall Park (Manhattan)",
+   "o": [
+    -73.9965,
+    40.702
+   ],
+   "d": [
+    -74.0059,
+    40.7127
+   ]
+  },
+  {
+   "id": "gantry-moma",
+   "area": "Across the river",
+   "from": "Gantry Plaza State Park",
+   "to": "MoMA (Manhattan)",
+   "o": [
+    -73.9585,
+    40.7455
+   ],
+   "d": [
+    -73.9776,
+    40.7614
+   ]
+  },
+  {
+   "id": "greenpoint-courtsq",
+   "area": "Across the river",
+   "from": "Greenpoint Av station (Brooklyn)",
+   "to": "Court Square (Queens)",
+   "o": [
+    -73.9542,
+    40.731
+   ],
+   "d": [
+    -73.945,
+    40.747
+   ]
+  }
  ]
 }

@@ -6,7 +6,30 @@
 > longer how routes are ranked or how the Explore map is coloured. Current scoring is described in the next three
 > sections, in `README.md`, `ARCHITECTURE.md` and `DIMENSIONS_MAP_MODE_REPORT.md`.
 
-## Routes across Manhattan, Brooklyn and western Queens (since 2026-11-17)
+## All of Queens (since 2026-11-19)
+
+The Queens area (id `lic`, `scripts/areas.py`) is now the whole borough, like Brooklyn: LION borocode 4, and the OSM walk
+network of Queens County (439,532 edges, built 2026-11-20). Two changes made it fit the free 512 MB API host: the router
+keeps edges, nodes, adjacency and OSM way ids as columns (`routing/compact.py`; the capacity check peak went from 405 MB
+for the western Queens network to 378 MB for the network with all of Queens, 785,328 edges), and the website is published
+without the server's own data (`.github/workflows/pages.yml`, about 815 MB of GitHub Pages' 1 GB).
+
+* 40,997 Queens street segments are scored on the shared scale (was 6,439 for western Queens); 98.8 % of Queens' routable
+  length carries scores.
+* Border bridges: each borough download stops at its own boundary, so on a long bridge the two downloads can end at
+  nodes the other only passes through. `scripts/build_pedestrian_network.py` downloads 350 m beyond the outline and keeps
+  bridges and their landings; `scripts/merge_networks.py` splits an edge where another download ends inside it (6 such
+  points, listed in the joined network's metadata: the Queensboro and Manhattan Bridges among them).
+  `tests/test_joined_network.py` walks the Queensboro, Brooklyn, Manhattan and Pulaski Bridge crossings.
+* Not routable: the Rockaway peninsula. In the OpenStreetMap walk data it has no walkable link to the rest of Queens
+  (it forms its own component of 8,649 nodes), so a start or destination there gets the "more than 150 m from any walkable
+  path" message instead of a route. Roosevelt Island and Randall's Island are now routable through Queens.
+* Route benchmark, Brooklyn and Queens set (19 trips × 12 dimensions, `benchmarks/ROUTE_BENCHMARK_AREAS.md`): +6.7 points
+  mean gain for a 4.2 % mean detour; eastern Queens trips (Flushing, Forest Hills, Jamaica) +8.7 points.
+* Map layers cover all of Queens for the same 53 tilesets as Brooklyn (696,507 Queens features, 297,744 of them street
+  trees). Place recommendations: 12,170 Queens records within 150 m of the walk network.
+
+## Routes across Manhattan, Brooklyn and western Queens (2026-11-17 to 2026-11-19)
 
 Western Queens (2026-11-18): the Queens box was widened from Long Island City alone to Long Island City, Astoria,
 Sunnyside, Woodside and Jackson Heights (Newtown Creek to Ditmars Boulevard, east to about 90th Street; `scripts/areas.py`,

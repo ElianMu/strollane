@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"J15","station_id":"83","complex_id":"83","stop_name":"Woodhaven Blvd","daytime_routes":"J Z","line":"Jamaica","structure":"Elevated","ada":"1","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.851576,40.693879]}}]}

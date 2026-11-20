@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"H09","station_id":"207","complex_id":"207","stop_name":"Beach 36 St","daytime_routes":"A","line":"Rockaway","structure":"Viaduct","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.768175,40.595398]}}]}

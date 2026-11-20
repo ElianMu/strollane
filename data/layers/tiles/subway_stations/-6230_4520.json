@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"F02","station_id":"255","complex_id":"255","stop_name":"169 St","daytime_routes":"F","line":"Queens Blvd","structure":"Subway","ada":"0","ada_notes":"NaN","area":"lic"},"geometry":{"type":"Point","coordinates":[-73.793604,40.71047]}}]}

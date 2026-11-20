@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"feature_id":"5607379212-7766245799-0","osm_way_ids":"586964011 1446185536","highway":"footway","footway":"crossing","surface":"paved","length_m":9.95,"area":"lic"},"geometry":{"type":"LineString","coordinates":[[-73.813028,40.584401],[-73.812982,40.584336],[-73.812972,40.584322]]}}]}
