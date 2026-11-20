@@ -485,6 +485,7 @@ const run=s=>vm.runInContext(s,context);
  const ns=w.document.querySelector('#navStart');assert(!ns.classList.contains('hidden')&&!ns.disabled,'validated route with maneuvers can start');
  assert(w.document.querySelector('#routeValidation').textContent.includes('Route check'));
  run("state.routes[0].raw.validation={...state.routes[0].raw.validation,navigation_allowed:false,status:'fail',blocking_issues:['gap between edges']};renderNavStart()");assert(ns.disabled&&ns.title.includes('gap between edges'),'failed route check blocks navigation');
+ {const why=w.document.querySelector('#navStartWhy');assert(!why.classList.contains('hidden')&&why.textContent.includes('gap between edges'),'the reason is shown under the button, not only as a tooltip');}
  run("delete state.routes[0].raw.maneuvers;state.routes[0].raw.validation.navigation_allowed=true;renderNavStart()");assert(ns.disabled,'no maneuvers, no navigation');
  // Reroute must preserve the City Walk: match a reached stop by stable id (two stops can share a name) and deduct
  // what was already walked/visited from the original budget instead of resetting it.

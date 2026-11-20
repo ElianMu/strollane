@@ -749,6 +749,21 @@
     moveComposerIn();
     ensureHandle($('leftPanel'), 'Plan your walk');
     ensureHandle($('rightPanel'), 'Your routes');
+    // collapsed routes sheet: the action bar is below the screen, so the handle strip carries a Start button
+    (() => {
+      const h = $('rightPanel')?.querySelector('.sheet-handle'); if (!h || h.querySelector('.sheet-quick-start')) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'sheet-quick-start'; b.textContent = '➤ Start';
+      b.setAttribute('aria-label', 'Start Navigation');
+      b.addEventListener('pointerdown', (e) => e.stopPropagation());
+      b.addEventListener('click', () => $('navStart')?.click());
+      h.appendChild(b);
+      // shown whenever the sheet is too short for the action bar (it rests wherever it is released)
+      const panel = $('rightPanel'), sync = () => {
+        const bar = panel.querySelector('.walk-actions');
+        panel.classList.toggle('bar-offscreen', Boolean(bar && mq.matches && panel.getBoundingClientRect().height < h.offsetHeight + bar.offsetHeight + 24));
+      };
+      if (typeof ResizeObserver === 'function') new ResizeObserver(sync).observe(panel);
+    })();
     ensureHandle($('exploreSheet'), 'Explore Urban Data');
     wireExploreSheet();
     wireRouteCardSwipe();
