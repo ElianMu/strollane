@@ -1264,3 +1264,30 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .walker-feedback-slot .walker-says{margin:0}
 .section-row a.small-count{text-decoration:none;color:var(--text-secondary)}
 .cw-photo{margin:2px 0 4px;max-width:260px}.cw-photo .rp-photo img{height:120px}.cw-photo .rp-photo figcaption strong{display:none} /* stop photo: the stop name sits right below it */
+.walker-feedback-near{margin:12px 0 4px;padding:12px 12px 4px;border:1px solid var(--line);border-radius:10px}.walker-feedback-near .walker-feedback-slot{margin-top:6px}
+/* After a route exists (v82): the walk options lead, the heading steps aside, and the actions stay in reach. */
+.right-panel:has(#routeCards .route-card) .right-head{display:none}
+/* Fixed action bar at the bottom of the panel: Start Navigation, then 3D preview · Share · Rate walk */
+.right-bottom.walk-actions{height:auto;flex-direction:column;align-items:stretch;gap:8px;padding:10px 16px 12px}
+.right-bottom.walk-actions:has(#navStart.hidden){display:none}
+.walk-actions .nav-start{margin:0;height:46px}
+.walk-actions-row{display:flex;gap:6px}
+.walk-actions-row .route-preview-btn{flex:1 1 0;min-width:0;height:36px;margin:0;padding:0 6px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.walk-actions-row .route-preview-btn svg{width:15px;height:15px;flex:none}
+@media(min-width:741px){.walk-actions-row .route-preview-btn{font-size:11px;gap:4px;padding:0 4px}.walk-actions-row .route-preview-btn svg{width:14px;height:14px}}
+.walk-actions-row .route-preview-btn span{overflow:hidden;text-overflow:ellipsis}
+.export-end{margin-top:18px}
+/* Walk options: only the selected card carries the explanation, photos and details; the others are a quick summary. */
+@media(min-width:741px){
+ .route-card:not(.selected) .rc-why,.route-card:not(.selected) .rc-photos,.route-card:not(.selected) .route-numbers,.route-card:not(.selected) .rc-note{display:none}
+ .route-card:not(.selected) .rc-chips .chip:nth-child(n+3),.route-card:not(.selected) .rc-chips>*:nth-child(n+3){display:none}
+}
+/* Places along the walk: one compact line each, first six shown */
+.poi-list{gap:0}
+.poi-list .poi-item{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 2px;align-items:baseline}
+.poi-list .poi-item strong{display:inline;font-size:12px;margin:0 6px 0 0}
+.poi-list .poi-item small{font-size:10px}
+.poi-list .poi-item.more-hidden{display:none}
+.poi-more{margin-top:8px;width:100%;border:1px dashed var(--line-strong);background:transparent;color:var(--text);border-radius:8px;padding:8px;font-size:11.5px;font-weight:700}
+.poi-source{display:block;color:var(--g8c);font-size:10px;margin-top:8px;line-height:1.5}
+.walker-feedback-near .walker-rate-now{background:transparent!important;color:var(--text)!important;border:1px solid var(--line-strong)!important;box-shadow:none!important}

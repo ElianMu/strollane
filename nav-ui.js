@@ -98,6 +98,7 @@ async function requestRoute(from,to){
  }catch(e){toast('Could not plan the walking route: '+e.message);return null;}
 }
 function beginNavigation(route,opts={}){
+ if(!opts.temporary&&!opts.restore)nav.checkAsked=null;
  stopWatch();
  const eng=new NavEngine(route,{progress_m:opts.progress_m||0});
  if(eng.blocked){toast('Route check failed: '+eng.blocked.join(' '));return;}
@@ -210,6 +211,7 @@ function onNavEvent(ev){
   speak(nav.voiceLang==='zh'?ev.maneuver.instruction_zh:ev.maneuver.instruction_text);
   if(nav.temporary&&nav.queue.length){const next=nav.queue.shift();toast('At the start — now following your planned walk.');beginNavigation(next);return;}
   clearNavSession();renderNav();
+  nav.checkAsked=nav.route?.route_id||true;
   if(typeof promptWalkCheck==='function')promptWalkCheck();
  }else if(ev.type==='off_route'){
   speak(nav.voiceLang==='zh'?'您已偏离路线，正在重新规划。':'You are off route. Recalculating.');reroute();
@@ -399,12 +401,20 @@ function speak(text){
  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=nav.voiceLang==='zh'?'zh-CN':'en-US';
   const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith(u.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u);}catch(e){}
 }
+/** Ending navigation by hand near the end of the walk counts as finishing it: ask for the rating then too
+ * (at most once per walk; arriving already asked). Near the end = 75% of the route walked or under 200 m left. */
+function walkedMostOfIt(eng){
+ const total=Number(nav.route?.distance_m)||0;if(!eng||nav.temporary||!total)return false;
+ const done=Number(eng.progress)||0;return done/total>=.75||total-done<=200;
+}
 function exitNavigation(){
- const eng=nav.engine;if(eng){eng.transition('STOPPED','user exit');}
+ const eng=nav.engine,askCheck=!nav.checkAsked&&walkedMostOfIt(eng);if(eng){eng.transition('STOPPED','user exit');}
  stopWatch();try{speechSynthesis.cancel();}catch(e){}nav.wakeLock?.release?.().catch(()=>{});
  window.removeEventListener('deviceorientationabsolute',onOrientation,true);window.removeEventListener('deviceorientation',onOrientation,true);
  nav.engine=null;nav.queue=[];nav.last=null;nav.heading=null;drawNavPosition(null);clearNavSession();hideNav();setDataLayersForNav(false);renderNavStart();
  state.map?.easeTo({bearing:0,pitch:0,padding:{top:0,bottom:0,left:0,right:0},duration:400});
+ nav.checkAsked=null;
+ if(askCheck&&typeof promptWalkCheck==='function')promptWalkCheck();
 }
 
 /* ---------- session (survives refresh; no GPS history) ---------- */

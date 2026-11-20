@@ -93,7 +93,7 @@ const I18N_ZH = {
  // results
  'YOUR WALK': '你的步行', 'Choose how it': '选择它带给你的', 'feels.': '感受。', 'YOUR WALK OPTIONS': '可选路线', 'No walks yet': '还没有路线',
  'Describe how you want to walk, or tap a few chips.': '描述你想怎么走，或者点几个按钮。', 'More routes': '更多路线', '➤ Start Navigation': '➤ 开始导航',
- '3D map preview': '3D 地图预览', 'Share this walk': '分享这条路线', 'ALONG THIS WALK': '沿途', 'On the street': '街景',
+ '3D map preview': '3D 地图预览', '3D preview': '3D 预览', 'Share': '分享', 'Rate walk': '评价路线', 'Show all places': '显示全部地点', 'After your walk: rate how it felt': '走完后：评价这次步行的感受', 'Share this walk': '分享这条路线', 'ALONG THIS WALK': '沿途', 'On the street': '街景',
  'Choose a walk to see the places along it.': '选一条路线，查看沿途地点。', 'REFINE YOUR WALK': '调整你的步行',
  'More Nature': '更多自然', 'Quieter Streets': '更安静的街道', 'More Architecture': '更多建筑', 'Shorter Walk': '更短的路线',
  'Each action updates state and requests fresh pedestrian candidate routes. A preference without evidence will not be claimed as achieved.': '每次操作都会更新状态并重新请求候选步行路线。没有数据支持的偏好，不会被声称已实现。',
