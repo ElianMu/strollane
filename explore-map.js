@@ -245,7 +245,8 @@ function renderExploreInspector(){
  const amf=exploreAreaOf(p.id)?.manifest||mf;
  const prov=`<h4>Data &amp; version</h4><p>Segment ${esc(p.id)} = NYC LION physical ID (${esc(amf.area_label)}). ${esc(amf.comparison_scope)} Calculation ${esc(amf.calculation_version)}, built ${esc(amf.built_at.slice(0,10))}. Values marked N/A were not measurable and are never counted as 0.</p>`;
  const methodology=(method)=>`<details class="inspector-method"${exploreMap.methodOpen?' open':''}><summary>Methodology</summary>${method}${prov}</details>`;
- box.innerHTML=head+`<p class="explore-note" data-k="loading">Loading indicator values…</p>`+methodology('');box.classList.remove('hidden');
+ box.innerHTML=head+(typeof walkerFeedbackBox==='function'&&dimMeta?walkerFeedbackBox(p.id,dimMeta.key,score):'')+`<p class="explore-note" data-k="loading">Loading indicator values…</p>`+methodology('');box.classList.remove('hidden');
+ if(typeof wireWalkerFeedback==='function')wireWalkerFeedback(box);
  // header buttons exist from the first paint and are wired once; the body is wired each time it is (re)written
  $('inspectorClose').addEventListener('click',()=>selectExploreSegment(null));
  $('inspectorPrev').addEventListener('click',()=>exploreStep(-1));$('inspectorNext').addEventListener('click',()=>exploreStep(1));

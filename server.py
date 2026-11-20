@@ -4,6 +4,7 @@ Keeps API keys on the server; never embeds credentials in client JavaScript.
 """
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
+from datetime import datetime, timezone
 import os
 import json
 import math
@@ -567,6 +568,20 @@ class Handler(SimpleHTTPRequestHandler):
             i = net.by_id.get(unquote(self.path[len('/api/edges/'):]))
             self.send_json(200, net.edge_object(i)) if i is not None else self.send_json(404, {'error': 'Unknown OSM edge ID (expected "u-v-key")'})
             return
+        if self.path.startswith('/api/feedback/segments/'):
+            # Walker reports on one street segment and what they change (routing/feedback.py).
+            try:
+                planner = get_planner()
+            except RuntimeError as e:
+                self.send_json(503, {'error': str(e)}); return
+            book = planner.feedback
+            book.refresh_in_background()
+            from routing import feedback as fb
+            seg = unquote(self.path[len('/api/feedback/segments/'):])
+            self.send_json(200, {'segment_id': seg, 'enabled': book.enabled, 'dimensions': book.for_segment(seg),
+                                 'time_bucket_now': fb.ny_bucket(datetime.now(timezone.utc)), 'rule': fb.RULE,
+                                 **({'store_error': book.error} if book.error else {})})
+            return
         if self.path.startswith('/api/segments/'):
             seg = street_segment(unquote(self.path[len('/api/segments/'):]))
             self.send_json(200, seg) if seg else self.send_json(404, {'error': 'Unknown analysis segment ID'})
@@ -747,6 +762,27 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json(200, result)
             except (ValueError, TypeError, json.JSONDecodeError) as e:
                 self.send_json(400, {'error': str(e)})
+            return
+        if self.path == '/api/feedback':
+            # A walker's report that a street felt worse or better than its score on one dimension. Nothing personal is
+            # kept: the client address is used only in memory, for the rate limit (routing/feedback.py FeedbackBook.allow).
+            try:
+                planner = get_planner()
+                book = planner.feedback
+                if not book.enabled:
+                    self.send_json(503, {'error': 'Walker feedback is not configured on this server (FEEDBACK_GITHUB_TOKEN).', 'code': 'feedback_disabled'}); return
+                from routing import feedback as fb
+                report = fb.make_report(read_json(self, 2000), lambda x: x in planner.net.segment_names)
+                if not book.allow(client_ip(self), (report['segment_id'], report['dimension'])):
+                    self.send_json(429, {'error': 'Thanks: this street and dimension already has your report today (or 20 reports in the last hour).'}); return
+                book.add(report)
+                self.send_json(201, {'saved': True, 'report': report, 'segment': book.for_segment(report['segment_id']).get(report['dimension']), 'rule': fb.RULE})
+            except (ValueError, TypeError, json.JSONDecodeError) as e:
+                self.send_json(400, {'error': str(e)})
+            except RuntimeError as e:
+                self.send_json(503, {'error': str(e)})
+            except Exception as e:  # the store (GitHub) failed: say so, keep nothing half-written
+                self.send_json(502, {'error': f'Report not saved: the feedback store did not answer ({str(e)[:120]}).'})
             return
         if self.path in ('/api/routes', '/api/navigation/progress'):
             try:
