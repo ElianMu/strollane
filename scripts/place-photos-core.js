@@ -59,11 +59,17 @@ function ppMetres(a, b) {
 }
 const ppStrip = (h) => String(h || '').replace(/<[^>]*>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
 /** The author's name from Commons' Artist HTML: the first linked name, else the plain text without notes. */
-function ppAuthor(html) {
+// Artist texts that are not the photographer's name (seen in the 2026-11-20 index): a licence note, the maker of the
+// work shown, a book's printing notes, "unknown"
+const PP_NOT_A_NAME = /licen[cs]e|^you may|censor librorum|i took this|^sculpture by|^unknown\b|^see\b/i;
+function ppAuthor(html, attribution) {
  const a = /<a\b[^>]*>(.*?)<\/a>/is.exec(String(html || ''));
  const t = ppStrip(a ? a[1] : html).replace(/\s*\(.*$/, '').replace(/^(Photo|Photograph|Image)( by)?:?\s*/i, '').trim();
  // a link to a source file (a derivative work) is not a name
- return /\.(jpe?g|png|gif|tiff?|svg)$/i.test(t) ? '' : t.slice(0, 80);
+ if (/\.(jpe?g|png|gif|tiff?|svg)$/i.test(t)) return '';
+ // not a name: Commons' Attribution field ("Padraic Ryan") when there is one, else no name
+ if (PP_NOT_A_NAME.test(t)) return attribution ? ppAuthor(attribution) : '';
+ return t.slice(0, 80);
 }
 
 async function ppJson(fetchFn, url, opts) {
@@ -141,11 +147,11 @@ async function buildPlacePhotoIndex(places, {fetch: fetchFn = fetch, log = () =>
  // file metadata: thumbnail, author, licence
  const files = [...new Set([...img.values()].map((x) => x.file))], meta = new Map();
  await ppPool(ppChunks(files, 50), 3, async (b) => {
-  const d = await ppJson(fetchFn, `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(b.map((f) => 'File:' + f).join('|'))}&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=${PP.WIDTH}&iiextmetadatafilter=Artist|LicenseShortName&format=json&origin=*`, H);
+  const d = await ppJson(fetchFn, `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(b.map((f) => 'File:' + f).join('|'))}&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=${PP.WIDTH}&iiextmetadatafilter=Artist|Attribution|LicenseShortName&format=json&origin=*`, H);
   const back = {}; for (const n of d.query?.normalized || []) back[n.to] = n.from;
   for (const pg of Object.values(d.query?.pages || {})) {
    const info = pg.imageinfo?.[0]; if (!info?.thumburl) continue;
-   const lic = ppStrip(info.extmetadata?.LicenseShortName?.value), auth = ppAuthor(info.extmetadata?.Artist?.value);
+   const lic = ppStrip(info.extmetadata?.LicenseShortName?.value), auth = ppAuthor(info.extmetadata?.Artist?.value, info.extmetadata?.Attribution?.value);
    const pd = /public domain|^PD|^CC0/i.test(lic);
    if (!PP.FREE.test(lic) || (!auth && !pd)) continue;
    const thumb = info.thumburl.replace(/^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\/thumb\//, '').replace(/\?.*$/, '');

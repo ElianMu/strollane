@@ -645,6 +645,7 @@ const run=s=>vm.runInContext(s,context);
   // short labels with numbers or names: the whole text, or each " · " part; names and addresses are kept
   {const cases=[['13 min','13 分钟'],['1.02 km','1.02 公里'],['105 min stay (est.)','停留约 105 分钟（估计）'],['Museum +1','博物馆 +1'],['3 PLANNED','已规划 3 个'],
     ['cafes · 78 West 3rd Street','咖啡馆 · 78 West 3rd Street'],['Moderate · 50','中等 · 50'],['Coffee (café)','咖啡（咖啡馆）'],['15 °C · feels 13 °C · Clear','15 °C · 体感 13 °C · 晴'],
+    ['安静放松 Quiet & Relax 60 · shortest route 47','安静放松 Quiet & Relax 60 · 最短路线 47'],['Your priority 60 · shortest route 47 (+13, similar) · 4.2% longer','你的优先级 60 · 最短路线 47（+13，相近） · 长 4.2%'],
     ['Wikipedia in 7 editions · NYC designated landmark · hours listed','维基百科 7 种语言版本 · 纽约市指定地标 · 列有营业时间'],['Up to 90 min · stairs allowed','最长 90 分钟 · 可以走楼梯'],['◇ Culture','◇ 文化 Culture'],
     ['3 stop(s), 1.02 km on the OSM pedestrian graph, 13 min walking + 105 min visits. Within your limits.','3 个停留点，步行网络上 1.02 公里，步行 13 分钟 + 停留 105 分钟。在你的限制范围内。']];
    const els=cases.map(([en])=>{const e=d.createElement('p');d.body.appendChild(e);e.textContent=en;return e;});

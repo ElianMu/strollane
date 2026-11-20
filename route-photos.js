@@ -34,6 +34,15 @@ function photoAuthor(html) {
  const text = (named ? named.textContent : d.textContent || '').replace(/No machine-readable author provided\.?/i, '').replace(/\s*assumed \(based on copyright claims\)\.?/i, '');
  return text.replace(/\s+/g, ' ').trim();
 }
+/** The photographer's name from Commons metadata: Artist, or Attribution when Artist holds a licence note or
+    describes the work shown instead ("You may select the license of your choice.", "Sculpture by …"). */
+const PHOTO_NOT_A_NAME = /licen[cs]e|^you may|censor librorum|i took this|^sculpture by|^unknown\b|^see\b/i;
+function photoAuthorOf(m) {
+ const a = photoAuthor(m.Artist?.value);
+ if (!PHOTO_NOT_A_NAME.test(a)) return a;
+ const b = photoAuthor(m.Attribution?.value);
+ return PHOTO_NOT_A_NAME.test(b) ? '' : b;
+}
 function photoKm(a, b) { const k = Math.PI / 180, x = (b.lon - a.lon) * Math.cos((a.lat + b.lat) / 2 * k), y = b.lat - a.lat; return Math.hypot(x, y) * k * 6371; }
 function photosEnabled() { return typeof window !== 'undefined' && window.STROLLANE_PHOTOS !== false && typeof fetch === 'function'; }
 
@@ -67,13 +76,13 @@ async function photosFetch(places) {
  }
  const titles = Object.keys(want);
  if (!titles.length) return false;
- const cm = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join('|'))}&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=${PHOTO.WIDTH}&iiextmetadatafilter=Artist|LicenseShortName|LicenseUrl|Credit&format=json&origin=*`).then((r) => r.json());
+ const cm = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join('|'))}&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=${PHOTO.WIDTH}&iiextmetadatafilter=Artist|Attribution|LicenseShortName|LicenseUrl|Credit&format=json&origin=*`).then((r) => r.json());
  const alias = Object.fromEntries((cm.query?.normalized || []).map((n) => [n.to, n.from]));
  let found = false;
  for (const page of Object.values(cm.query?.pages || {})) {
   const id = want[alias[page.title] || page.title]; if (!id) continue;
   const info = page.imageinfo?.[0], m = info?.extmetadata || {};
-  const license = photoStrip(m.LicenseShortName?.value), author = photoAuthor(m.Artist?.value) || (/public domain|^PD|^CC0/i.test(license) ? '' : null); // no author → only public domain / CC0 can be shown
+  const license = photoStrip(m.LicenseShortName?.value), author = photoAuthorOf(m) || (/public domain|^PD|^CC0/i.test(license) ? '' : null); // no author → only public domain / CC0 can be shown
   if (!info?.thumburl || !PHOTO.FREE.test(license) || author == null) { routePhotos.cache.set(id, {none: true}); continue; }
   routePhotos.cache.set(id, {wd: id, thumb: info.thumburl, w: info.thumbwidth, h: info.thumbheight, page: info.descriptionurl, author: author.slice(0, 80), license, licenseUrl: m.LicenseUrl?.value || null});
   found = true;

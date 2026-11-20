@@ -17,4 +17,8 @@ for(const [a,b] of same)assert(ppSameName(a,b),`should match: ${a} ⇄ ${b}`);
 for(const [a,b] of different)assert(!ppSameName(a,b),`must not match: ${a} ⇄ ${b}`);
 assert.equal(ppAuthor('<a href="x">1_Wall_Street_001.JPG</a>'),'','a source file name is not an author');
 assert.equal(ppAuthor('<a href="x">Ajay Suresh</a> from New York, NY, USA'),'Ajay Suresh');
+// Artist holding a licence note or the work's maker: the Attribution field's name, else none (2026-11-20)
+assert.equal(ppAuthor('You may select the license of your choice.','<a href="//commons.wikimedia.org/wiki/User:Padraic">Padraic Ryan</a>'),'Padraic Ryan');
+assert.equal(ppAuthor('Sculpture by Paul Manship; I took this photograph.'),'');
+assert.equal(ppAuthor('Regimus LaFort is listed as the Censor Librorum, and Cardinal John Farley is listed'),'');
 console.log('place-photos: ok');

@@ -84,7 +84,9 @@ async function generateRoutes(userText=null,isFollowUp=false){
   renderRouteCards();syncMapData();updateProfile();updateWhyRoute();renderRouteEdges();renderPOIs();
   appendChat('assistant',planner.lastExplanation);
   // the same result in plain words (the walk names on the cards)
-  const told=routeStory.last;if(told?.shown.length){const names=told.shown.map(id=>{const t=told.stories[id];return t.short+(t.tag?' (best match)':'');});appendChat('assistant',`${names.length} walk${names.length>1?'s':''} to choose from: ${names.join(', ')}.${told.extra.length?` ${told.extra.length} more under “More routes”.`:''}`);}
+  const told=routeStory.last;if(told?.shown.length){
+   if(typeof i18n!=='undefined'&&i18n.lang==='zh'){const names=told.shown.map(id=>{const t=told.stories[id];return t.short+(t.tag&&!/最佳匹配/.test(t.short)?'（最佳匹配）':'');});appendChat('assistant',`有 ${names.length} 条路线可选：${names.join('、')}。${told.extra.length?`"更多路线"里还有 ${told.extra.length} 条。`:''}`);}
+   else{const names=told.shown.map(id=>{const t=told.stories[id];return t.short+(t.tag?' (best match)':'');});appendChat('assistant',`${names.length} walk${names.length>1?'s':''} to choose from: ${names.join(', ')}.${told.extra.length?` ${told.extra.length} more under “More routes”.`:''}`);}}
   if(state.mapReady&&!isFollowUp){const bx=routeBounds(state.routes,80);if(bx)state.map.fitBounds([[bx[0],bx[1]],[bx[2],bx[3]]],{padding:routeFitPadding(65),maxZoom:15.5,duration:700});}
   await loadRoutePOIs(run);
  }catch(err){

@@ -237,6 +237,8 @@ const I18N_ZH_PATTERNS = [
  [/^(\d+) stop\(s\), ([\d.]+) km on the OSM pedestrian graph, (\d+) min walking \+ (\d+) min visits\. Within your limits\.$/, '$1 个停留点，步行网络上 $2 公里，步行 $3 分钟 + 停留 $4 分钟。在你的限制范围内。'],
  [/^(\d+) stop\(s\), ([\d.]+) km on the OSM pedestrian graph, (\d+) min walking \+ (\d+) min visits\. Not feasible: (.+)$/, '$1 个停留点，步行网络上 $2 公里，步行 $3 分钟 + 停留 $4 分钟。无法满足：$5'],
  [/^Whether it serves (.+?): (.+)$/, '是否供应 $1：$2'], [/^rank (\d+)$/, '第 $1 名'],
+ [/^shortest route$/, '最短路线'], [/^this is the shortest route$/, '这就是最短路线'], [/^([\d.]+)% longer$/, '长 $1%'],
+ [/^shortest route ([\d.]+|N\/A)(?: \(([+-]?\d+)(, similar)?\))?$/, (m, v, d, sim) => `最短路线 ${v}${d ? `（${d}${sim ? '，相近' : ''}）` : ''}`],
  // the facts under a recommended café or restaurant (routing/recommend.py)
  [/^“(.+)” is on the official menu \((\S+)\); checked (\S+)\.$/, '官方菜单上有“$1”（$2）；查询时间 $3。'],
  [/^NYC Health inspection grade (\w+) \((\S+)\); last inspected (\S+)\.$/, '纽约市卫生检查等级 $1（$2）；最近一次检查 $3。'],
