@@ -10,7 +10,7 @@ import gzip, hashlib, heapq, json, math, os, threading, time, uuid
 from array import array
 from collections import OrderedDict
 from .geometry_store import PackedPolylines, ProjectedPolylines
-from .compact import Adjacency, EdgeIds, EdgeTable, GeomIndex, NodeTable, PackedScores, intern_edges
+from .compact import Adjacency, EdgeIds, EdgeTable, GeomIndex, NodeTable, WayPool, PackedScores, intern_edges
 from . import netpack
 
 try:
@@ -72,7 +72,7 @@ class PedestrianNetwork:
         self.by_geom = GeomIndex(self.edges, len(self.geoms))
         # Metric polylines and a 100 m bucket index of routable edge geometries (both endpoints in the main component).
         self.gxy = ProjectedPolylines(self.geoms, xy)
-        self.glen = [sum(math.dist(a, b) for a, b in zip(g, g[1:])) for g in self.gxy]
+        self.glen = array('d', (sum(math.dist(a, b) for a, b in zip(g, g[1:])) for g in self.gxy))
         self.index = {}
         for i, (u, v, k, gi, rev, *_rest) in enumerate(self.edges):
             if rev or self.nodes[u][3] != 0 or self.nodes[v][3] != 0:
@@ -144,7 +144,7 @@ class PedestrianNetwork:
         tags = header['tags']
         for t in tags:
             t['_steps'] = 'steps' in as_list(t.get('highway'))
-        ways = header['ways']
+        ways = WayPool(header.pop('ways'))
         U, V, K, G, R, L, W, T = (A[c] for c in ('e_u', 'e_v', 'e_k', 'e_gi', 'e_rev', 'e_len', 'e_ways', 'e_tags'))
         self.edges = EdgeTable(ids, U, V, K, G, R, L, W, T, ways, tags)
         self.gscores = netpack.scores_from_pack(header, A, len(DIMENSIONS))

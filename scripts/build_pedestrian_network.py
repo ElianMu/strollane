@@ -96,7 +96,23 @@ def main():
                 json.dump({'place': PLACE, 'source': 'OpenStreetMap boundary via Nominatim (OSMnx geocode_to_gdf), simplified 0.0002 degrees',
                            'geometry': mapping(boundary.simplify(0.0002))}, f, separators=(',', ':'))
     print('Downloading OSM walk network (Overpass)…', flush=True)
-    G = download_walk_graph(boundary)
+    if area != 'manhattan' and not box:
+        # A bridge that leaves the borough can end on a stretch whose nodes are all outside it (the Queensboro Bridge's
+        # last 190 m over Manhattan's shore), and truncate_by_edge drops that stretch, so the joined network loses the
+        # crossing. Download a little beyond the outline (0.004 degrees, about 350 m), then keep only edges with a node
+        # inside it, plus bridges: other boroughs' and counties' streets stay out.
+        from shapely.geometry import Point
+        from shapely.prepared import prep
+        G = download_walk_graph(boundary.buffer(0.004))
+        inside = prep(boundary)
+        out = {n for n, d in G.nodes(data=True) if not inside.contains(Point(d['x'], d['y']))}
+        drop = [(u, v, k) for u, v, k, d in G.edges(keys=True, data=True)
+                if u in out and v in out and 'yes' not in (d.get('bridge') if isinstance(d.get('bridge'), list) else [d.get('bridge')])]
+        G.remove_edges_from(drop)
+        G.remove_nodes_from([n for n in out if G.degree(n) == 0])
+        print(f'  kept bridges beyond the outline; dropped {len(drop):,} edges with both ends outside it', flush=True)
+    else:
+        G = download_walk_graph(boundary)
     raw_nodes, raw_edges = G.number_of_nodes(), G.number_of_edges()
 
     # Pedestrian access: drop legally closed edges; a directed copy against an oneway:foot restriction is dropped too.
