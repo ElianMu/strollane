@@ -46,18 +46,42 @@ function calloutPlace(a, others, route, box, w, h, gap, placed) {
  const mid = route.length ? {x: route.reduce((s, p) => s + p.x, 0) / route.length, y: route.reduce((s, p) => s + p.y, 0) / route.length} : a;
  const hit = (r, p) => r.x < p.x + p.w + 6 && p.x < r.x + r.w + 6 && r.y < p.y + p.h + 6 && p.y < r.y + r.h + 6;
  let best = null;
- for (const g of [gap, gap * 1.6, gap * 2.4]) for (const [dx, dy] of dirs) {
+ for (const g of [gap, gap * 1.6, gap * 2.4]) for (const [dx, dy] of dirs) for (const slide of (dx === 0 ? [0.5, 0.12, 0.88] : [0.5])) {
   const n = Math.hypot(dx, dy), ox = dx / n * g, oy = dy / n * g;
-  const r = {x: a.x + ox - (dx < 0 ? w : dx > 0 ? 0 : w / 2), y: a.y + oy - (dy < 0 ? h : dy > 0 ? 0 : h / 2), w, h};
+  // above / below a place the card may also sit left- or right-aligned, not only centred
+  const r = {x: a.x + ox - (dx < 0 ? w : dx > 0 ? 0 : w * slide), y: a.y + oy - (dy < 0 ? h : dy > 0 ? 0 : h / 2), w, h};
   if (r.x < box.x0 || r.y < box.y0 || r.x + w > box.x1 || r.y + h > box.y1) continue;
   if (placed.some((p) => hit(r, p))) continue;
   if (others.some((o) => o.x > r.x - 4 && o.x < r.x + w + 4 && o.y > r.y - 4 && o.y < r.y + h + 4)) continue;
   const onRoute = route.filter((p) => p.x > r.x - 3 && p.x < r.x + w + 3 && p.y > r.y - 3 && p.y < r.y + h + 3).length;
   const toward = (r.x + w / 2 - a.x) * (a.x - mid.x) + (r.y + h / 2 - a.y) * (a.y - mid.y) < 0 ? 1 : 0;
-  const score = onRoute * 10 + toward * 3 + (g / gap - 1) * 3 + (dx && dy ? 0.5 : 0);
+  const score = onRoute * 10 + toward * 3 + (g / gap - 1) * 3 + (dx && dy ? 0.5 : 0) + (slide !== 0.5 ? 0.3 : 0);
   if (!best || score < best.score) best = {r, score};
  }
  return best ? best.r : null;
+}
+
+/** Place the cards greedily, most important first; if some place gets no card, try again with the places that
+    failed laid out first, and keep the arrangement that shows the most cards (then the most important ones). */
+function calloutArrange(order, route, box, gap, max) {
+ const run = (seq) => {
+  const placed = [...box.obstacles], out = [];
+  for (const o of seq) {
+   if (out.length >= max) break;
+   const rect = calloutPlace(o.a, order.filter((x) => x !== o).map((x) => x.a), route, box, o.w, o.h, gap, placed);
+   if (rect) { placed.push(rect); out.push({o, rect}); }
+  }
+  return out;
+ };
+ const want = order.slice(0, max);
+ let best = run(order);
+ const missed = want.filter((o) => !best.some((p) => p.o === o));
+ for (const m of missed) {
+  const alt = run([m, ...want.filter((o) => o !== m), ...order.slice(max)]);
+  const rankSum = (r) => r.reduce((s, p) => s + p.o.it.rank, 0);
+  if (alt.length > best.length || (alt.length === best.length && rankSum(alt) < rankSum(best))) best = alt;
+ }
+ return best;
 }
 
 /** The free part of the map: below the floating controls, above the phone routes sheet. */
@@ -137,15 +161,10 @@ function calloutsLayout() {
   .filter((o) => o.el && o.a.x > box.x0 && o.a.x < box.x1 && o.a.y > box.y0 && o.a.y < box.y1)
   .sort((a, b) => a.it.rank - b.it.rank);
  els.forEach((el) => { el.style.display = 'none'; el.dataset.dx = ''; });
- const gap = phone ? CALLOUT.GAP * 0.75 : CALLOUT.GAP, placed = [...box.obstacles], cards = [];
- for (const o of order) {
-  if (cards.length >= max) break;
-  o.el.style.display = '';
-  const rect = calloutPlace(o.a, order.filter((x) => x !== o).map((x) => x.a), route, box, o.el.offsetWidth, o.el.offsetHeight, gap, placed);
-  if (!rect) { o.el.style.display = 'none'; continue; }
-  placed.push(rect); cards.push(rect);
-  o.el.dataset.dx = rect.x - o.a.x; o.el.dataset.dy = rect.y - o.a.y;
- }
+ const gap = phone ? CALLOUT.GAP * 0.75 : CALLOUT.GAP;
+ order.forEach((o) => { o.el.style.display = ''; o.w = o.el.offsetWidth; o.h = o.el.offsetHeight; o.el.style.display = 'none'; });
+ const pick = calloutArrange(order, route, box, gap, max);
+ for (const {o, rect} of pick) { o.el.style.display = ''; o.el.dataset.dx = rect.x - o.a.x; o.el.dataset.dy = rect.y - o.a.y; }
  calloutsFollow();
 }
 
@@ -181,4 +200,4 @@ if (typeof window !== 'undefined') {
  // nav mode hides them; leaving it shows them again
  new MutationObserver(() => calloutsLayout()).observe(document.body, {attributes: true, attributeFilter: ['class']});
 }
-if (typeof module !== 'undefined' && module.exports) module.exports = {calloutPlace};
+if (typeof module !== 'undefined' && module.exports) module.exports = {calloutPlace, calloutArrange};
