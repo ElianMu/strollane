@@ -6,8 +6,10 @@
    is translated by a machine at run time: every Chinese string below was written by hand.
 
    What is NOT translated, on purpose:
-   - Sentences the app builds from data (route explanations, "Why this route?", AI replies, toasts with numbers). They
-     stay in English rather than being half-translated. i18nCoverageNote says so in the menu.
+   - Technical details (route edges, the route check, score formulas, indicator definitions). Walk names, walk
+     descriptions, "Why this route?", City Walk stops and the page's own chat messages are written in Chinese where
+     they are composed (route-story.js, journey-ui.js, journey.js, app.js); short labels with a number in them
+     ("13 min", "Museum +1") are matched by I18N_ZH_PATTERNS below. A sentence no rule matches stays in English, whole.
    - Input values. The sentence the priority pills write into the request box stays English because the planner reads
      it. Visitors can type their own request in Chinese: on 2026-11-15 the live interpreter turned
      "我想要一条更绿、更安静、建筑有看头的路线" into Nature, Quiet & Relax and Architecture at 90. A start and destination
@@ -140,19 +142,146 @@ const I18N_ZH = {
  'Planning your walk…': '正在规划你的步行…', 'Waking the route server…': '正在唤醒路线服务器…', 'Finding places & routing…': '正在查找地点并规划…', 'Details': '详情',
  'Locate me': '定位我', 'About the prototype': '关于本原型', 'Dismiss': '关闭', 'Clear': '清除', 'Describe your walk': '描述你的步行', 'Back to map': '回到地图', 'Quick preferences': '快捷偏好',
 };
+// What a walker sees after planning (City Walk, the left panel, weather, the data along the route). Added 2026-11-20
+// after a live check in Chinese mode; technical details (route edges, route check, score formulas, indicator
+// definitions) stay in English on purpose.
+Object.assign(I18N_ZH, {
+ // City Walk card
+ 'NOT FEASIBLE': '无法满足', 'no limit set': '未设上限', 'How this plan was made': '这份行程是怎么排出来的', 'Find cappuccino': '找卡布奇诺',
+ 'Describe what you want to see, eat or do — or add stops — then Plan My Walk.': '描述你想看、想吃或想做的事，或者添加途经点，然后点"规划我的步行"。',
+ 'Hours listed but not machine-readable': '列有营业时间，但格式无法自动识别', 'Open at arrival per OSM hours': '按 OSM 营业时间，到达时在营业',
+ 'Opening hours (OSM) say closed at arrival time': '按 OSM 营业时间，到达时已关门', 'Closes during the planned visit (OSM hours)': '按 OSM 营业时间，停留期间会关门',
+ 'Verified facts': '已核实的事实', 'Derived metrics': '推算出的数据', 'Interpretation': '解读', 'Unknown': '未知',
+ 'Recommended: the requested item is confirmed and the detour is short.': '推荐：你要的东西已确认有，而且绕路很短。',
+ 'Possible match: please review the menu evidence.': '可能符合：请核对菜单依据。', 'Listed for reference only: it does not meet the request on current evidence.': '仅供参考：按现有依据不符合你的要求。',
+ 'Matches the requested kind of place.': '符合你要的地点类型。', 'rule-based (no language model)': '按规则判断（未用语言模型）',
+ 'Ratings and review counts: no rating provider is configured.': '评分和评论数：没有接入评分来源。', 'Ratings: not available.': '评分：暂无。',
+ 'Opening hours at arrival: not mapped or not machine-readable.': '到达时是否营业：没有记录，或格式无法识别。', 'Today’s stock and prices: a menu listing does not confirm them.': '今天有没有货、价格多少：菜单上列着并不代表确定。',
+ 'Confirmed menu match': '菜单上已确认有', 'Probable match — review needed': '可能有，需要核对', 'Unverified': '未核实', 'Not found in checked sources': '查过的来源里没有',
+ 'Checking official menu…': '正在查官方菜单…', 'not checked': '未查', 'source': '来源', 'optional': '可选',
+ 'Wikidata-listed': 'Wikidata 收录', 'hours listed': '列有营业时间', 'OSM tag: serves espresso': 'OSM 标注：供应意式浓缩', 'OSM tag: serves coffee': 'OSM 标注：供应咖啡',
+ // kinds of stops (journey.js labels and place categories)
+ 'Famous sight': '著名景点', 'Famous sights': '著名景点', 'Museums': '博物馆', 'Historic buildings': '历史建筑', 'Parks': '公园', 'Shopping': '购物',
+ 'Culture venue': '文化场所', 'Culture venues': '文化场所', 'Pharmacy': '药店', 'Grocery / supermarket': '杂货店 / 超市', 'Hospital / clinic': '医院 / 诊所',
+ 'ATM / bank': 'ATM / 银行', 'Public restroom': '公共厕所', 'Luggage storage': '行李寄存', 'Café': '咖啡馆', 'Restaurant': '餐厅', 'Bakery / dessert': '面包 / 甜点', 'Bar': '酒吧',
+ 'Coffee': '咖啡', 'Cappuccino': '卡布奇诺', 'Espresso': '意式浓缩', 'Latte': '拿铁', 'Tea': '茶', 'Matcha': '抹茶', 'Pizza': '披萨', 'Bagel': '贝果', 'Croissant': '可颂',
+ 'cafes': '咖啡馆', 'restaurants': '餐厅', 'bakeries': '面包甜点店', 'bars': '酒吧', 'museums': '博物馆', 'parks': '公园', 'historic': '历史建筑', 'famous': '著名景点',
+ 'culture': '文化场所', 'shopping': '购物', 'hotels': '酒店', 'Hotel': '酒店', 'Attraction': '景点', 'Gallery': '美术馆', 'Library': '图书馆', 'Monument': '纪念碑', 'Memorial': '纪念地',
+ 'Place of worship': '宗教场所', 'Theatre': '剧院', 'Viewpoint': '观景点', 'Garden': '花园', 'Bakery': '面包店', 'Fast food': '快餐',
+ // left panel
+ '✦ AI on · understood your last request': '✦ AI 已开启 · 已理解你上一个请求', '✦ AI on · describe your walk in your own words': '✦ AI 已开启 · 用你自己的话描述这次步行',
+ '◇ AI off · your request is read with simple rules': '◇ AI 未开启 · 用简单规则理解你的请求', '◇ AI not reachable yet · it will try again when you plan': '◇ 暂时连不上 AI · 规划时会再试',
+ 'Planned stops are listed under “Your city walk” on the right.': '规划好的停留点列在右侧"你的城市漫步"里。',
+ 'READ BY AI': '由 AI 理解', 'READ WITH SIMPLE RULES': '用简单规则理解', 'NOT READ YET': '尚未理解', '✦ UNDERSTOOD YOUR PREFERENCES': '✦ 理解出的偏好',
+ '✧ No preferences interpreted yet. Unmentioned dimensions = neutral 50.': '✧ 还没有理解出偏好。没提到的维度 = 中性 50。',
+ 'High': '高', 'Moderate': '中等', 'Low': '低', 'less': '更少', 'prefer less': '偏好更少', 'stairs allowed': '可以走楼梯', 'avoiding stairs': '避开楼梯', 'step-free': '无台阶',
+ // results, map and status lines
+ 'Each button plans the walk again with that change. We only say it improved when the data shows it.': '每个按钮都会按这个改动重新规划。只有数据显示确实变好了，我们才会这么说。',
+ 'DATA ↗': '数据 ↗', '● Walking routes: Manhattan · Brooklyn · Queens': '● 步行路线：曼哈顿 · 布鲁克林 · 皇后区',
+ 'STREETS LOADED · MANHATTAN · BROOKLYN · QUEENS': '街道已加载 · 曼哈顿 · 布鲁克林 · 皇后区', 'How walkers rated their walks': '步行者给路线的评分', 'Install': '安装',
+ 'Selected': '已选', 'Did a street feel different from its score?': '有哪条街感觉和它的分数不一样吗？', 'Street': '街道', 'Worse than rated': '比分数差',
+ 'Better than rated': '比分数好', 'What these scores measure': '这些分数衡量什么', 'Explore on map ↗': '在地图上查看 ↗',
+ 'Trees': '行道树', 'Historic landmarks': '历史地标', 'Restaurants & cafés': '餐厅与咖啡馆', 'Transit stops': '公交站点', 'subway entrances + bus stops': '地铁入口 + 公交站',
+ 'Pedestrian crashes': '行人交通事故', 'Plan a route to see the city data around it.': '规划路线后，可以看到周边的城市数据。',
+ // weather
+ 'Now': '现在', 'Humidity': '湿度', 'Wind': '风', 'Clear': '晴', 'Cloudy': '多云', 'Fog': '雾', 'Rain': '雨', 'Snow': '雪', 'Showers': '阵雨', 'Storm': '雷暴', 'Variable': '多变',
+ 'after dark': '天黑后', 'rain': '雨', 'wind': '风', 'alert': '警报', 'Forecast window unavailable': '暂无这段时间的预报',
+ 'No active NWS alerts for this point': '此处没有生效的天气警报（NWS）', 'NWS alerts unavailable': '暂时无法获取天气警报（NWS）',
+ 'These routes were computed without weather data.': '这些路线在规划时没有用到天气数据。', 'These routes were computed without usable weather data.': '这些路线在规划时没有可用的天气数据。',
+ 'Weather-aware routing is off.': '考虑天气的路线规划已关闭。', 'Weather will be checked when you plan a route.': '规划路线时会查看天气。',
+ 'Open-Meteo forecast (grid model, one value for the whole walk) · NWS alerts. Never a street-level measurement.': 'Open-Meteo 天气预报（网格模型，整段步行用同一个值）· NWS 天气警报。不是街道级的测量。',
+ 'Open-Meteo model (not a station observation)': 'Open-Meteo 模型（不是气象站实测）', 'INFO ONLY': '仅供参考', 'ROUTING ACTIVE': '已用于规划', 'UNAVAILABLE': '不可用',
+ 'Weather conditions': '天气状况', 'Rain chance · wind': '降雨概率 · 风', 'Weather impact on your walk': '天气对步行的影响',
+ 'No weather condition expected to affect walking comfort.': '预计没有会影响步行舒适度的天气。', 'Unknown — no forecast.': '未知：没有预报。',
+ 'Weather-aware route explanation': '天气与路线', 'Plan a route to see whether weather changed it.': '规划路线后，可以看到天气有没有改变它。',
+ 'Weather information is available, but weather-based route optimization is not active for this route.': '有天气信息，但这条路线没有按天气优化。',
+ 'Recalculate': '重新计算', 'Weather has not loaded.': '天气还没有加载。', 'Routes use the static experience scores.': '路线使用固定的体验分数。',
+ // status lines
+ 'Clarification needed. The displayed previous route has not been recalculated.': '需要你补充一点信息。当前显示的路线没有重新计算。',
+ 'Journey changed. Plan again to update route geometry.': '行程改了。再规划一次就能更新路线。', 'No selected route yet.': '还没有选中的路线。',
+ 'No discovery request yet. Describe what you want, or add stops.': '还没有想去的地方。描述你想要什么，或者添加途经点。',
+ 'Step-free access cannot be verified with the current curb-ramp and elevator data. No route is recommended.': '现有的路缘坡道和电梯数据无法核实无台阶通行，因此不推荐路线。',
+ 'Step-free access needs verified curb-ramp and elevator data, which is not connected. No route recommendation will be returned.': '无台阶通行需要经过核实的路缘坡道和电梯数据，目前尚未接入，因此不会推荐路线。',
+ 'Step-free access cannot be verified, so no route is recommended.': '无法核实无台阶通行，因此不推荐路线。',
+ 'Install STROLLANE on your home screen for a faster, full-screen view.': '把 STROLLANE 安装到手机主屏幕，像 App 一样打开。', 'Waterfront': '滨水',
+ 'Cafes': '咖啡馆', 'Restaurants': '餐厅', 'Bakeries': '面包甜点店', 'Bars': '酒吧',
+});
+for (const k of ['Clear', 'Cloudy', 'Fog', 'Rain', 'Snow', 'Showers', 'Storm', 'Variable']) I18N_ZH[k.toLowerCase()] = I18N_ZH[k];
+
+/* Phrases with a number or a name in them. Each rule must match the WHOLE text (or the whole of one " · " part):
+   anything else, such as a sentence built from data, stays as it is. A function returning null means "no match". */
+const i18nTerm = (s) => I18N_ZH[i18nKey(String(s))] || String(s);
+const i18nTermOnly = (s) => I18N_ZH[i18nKey(String(s))] || null;
+const I18N_ZH_PATTERNS = [
+ [/^(-?[\d.,]+) km$/, '$1 公里'], [/^(-?[\d.,]+) mi$/, '$1 英里'], [/^(\d+) min$/, '$1 分钟'], [/^(\d+) min stay \(est\.\)$/, '停留约 $1 分钟（估计）'],
+ [/^limit (\d+)$/, '上限 $1 分钟'], [/^(\d+) PLANNED$/, '已规划 $1 个'], [/^(\d+) STOPS?$/, '$1 个途经点'], [/^(\d+) WALKS?$/, '$1 条路线'],
+ [/^(\d+) NEAR ROUTE$/, '沿途 $1 个'], [/^(\d+)\/12 MEASURED$/, '已测量 $1/12'], [/^(\d+) EDGES$/, '$1 条路段'], [/^Up to (\d+) min$/, '最长 $1 分钟'],
+ [/^([A-Z][\w &/'’-]{0,40}) \+(\d+)$/, (m, a, n) => (i18nTermOnly(a) ? `${i18nTermOnly(a)} +${n}` : null)],
+ [/^Wikipedia in (\d+) editions?$/, '维基百科 $1 种语言版本'], [/^entrance approx\. (\d+) m from mapped point$/, '入口距标注点约 $1 米'],
+ [/^cuisine: (.+)$/, '菜系：$1'], [/^Arrive ~(.+)$/, '约 $1 到达'],
+ [/^feels (-?[\d.]+) ?°(C?)$/, '体感 $1 °$2'], [/^Feels (-?[\d.]+) ?°C$/, '体感 $1 °C'], [/^feels up to (-?[\d.]+) ?°C$/, '体感最高 $1 °C'],
+ [/^rain (\d+) ?%$/, '降雨概率 $1%'], [/^wind up to ([\d.]+) km\/h$/, '风速最高 $1 km/h'], [/^([\d.]+) km\/h wind$/, '风速 $1 km/h'],
+ [/^Next (\d+) min$/, '未来 $1 分钟'], [/^During the walk \((\d+) min from now\)$/, '步行期间（$1 分钟后起）'], [/^(\d+) min ago$/, '$1 分钟前'],
+ [/^valid (.+) \(New York\)$/, '有效时间 $1（纽约）'], [/^until (\w{3},? \d{1,2}:\d\d ?[AP]M)$/, '至 $1'],
+ [/^weight (\d+)$/, '权重 $1'], [/^Your priority (\d+)$/, '你的优先级 $1'], [/^(\d+)% coverage$/, '覆盖率 $1%'], [/^this route (\d+)$/, '本路线 $1'],
+ [/^([\d.]+) → fit ([\d.]+)$/, '$1 → 匹配 $2'], [/^Based on: (.+)$/, '依据：$1'],
+ [/^([A-Z][\w &]+) (\d+(?:\.\d+)?)$/, (m, a, n) => (I18N_DIMENSIONS_ZH[a] ? `${I18N_ZH[a]} ${n}` : null)], [/^(\d+) datasets?$/, '$1 个数据集'], [/^ACTIVE DATASETS: (\d+) of (\d+)$/, '已启用的数据集：$1 / $2'],
+ [/^WITHIN (\d+) M$/, '$1 米以内'], [/^(\d+) · Crashes (\S+) to (\S+) \((\d+) years?\)$/, '$1 · 事故 $2 至 $3（$4 年）'],
+ [/^Real records within (\d+) m of the route's geometry \(map display corridor, not a scoring distance\)\.$/, '路线 $1 米以内的真实记录（仅用于地图显示，不参与评分）。'],
+ [/^(\d\d) (.+)$/, (m, n, a) => (i18nTermOnly(a) ? `${n} ${i18nTermOnly(a)}` : null)],
+ [/^for “(.+)”$/, (m, a) => `用于“${i18nTerm(a)}”`],
+ [/^([^A-Za-z0-9\s]{1,2}) ([A-Z].*)$/, (m, icon, a) => (i18nTermOnly(a) ? `${icon} ${i18nTermOnly(a)}` : null)],
+ [/^([A-Z][\w'’-]*(?: [A-Z][\w'’-]*){0,2}) \((café|restaurant|bakerie|bar)\)$/, (m, a, k) => `${i18nTerm(a)}（${{café: '咖啡馆', restaurant: '餐厅', bakerie: '面包甜点店', bar: '酒吧'}[k]}）`],
+ [/^([A-Z][\w'’-]*(?: [A-Z][\w'’-]*)?) restaurant$/, (m, a) => `${i18nTerm(a)} 餐厅`],
+ [/^(.+) \(rule-based \(no language model\)\)$/, (m, a) => `${a}（按规则判断，未用语言模型）`], [/^\(rule-based \(no language model\)\)$/, '（按规则判断，未用语言模型）'],
+ [/^(\d+) stop\(s\), ([\d.]+) km on the OSM pedestrian graph, (\d+) min walking \+ (\d+) min visits\. Within your limits\.$/, '$1 个停留点，步行网络上 $2 公里，步行 $3 分钟 + 停留 $4 分钟。在你的限制范围内。'],
+ [/^(\d+) stop\(s\), ([\d.]+) km on the OSM pedestrian graph, (\d+) min walking \+ (\d+) min visits\. Not feasible: (.+)$/, '$1 个停留点，步行网络上 $2 公里，步行 $3 分钟 + 停留 $4 分钟。无法满足：$5'],
+ [/^Whether it serves (.+?): (.+)$/, '是否供应 $1：$2'], [/^rank (\d+)$/, '第 $1 名'],
+ // the facts under a recommended café or restaurant (routing/recommend.py)
+ [/^“(.+)” is on the official menu \((\S+)\); checked (\S+)\.$/, '官方菜单上有“$1”（$2）；查询时间 $3。'],
+ [/^NYC Health inspection grade (\w+) \((\S+)\); last inspected (\S+)\.$/, '纽约市卫生检查等级 $1（$2）；最近一次检查 $3。'],
+ [/^Official website: (\S+?)\.?$/, '官网：$1'], [/^Adds (\d+) m \/ (\d+) min of walking on the pedestrian network\.$/, '在步行网络上多走 $1 米 / $2 分钟。'],
+ [/^Open at the estimated arrival (\S+) according to its mapped hours\.$/, '按记录的营业时间，预计 $1 到达时在营业。'],
+];
+/** Chinese for one phrase: the dictionary first, then the rules above. null when nothing applies. */
+function i18nPhrase(text) {
+ const key = i18nKey(String(text || ''));
+ if (!key) return null;
+ if (I18N_ZH[key]) return I18N_ZH[key];
+ if (!/[A-Za-z]/.test(key)) return null;
+ for (const [re, to] of I18N_ZH_PATTERNS) {
+  const m = key.match(re); if (!m) continue;
+  const out = typeof to === 'function' ? to(...m) : key.replace(re, to);
+  if (out != null && out !== key) return out;
+ }
+ return null;
+}
+/** Chinese for a text node's whole text: one phrase, or " · "-separated parts of which at least one is known (the
+    others, usually names and addresses, are kept as they are). */
+function i18nLookup(text) {
+ const one = i18nPhrase(text);
+ if (one) return one;
+ const key = i18nKey(String(text || ''));
+ if (!key.includes(' · ')) return null;
+ let hit = false;
+ const out = key.split(' · ').map((p) => { const z = i18nPhrase(p); if (z) { hit = true; return z; } return p; });
+ return hit ? out.join(' · ') : null;
+}
+/** A label in the interface language (used by code that writes Chinese sentences around a data label). */
+function i18nLabel(s) { return typeof i18n !== 'undefined' && i18n.lang === 'zh' ? (i18nPhrase(s) || s) : s; }
 for (const [en, zh] of Object.entries(I18N_DIMENSIONS_ZH)) I18N_ZH[en] = `${zh} ${en}`; // gloss + the unchanged name
 
 const I18N_ATTRS = ['placeholder', 'title', 'aria-label'];
 const I18N_SKIP = new Set(['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION', 'CODE', 'PRE']);
 const i18n = {lang: 'en', observer: null, busy: false};
-const I18N_COVERAGE_NOTE = '界面已切换为中文。路线说明、AI 回复等由数据生成的句子仍为英文；12 个维度保留英文原名并附中文注释。可以用中文描述偏好；起点和终点请在输入框里选择。';
+const I18N_COVERAGE_NOTE = '界面已切换为中文。地名和技术细节（路段列表、评分公式、数据说明）保留英文；12 个维度保留英文原名并附中文注释。可以用中文描述偏好；起点和终点请在输入框里选择。';
 
 const i18nKey = (s) => s.replace(/\s+/g, ' ').trim();
 function i18nText(node) {
  if (node.parentNode && I18N_SKIP.has(node.parentNode.nodeName)) return;
  if (i18n.lang === 'zh') {
   if (node.__zh !== undefined && node.nodeValue === node.__zh) return; // already shown in Chinese
-  const key = i18nKey(node.nodeValue), zh = I18N_ZH[key];
+  const zh = i18nLookup(node.nodeValue);
   if (!zh) { node.__en = undefined; node.__zh = undefined; return; }
   node.__en = node.nodeValue; node.__zh = node.nodeValue.replace(node.nodeValue.trim(), zh); node.nodeValue = node.__zh;
  } else if (node.__en !== undefined) {
@@ -165,10 +294,10 @@ function i18nAttrs(el) {
   if (!el.hasAttribute || !el.hasAttribute(a)) continue;
   const store = 'data-i18n-en-' + a, shown = el.getAttribute(a);
   if (i18n.lang === 'zh') {
-   const zh = I18N_ZH[i18nKey(shown)];
+   const zh = i18nLookup(shown);
    if (zh && zh !== shown) { el.setAttribute(store, shown); el.setAttribute(a, zh); }
   } else if (el.hasAttribute(store)) {
-   if (I18N_ZH[i18nKey(el.getAttribute(store))] === shown) el.setAttribute(a, el.getAttribute(store));
+   if (i18nLookup(el.getAttribute(store)) === shown) el.setAttribute(a, el.getAttribute(store));
    el.removeAttribute(store);
   }
  }
@@ -227,6 +356,6 @@ function setupI18n() {
  if (saved === 'zh') setLanguage('zh', false);
 }
 if (typeof window !== 'undefined') {
- Object.assign(window, {setLanguage, toggleLanguage, I18N_ZH, I18N_DIMENSIONS_ZH});
+ Object.assign(window, {setLanguage, toggleLanguage, I18N_ZH, I18N_DIMENSIONS_ZH, i18nLookup, i18nPhrase, i18nLabel});
  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupI18n); else setupI18n();
 }

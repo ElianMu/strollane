@@ -257,7 +257,12 @@ class ReplyLanguage(unittest.TestCase):
         return seen['body']['messages'][-1]['content']
 
     def test_chinese_interface_asks_for_chinese_text(self):
-        self.assertIn('Simplified Chinese', self.sent_prompt({**DOC, 'reply_language': 'zh'}))
+        prompt = self.sent_prompt({**DOC, 'reply_language': 'zh'})
+        self.assertIn('Simplified Chinese', prompt)
+        # the language note must not push the model towards clarifications or unsupported items (seen live on
+        # 2026-11-20: "quieter and greener" came back as unsupported in Chinese mode)
+        self.assertIn('changes nothing about WHAT you return', prompt)
+        self.assertIn('never unsupported', prompt)
 
     def test_english_by_default(self):
         self.assertNotIn('Chinese', self.sent_prompt(dict(DOC)))

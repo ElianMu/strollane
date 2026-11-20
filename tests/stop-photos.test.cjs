@@ -12,9 +12,9 @@ const fake=(url)=>{calls.push(url);let body;
  else body={query:{pages:{1:{title:'File:Apollo.jpg',imageinfo:[{thumburl:'https://upload.wikimedia.org/a.jpg',thumbwidth:320,thumbheight:240,descriptionurl:'https://commons.wikimedia.org/wiki/File:Apollo.jpg',extmetadata:{Artist:{value:'<a>Jane Doe</a>'},LicenseShortName:{value:'CC BY-SA 4.0'}}}]}}}};
  return Promise.resolve({json:()=>Promise.resolve(body)});};
 class DP{parseFromString(h){const t=String(h).replace(/<[^>]+>/g,'');return{body:{textContent:t,querySelectorAll:()=>[],querySelector:()=>({textContent:t})}};}}
-const ctx={window:{},fetch:fake,DOMParser:DP,console,Map,Set,Promise};ctx.window=ctx;vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(__dirname,'..','route-photos.js'),'utf8')+';this.api={photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName};',ctx);
-const {photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName}=ctx.api;
+const ctx={window:{},fetch:fake,DOMParser:DP,console,Map,Set,Promise,AbortSignal};ctx.window=ctx;vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','route-photos.js'),'utf8')+';this.api={photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName,placePhotosEnsure,placePhoto};',ctx);
+const {photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName,placePhotosEnsure,placePhoto}=ctx.api;
 assert.ok(photoSameName('Church of St. Joseph of the Holy Family',"St. Joseph of the Holy Family's Church"));
 assert.ok(!photoSameName("St. Mary's Protestant Episcopal Church, Parish House, and Sunday School",'Sheltering Arms Park'));
 assert.ok(!photoSameName('Church of St. Joseph of the Holy Family','Holy Name Church'),'one shared word is not enough');
@@ -30,5 +30,17 @@ setTimeout(()=>{
  const ph=photosFor([{...apollo,wd:'Q3'}])[0];
  assert.equal(ph.author,'Jane Doe');assert.equal(ph.license,'CC BY-SA 4.0');
  const n=calls.length;photosResolve([apollo,nowhere],()=>{});
- setTimeout(()=>{assert.equal(calls.length,n,'resolved once per session');console.log('stop-photos: ok');},20);
+ setTimeout(()=>{assert.equal(calls.length,n,'resolved once per session');
+  // a stop with no Wikidata entry (a café) ends with a street-level photo: the lookup that finds nothing still
+  // reports back, and the next pass asks the API host for a photo at the place
+  const cafe={id:'osm:node/1',name:'Corner Café',lat:40.7307,lon:-73.9985},asked=[];
+  ctx.streetwiseFetch=(url,opt)=>{asked.push([url,JSON.parse(opt.body)]);return Promise.resolve({json:()=>Promise.resolve({configured:true,photos:{'osm:node/1':{thumb:'https://images.example/t.jpg',page:'https://www.mapillary.com/app/?pKey=1',username:'walker',captured_on:'2025-06-01',distance_m:12}}})});};
+  let renders=0;const render=()=>{renders++;if(renders<20)placePhotosEnsure([cafe],render);};
+  render();
+  setTimeout(()=>{
+   assert.equal(asked.length,1,'asked the API host once');assert.equal(asked[0][0],'/api/place-photos');assert.equal(asked[0][1].places[0].id,'osm:node/1');
+   const ph=placePhoto(cafe);assert.equal(ph&&ph.kind,'street','street-level photo shown');assert.equal(ph.author,'walker');
+   assert(renders<20,'no endless redraw');
+   console.log('stop-photos: ok');},80);
+ },20);
 },50);

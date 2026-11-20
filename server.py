@@ -1041,7 +1041,7 @@ def interpret(doc):
         'messages': [
             {'role': 'system', 'content': SYSTEM},
             {'role': 'user', 'content': 'Current state: '+json.dumps(context, ensure_ascii=False)+'\nRecent conversation: '+json.dumps(history[-8:], ensure_ascii=False)+'\nLatest instruction: '+message
-             + ('\nThe walker is using the Chinese interface: write `clarification` and every `unsupported[].reason` in Simplified Chinese. Keep all other fields exactly as the schema says (dimension names, enums and numbers stay as they are).' if doc.get('reply_language') == 'zh' else '')}
+             + ('\nLanguage only: the walker is using the Chinese interface. IF you write a `clarification` or an `unsupported[].reason`, write that text in Simplified Chinese, and copy `unsupported[].request` in the walker\'s own words. This note changes nothing about WHAT you return: decide clarification, unsupported and every other field exactly as you would for an English interface (a wish one of the 12 dimensions covers, such as quieter or greener, is set as a weight and is never unsupported). Dimension names, enums and numbers stay as the schema says.' if doc.get('reply_language') == 'zh' else '')}
         ]
     }
     try:

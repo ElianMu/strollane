@@ -271,6 +271,11 @@ async function interpretIntent(q){
 function unsupportedText(list){
   return list.map(u=>{
     const known=u.nearest_dimension&&DIMENSIONS.some(d=>d.name===u.nearest_dimension),has=known&&planner.origins[u.nearest_dimension]!=='default';
+    if(typeof i18n!=='undefined'&&i18n.lang==='zh'){
+      const dz=(typeof I18N_ZH!=='undefined'&&I18N_ZH[u.nearest_dimension])||dimLabel(u.nearest_dimension);
+      const nearZh=!known?'':has?`最接近的是“${dz}”，它已经是你的优先项之一。`:`最接近的是“${dz}”，需要的话可以选它。`;
+      return `没法按“${u.request.trim()}”来规划：${u.reason.trim().replace(/[.。]?$/,'。')}${nearZh}`;
+    }
     const near=!known?'':has?` The closest thing I can plan for is ${dimLabel(u.nearest_dimension)}, which is already one of your priorities.`:` The closest thing I can plan for is ${dimLabel(u.nearest_dimension)}; pick it if that helps.`;
     return `I can’t plan for “${u.request.trim()}”: ${u.reason.trim().replace(/[.。]?$/,'.')}${near}`;
   }).join(' ');
@@ -310,10 +315,15 @@ const ZH_CHAT=[
  [/ The displayed previous route has not been recalculated\./g,'当前显示的路线没有重新计算。'],
  [/ Nothing was changed\./g,'没有做任何更改。'],
  [/ The rest of your request is planned as usual\./g,'你请求的其余部分照常规划。'],
- [/^AI interpretation: (.*)\. Checking feasible pedestrian paths…$/,'AI 理解：$1。正在查找可走的步行路线…'],
- [/^Limited local interpretation: (.*)\. Checking feasible pedestrian paths…$/,'简单规则理解：$1。正在查找可走的步行路线…'],
- [/^AI journey interpretation: (.*)\.$/,'AI 行程理解：$1。'],
- [/^Limited local journey interpretation: (.*)\.$/,'简单规则行程理解：$1。'],
+ [/^AI interpretation: (.*)\. Checking feasible pedestrian paths…$/,(m,a)=>`AI 理解：${zhChatParts(a)}。正在查找可走的步行路线…`],
+ [/^Limited local interpretation: (.*)\. Checking feasible pedestrian paths…$/,(m,a)=>`简单规则理解：${zhChatParts(a)}。正在查找可走的步行路线…`],
+ [/^AI journey interpretation: (.*)\.$/,(m,a)=>`AI 行程理解：${zhChatParts(a)}。`],
+ [/^Limited local journey interpretation: (.*)\.$/,(m,a)=>`简单规则行程理解：${zhChatParts(a)}。`],
+ [/^No destination given, so I recommend a walk from (.+?): (.+?) chosen for your priorities, (coming back to the start|ending at the last highlight), (.+)\. Name a destination any time to walk there instead\.$/,
+  (m,from,what,end,time)=>`没有给终点，所以从${from==='your location'?'你的位置':from}出发推荐一条路线：按你的偏好选${what==='the places you asked for'?'你要的地点':what.split(' and ').map(w=>ZH_KINDS[w]||w).join('和')}，${end==='coming back to the start'?'最后回到起点':'在最后一个景点结束'}，${
+   time.replace(/^about (\d+) minutes in all \(say a time to change it\)$/,'总共约 $1 分钟（说个时间就能改）').replace(/^within your (\d+)-minute outing$/,'控制在你的 $1 分钟外出时间内').replace(/^within your (\d+)-minute walking limit$/,'控制在你的 $1 分钟步行上限内')}。随时说一个终点，就会改成走到那里。`],
+ [/^Could not build the walk: /,'没能生成这条步行路线：'],
+ [/ Your previous route is still shown and unchanged\./g,'之前的路线仍然显示，没有改动。'],
  [/^No explicit preference change recognized( by limited local preview)?\. I’ll check route options using current settings\.$/,'没有识别到明确的偏好变化，将按当前设置查找路线。'],
  [/^Updated: (.*)\. Re-planning…$/,'已更新：$1。正在重新规划…'],
  [/^My hotel set to (.*?)\. Use it as start, return point or search anchor\.$/,'已把酒店设为 $1。可以把它作为起点、返回点或搜索中心。'],
@@ -321,6 +331,27 @@ const ZH_CHAT=[
  [/^My hotel set to (.*)\.$/,'已把酒店设为 $1。'],
  [/^Hotel search unavailable: /,'酒店搜索暂时不可用：'],
 ];
+const ZH_KINDS={'famous sights':'著名景点','museums':'博物馆','historic buildings':'历史建筑','parks':'公园','shoppings':'购物地点','culture venues':'文化场所'};
+// One " · " part of an interpretation summary ("interest: Museum", "max 90 min", "avoidDetours: yes", "Culture 50")
+const ZH_CHAT_PARTS=[
+ [/^interest: (.+)$/,(m,a)=>`兴趣：${i18nLabel(a)}`],[/^\+(\d+) (.+)$/,(m,n,a)=>`再加 ${n} 个${i18nLabel(a)}`],[/^stop: (.+)$/,'途经点：$1'],
+ [/^start: my hotel$/,'起点：我的酒店'],[/^start: my hotel \(set your hotel first\)$/,'起点：我的酒店（请先设置酒店）'],[/^start: my location$/,'起点：我的位置'],
+ [/^start: GPS \(allow location first\)$/,'起点：定位（请先允许定位）'],[/^start: (.+)$/,'起点：$1'],[/^end: back to my hotel$/,'终点：回到酒店'],[/^end: back to start$/,'终点：回到起点'],
+ [/^end: (.+)$/,'终点：$1'],[/^flexible end \(discover for me\)$/,'终点灵活（为我推荐）'],[/^flexible end$/,'终点灵活'],
+ [/^outing (\d+) min \(walking \+ visits\)$/,'外出 $1 分钟（步行 + 停留）'],[/^max (\d+) min walking$/,'最长步行 $1 分钟'],[/^max (\d+) min$/,'最长 $1 分钟'],
+ [/^max ([\d.]+) km$/,'最远 $1 公里'],[/^less walking: max ([\d.]+) km$/,'少走一点：最远 $1 公里'],[/^removed (.+)$/,'已移除 $1'],[/^max detour (\d+)%$/,'最多绕行 $1%'],
+ [/^([\w ]+) \((cafes|restaurants|bakeries|bars)\)$/,(m,a,c)=>`${i18nLabel(titleCase(a))}（${i18nLabel(c)}）`],
+ [/^(avoidDetours|stepFree|avoidStairs): (yes|no)$/,(m,k,v)=>`${{avoidDetours:'避免绕行',stepFree:'无台阶',avoidStairs:'避开楼梯'}[k]}：${v==='yes'?'是':'否'}`],
+ [/^“(.+)” not found in NYC place data$/,'纽约地点数据里没找到“$1”'],[/^weather: cooler walk.*$/,'天气：走凉快一点的路（天热时更看重遮阴）'],[/^weather: use today’s forecast$/,'天气：参考今天的预报'],
+ [/^time limit (\d+) min ignored \(minimum (\d+)\); kept (\d+) min$/,'时间上限 $1 分钟太短，已忽略（最少 $2 分钟）；仍为 $3 分钟'],
+ [/^(.+) (\d+)$/,(m,a,n)=>typeof I18N_ZH!=='undefined'&&I18N_ZH[a]?`${I18N_ZH[a]} ${n}`:null],
+];
+function zhChatParts(text){
+ return String(text).split(' · ').map(p=>{
+  for(const [re,to] of ZH_CHAT_PARTS){const m=p.match(re);if(!m)continue;const o=typeof to==='function'?to(...m):p.replace(re,to);if(o!=null)return o;}
+  return (typeof i18nPhrase==='function'&&i18nPhrase(p))||p;
+ }).join(' · ');
+}
 function zhChat(t){let s=String(t||'');for(const [re,to] of ZH_CHAT)s=s.replace(re,to);return s;}
 function appendChat(role,message){
   planner.conversations.push({role,content:message,tech:role==='assistant'&&TECH_CHAT.test(message)});$('conversationSection').classList.remove('hidden');

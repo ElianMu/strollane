@@ -431,8 +431,12 @@ function candidateEvidence(c){
  const e=[];if(c.raw?.sl)e.push(`Wikipedia in ${c.raw.sl} editions`);else if(c.wikidata)e.push('Wikidata-listed');if(c.raw?.src==='lpc'||c.raw?.lpc)e.push('NYC designated landmark');if(c.raw?.snap>80)e.push(`entrance approx. ${Math.round(c.raw.snap)} m from mapped point`);if(c.drink?.espresso==='yes')e.push('OSM tag: serves espresso');if(c.drink?.coffee==='yes')e.push('OSM tag: serves coffee');
  if(c.cuisine)e.push('cuisine: '+c.cuisine.replace(/;/g,', '));if(c.hours)e.push('hours listed');return e.join(' · ')||null;
 }
+// The walk's name, in the interface language (the server keeps it as the route name, so it is written in Chinese
+// here rather than translated on screen).
 function journeyTheme(){
- const parts=[...journey.interests.map(i=>INTEREST_LABEL[i]+'s'),...journey.food.map(foodLabel),...journey.named.map(n=>n.place.name)];
+ const zh=typeof i18n!=='undefined'&&i18n.lang==='zh',L=typeof i18nLabel==='function'?i18nLabel:(x=>x);
+ const parts=[...journey.interests.map(i=>zh?L(INTEREST_LABEL[i]):INTEREST_LABEL[i]+'s'),...journey.food.map(f=>zh?L(foodLabel(f)):foodLabel(f)),...journey.named.map(n=>n.place.name)];
+ if(zh)return parts.length?`城市漫步：${parts.slice(0,4).join(' · ')}`:'你的城市漫步';
  return parts.length?`City walk: ${parts.slice(0,4).join(' · ')}`:'Your City Walk';
 }
 // The itinerary planner is for walks with places in them: stops, places to discover (interests, food, services) or an
@@ -518,6 +522,14 @@ async function planJourney(isFollowUp=false){
 function itinerarySummaryText(it){
  const t=it.totals,c=it.constraints;
  const stops=it.stops.filter(s=>s.role!=='end').map(s=>s.name).join(' → ');
+ if(typeof i18n!=='undefined'&&i18n.lang==='zh'){
+  const pool=it.pool&&it.pool.requested>it.pool.added&&!journey.autoInterests.length?`另有 ${it.pool.requested-it.pool.added} 个发现的地点排不进${c.max_outing_minutes?` ${c.max_outing_minutes} 分钟的外出时间`:'时间预算'}，延长时间就能加上。`:'';
+  return pool+`${c.feasible?'已规划':'无法满足'}：${t.stops} 个停留点${stops?`：${stops}`:''}${it.end_mode==='round'?' → 回到起点':it.end_mode==='hotel'?' → 回到酒店':''}。`+
+   `步行 ${(t.walk_m/1000).toFixed(2)} 公里、${Math.round(t.walk_min)} 分钟，加停留约 ${Math.round(t.visit_min)} 分钟，共 ${Math.round(t.outing_min)} 分钟。`+
+   (c.violations.length?`${c.violations.join('；')}。`:'')+(it.skipped.length?`没排进去：${it.skipped.map(s=>`${s.name}（${s.reason}）`).join('；')}。`:'')+
+   it.stops.map(s=>{const f=journey.food.find(f=>s.slot_id===`food:${f.category}:${f.item||f.cuisine||''}`&&f.item),r=f&&journey.recs[s.id+'|'+f.item];
+    return r&&r.classification!=='meets_request'?`${s.name} 的官方菜单上没有确认到${i18nLabel(titleCase(f.item))}（${r.classification==='needs_review'?'可能有，请核对依据':'没有可确认的来源'}）。`:'';}).join('');
+ }
  const pool=it.pool&&it.pool.requested>it.pool.added&&!journey.autoInterests.length?` ${it.pool.requested-it.pool.added} more discovered place(s) did not fit the ${c.max_outing_minutes?`${c.max_outing_minutes}-minute outing`:'budget'}; extend the time to add them.`:'';
  return pool+`${c.feasible?'Planned':'Not feasible'}: ${t.stops} stop(s)${stops?` — ${stops}`:''}${it.end_mode==='round'?' → back to start':it.end_mode==='hotel'?' → back to my hotel':''}. `+
   `${(t.walk_m/1000).toFixed(2)} km, ${Math.round(t.walk_min)} min walking + ${Math.round(t.visit_min)} min visits (estimated) = ${Math.round(t.outing_min)} min.`+

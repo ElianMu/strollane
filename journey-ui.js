@@ -93,7 +93,9 @@ function renderCityWalk(){
  const stopRows=it.stops.map(s=>{
   const menuRows=stopMenuItems(s).map(item=>{
    const m=menuEvidenceForDisplay(journey.menu[s.id+'|'+item]),url=m?.menu_source_url||m?.source_url;
-   return `<small class="cw-menu ${m?.status||''}">${esc(item)}: ${esc(MENU_LABEL[m?.status]||'not checked')}${m?.price?` · $${m.price.toFixed(2)} as listed`:''}${url?` · <a href="${esc(url)}" target="_blank" rel="noopener">source</a>`:''}${m?.reason?` — ${esc(m.reason)}`:''}</small>`;
+   const label=MENU_LABEL[m?.status]||'not checked';
+   return zh?`<small class="cw-menu ${m?.status||''}">${esc(i18nLabel(titleCase(item)))}：${esc(i18nLabel(label))}${m?.price?` · 标价 $${m.price.toFixed(2)}`:''}${url?` · <a href="${esc(url)}" target="_blank" rel="noopener">来源</a>`:''}</small>`
+    :`<small class="cw-menu ${m?.status||''}">${esc(item)}: ${esc(label)}${m?.price?` · $${m.price.toFixed(2)} as listed`:''}${url?` · <a href="${esc(url)}" target="_blank" rel="noopener">source</a>`:''}${m?.reason?` — ${esc(m.reason)}`:''}</small>`;
   }).join('');
   const p=placeCache[s.id],hrs=p?.hours||s.hours;
   // a real photo of every stop where one exists: photo index → Wikidata → street view at the stop (route-photos.js)
@@ -102,7 +104,7 @@ function renderCityWalk(){
   const ph=phPlace&&typeof placePhoto==='function'?placePhoto(phPlace):null;const open=s.open_at_arrival!=null?s.open_at_arrival:hrs?isOpenAt(hrs,new Date(Date.now()+s.arrival_min*60000)):null;
   return `<li class="cw-stop ${s.role==='end'?'end':''}"><span class="cw-seq">${s.role==='end'?'■':s.seq}</span><span class="cw-body">${ph?photoFigures([ph],'cw-photo'):''}<strong>${esc(s.name)}</strong>
    <small>${esc([s.category,s.address].filter(Boolean).join(' · '))}</small>
-   <small>${zh?`约 ${clockAt(s.arrival_min)} 到达 · 步行 +${(s.leg_in_m/1000).toFixed(2)} 公里 / ${Math.round(s.leg_in_min)} 分钟${s.visit_min?` · 停留约 ${s.visit_min} 分钟`:''}${s.slot_label?` · 用于“${esc(s.slot_label)}”`:''}${s.required?'':' · 可选'}`:`Arrive ~${clockAt(s.arrival_min)} · +${(s.leg_in_m/1000).toFixed(2)} km / ${Math.round(s.leg_in_min)} min walk${s.visit_min?` · stay ${s.visit_min} min (est.)`:''}${s.slot_label?` · for “${esc(s.slot_label)}”`:''}${s.required?'':' · optional'}`}</small>
+   <small>${zh?`约 ${clockAt(s.arrival_min)} 到达 · 步行 +${(s.leg_in_m/1000).toFixed(2)} 公里 / ${Math.round(s.leg_in_min)} 分钟${s.visit_min?` · 停留约 ${s.visit_min} 分钟`:''}${s.slot_label?` · 用于“${esc(String(s.slot_label).split(' + ').map(i18nLabel).join(' + '))}”`:''}${s.required?'':' · 可选'}`:`Arrive ~${clockAt(s.arrival_min)} · +${(s.leg_in_m/1000).toFixed(2)} km / ${Math.round(s.leg_in_min)} min walk${s.visit_min?` · stay ${s.visit_min} min (est.)`:''}${s.slot_label?` · for “${esc(s.slot_label)}”`:''}${s.required?'':' · optional'}`}</small>
    ${open===false?'<small class="cw-warn">Opening hours (OSM) say closed at arrival time</small>':open===true?'<small class="cw-ok">Open at arrival per OSM hours</small>':hrs?'<small>Hours listed but not machine-readable</small>':'<small>Hours not listed</small>'}${s.closes_during_visit?'<small class="cw-warn">Closes during the planned visit (OSM hours)</small>':''}
    ${menuRows}
    ${stopMenuItems(s).some(item=>journey.recs[s.id+'|'+item])?stopMenuItems(s).map(item=>journey.recs[s.id+'|'+item]?recExplain(journey.recs[s.id+'|'+item]):'').join(''):s.evidence?`<small>${esc(s.evidence)}</small>`:''}
@@ -112,9 +114,9 @@ function renderCityWalk(){
   <p class="soft-copy">${zh?`从 ${esc(it.start.name)} 出发${it.end_mode==='round'?'并返回':it.end_mode==='hotel'?'，回到你的酒店':it.end_mode==='open'?' · 终点灵活':''}。`:`From ${esc(it.start.name)}${it.end_mode==='round'?' and back':it.end_mode==='hotel'?' back to your hotel':it.end_mode==='open'?' · flexible end':''}.`}</p>
   <div class="cw-grid"><div><span>Walking</span><strong>${(t.walk_m/1000).toFixed(2)} km</strong><small>${Math.round(t.walk_min)} min</small></div><div><span>Stops</span><strong>${t.stops}</strong><small>${Math.round(t.visit_min)} min stay (est.)</small></div>
    <div><span>Total outing</span><strong>${Math.round(t.outing_min)} min</strong><small>${c.max_outing_minutes?`limit ${c.max_outing_minutes}`:'no limit set'}</small></div><div><span>Experience</span><strong>${route?.personalized_score?.utility??'N/A'}</strong><small>route match</small></div></div>
-  ${c.violations.length?`<p class="cw-warn">${esc(c.violations.join('; '))}. Required stops are never dropped silently: remove one or extend the limit.</p>`:''}
+  ${c.violations.length?`<p class="cw-warn">${esc(c.violations.join('; '))}${zh?'。必去的停留点不会被悄悄去掉：请移除一个，或放宽限制。':'. Required stops are never dropped silently: remove one or extend the limit.'}</p>`:''}
   <ol class="cw-stops">${stopRows}</ol>
-  ${it.skipped.length?`<p class="soft-copy">Skipped: ${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}
+  ${it.skipped.length?`<p class="soft-copy">${zh?'没排进去：':'Skipped: '}${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}
   <div class="cw-refine">${[['museums','More museums'],['historic','More historic'],['coffee','Add coffee'],['cappuccino','Find cappuccino'],['restaurant','Add restaurant'],['hotel','Return to hotel'],['less','Less walking'],['extend','Extend time']].map(([k,l])=>`<button type="button" class="mini-outline" data-refine="${k}">${l}</button>`).join('')}</div>
   <details class="cw-how"><summary>How this plan was made</summary><small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small></details>`;
  if(photoWant.length&&typeof placePhotosEnsure==='function')placePhotosEnsure(photoWant,()=>{if(journey.plan===it)renderCityWalk();});

@@ -50,9 +50,10 @@ function photosLoad(places, done) {
  batch.forEach((p) => routePhotos.queue.delete(p));
  routePhotos.inflight = photosFetch(batch).then((found) => {
   routePhotos.inflight = null;
-  if (found && typeof done === 'function') done();
+  // also when nothing was found: the caller then moves on to the next source (street view at the place)
+  if (typeof done === 'function') done();
   if (routePhotos.queue.size) photosLoad([], done);
- }).catch(() => { routePhotos.inflight = null; routePhotos.failed = true; batch.forEach((p) => routePhotos.cache.set(p.wd, {none: true})); });
+ }).catch(() => { routePhotos.inflight = null; routePhotos.failed = true; batch.forEach((p) => routePhotos.cache.set(p.wd, {none: true})); if (typeof done === 'function') done(); });
 }
 async function photosFetch(places) {
  const ids = places.map((p) => p.wd);
@@ -107,8 +108,10 @@ function photosResolve(places, done) {
   photoIds.pending.add(p.id);
   photoResolveOne(p).then((wd) => {
    photoIds.cache.set(p.id, wd || null); photoIds.pending.delete(p.id);
-   if (wd) photosLoad([{...p, wd}], done);
-  }).catch(() => { photoIds.cache.set(p.id, null); photoIds.pending.delete(p.id); });
+   // no Wikidata entry: tell the caller, so it can ask for a street-level photo instead (this was never reached
+   // before 2026-11-20, so City Walk stops without a Wikidata entry stayed without a photo)
+   if (wd) photosLoad([{...p, wd}], done); else if (typeof done === 'function') done();
+  }).catch(() => { photoIds.cache.set(p.id, null); photoIds.pending.delete(p.id); if (typeof done === 'function') done(); });
  }
 }
 /** Words that name the place, without generic ones ("church", "the", "st"), for comparing a nearby entry's label. */

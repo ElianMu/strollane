@@ -624,7 +624,7 @@ const run=s=>vm.runInContext(s,context);
   assert(w.document.querySelector('#shareWalk'),'Share button present');
   w.__sv=JSON.parse(saved);run('Object.assign(planner.weights,__sv[0]);Object.assign(planner.origins,__sv[1]);Object.assign(planner.directions,__sv[2]);setBudget(__sv[3]);setEndMode(__sv[4]);[state.start,state.customStart,state.end,state.customEnd]=__ks;');}
  // --- Chinese interface (i18n.js): display only, reversible, dimension names never replaced ---
- {const d=w.document,q=s=>d.querySelector(s),redraw="renderPreferenceSummary();if(typeof renderDimensions==='function')renderDimensions();renderWalkPresets();";run(redraw);
+ {const d=w.document,q=s=>d.querySelector(s),redraw="renderPreferenceSummary();if(typeof renderDimensions==='function')renderDimensions();renderWalkPresets();renderRouteCards();updateWhyRoute();if(journey.plan)renderCityWalk();";run(redraw);
   const before=d.body.textContent,cta=q('#generateRoutes')?.textContent;
   assert.equal(run('i18n.lang'),'en');assert.equal(q('#langToggle [data-lang-label]').textContent,'中文');
   assert.equal(Object.keys(run('I18N_DIMENSIONS_ZH')).join('|'),run("DIMENSIONS.map(d=>d.name).join('|')"),'a gloss for each of the 12 registered names, no others');
@@ -642,6 +642,24 @@ const run=s=>vm.runInContext(s,context);
   const built=d.createElement('p');d.body.appendChild(built);built.textContent='3 walks to choose from: Greener, Quieter.';
   await new Promise(r=>setTimeout(r,0));
   assert.equal(probe.textContent,'更多路线');assert.equal(built.textContent,'3 walks to choose from: Greener, Quieter.');
+  // short labels with numbers or names: the whole text, or each " · " part; names and addresses are kept
+  {const cases=[['13 min','13 分钟'],['1.02 km','1.02 公里'],['105 min stay (est.)','停留约 105 分钟（估计）'],['Museum +1','博物馆 +1'],['3 PLANNED','已规划 3 个'],
+    ['cafes · 78 West 3rd Street','咖啡馆 · 78 West 3rd Street'],['Moderate · 50','中等 · 50'],['Coffee (café)','咖啡（咖啡馆）'],['15 °C · feels 13 °C · Clear','15 °C · 体感 13 °C · 晴'],
+    ['Wikipedia in 7 editions · NYC designated landmark · hours listed','维基百科 7 种语言版本 · 纽约市指定地标 · 列有营业时间'],['Up to 90 min · stairs allowed','最长 90 分钟 · 可以走楼梯'],['◇ Culture','◇ 文化 Culture'],
+    ['3 stop(s), 1.02 km on the OSM pedestrian graph, 13 min walking + 105 min visits. Within your limits.','3 个停留点，步行网络上 1.02 公里，步行 13 分钟 + 停留 105 分钟。在你的限制范围内。']];
+   const els=cases.map(([en])=>{const e=d.createElement('p');d.body.appendChild(e);e.textContent=en;return e;});
+   const keep=['Irving Farm Coffee Roasters','Add a restaurant','West 3rd Street · 120 m','Mostly along La Guardia Place.'].map(t=>{const e=d.createElement('p');d.body.appendChild(e);e.textContent=t;return e;});
+   await new Promise(r=>setTimeout(r,0));
+   cases.forEach(([en,zh],i)=>assert.equal(els[i].textContent,zh,en));
+   keep.forEach(e=>assert(!/[\u4e00-\u9fff]/.test(e.textContent),'left as it is: '+e.textContent));
+   run("setLanguage('en',false)");cases.forEach(([en],i)=>assert.equal(els[i].textContent,en,'restored: '+en));run("setLanguage('zh',false)");
+   els.concat(keep).forEach(e=>e.remove());}
+  // the page's own chat summaries and the walk's name are written in Chinese
+  assert.equal(run("zhChat('AI journey interpretation: interest: Museum · +1 Museum · coffee (cafes) · flexible end (discover for me).')"),'AI 行程理解：兴趣：博物馆 · 再加 1 个博物馆 · 咖啡（咖啡馆） · 终点灵活（为我推荐）。');
+  assert.equal(run("zhChat('AI interpretation: Culture 50 · max 90 min · avoidDetours: yes. Checking feasible pedestrian paths…')"),'AI 理解：文化 Culture 50 · 最长 90 分钟 · 避免绕行：是。正在查找可走的步行路线…');
+  {w.__jk=run('[journey.interests.slice(),journey.food.slice(),journey.named.slice()]');run("journey.interests=['museums'];journey.food=[{category:'cafes',item:'coffee'}];journey.named=[]");
+   assert.equal(run('journeyTheme()'),'城市漫步：博物馆 · 咖啡（咖啡馆）');run("setLanguage('en',false)");assert.equal(run('journeyTheme()'),'City walk: Museums · Coffee (café)');run("setLanguage('zh',false)");
+   run('[journey.interests,journey.food,journey.named]=__jk');}
   // the planner still works on English keys while Chinese is shown
   {const nature=()=>[...d.querySelectorAll('[data-walk-presets] .walk-pill[data-dim]')].find(b=>b.dataset.dim==='Nature'&&b.closest('[data-walk-presets]')===pill.closest('[data-walk-presets]'))||pill,was=run("planner.origins['Nature']")+run("planner.weights['Nature']"),keepN=run("[planner.weights['Nature'],planner.origins['Nature'],planner.directions['Nature']]");
    nature().click();assert.notEqual(run("planner.origins['Nature']")+run("planner.weights['Nature']"),was,'pills work on the English data key while Chinese is shown');assert(/自然 Nature/.test(nature().textContent),'a re-rendered pill is translated again');w.__kn=keepN;run("[planner.weights['Nature'],planner.origins['Nature'],planner.directions['Nature']]=__kn;renderWalkPresets()");}
