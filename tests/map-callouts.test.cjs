@@ -18,4 +18,8 @@ for(const {o,rect} of out){
 }
 // no room at all → no card (never forced onto the map controls)
 assert.equal(calloutPlace({x:30,y:30},[],[],{x0:10,y0:10,x1:60,y1:60,obstacles:[]},132,150,64,[]),null);
+// after a pan a card keeps its spot while that spot is still free (no jumping), and moves when it is not
+{const b={x0:0,y0:0,x1:500,y1:500,obstacles:[]};
+ const kept=calloutPlace({x:200,y:200},[],[],b,100,80,64,[],{dx:-170,dy:-100});assert.deepEqual([kept.x,kept.y],[30,100]);
+ const moved=calloutPlace({x:200,y:200},[],[],b,100,80,64,[],{dx:-260,dy:-100});assert(moved.x>=0,'off-map spot is not kept');}
 console.log('map-callouts: ok');

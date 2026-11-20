@@ -41,11 +41,19 @@ function calloutPlaces() {
 /** Where one card goes: 8 positions around its place (two distances), inside `box`, clear of the cards already
     placed and of the other places, covering as little of the route as possible, preferably on the far side of the
     route from its middle. Returns {x,y,w,h} or null when there is no free position. */
-function calloutPlace(a, others, route, box, w, h, gap, placed) {
+function calloutPlace(a, others, route, box, w, h, gap, placed, prev) {
  const dirs = [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, -1], [1, 1], [-1, 1]];
  const mid = route.length ? {x: route.reduce((s, p) => s + p.x, 0) / route.length, y: route.reduce((s, p) => s + p.y, 0) / route.length} : a;
  const hit = (r, p) => r.x < p.x + p.w + 6 && p.x < r.x + r.w + 6 && r.y < p.y + p.h + 6 && p.y < r.y + r.h + 6;
  let best = null;
+ // keep the card where it was if that spot is still free: cards should not jump after every pan
+ if (prev) {
+  const r = {x: a.x + prev.dx, y: a.y + prev.dy, w, h};
+  const ok = r.x >= box.x0 && r.y >= box.y0 && r.x + w <= box.x1 && r.y + h <= box.y1 && !placed.some((p) => hit(r, p)) &&
+   !others.some((o) => o.x > r.x - 4 && o.x < r.x + w + 4 && o.y > r.y - 4 && o.y < r.y + h + 4) &&
+   !route.some((p) => p.x > r.x + 2 && p.x < r.x + w - 2 && p.y > r.y + 2 && p.y < r.y + h - 2);
+  if (ok) return r;
+ }
  for (const g of [gap, gap * 1.6, gap * 2.4]) for (const [dx, dy] of dirs) for (const slide of (dx === 0 ? [0.5, 0.12, 0.88] : [0.5])) {
   const n = Math.hypot(dx, dy), ox = dx / n * g, oy = dy / n * g;
   // above / below a place the card may also sit left- or right-aligned, not only centred
@@ -68,7 +76,7 @@ function calloutArrange(order, route, box, gap, max) {
   const placed = [...box.obstacles], out = [];
   for (const o of seq) {
    if (out.length >= max) break;
-   const rect = calloutPlace(o.a, order.filter((x) => x !== o).map((x) => x.a), route, box, o.w, o.h, gap, placed);
+   const rect = calloutPlace(o.a, order.filter((x) => x !== o).map((x) => x.a), route, box, o.w, o.h, gap, placed, o.prev);
    if (rect) { placed.push(rect); out.push({o, rect}); }
   }
   return out;
@@ -160,6 +168,7 @@ function calloutsLayout() {
  const order = mapCallouts.items.map((it, i) => ({it, el: els[i], a: map.project([it.lon, it.lat])}))
   .filter((o) => o.el && o.a.x > box.x0 && o.a.x < box.x1 && o.a.y > box.y0 && o.a.y < box.y1)
   .sort((a, b) => a.it.rank - b.it.rank);
+ order.forEach((o) => { o.prev = o.el.dataset.dx !== '' && o.el.dataset.dx != null && o.el.style.display !== 'none' ? {dx: Number(o.el.dataset.dx), dy: Number(o.el.dataset.dy)} : null; });
  els.forEach((el) => { el.style.display = 'none'; el.dataset.dx = ''; });
  const gap = phone ? CALLOUT.GAP * 0.75 : CALLOUT.GAP;
  order.forEach((o) => { o.el.style.display = ''; o.w = o.el.offsetWidth; o.h = o.el.offsetHeight; o.el.style.display = 'none'; });
