@@ -1260,3 +1260,6 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .walker-rate-now{width:100%;margin-top:9px;border:1px solid var(--lime);background:var(--lime);color:var(--g0b);border-radius:7px;padding:9px 10px;font-size:11.5px;font-weight:800}
 .modal .walk-check{border:0;background:transparent;padding:0;margin:4px 0 0}.modal .walk-check>summary{display:none}
 .modal .walk-check-q{font-size:12.5px}.modal .walk-check-scale button{min-width:40px;min-height:38px;font-size:13px}
+
+.walker-feedback-slot .walker-says{margin:0}
+.section-row a.small-count{text-decoration:none;color:var(--text-secondary)}

@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.
 const dom=new JSDOM(html,{runScripts:'outside-only',url:'http://localhost:8080'}),w=dom.window;
 w.fetch=async()=>{throw new Error('Network intentionally blocked in DOM test')};w.HTMLElement.prototype.scrollIntoView=function(){};w.AbortSignal.timeout=()=>new w.AbortController().signal;
 const vm=require('vm'),context=dom.getInternalVMContext();
-for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','street-photos.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js','share-link.js','i18n.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+for(const file of ['experience-core.js','api-config.js','weather.js','places.js','opening-hours.js','app.js','route-story.js','street-photos.js','feedback-ui.js','route-client.js','walk-presets.js','weather-ui.js','journey.js','journey-ui.js','voice.js','nav-engine.js','nav-ui.js','urban-geo.js','urban-style.js','urban-layers.js','side-panels.js','explore-map.js','explore-analytics.js','center-map.js','share-link.js','i18n.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 const run=s=>vm.runInContext(s,context);
 (async()=>{
  // flatMapBounds: a pitch-independent query box, checked against a real map.getBounds() reading captured live
@@ -167,6 +167,10 @@ const run=s=>vm.runInContext(s,context);
  const rows=[...w.document.querySelectorAll('#profileChart .experience-row')];assert.equal(rows.length,12);
  run('DIMENSIONS').forEach((d,i)=>assert.equal(rows[i].querySelector('strong').textContent,best.dimension_scores[d.name]==null?'N/A':String(best.dimension_scores[d.name])));
  assert(w.document.querySelector('#whyRoute').textContent.includes(String(best.personalized_score.utility)));
+ // Walker feedback sits in its own visible section under the walk options, not inside Technical details.
+ {const fb=w.document.querySelector('#walkerFeedback');
+  assert(fb&&!fb.closest('details'),'walker feedback is outside the collapsed technical details');
+  assert(fb.textContent.includes('What walkers said')&&fb.querySelector('[data-k="rate-now"]'),'what walkers said and rate-now on every route');}
  // "What these scores measure": the router's own indicator definitions (static file), shown only for the user's
  // priorities and only when the file's score_version equals the route's. Numbers come from the route response.
  assert(!w.document.querySelector('#whyRoute .why-measures'),'no indicator text before the definitions file has loaded (network is blocked here)');

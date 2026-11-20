@@ -193,7 +193,7 @@ function walkerSaysStreets(segs,r){
 /** The block at the top of "Why this route". */
 function walkerSaysBox(r){
  if(!r)return '';
- return `<section class="walker-says" aria-label="What walkers said"><div class="walker-says-head"><strong>What walkers said</strong><a href="./evaluation.html" target="_blank" rel="noopener">All results</a></div>
+ return `<section class="walker-says" aria-label="What walkers said"><div class="walker-says-head"><strong>What walkers said</strong></div>
   <div data-k="walker-says-ratings">${walkerSaysRatings(walkerSays.evaluation,walkCheckType())}</div><div data-k="walker-says-streets"></div>
   <button type="button" class="walker-rate-now" data-k="rate-now">I walked this – rate it now</button></section>`;
 }
