@@ -1122,7 +1122,6 @@ html[data-map-theme="light"] .explore-ramp i{background:linear-gradient(90deg,#1
 /* ---- Walk presets (walk-presets.js) and "What these scores measure" (route-client.js) --------------------------
    Theme variables only (tests/test_theme_tokens.py). Presets are plain buttons: title, one line, the indicators the
    router's score is built from, and an arrow. Two side by side; they wrap to one column in a narrow panel. */
-.intro-audience{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--text-secondary)}
 .walk-presets-label{margin-top:16px}
 .walk-presets{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 4px}
 .walk-pill{flex:none;min-height:26px;padding:0 9px;border:1px solid var(--border-strong);border-radius:999px;background:transparent;color:var(--text-primary);font-size:11.5px;font-weight:600;white-space:nowrap}
@@ -1249,7 +1248,6 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .walk-check-send:disabled{opacity:.45}
 .walker-status,.walker-note{display:block;font-size:9.5px;line-height:1.55;color:var(--g9d);margin-top:4px}
 /* who the mobile composer is for (AUDIENCE.md lead audience) */
-.m-composer-for{margin:-4px 2px 9px;font-size:12px;line-height:1.4;color:var(--muted)}
 
 /* Evaluation dashboard links (evaluation.html) */
 .eval-link{display:inline-grid;place-items:center;text-decoration:none;font-size:13px}
