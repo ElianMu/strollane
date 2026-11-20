@@ -10,7 +10,7 @@ function setupJourneyUI(){
   placeInputs[kind]=attachPlaceSearch($(kind==='start'?'searchStart':'searchEnd'),{
    placeholder:'Search any NYC address, place or business',
    onSelect:p=>{setJourneyPlace(kind,p);resetRoutes();syncMapData();
-    if(p.routing_coverage==='search_only')return toast('This source point has no verified walking access; discovery only.');
+    if(p.routing_coverage==='search_only')return toast('This place can be found here, but walking routes do not reach it yet.');
  if(!inRoutingCoverage(p))return toast(`${p.name} is in ${p.borough||'NYC'}: place search covers all five boroughs, but walking routes cover Manhattan, Brooklyn and Queens only.`);
     if(state.mapReady)state.map.flyTo({center:[p.lon,p.lat],zoom:15,duration:450});},
    onClear:()=>{state[kind]=null;state[kind==='start'?'customStart':'customEnd']=null;resetRoutes();syncMapData();}});
@@ -31,7 +31,7 @@ function setupJourneyUI(){
 }
 function addNamedStop(p,required=true){
  if(journey.named.some(n=>n.place.id===p.id))return toast(`${p.name} is already a stop.`);
- if(p.routing_coverage==='search_only')return toast('This source point has no verified walking access; discovery only.');
+ if(p.routing_coverage==='search_only')return toast('This place can be found here, but walking routes do not reach it yet.');
  if(!inRoutingCoverage(p))return toast(`${p.name} is outside walking-route coverage (Manhattan, Brooklyn, Queens); it cannot be routed.`);
  journey.removed.delete(p.id);journey.named.push({place:p,required,order:null,visitMin:VISIT_MIN[p.cat]??20,visitEstimated:true});journey.active=true;
  if(journey.endMode==='fixed'&&!getPlace('end'))setEndMode('open');
@@ -89,35 +89,35 @@ function renderCityWalk(){
  const root=$('cityWalk');if(!root)return;
  const it=journey.plan;root.classList.toggle('hidden',!it&&!journeyMode());
  if(!it){root.innerHTML=`<div class="section-row"><div class="section-overline">YOUR CITY WALK</div></div><p class="soft-copy">Describe what you want to see, eat or do — or add stops — then Plan My Walk.</p>`;return;}
- const t=it.totals,c=it.constraints,route=state.routes[0]?.raw,photoWant=[];
+ const t=it.totals,c=it.constraints,route=state.routes[0]?.raw,photoWant=[],zh=typeof i18n!=='undefined'&&i18n.lang==='zh';
  const stopRows=it.stops.map(s=>{
   const menuRows=stopMenuItems(s).map(item=>{
    const m=menuEvidenceForDisplay(journey.menu[s.id+'|'+item]),url=m?.menu_source_url||m?.source_url;
    return `<small class="cw-menu ${m?.status||''}">${esc(item)}: ${esc(MENU_LABEL[m?.status]||'not checked')}${m?.price?` · $${m.price.toFixed(2)} as listed`:''}${url?` · <a href="${esc(url)}" target="_blank" rel="noopener">source</a>`:''}${m?.reason?` — ${esc(m.reason)}`:''}</small>`;
   }).join('');
   const p=placeCache[s.id],hrs=p?.hours||s.hours;
-  // a real photo of this stop (Wikimedia Commons via Wikidata, with author + licence), only for places in the index
-  const phPlace=p?{id:s.id,name:s.name,lat:s.lat??p.lat,lon:s.lon??p.lon,wd:typeof photoIdFor==='function'?photoIdFor({...p,id:s.id}):p.wikidata}:null;
+  // a real photo of every stop where one exists: photo index → Wikidata → street view at the stop (route-photos.js)
+  const phPlace=s.role!=='end'&&(s.lat??p?.lat)!=null?{id:s.id,name:s.name,lat:s.lat??p?.lat,lon:s.lon??p?.lon,wd:p?.wd||p?.wikidata||s.wd||null}:null;
   if(phPlace)photoWant.push(phPlace);
-  const ph=phPlace&&phPlace.wd&&typeof photosFor==='function'?photosFor([phPlace])[0]:null;const open=s.open_at_arrival!=null?s.open_at_arrival:hrs?isOpenAt(hrs,new Date(Date.now()+s.arrival_min*60000)):null;
+  const ph=phPlace&&typeof placePhoto==='function'?placePhoto(phPlace):null;const open=s.open_at_arrival!=null?s.open_at_arrival:hrs?isOpenAt(hrs,new Date(Date.now()+s.arrival_min*60000)):null;
   return `<li class="cw-stop ${s.role==='end'?'end':''}"><span class="cw-seq">${s.role==='end'?'■':s.seq}</span><span class="cw-body">${ph?photoFigures([ph],'cw-photo'):''}<strong>${esc(s.name)}</strong>
    <small>${esc([s.category,s.address].filter(Boolean).join(' · '))}</small>
-   <small>Arrive ~${clockAt(s.arrival_min)} · +${(s.leg_in_m/1000).toFixed(2)} km / ${Math.round(s.leg_in_min)} min walk${s.visit_min?` · stay ${s.visit_min} min (est.)`:''}${s.slot_label?` · for “${esc(s.slot_label)}”`:''}${s.required?'':' · optional'}</small>
+   <small>${zh?`约 ${clockAt(s.arrival_min)} 到达 · 步行 +${(s.leg_in_m/1000).toFixed(2)} 公里 / ${Math.round(s.leg_in_min)} 分钟${s.visit_min?` · 停留约 ${s.visit_min} 分钟`:''}${s.slot_label?` · 用于“${esc(s.slot_label)}”`:''}${s.required?'':' · 可选'}`:`Arrive ~${clockAt(s.arrival_min)} · +${(s.leg_in_m/1000).toFixed(2)} km / ${Math.round(s.leg_in_min)} min walk${s.visit_min?` · stay ${s.visit_min} min (est.)`:''}${s.slot_label?` · for “${esc(s.slot_label)}”`:''}${s.required?'':' · optional'}`}</small>
    ${open===false?'<small class="cw-warn">Opening hours (OSM) say closed at arrival time</small>':open===true?'<small class="cw-ok">Open at arrival per OSM hours</small>':hrs?'<small>Hours listed but not machine-readable</small>':'<small>Hours not listed</small>'}${s.closes_during_visit?'<small class="cw-warn">Closes during the planned visit (OSM hours)</small>':''}
    ${menuRows}
    ${stopMenuItems(s).some(item=>journey.recs[s.id+'|'+item])?stopMenuItems(s).map(item=>journey.recs[s.id+'|'+item]?recExplain(journey.recs[s.id+'|'+item]):'').join(''):s.evidence?`<small>${esc(s.evidence)}</small>`:''}
    ${s.alternatives?.length?`<button type="button" class="cw-alt" data-cw-replace="${esc(s.slot_id)}" data-cw-id="${esc(s.id)}">Replace</button>`:''}${s.role!=='end'?`<button type="button" class="cw-alt" data-cw-remove="${esc(s.id)}">Remove</button>`:''}</span></li>`;}).join('');
  root.innerHTML=`<div class="section-row"><div class="section-overline">YOUR CITY WALK</div><span class="small-count">${c.feasible?'WITHIN LIMITS':'NOT FEASIBLE'}</span></div>
   <div class="cw-theme">${esc(route?.route_name||'City walk')}</div>
-  <p class="soft-copy">From ${esc(it.start.name)}${it.end_mode==='round'?' and back':it.end_mode==='hotel'?' back to your hotel':it.end_mode==='open'?' · flexible end':''}.</p>
+  <p class="soft-copy">${zh?`从 ${esc(it.start.name)} 出发${it.end_mode==='round'?'并返回':it.end_mode==='hotel'?'，回到你的酒店':it.end_mode==='open'?' · 终点灵活':''}。`:`From ${esc(it.start.name)}${it.end_mode==='round'?' and back':it.end_mode==='hotel'?' back to your hotel':it.end_mode==='open'?' · flexible end':''}.`}</p>
   <div class="cw-grid"><div><span>Walking</span><strong>${(t.walk_m/1000).toFixed(2)} km</strong><small>${Math.round(t.walk_min)} min</small></div><div><span>Stops</span><strong>${t.stops}</strong><small>${Math.round(t.visit_min)} min stay (est.)</small></div>
    <div><span>Total outing</span><strong>${Math.round(t.outing_min)} min</strong><small>${c.max_outing_minutes?`limit ${c.max_outing_minutes}`:'no limit set'}</small></div><div><span>Experience</span><strong>${route?.personalized_score?.utility??'N/A'}</strong><small>route match</small></div></div>
   ${c.violations.length?`<p class="cw-warn">${esc(c.violations.join('; '))}. Required stops are never dropped silently: remove one or extend the limit.</p>`:''}
   <ol class="cw-stops">${stopRows}</ol>
   ${it.skipped.length?`<p class="soft-copy">Skipped: ${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}
   <div class="cw-refine">${[['museums','More museums'],['historic','More historic'],['coffee','Add coffee'],['cappuccino','Find cappuccino'],['restaurant','Add restaurant'],['hotel','Return to hotel'],['less','Less walking'],['extend','Extend time']].map(([k,l])=>`<button type="button" class="mini-outline" data-refine="${k}">${l}</button>`).join('')}</div>
-  <small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small>`;
- if(photoWant.length&&typeof photosResolve==='function')photosResolve(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
+  <details class="cw-how"><summary>How this plan was made</summary><small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small></details>`;
+ if(photoWant.length&&typeof placePhotosEnsure==='function')placePhotosEnsure(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
  if(typeof calloutsRefresh==='function')calloutsRefresh();
  root.querySelectorAll('[data-refine]').forEach(b=>b.addEventListener('click',()=>refineWalk(b.dataset.refine)));
  root.querySelectorAll('[data-cw-remove]').forEach(b=>b.addEventListener('click',()=>{journey.removed.add(b.dataset.cwRemove);journey.named=journey.named.filter(n=>n.place.id!==b.dataset.cwRemove);planJourney(true);}));

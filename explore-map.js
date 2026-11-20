@@ -115,7 +115,7 @@ function loadExploreArea(area){
   exploreRecomputeStops();renderExploreStatus();selectExploreView(exploreMap.view);
   if(state.mapLayersReady)state.map.getSource('manhattan-streets')?.setData(exploreMap.data);
   return exploreMap.areas[area];
- })().catch(e=>{delete exploreMap.areaLoads[area];toast(`${spec.label} street scores could not be loaded: ${e.message}`);return null;});
+ })().catch(e=>{delete exploreMap.areaLoads[area];toast(`Street scores for ${spec.label} could not load. ${plainError(e)}`);return null;});
 }
 /** Loads each extra area whose box is on screen while Explore is open. */
 function loadVisibleExploreAreas(){

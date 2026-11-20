@@ -181,6 +181,12 @@ const run=s=>vm.runInContext(s,context);
   run('nav.engine=__eng(400);exitNavigation()');assert.equal(asked(),0,'20% walked: no prompt');
   run('nav.route={route_id:"r",distance_m:2000}');run('nav.engine=__eng(1700);exitNavigation()');assert.equal(asked(),1,'85% walked: prompt');
   run('nav.route={route_id:"r",distance_m:2000};nav.checkAsked="r"');run('nav.engine=__eng(2000);exitNavigation()');assert.equal(asked(),1,'already asked on arrival: no second prompt');}
+ // Chinese interface: walk names, sentences and "why" are composed in Chinese, and back in English after switching back
+ {run("setLanguage('zh',false)");const zh=w.document.querySelector('#routeCards').textContent;
+  assert(/(最快|最佳匹配|另一条路|你的路线|最绿|最安静)/.test(zh),'walk names in Chinese');
+  assert(/(比最快的路线|最直接的走法|你想要|还没有设置偏好|比曼哈顿)/.test(zh),'walk sentences in Chinese');
+  assert(!/than the fastest way|The most direct way|You asked for/.test(zh),'no English sentence left on the cards');
+  run("setLanguage('en',false)");assert(/Fastest|Best match|Another way|Your walk|Greenest|Quietest/.test(w.document.querySelector('#routeCards').textContent),'English again');}
  // "What these scores measure": the router's own indicator definitions (static file), shown only for the user's
  // priorities and only when the file's score_version equals the route's. Numbers come from the route response.
  assert(!w.document.querySelector('#whyRoute .why-measures'),'no indicator text before the definitions file has loaded (network is blocked here)');
@@ -225,7 +231,7 @@ const run=s=>vm.runInContext(s,context);
  run('renderRouteCards()');
  const basisEls=[...w.document.querySelectorAll('.route-card .rc-basis')];assert.equal(basisEls.length,1,'only the selected card carries the numbers');
  const basisEl=basisEls[0];assert.equal(basisEl.closest('.route-card').dataset.route,best.route_id);
- assert(basisEl.textContent.includes(`${best.dimension_scores.Nature}`)&&basisEl.textContent.includes('Measured by:'));
+ assert(basisEl.textContent.includes(`${best.dimension_scores.Nature}`)&&basisEl.textContent.includes('Based on:'));
  assert(basisEl.textContent.includes(basis.dimensions.Nature.find(x=>x.role==='up').label));
  if(fxShortest&&fxShortest!==best)assert(basisEl.textContent.includes(`shortest route ${fxShortest.dimension_scores.Nature}`));
  assert(basisEl.querySelectorAll('.rc-basis-row').length<=2,'two priorities at most on a card');
@@ -529,7 +535,7 @@ const run=s=>vm.runInContext(s,context);
  w.fetch=async(url)=>String(url).endsWith('/api/interpret')?({ok:true,json:async()=>({weights:{'Scenic & Visual':90,Architecture:85,Nature:85},constraints:{},journey:{food:[{category:'cafes',item:'coffee',required:true}],interests:['parks']}})}):initialFetch(url);
  const ai=await run("interpretIntent('I want a scenic walk with architecture, parks, and good coffee.')");
  assert.equal(run('planner.interpretation'),'llm');
- assert(w.document.querySelector('#interpretMode').textContent.includes('AI VERIFIED'),'A failed status probe must not permanently force local preview');
+ assert(w.document.querySelector('#interpretMode').textContent.includes('AI on'),'A failed status probe must not permanently force local preview');
  assert.equal(run("planner.weights['Scenic & Visual']"),90);
  assert.equal(ai.journey.food[0].item,'coffee');
  // A request no dataset measures (the critique's "as much dog poop as possible"): the AI names it in `unsupported`;
@@ -554,7 +560,7 @@ const run=s=>vm.runInContext(s,context);
  w.fetch=async(url)=>String(url).endsWith('/api/interpret')?({ok:false,status:502,json:async()=>({reason:{stage:'upstream_http',code:'invalid_api_key',detail:'internal diagnostic keys: weights directions'}})}):initialFetch(url);
  await run("interpretIntent('greener walk')");
  assert.equal(run('planner.interpretation'),'local');
- assert(w.document.querySelector('#toast').textContent.includes('invalid_api_key'));
+ assert(w.document.querySelector('#toast').textContent.includes('AI assistant is not available')&&!w.document.querySelector('#toast').textContent.includes('invalid_api_key'),'plain message for walkers; the code stays in the console');
  assert(!w.document.querySelector('#toast').textContent.includes('internal diagnostic'));
  run('planner.llmConnected=false');w.fetch=initialFetch;
 

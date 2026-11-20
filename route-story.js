@@ -32,15 +32,34 @@ const STORY_WORDS = {
  'Environment': {name: null, sup: 'farthest from highways', more: 'farther from highways', less: 'closer to highways', chip: 'Away from highways', noun: 'distance from highways', ask: 'less traffic'},
  'Transit Connectivity': {name: null, sup: 'closest to the subway', more: 'closer to the subway', less: 'farther from the subway', chip: 'Near the subway', noun: 'subway access', ask: 'transit'},
 };
+// The same words in Simplified Chinese, used when the interface is in Chinese (i18n.js). Sentences are composed in
+// Chinese directly (not translated afterwards), so the comparison stays exactly the one the English sentence makes.
+const STORY_WORDS_ZH = {
+ 'Nature': {name: '最绿', sup: '绿化最多', more: '更绿', less: '绿化更少', chip: '树更多', noun: '绿化', ask: '自然'},
+ 'Quiet & Relax': {name: '最安静', sup: '最安静', more: '更安静', less: '更喧闹', chip: '街道更安静', noun: '安静程度', ask: '安静'},
+ 'Architecture': {name: '地标最多', sup: '离地标建筑最近', more: '离地标建筑更近', less: '离地标建筑更远', chip: '地标建筑', noun: '地标建筑', ask: '建筑'},
+ 'Culture': {name: '文化最多', sup: '离文化场所最近', more: '离文化场所更近', less: '离文化场所更远', chip: '文化场所', noun: '文化场所', ask: '文化'},
+ 'Scenic & Visual': {name: '风景最好', sup: '风景最好', more: '风景更好', less: '风景较差', chip: '风景点', noun: '风景', ask: '风景'},
+ 'Urban Vibrancy': {name: '最热闹', sup: '最热闹', more: '更热闹', less: '更平静', chip: '热闹街道', noun: '街头活力', ask: '热闹的街道'},
+ 'Food & Retail': {name: '美食和商店最多', sup: '美食和商店最多', more: '美食和商店更多', less: '美食和商店更少', chip: '美食和商店', noun: '美食和商店', ask: '美食和商店'},
+ 'Spatial Comfort': {name: '人行道最宽', sup: '人行道最宽', more: '人行道更宽', less: '人行道更窄', chip: '人行道宽敞', noun: '人行道空间', ask: '宽敞'},
+ 'Walkability': {name: '最适合步行', sup: '最适合步行', more: '更适合步行', less: '不太适合步行', chip: '步行友好', noun: '步行友好度', ask: '步行友好'},
+ 'Access & Safety': {name: null, sup: '行人事故记录最少', more: '行人事故记录更少', less: '行人事故记录更多', chip: '事故记录较少', noun: '事故记录', ask: '安全'},
+ 'Environment': {name: null, sup: '离高速公路最远', more: '离高速公路更远', less: '离高速公路更近', chip: '远离高速公路', noun: '与高速公路的距离', ask: '少车流'},
+ 'Transit Connectivity': {name: null, sup: '离地铁最近', more: '离地铁更近', less: '离地铁更远', chip: '靠近地铁', noun: '地铁便利度', ask: '公共交通'},
+};
+const storyZh = () => typeof i18n !== 'undefined' && i18n.lang === 'zh';
+const SW = (d) => (storyZh() ? STORY_WORDS_ZH : STORY_WORDS)[d];
+const PLACE_KIND_ZH = {parks: '公园', museums: '博物馆', historic: '历史遗址', attractions: '地标', culture: '文化场所'};
 // dimensions that describe how a stretch of street feels (used for "Along this walk")
 const STORY_FEEL = ['Nature', 'Quiet & Relax', 'Architecture', 'Culture', 'Urban Vibrancy', 'Food & Retail', 'Scenic & Visual', 'Spatial Comfort'];
 const PLACE_KIND = {parks: ['park', 'parks'], museums: ['museum', 'museums'], historic: ['historic site', 'historic sites'], attractions: ['landmark', 'landmarks'], culture: ['cultural venue', 'cultural venues']};
 
 const routeStory = {lists: null, loading: null, near: {}, showAll: false, last: null};
 
-const storyMuch = (w) => (/^fewer/.test(w) ? 'far ' + w : 'much ' + w);
-const storyCap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-const storyJoin = (xs) => (xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs.at(-1));
+const storyMuch = (w) => (storyZh() ? '明显' + w : /^fewer/.test(w) ? 'far ' + w : 'much ' + w);
+const storyCap = (s) => (s && !storyZh() ? s[0].toUpperCase() + s.slice(1) : s);
+const storyJoin = (xs) => (storyZh() ? xs.join('、') : xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs.at(-1));
 function storyScore(r, d) { const v = r.dimension_scores?.[d], c = r.data_coverage?.by_dimension?.[d]; return v == null || (c != null && c < STORY.COVER) ? null : v; }
 function storyDiff(a, b, d) { const x = storyScore(a, d), y = storyScore(b, d); return x == null || y == null ? null : x - y; }
 /** The user's own priorities, strongest first (same source the engine request uses: planner.weights / origins). */
@@ -128,7 +147,7 @@ function storyPlaceChip(places) {
  const by = {};
  for (const p of places) by[p.cat] = (by[p.cat] || 0) + 1;
  const [cat, n] = Object.entries(by).sort((a, b) => b[1] - a[1] || (a[0] === 'parks' ? -1 : 1))[0];
- return `${n} ${PLACE_KIND[cat][n > 1 ? 1 : 0]}`;
+ return storyZh() ? `${n} 个${PLACE_KIND_ZH[cat]}` : `${n} ${PLACE_KIND[cat][n > 1 ? 1 : 0]}`;
 }
 
 /* ---------- which 2–3 routes to show ---------- */
@@ -161,7 +180,7 @@ function storyTraits(r, ref, dims) {
  return dims.map((d) => ({d, diff: storyDiff(r, ref, d)})).filter((t) => t.diff != null && Math.abs(t.diff) >= STORY.MORE);
 }
 function traitWord(t, low = false) {
- const w = STORY_WORDS[t.d], up = low ? t.diff < 0 : t.diff > 0, word = up ? (low ? w.less : w.more) : (low ? w.more : w.less);
+ const w = SW(t.d), up = low ? t.diff < 0 : t.diff > 0, word = up ? (low ? w.less : w.more) : (low ? w.more : w.less);
  return Math.abs(t.diff) >= STORY.MUCH ? storyMuch(word) : word;
 }
 function storyLeader(r, others, dims) {
@@ -176,7 +195,7 @@ function storyLeader(r, others, dims) {
  return best;
 }
 function storyMinutes(a, b) { return Math.round(a.estimated_duration_min - b.estimated_duration_min); }
-function storyTime(m) { return m <= 0 ? (m < 0 ? `about ${-m} min shorter` : 'about the same time') : `about ${m} min longer`; }
+function storyTime(m) { if (storyZh()) return m <= 0 ? (m < 0 ? `约少 ${-m} 分钟` : '用时差不多') : `约多 ${m} 分钟`; return m <= 0 ? (m < 0 ? `about ${-m} min shorter` : 'about the same time') : `about ${m} min longer`; }
 
 /** The dimension a route's name would use (asked-for dimensions first), or null. */
 function lead0(r, others) {
@@ -209,11 +228,12 @@ function storyBuild(routes) {
   // name
   const lead = single ? null : (storyLeader(r, others, nameDims.filter((d) => askDims.includes(d))) || storyLeader(r, others, nameDims.filter((d) => !askDims.includes(d))));
   let name;
+  const zh = storyZh();
   if (itinerary) name = r.route_name;
-  else if (!single && isFastest) name = 'Fastest';
-  else if (lead) name = STORY_WORDS[lead.d].name;
-  else name = r.recommended ? 'Best match' : single ? 'Your walk' : 'Another way';
-  const tag = r.recommended && !itinerary ? (asks.length ? 'Best match for you' : 'Best match') : '';
+  else if (!single && isFastest) name = zh ? '最快' : 'Fastest';
+  else if (lead) name = SW(lead.d).name;
+  else name = r.recommended ? (zh ? '最佳匹配' : 'Best match') : single ? (zh ? '你的路线' : 'Your walk') : (zh ? '另一条路' : 'Another way');
+  const tag = r.recommended && !itinerary ? (asks.length ? (zh ? '最适合你' : 'Best match for you') : (zh ? '最佳匹配' : 'Best match')) : '';
   // sentence
   const sentence = (() => {
    if (single) {
@@ -221,13 +241,20 @@ function storyBuild(routes) {
     const order = [...typical.filter((t) => askDims.includes(t.d)), ...typical.filter((t) => !askDims.includes(t.d)).sort((a, b) => b.diff - a.diff)].slice(0, 2);
     const main = Object.entries(storyStreets(r)).sort((a, b) => b[1] - a[1])[0];
     const parts = [];
-    if (main && main[1] > 150) parts.push(`Mostly along ${main[0]}.`);
-    if (order.length) parts.push(`${storyCap(storyJoin(order.map((t) => STORY_WORDS[t.d].more)))} than a typical street in Manhattan, Brooklyn and Queens.`);
-    return parts.join(' ') || null;
+    if (main && main[1] > 150) parts.push(zh ? `主要沿 ${main[0]}。` : `Mostly along ${main[0]}.`);
+    if (order.length) parts.push(zh ? `比曼哈顿、布鲁克林和皇后区的一般街道${storyJoin(order.map((t) => SW(t.d).more))}。` : `${storyCap(storyJoin(order.map((t) => STORY_WORDS[t.d].more)))} than a typical street in Manhattan, Brooklyn and Queens.`);
+    return parts.join(zh ? '' : ' ') || null;
    }
    if (isFastest) {
     const main = Object.entries(storyStreets(r)).sort((a, b) => b[1] - a[1])[0];
     const lows = asks.filter((a) => others.length && others.every((o) => { const d = storyDiff(r, o, a.dim); return d != null && (a.low ? d >= STORY.MORE : d <= -STORY.MORE); }));
+    if (zh) {
+     let z = `最直接的走法${main && main[1] > 150 ? `，主要沿 ${main[0]}` : ''}`;
+     if (pick.fastestToo === r.route_id) z += '，而且最符合你的要求';
+     z += '。';
+     if (lows.length) z += `比其他选项${storyJoin(lows.slice(0, 2).map((a) => a.low ? SW(a.dim).more : SW(a.dim).less))}。`;
+     return z;
+    }
     let s = `The most direct way${main && main[1] > 150 ? `, mostly along ${main[0]}` : ''}`;
     if (pick.fastestToo === r.route_id) s += ', and it ranks best for what you asked';
     s += '.';
@@ -239,6 +266,11 @@ function storyBuild(routes) {
     ...tr.filter((t) => !askDims.includes(t.d) && t.diff > 0 && STORY_WORDS[t.d].name).sort((a, b) => b.diff - a.diff)].slice(0, 2);
    const bad = tr.filter((t) => askDims.includes(t.d) && (asks.find((a) => a.dim === t.d).low ? t.diff > 0 : t.diff < 0));
    const m = storyMinutes(r, fastest);
+   if (zh) {
+    let z = good.length ? `比最快的路线${storyJoin(good.map((t) => traitWord(t, asks.find((a) => a.dim === t.d)?.low)))}` : '走不同的街道，感觉与最快的路线相近';
+    if (bad.length) z += `，但${traitWord(bad[0], asks.find((a) => a.dim === bad[0].d)?.low)}`;
+    return `${z}；${storyTime(m)}。`;
+   }
    let s = good.length ? `${storyCap(storyJoin(good.map((t) => traitWord(t, asks.find((a) => a.dim === t.d)?.low))))} than the fastest way` : 'Different streets, a similar feel to the fastest way';
    if (bad.length) s += `, but ${traitWord(bad[0], asks.find((a) => a.dim === bad[0].d)?.low)}`;
    return `${s}; ${storyTime(m)}.`;
@@ -250,32 +282,35 @@ function storyBuild(routes) {
    if (chips.length >= 2) break;
    const v = storyScore(r, d); if (v == null) continue;
    const ok = ref ? ref.every((o) => { const x = storyScore(o, d); return x != null && v - x >= STORY.MORE; }) : v >= STORY.TYPICAL;
-   if (ok) chips.push(STORY_WORDS[d].chip);
+   if (ok) chips.push(SW(d).chip);
   }
   const pc = storyPlaceChip(places); if (pc) chips.push(pc);
   // why it fits you: the user's own priorities, in the same comparisons
   let why;
-  if (!asks.length) why = 'No preference set yet, so all 12 experience dimensions count equally.';
+  if (!asks.length) why = zh ? '还没有设置偏好，所以 12 个体验维度权重相同。' : 'No preference set yet, so all 12 experience dimensions count equally.';
   else {
    const parts = asks.slice(0, 2).map((a) => {
-    const w = STORY_WORDS[a.dim], v = storyScore(r, a.dim);
-    if (v == null) return `${w.noun} not measured on enough of this route`;
+    const w = SW(a.dim), v = storyScore(r, a.dim);
+    if (v == null) return zh ? `这条路线大部分没有${w.noun}数据` : `${w.noun} not measured on enough of this route`;
     if (!single) {
      const leads = others.every((o) => { const x = storyScore(o, a.dim); return x != null && (a.low ? x - v : v - x) >= STORY.LEAD; });
-     if (leads) return a.low ? `the least ${w.noun} of the ${shown.length}` : `the ${w.sup} of the ${shown.length}`;
-     if (!isFastest) { const t = {d: a.dim, diff: storyDiff(r, fastest, a.dim)}; if (t.diff != null && Math.abs(t.diff) >= STORY.MORE) return `${traitWord(t, a.low)} than the fastest`; return `similar ${w.noun} to the fastest`; }
+     if (leads) return zh ? (a.low ? `${shown.length} 条中${w.noun}最少` : `${shown.length} 条中${w.sup}`) : a.low ? `the least ${w.noun} of the ${shown.length}` : `the ${w.sup} of the ${shown.length}`;
+     if (!isFastest) { const t = {d: a.dim, diff: storyDiff(r, fastest, a.dim)}; if (t.diff != null && Math.abs(t.diff) >= STORY.MORE) return zh ? `比最快的路线${traitWord(t, a.low)}` : `${traitWord(t, a.low)} than the fastest`; return zh ? `similar:${w.noun}与最快的路线相近` : `similar ${w.noun} to the fastest`; }
      const trails = others.every((o) => { const x = storyScore(o, a.dim); return x != null && (a.low ? v - x : x - v) >= STORY.MORE; });
-     return trails ? `${a.low ? w.more : w.less} than the others` : `similar ${w.noun} to the others`;
+     return trails ? (zh ? `比其他路线${a.low ? w.more : w.less}` : `${a.low ? w.more : w.less} than the others`) : (zh ? `similar:${w.noun}与其他路线相近` : `similar ${w.noun} to the others`);
     }
+    if (zh) return v >= STORY.TYPICAL ? `比一般街道${w.more}` : v <= 100 - STORY.TYPICAL ? `比一般街道${w.less}` : `${w.noun}与一般街道相当`;
     return v >= STORY.TYPICAL ? `${w.more} than a typical street in Manhattan, Brooklyn and Queens` : v <= 100 - STORY.TYPICAL ? `${w.less} than a typical street in Manhattan, Brooklyn and Queens` : `about typical ${w.noun} for Manhattan, Brooklyn and Queens`;
    });
-   const asked = storyJoin(asks.slice(0, 2).map((a) => (a.low ? 'less ' : '') + STORY_WORDS[a.dim].ask));
-   why = parts.every((x) => x.startsWith('similar')) ? `You asked for ${asked}: ${isFastest ? 'about the same as the other options' : 'about the same as the fastest way'}${parts.length > 1 ? ' on both' : ''}.` : `You asked for ${asked}: ${storyJoin(parts)}.`;
+   const asked = storyJoin(asks.slice(0, 2).map((a) => (a.low ? (zh ? '更少' : 'less ') : '') + SW(a.dim).ask));
+   const allSimilar = parts.every((x) => x.startsWith('similar'));
+   if (zh) why = allSimilar ? `你想要${asked}：与${isFastest ? '其他选项' : '最快的路线'}差不多。` : `你想要${asked}：${storyJoin(parts.map((x) => x.replace(/^similar:/, '')))}。`;
+   else why = allSimilar ? `You asked for ${asked}: ${isFastest ? 'about the same as the other options' : 'about the same as the fastest way'}${parts.length > 1 ? ' on both' : ''}.` : `You asked for ${asked}: ${storyJoin(parts)}.`;
   }
   const water = r.independent_metrics?.waterfront?.within_100m_share;
-  if (typeof planner !== 'undefined' && planner.waterfront && water != null) why += ` ${Math.round(water * 100)}% of it within 100 m of the water.`;
-  const note = r.constraints?.feasible === false ? `Outside your limits: ${(r.constraints.violations || []).join('; ')}` : null;
-  stories[r.route_id] = {name: via && !itinerary ? `${name} · via ${via}` : name, short: name, tag, sentence, highlights: chips.slice(0, 3), why, via, note};
+  if (typeof planner !== 'undefined' && planner.waterfront && water != null) why += zh ? `其中 ${Math.round(water * 100)}% 在离水边 100 米以内。` : ` ${Math.round(water * 100)}% of it within 100 m of the water.`;
+  const note = r.constraints?.feasible === false ? `${zh ? '超出你的限制：' : 'Outside your limits: '}${(r.constraints.violations || []).join('; ')}` : null;
+  stories[r.route_id] = {name: via && !itinerary ? `${name} · ${zh ? '经过' : 'via'} ${via}` : name, short: name, tag, sentence, highlights: chips.slice(0, 3), why, via, note};
  }
  for (const r of pick.extra) stories[r.route_id] = {name: r.route_name, short: r.route_name, tag: '', sentence: null, highlights: [], why: null, via: null, note: r.constraints?.feasible === false ? `Outside your limits: ${(r.constraints.violations || []).join('; ')}` : null};
  routeStory.last = {shown: shown.map((r) => r.route_id), extra: pick.extra.map((r) => r.route_id), stories};
@@ -302,12 +337,13 @@ function storyStretches(r) {
   const street = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
   const traits = STORY_FEEL.map((d) => { const v = mean(list, d); return {d, diff: v == null || whole[d] == null ? null : v - whole[d]}; })
    .filter((t) => t.diff != null && Math.abs(t.diff) >= 10).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)).slice(0, 2);
-  const when = k === 0 ? `First ${min} min` : k === parts.length - 1 ? `Last ${min} min` : `Next ${min} min`;
+  const zh = storyZh();
+  const when = zh ? (k === 0 ? `前 ${min} 分钟` : k === parts.length - 1 ? `最后 ${min} 分钟` : `接下来 ${min} 分钟`) : k === 0 ? `First ${min} min` : k === parts.length - 1 ? `Last ${min} min` : `Next ${min} min`;
   const name = street && street[1] > len * 0.3 ? street[0] : null, same = name && name === prev;
   prev = name;
-  const where = name ? (same ? `, still on ${name}` : `, along ${name}`) : '';
-  const feel = traits.length ? `: ${storyJoin(traits.map((t) => (t.diff > 0 ? STORY_WORDS[t.d].more : STORY_WORDS[t.d].less)))} than the rest of the walk` : '';
-  return `${when}${where}${feel}.`;
+  const where = name ? (zh ? (same ? `，仍在 ${name}` : `，沿 ${name}`) : same ? `, still on ${name}` : `, along ${name}`) : '';
+  const feel = traits.length ? (zh ? `：比其余路段${storyJoin(traits.map((t) => (t.diff > 0 ? SW(t.d).more : SW(t.d).less)))}` : `: ${storyJoin(traits.map((t) => (t.diff > 0 ? STORY_WORDS[t.d].more : STORY_WORDS[t.d].less)))} than the rest of the walk`) : '';
+  return `${when}${where}${feel}${zh ? '。' : '.'}`;
  });
 }
 

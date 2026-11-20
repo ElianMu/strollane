@@ -161,7 +161,7 @@ function renderDimensions(){
 }
 function renderPreferenceSummary(){
   const items=DIMENSIONS.filter(d=>planner.origins[d.name]!=='default').sort((a,b)=>planner.weights[b.name]-planner.weights[a.name]);
-  $('preferenceSource').textContent=planner.interpretation==='llm'?'AI INTERPRETED':planner.interpretation==='local'?'LOCAL PREVIEW':'NOT INTERPRETED';
+  $('preferenceSource').textContent=planner.interpretation==='llm'?'READ BY AI':planner.interpretation==='local'?'READ WITH SIMPLE RULES':'NOT READ YET';
   $('preferenceSummary').innerHTML=items.length?`<div class="pref-heading">✦ UNDERSTOOD YOUR PREFERENCES</div><div class="pref-items">${items.map(d=>`<div class="pref-item"><span>${esc(d.icon)} ${esc(d.name)}</span><strong>${weightLabel(planner.weights[d.name])} · ${planner.weights[d.name]}${planner.directions[d.name]==='low'?' · less':''}</strong></div>`).join('')}</div>`:'<span class="status-empty">✧ No preferences interpreted yet. Unmentioned dimensions = neutral 50.</span>';
   syncBudgetUI();$('maxDetourPct').value=planner.maxDetourPct;
   ['avoidDetours','stepFree','avoidStairs'].forEach(id=>$(id).checked=planner.constraints[id]);
@@ -250,13 +250,13 @@ async function interpretIntent(q){
   // proof that AI is disabled. Attempt the real parse when configuration is unknown.
   if(location.protocol!=='file:' && planner.llmConfigured!==false){
     try{
-      const r=await streetwiseFetch('/api/interpret',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:input,weights:planner.weights,budget:state.budget,constraints:planner.constraints,crime:planner.crime||null,waterfront:planner.waterfront||null,weather:weatherWindow(state.budget),history:planner.conversations.slice(-8)}),signal:AbortSignal.timeout(planner.llmConfigured===null?65000:32000)});
+      const r=await streetwiseFetch('/api/interpret',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:input,weights:planner.weights,budget:state.budget,constraints:planner.constraints,crime:planner.crime||null,waterfront:planner.waterfront||null,weather:weatherWindow(state.budget),history:planner.conversations.slice(-8),reply_language:typeof i18n!=='undefined'&&i18n.lang==='zh'?'zh':'en'}),signal:AbortSignal.timeout(planner.llmConfigured===null?65000:32000)});
       if(!r.ok){const j=await r.json().catch(()=>({}));const why=j.reason?[j.reason.stage,j.reason.http_status,j.reason.type,j.reason.code].filter(Boolean).join(' · '):'';
         console.warn('LLM response rejected:',j.reason||{status:r.status});
         throw new Error(`LLM service ${r.status}${why?` (${why})`:''}`);}
       data=await r.json();mode='llm';planner.llmConnected=true;planner.llmConfigured=true;
-      $('interpretMode').textContent='✦ AI VERIFIED · Latest natural-language request succeeded';
-    }catch(err){planner.llmConnected=false;$('interpretMode').textContent='◇ LIMITED LOCAL PREVIEW · AI request failed; next plan retries';console.warn('LLM parsing unavailable:',err);toast(`AI parsing unavailable — ${err.message}. Using clearly marked limited local preview.`);}
+      $('interpretMode').textContent='✦ AI on · understood your last request';
+    }catch(err){planner.llmConnected=false;$('interpretMode').textContent='◇ AI unavailable · your request was read with simple rules';console.warn('LLM parsing unavailable:',err);toast('The AI assistant is not available right now, so your request was read with simpler rules. Check the chips it picked.');}
   }
   if(!data){data=localInterpret(input);if(/\bcrime\b|犯罪/.test(input.toLowerCase()))data.crime={mode:'set',direction:/avoid|lower|less|low crime|避开|低犯罪/i.test(input)?'low':'high',weight:90};}
   if(mode!=='llm'&&/waterfront|river|河边|河岸|海边/i.test(input))data.waterfront={mode:'set',direction:/avoid|away from|not along|避开|不走/i.test(input)?'low':'high',weight:90};
@@ -298,14 +298,33 @@ async function checkInterpreter(){
     const r=await streetwiseFetch('/api/status',{signal:AbortSignal.timeout(2500)});const d=await r.json();planner.llmConfigured=r.ok?Boolean(d.llm):null;planner.llmConnected=Boolean(r.ok&&d.llm);
     if(r.ok)checkServerVersion(d);
   }catch(_) {planner.llmConnected=false;planner.llmConfigured=null;}
-  $('interpretMode').textContent=planner.llmConnected?'✦ AI CONFIGURED · Connection verified when you plan':planner.llmConfigured===false?'◇ LOCAL PREVIEW · AI backend key is missing or invalid':'◇ AI STATUS UNAVAILABLE · Planning will retry the AI service';
+  $('interpretMode').textContent=planner.llmConnected?'✦ AI on · describe your walk in your own words':planner.llmConfigured===false?'◇ AI off · your request is read with simple rules':'◇ AI not reachable yet · it will try again when you plan';
 }
 // Messages written in research notation (scores, formulas, interpreted weights) go to the full log under Technical
 // details; the conversation under the routes keeps the user's words and plain replies (questions, errors, results).
 const TECH_CHAT=/Personalized score|weighted experience|Route scores:|interpretation:|data coverage|OSM edges?|detour penalty|Hard limits used/i;
+/* Fixed assistant messages written by the page itself, in Chinese when the interface is Chinese. The AI's own text
+   (clarifications, unsupported reasons) is asked for in Chinese at the source (reply_language). Text that matches no
+   rule is shown as it is. */
+const ZH_CHAT=[
+ [/ The displayed previous route has not been recalculated\./g,'当前显示的路线没有重新计算。'],
+ [/ Nothing was changed\./g,'没有做任何更改。'],
+ [/ The rest of your request is planned as usual\./g,'你请求的其余部分照常规划。'],
+ [/^AI interpretation: (.*)\. Checking feasible pedestrian paths…$/,'AI 理解：$1。正在查找可走的步行路线…'],
+ [/^Limited local interpretation: (.*)\. Checking feasible pedestrian paths…$/,'简单规则理解：$1。正在查找可走的步行路线…'],
+ [/^AI journey interpretation: (.*)\.$/,'AI 行程理解：$1。'],
+ [/^Limited local journey interpretation: (.*)\.$/,'简单规则行程理解：$1。'],
+ [/^No explicit preference change recognized( by limited local preview)?\. I’ll check route options using current settings\.$/,'没有识别到明确的偏好变化，将按当前设置查找路线。'],
+ [/^Updated: (.*)\. Re-planning…$/,'已更新：$1。正在重新规划…'],
+ [/^My hotel set to (.*?)\. Use it as start, return point or search anchor\.$/,'已把酒店设为 $1。可以把它作为起点、返回点或搜索中心。'],
+ [/^My hotel set to (.*?)\. It will be used as start \/ return point when you ask\.$/,'已把酒店设为 $1。你需要时会用作起点或返回点。'],
+ [/^My hotel set to (.*)\.$/,'已把酒店设为 $1。'],
+ [/^Hotel search unavailable: /,'酒店搜索暂时不可用：'],
+];
+function zhChat(t){let s=String(t||'');for(const [re,to] of ZH_CHAT)s=s.replace(re,to);return s;}
 function appendChat(role,message){
   planner.conversations.push({role,content:message,tech:role==='assistant'&&TECH_CHAT.test(message)});$('conversationSection').classList.remove('hidden');
-  const row=m=>`<div class="chat-message ${m.role==='user'?'user-message':'assistant-message'}"><div class="chat-name">${m.role==='user'?'YOU':'✦ STROLLANE'}</div><div class="chat-copy">${esc(m.content)}</div></div>`;
+  const row=m=>`<div class="chat-message ${m.role==='user'?'user-message':'assistant-message'}"><div class="chat-name">${m.role==='user'?'YOU':'✦ STROLLANE'}</div><div class="chat-copy">${esc(m.role==='assistant'&&typeof i18n!=='undefined'&&i18n.lang==='zh'?zhChat(m.content):m.content)}</div></div>`;
   $('chatHistory').innerHTML=planner.conversations.filter(m=>!m.tech).map(row).join('');
   if($('chatLog'))$('chatLog').innerHTML=planner.conversations.map(row).join('');
   $('chatHistory').scrollTop=$('chatHistory').scrollHeight;
@@ -341,7 +360,7 @@ async function loadManhattanStreets(){
   if(state.loading.streets)return;
   state.loading.streets=true;
   state.dataComplete.streets=false;
-  setSourceStatus('LOADING NYC STREET CENTERLINES…');
+  setSourceStatus('LOADING STREETS…');
   if(!state.datasets.streets)state.datasets.streets=emptyFC();
   const features=state.datasets.streets.features;
   state.streetExpectedBy=state.streetExpectedBy||{};
@@ -386,12 +405,11 @@ async function loadManhattanStreets(){
       if(expected!==null && mine<expected)throw new Error(`Only ${mine} of ${expected} ${q.label} street features loaded`);
     }
     state.dataComplete.streets=true;
-    setSourceStatus(`MANHATTAN · BROOKLYN · W. QUEENS · ${features.length.toLocaleString()} NYC CENTERLINES`,true);
-    toast(`NYC Street Centerline geometry loaded for ${STUDY_AREA_NAME}. Streets are not a pedestrian-accessibility guarantee.`);
+    setSourceStatus('STREETS LOADED · MANHATTAN · BROOKLYN · QUEENS',true);
   }catch(err){
     state.dataErrors.streets=err.message;
-    setSourceStatus(`STREET DATA PARTIAL · ${features.length.toLocaleString()} FEATURES`);
-    toast(`Street data incomplete at ${current} (${features.length.toLocaleString()} loaded). Retry button available; no substitute geometry was invented.`);
+    setSourceStatus('SOME STREETS DID NOT LOAD · RETRY IN MAP LAYERS');
+    toast('Some streets did not load. Use Retry in the map layers to load them again.');
   }finally{state.loading.streets=false;syncMapData();updateLegend();updateSegmentDetails();}
 }
 /** A LngLatBounds-shaped box (getWest/getSouth/getEast/getNorth — the only methods every caller in this codebase
@@ -433,7 +451,7 @@ async function loadViewportEvidence(kind){
   // Never label their visible subset as complete Manhattan data.
   if(!state.mapReady)return;
   if(state.map.getZoom()<12.3){
-    toast(`Zoom in to load ${kind==='trees'?'tree points':'landmark polygons'}; all-island raw evidence is too dense for a first-pass client view.`);
+    toast(`Zoom in to see ${kind==='trees'?'trees':'landmarks'}.`);
     return;
   }
   const bbox=visibleEnvelope();if(!bbox)return;
@@ -449,7 +467,7 @@ async function loadViewportEvidence(kind){
     state.dataComplete[kind]=!state.overlayCoverage[kind].partial;
     if(state.overlayCoverage[kind].partial)toast(`${kind==='trees'?'Trees':'Landmarks'}: showing only ${d.features.length} raw records in this view. Zoom in for a smaller area.`);
     syncMapData();updateLegend();updateSegmentDetails();updateProfile();
-  }catch(err){state.dataErrors[kind]=err.message;toast(`${kind.toUpperCase()} data source unavailable: ${err.message}`)}
+  }catch(err){state.dataErrors[kind]=err.message;toast(`${kind==='trees'?'Trees':kind==='lpc'?'Landmarks':'This map layer'} could not load. ${plainError(err)}`)}
   finally{state.loading[kind]=false;if(state.overlayPending?.[kind]){state.overlayPending[kind]=false;scheduleOverlayRefresh();}}
 }
 function setMapLayerVisible(id,yes){if(state.mapReady&&state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',yes?'visible':'none')}
@@ -739,7 +757,7 @@ async function handlePlan(text,isFollowUp=false){
     }
     const changes=result.changes;if(changes.length)appendChat('assistant',`${planner.interpretation==='llm'?'AI interpretation':'Limited local interpretation'}: ${changes.join(' · ')}. Checking feasible pedestrian paths…`);
     else appendChat('assistant',`No explicit preference change recognized${planner.interpretation==='local'?' by limited local preview':''}. I’ll check route options using current settings.`);
-  }catch(err){toast('Unable to interpret preferences: '+err.message);return;}
+  }catch(err){toast('Could not read your request. Try saying it another way, or tap a few chips. '+plainError(err));return;}
   finally{planner.parsing=false;$('generateRoutes').disabled=false;$('chatSend').disabled=false}
   // Start: what the request named, else where the user is (GPS). Never a preset place.
   const startProblem=await ensurePlanStart();
@@ -801,7 +819,7 @@ function renderPOIs(){
    +(list.length>POI_FIRST?`<button type="button" class="poi-more">Show all places<span> (${list.length})</span></button>`:'')+`<small class="poi-source">OpenStreetMap · ${esc(planner.poiStatus)}</small>`;
   $('poiList').querySelector('.poi-more')?.addEventListener('click',e=>{$('poiList').querySelectorAll('.more-hidden').forEach(x=>x.classList.remove('more-hidden'));e.currentTarget.remove();});
   $('poiList').querySelectorAll('[data-poi]').forEach(el=>el.addEventListener('click',()=>{
-    const p=list[+el.dataset.poi];if(state.mapReady)state.map.flyTo({center:[p.lon,p.lat],zoom:16.4,duration:500});toast(`${p.name} · ${p.distance} m from route geometry`);
+    const p=list[+el.dataset.poi];if(state.mapReady)state.map.flyTo({center:[p.lon,p.lat],zoom:16.4,duration:500});toast(`${p.name} · ${p.distance} m from your walk`);
   }));
 }
 function updateSegmentDetails(){
@@ -829,11 +847,11 @@ function requestGPS(useAsStart=false,follow=false){
     setGpsPosition(p.coords);
     if(useAsStart){if(!latLonInsideStudyArea(state.gps))toast(`GPS is outside the routing area (${STUDY_AREA_NAME}). You may explore the map, but walks can only start there.`);else{state.start='gps';$('startSelect').value='gps';$('searchStart').value='My current location';resetRoutes();syncMapData();document.dispatchEvent(new CustomEvent('strollane:ends-changed',{detail:{kind:'start',source:'gps'}}))}}
     if(state.mapReady)state.map.flyTo({center:[state.gps.lon,state.gps.lat],zoom:15.5,duration:800});
-    if(!follow)toast('GPS location acquired. It is not transmitted to our own server.');
+    if(!follow)toast('Found your location. It stays on your device.');
     loadWeather();
   };
   const bad=(err)=>{toast(`Unable to access GPS: ${err.message||'location denied or timed out'}`);$('gpsMain').textContent=({1:'DENIED',2:'UNAVAILABLE',3:'TIMED OUT'})[err.code]||'UNAVAILABLE'};
-  if(follow){if(state.gpsWatch!==null){navigator.geolocation.clearWatch(state.gpsWatch);state.gpsWatch=null;$('gpsMain').textContent='STOPPED';toast('Continuous GPS updates stopped.');return} state.gpsWatch=navigator.geolocation.watchPosition(good,bad,{enableHighAccuracy:true,maximumAge:4000,timeout:15000});toast('Foreground-only location updates enabled.');}
+  if(follow){if(state.gpsWatch!==null){navigator.geolocation.clearWatch(state.gpsWatch);state.gpsWatch=null;$('gpsMain').textContent='STOPPED';toast('Stopped following your location.');return} state.gpsWatch=navigator.geolocation.watchPosition(good,bad,{enableHighAccuracy:true,maximumAge:4000,timeout:15000});toast('Following your location while this page is open.');}
   else navigator.geolocation.getCurrentPosition(good,bad,{enableHighAccuracy:true,maximumAge:0,timeout:14000});
 }
 /** Default start = where the user is. Asked once on load (the browser shows its own permission prompt; nothing is

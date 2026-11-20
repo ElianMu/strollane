@@ -123,7 +123,7 @@ function renderUrbanPanel(){
  $('urbanCats').querySelectorAll('[data-ud-info]').forEach(b=>b.addEventListener('click',()=>{const box=b.closest('.urban-ds').querySelector('.urban-meta');box.classList.toggle('hidden');b.setAttribute('aria-expanded',String(!box.classList.contains('hidden')));}));
  $('urbanCats').querySelectorAll('[data-ud-opacity]').forEach(r=>r.addEventListener('input',()=>setUrbanOpacity(r.dataset.udOpacity,r.value/100)));
  $('urbanCats').querySelectorAll('[data-crime-filter]').forEach(r=>r.addEventListener('change',()=>{
-  if(state.routingBusy||planner.parsing){toast('Wait for the current route calculation before changing its data filters.');renderUrbanPanel();return;}
+  if(state.routingBusy||planner.parsing){toast('Your walk is still being planned. Change this when it is ready.');renderUrbanPanel();return;}
   const filters=urbanData.crimeFilter||{},k=r.dataset.crimeFilter;filters[k]=k==='offense_types'?(r.value?[r.value]:[]):r.value;urbanData.crimeFilter=filters;
   if(planner.crime){planner.crime={...planner.crime,...filters};if(typeof journeyMode==='function'&&journeyMode())planJourney(true);else generateRoutes(null,true);}
   loadUrbanDataset('reported_complaints');

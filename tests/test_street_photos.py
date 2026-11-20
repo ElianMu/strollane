@@ -111,3 +111,45 @@ class StreetPhotos(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class PlacePhotos(unittest.TestCase):
+    """at_places: a street-level photo taken at a place, for places with no photo of their own."""
+    PLACE = {'id': 'osm:node/1', 'lon': -73.9498, 'lat': 40.8101}
+
+    def setUp(self):
+        sp._cache.clear()
+
+    def img(self, north_m, heading, **kw):
+        d = {'id': kw.pop('id', '1'), 'computed_geometry': {'type': 'Point', 'coordinates': [self.PLACE['lon'], self.PLACE['lat'] + north_m / 111320]},
+             'computed_compass_angle': heading, 'captured_at': T2024, 'is_pano': False, 'thumb_1024_url': 'https://example.invalid/t.jpg',
+             'creator': {'username': 'walker'}}
+        d.update(kw)
+        return d
+
+    def test_prefers_a_photo_looking_at_the_place(self):
+        # camera 15 m north of the place: looking south (180°) faces it, looking north does not
+        imgs = [self.img(15, 0, id='away'), self.img(15, 180, id='facing')]
+        with mock.patch.dict(os.environ, {'MAPILLARY_TOKEN': TOKEN}):
+            out = sp.at_places([self.PLACE], opener=FakeProvider(lambda i: imgs))
+        ph = out['photos']['osm:node/1']
+        self.assertEqual(ph['image_id'], 'facing'); self.assertTrue(ph['faces_place']); self.assertEqual(ph['distance_m'], 15.0)
+
+    def test_nothing_beyond_30_m_and_no_panoramas(self):
+        imgs = [self.img(45, 180, id='far'), self.img(5, 180, id='pano', is_pano=True)]
+        with mock.patch.dict(os.environ, {'MAPILLARY_TOKEN': TOKEN}):
+            out = sp.at_places([self.PLACE], opener=FakeProvider(lambda i: imgs))
+        self.assertEqual(out['photos'], {})
+
+    def test_unconfigured_and_bad_input(self):
+        with mock.patch.dict(os.environ, {'MAPILLARY_TOKEN': ''}):
+            self.assertEqual(sp.at_places([self.PLACE])['configured'], False)
+        with mock.patch.dict(os.environ, {'MAPILLARY_TOKEN': TOKEN}):
+            for bad in ([], [{'id': 'x', 'lon': 0, 'lat': 0}], [{'lon': -73.95, 'lat': 40.8}], [self.PLACE] * 9):
+                with self.assertRaises(ValueError):
+                    sp.at_places(bad, opener=FakeProvider(lambda i: []))
+
+    def test_provider_failure_leaves_the_place_out(self):
+        with mock.patch.dict(os.environ, {'MAPILLARY_TOKEN': TOKEN}):
+            out = sp.at_places([self.PLACE], opener=FakeProvider(lambda i: OSError('down')))
+        self.assertEqual((out['photos'], out['failed']), ({}, 1))

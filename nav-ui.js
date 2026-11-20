@@ -66,7 +66,7 @@ function foodEvidenceStatus(r){
 /* ---------- start ---------- */
 async function startNavigation(){
  const r=activeRouteObject();if(!r||nav.engine)return;
- if(r.constraints?.feasible===false)return toast('This walk does not meet required constraints; revise the plan before navigation.');
+ if(r.constraints?.feasible===false)return toast('This walk is over your limits. Pick another walk or change your time.');
  if(r.validation&&!r.validation.navigation_allowed)return toast('This route failed its route check and cannot be navigated.');
  if(!navigator.geolocation)return toast('Location is not available in this browser.');
  // iOS asks for compass access only inside a user gesture
@@ -97,7 +97,7 @@ async function requestRoute(from,to){
   const best=j.routes.find(x=>x.recommended)||j.routes.slice().sort((a,b)=>a.distance_m-b.distance_m)[0];
   if(best?.validation&&!best.validation.navigation_allowed)throw new Error('the new route failed its route check');
   return best;
- }catch(e){toast('Could not plan the walking route: '+e.message);return null;}
+ }catch(e){toast('Could not plan the walking route. '+plainError(e));return null;}
 }
 function beginNavigation(route,opts={}){
  if(!opts.temporary&&!opts.restore)nav.checkAsked=null;

@@ -141,7 +141,7 @@ function attachPlaceSearch(input,{onSelect,onClear,osmTags=null,placeholder=null
  };
  async function choose(i){
   let p=st.items[i];if(!p)return;close();
-  try{p=await retrievePlace(p);}catch(e){toast('Could not confirm that place: '+e.message);return;}
+  try{p=await retrievePlace(p);}catch(e){toast('Could not confirm that place. '+plainError(e));return;}
   st.selected=p;input.value=p.name;clear.classList.remove('hidden');onSelect(p);
   // touch: a chosen place ends the typing step, so let the keyboard close (desktop keeps focus for Tab)
   if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)input.blur();

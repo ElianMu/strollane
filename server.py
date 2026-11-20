@@ -695,7 +695,7 @@ class Handler(SimpleHTTPRequestHandler):
         return True
 
     def do_POST(self):
-        bucket = {'/api/menu/verify': 'menu', '/api/itinerary': 'itinerary', '/api/routes': 'routes', '/api/detours': 'itinerary', '/api/street-photos': 'photos',
+        bucket = {'/api/menu/verify': 'menu', '/api/itinerary': 'itinerary', '/api/routes': 'routes', '/api/detours': 'itinerary', '/api/street-photos': 'photos', '/api/place-photos': 'photos',
                   '/api/interpret': 'interpret', '/api/recommend/food': 'recommend', '/api/agent/food-stop': 'agent'}.get(self.path)
         if bucket and not rate_ok(self, bucket):
             self.send_json(429, {'error': f'Too many requests; limit {RATE_LIMITS[bucket]} per minute.'})
@@ -718,6 +718,14 @@ class Handler(SimpleHTTPRequestHandler):
             try:
                 import street_photos
                 self.send_json(200, street_photos.along_route(read_json(self, 400000).get('coordinates')))
+            except (ValueError, TypeError, AttributeError, json.JSONDecodeError) as e:
+                self.send_json(400, {'error': str(e)})
+            return
+        if self.path == '/api/place-photos':
+            # A street-level photo taken at each place (within 30 m), for places with no photo of their own.
+            try:
+                import street_photos
+                self.send_json(200, street_photos.at_places(read_json(self, 20000).get('places')))
             except (ValueError, TypeError, AttributeError, json.JSONDecodeError) as e:
                 self.send_json(400, {'error': str(e)})
             return
@@ -1032,7 +1040,8 @@ def interpret(doc):
         'response_format': RESPONSE_FORMAT,
         'messages': [
             {'role': 'system', 'content': SYSTEM},
-            {'role': 'user', 'content': 'Current state: '+json.dumps(context, ensure_ascii=False)+'\nRecent conversation: '+json.dumps(history[-8:], ensure_ascii=False)+'\nLatest instruction: '+message}
+            {'role': 'user', 'content': 'Current state: '+json.dumps(context, ensure_ascii=False)+'\nRecent conversation: '+json.dumps(history[-8:], ensure_ascii=False)+'\nLatest instruction: '+message
+             + ('\nThe walker is using the Chinese interface: write `clarification` and every `unsupported[].reason` in Simplified Chinese. Keep all other fields exactly as the schema says (dimension names, enums and numbers stay as they are).' if doc.get('reply_language') == 'zh' else '')}
         ]
     }
     try:

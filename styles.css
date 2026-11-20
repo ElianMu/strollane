@@ -1316,3 +1316,4 @@ html[lang^=zh] .intro-row h1 br{display:none}
 .map-callout a:hover{text-decoration:underline}
 @media(max-width:740px){.map-callout figcaption{padding:5px 7px 6px}.map-callout strong{font-size:11px}.map-callout small{display:none}}
 #mapPhotosToggle[aria-pressed="false"]{opacity:.55}
+.cw-how{margin-top:8px}.cw-how summary{cursor:pointer;font-size:11px;color:var(--g9d)}
