@@ -1263,3 +1263,4 @@ html[lang^=zh] .intro-row h1 br{display:none}
 
 .walker-feedback-slot .walker-says{margin:0}
 .section-row a.small-count{text-decoration:none;color:var(--text-secondary)}
+.cw-photo{margin:2px 0 4px;max-width:260px}.cw-photo .rp-photo img{height:120px}.cw-photo .rp-photo figcaption strong{display:none} /* stop photo: the stop name sits right below it */

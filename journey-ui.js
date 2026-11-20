@@ -89,14 +89,18 @@ function renderCityWalk(){
  const root=$('cityWalk');if(!root)return;
  const it=journey.plan;root.classList.toggle('hidden',!it&&!journeyMode());
  if(!it){root.innerHTML=`<div class="section-row"><div class="section-overline">YOUR CITY WALK</div></div><p class="soft-copy">Describe what you want to see, eat or do — or add stops — then Plan My Walk.</p>`;return;}
- const t=it.totals,c=it.constraints,route=state.routes[0]?.raw;
+ const t=it.totals,c=it.constraints,route=state.routes[0]?.raw,photoWant=[];
  const stopRows=it.stops.map(s=>{
   const menuRows=stopMenuItems(s).map(item=>{
    const m=menuEvidenceForDisplay(journey.menu[s.id+'|'+item]),url=m?.menu_source_url||m?.source_url;
    return `<small class="cw-menu ${m?.status||''}">${esc(item)}: ${esc(MENU_LABEL[m?.status]||'not checked')}${m?.price?` · $${m.price.toFixed(2)} as listed`:''}${url?` · <a href="${esc(url)}" target="_blank" rel="noopener">source</a>`:''}${m?.reason?` — ${esc(m.reason)}`:''}</small>`;
   }).join('');
-  const p=placeCache[s.id],hrs=p?.hours||s.hours;const open=s.open_at_arrival!=null?s.open_at_arrival:hrs?isOpenAt(hrs,new Date(Date.now()+s.arrival_min*60000)):null;
-  return `<li class="cw-stop ${s.role==='end'?'end':''}"><span class="cw-seq">${s.role==='end'?'■':s.seq}</span><span class="cw-body"><strong>${esc(s.name)}</strong>
+  const p=placeCache[s.id],hrs=p?.hours||s.hours;
+  // a real photo of this stop (Wikimedia Commons via Wikidata, with author + licence), only for places in the index
+  const phPlace=p?{id:s.id,name:s.name,lat:s.lat??p.lat,lon:s.lon??p.lon,wd:typeof photoIdFor==='function'?photoIdFor({...p,id:s.id}):p.wikidata}:null;
+  if(phPlace)photoWant.push(phPlace);
+  const ph=phPlace&&phPlace.wd&&typeof photosFor==='function'?photosFor([phPlace])[0]:null;const open=s.open_at_arrival!=null?s.open_at_arrival:hrs?isOpenAt(hrs,new Date(Date.now()+s.arrival_min*60000)):null;
+  return `<li class="cw-stop ${s.role==='end'?'end':''}"><span class="cw-seq">${s.role==='end'?'■':s.seq}</span><span class="cw-body">${ph?photoFigures([ph],'cw-photo'):''}<strong>${esc(s.name)}</strong>
    <small>${esc([s.category,s.address].filter(Boolean).join(' · '))}</small>
    <small>Arrive ~${clockAt(s.arrival_min)} · +${(s.leg_in_m/1000).toFixed(2)} km / ${Math.round(s.leg_in_min)} min walk${s.visit_min?` · stay ${s.visit_min} min (est.)`:''}${s.slot_label?` · for “${esc(s.slot_label)}”`:''}${s.required?'':' · optional'}</small>
    ${open===false?'<small class="cw-warn">Opening hours (OSM) say closed at arrival time</small>':open===true?'<small class="cw-ok">Open at arrival per OSM hours</small>':hrs?'<small>Hours listed but not machine-readable</small>':'<small>Hours not listed</small>'}${s.closes_during_visit?'<small class="cw-warn">Closes during the planned visit (OSM hours)</small>':''}
@@ -113,6 +117,7 @@ function renderCityWalk(){
   ${it.skipped.length?`<p class="soft-copy">Skipped: ${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}
   <div class="cw-refine">${[['museums','More museums'],['historic','More historic'],['coffee','Add coffee'],['cappuccino','Find cappuccino'],['restaurant','Add restaurant'],['hotel','Return to hotel'],['less','Less walking'],['extend','Extend time']].map(([k,l])=>`<button type="button" class="mini-outline" data-refine="${k}">${l}</button>`).join('')}</div>
   <small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small>`;
+ if(photoWant.length&&typeof photosResolve==='function')photosResolve(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
  root.querySelectorAll('[data-refine]').forEach(b=>b.addEventListener('click',()=>refineWalk(b.dataset.refine)));
  root.querySelectorAll('[data-cw-remove]').forEach(b=>b.addEventListener('click',()=>{journey.removed.add(b.dataset.cwRemove);journey.named=journey.named.filter(n=>n.place.id!==b.dataset.cwRemove);planJourney(true);}));
  root.querySelectorAll('[data-cw-replace]').forEach(b=>b.addEventListener('click',()=>{journey.removed.add(b.dataset.cwId);delete journey.replaced[b.dataset.cwReplace];planJourney(true);}));
