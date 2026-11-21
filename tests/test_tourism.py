@@ -252,6 +252,35 @@ class E_Scenarios(unittest.TestCase):
                 self.assertIn('Ratings and review counts: no rating provider is configured.', c['explanation']['unknown'])
                 self.assertFalse([f for f in c['explanation']['verified_facts'] if 'rating ' in f])
 
+    def test_G_a_stalled_menu_site_does_not_hold_the_answer(self):
+        # Live: one coffee stop waited 41 s because leaving the executor's `with` block waited for every check.
+        import time as _t
+        from routing import recommend as rec
+        def stall(doc, now=None, deadline=None):
+            _t.sleep(3)
+            return fake_menu('not_found_in_checked_sources')(doc)
+        with mock.patch.object(rec, 'DEADLINE_S', 0.5), mock.patch.object(rec, 'GRACE_S', 0.5), mock.patch.dict(os.environ, NO_KEYS), \
+                mock.patch.object(menu, 'verify', side_effect=stall), mock.patch.object(menu, 'cached_evidence', return_value=None), \
+                mock.patch.object(menu, 'candidate_venues', return_value=set()):
+            t0 = _t.monotonic()
+            r = recommend_food(P, {'item': 'espresso', 'categories': ['cafes'], 'near': BRYANT, 'radius_m': 600, 'departure': WED_NOON})
+            took = _t.monotonic() - t0
+        self.assertLess(took, 2.5, 'answered at the deadline, not after the stalled checks')
+        self.assertTrue(any((c.get('menu') or {}).get('status') == 'not_checked' for c in r['candidates']))
+
+    def test_H_a_slow_confirmation_is_still_waited_for_when_nothing_else_confirmed(self):
+        # The extra wait keeps a slow but successful check: without any confirmed match the walk cannot be built.
+        import time as _t
+        from routing import recommend as rec
+        def slow_yes(doc, now=None, deadline=None):
+            _t.sleep(0.8)
+            return fake_menu('confirmed_menu_match')(doc)
+        with mock.patch.object(rec, 'DEADLINE_S', 0.3), mock.patch.object(rec, 'GRACE_S', 3), mock.patch.dict(os.environ, NO_KEYS), \
+                mock.patch.object(menu, 'verify', side_effect=slow_yes), mock.patch.object(menu, 'cached_evidence', return_value=None), \
+                mock.patch.object(menu, 'candidate_venues', return_value=set()):
+            r = recommend_food(P, {'item': 'espresso', 'categories': ['cafes'], 'near': BRYANT, 'radius_m': 600, 'departure': WED_NOON})
+        self.assertTrue(any(c['classification'] == 'meets_request' for c in r['candidates']))
+
 
 class F_TimeAwareItinerary(unittest.TestCase):
     def test_required_stop_closed_at_arrival_is_reported(self):

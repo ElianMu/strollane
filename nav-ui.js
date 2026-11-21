@@ -487,7 +487,7 @@ async function offerNavResume(){
  let netVersion=null;try{netVersion=(await streetwiseJson('/api/routing/status',{signal:AbortSignal.timeout(20000)})).network_version;}catch(e){}
  if(netVersion&&netVersion!==s.route.network_version){clearNavSession();toast('The walking network was updated since your navigation started — please plan the walk again.');return;}
  const box=$('navChoice');box.classList.remove('hidden');
- box.innerHTML=`<div class="nav-choice-card"><strong>Resume navigation?</strong><p>${esc(s.route.route_name||'Your walk')} · ${formatNavDistance(s.route.distance_m-s.progress.progress_m,nav.units)} left. The same route is restored (signature ${esc(s.route.route_signature)}).${netVersion?'':' The route server is not answering yet, so re-routing may wait until it does.'}</p>
+ box.innerHTML=`<div class="nav-choice-card"><strong>Resume navigation?</strong><p>${esc(s.route.route_name||'Your walk')} · ${formatNavDistance(s.route.distance_m-s.progress.progress_m,nav.units)} left. <span>Pick up where you stopped.</span>${netVersion?'':' <span>The route server is still waking up; re-routing waits until it answers.</span>'}</p>
   <button type="button" class="primary-cta" data-c="resume">Resume</button><button type="button" class="mini-outline" data-c="discard">Discard</button></div>`;
  box.onclick=e=>{const c=e.target.dataset?.c;if(!c)return;box.classList.add('hidden');
   if(c==='resume'){

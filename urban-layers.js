@@ -343,10 +343,13 @@ async function loadUrbanDataset(id){
    const ll=box?[box[0]/urbanData.catalog.projection.mx,box[1]/urbanData.catalog.projection.my,box[2]/urbanData.catalog.projection.mx,box[3]/urbanData.catalog.projection.my]:[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()];
    ll[0]=Math.max(-74.3,ll[0]);ll[1]=Math.max(40.45,ll[1]);ll[2]=Math.min(-73.68,ll[2]);ll[3]=Math.min(40.95,ll[3]);
    if(ll[0]>=ll[2]||ll[1]>=ll[3]){done(emptyFC(),'Outside NYC snapshot','empty');return;}
-   const params=new URLSearchParams({bbox:ll.join(','),zoom:state.map.getZoom()});
+   // Rounded, so the same view asks the same URL: on the live site one city-wide view asked the server for the same
+   // two layers three times in 20 s (3-10 s each), right while it was planning the walk.
+   const params=new URLSearchParams({bbox:ll.map(v=>v.toFixed(4)).join(','),zoom:state.map.getZoom().toFixed(1)});
    if(d.remote.startsWith('context:'))params.set('category',d.remote.slice(8));
-   const fc=await streetwiseJson('/api/urban/'+(d.remote==='trees'?'trees':'context')+'?'+params,{signal:AbortSignal.timeout(20000)});
-   if(coords)fc.features=UrbanGeo.alongLine(fc.features,coords,urbanData.corridor).map(h=>h.feature);
+   const url='/api/urban/'+(d.remote==='trees'?'trees':'context')+'?'+params,C=urbanData.remote||(urbanData.remote=new Map());
+   if(!C.has(url)){C.set(url,streetwiseJson(url,{signal:AbortSignal.timeout(20000)}).catch(e=>{C.delete(url);throw e;}));if(C.size>40)C.delete(C.keys().next().value);}
+   const got=await C.get(url),fc={...got,features:coords?UrbanGeo.alongLine(got.features,coords,urbanData.corridor).map(h=>h.feature):got.features};
    done(fc,`${fc.features.length} ${d.remote==='trees'&&state.map.getZoom()<16?'inventory cells':'features'}${fc.metadata.truncated?' · truncated: zoom in':''}`,'loaded');return;
   }
   if(d.remote==='crime'){

@@ -586,9 +586,11 @@ function itinerarySummaryText(it){
 
 /* ---------- food recommendations (server) ---------- */
 async function recommendFood(f,cats,start,end){
+ // the phone status line says what the wait is for (mobile-ui.js statusLabel): menu checks can take 10 s or more
+ journey.menuChecks=(journey.menuChecks||0)+1;journey.menuItem=f.item||null;
  try{
   const searchAnchor=journey.requirements.search_anchor?await findNamedPlace(journey.requirements.search_anchor):null;
-  const r=await streetwiseFetch('/api/recommend/food',{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(65000),
+  const r=await streetwiseFetch('/api/recommend/food',{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(40000),
    body:JSON.stringify({search_near:searchAnchor?pick(searchAnchor):null,item:f.item,cuisine:f.cuisine||null,categories:cats,sequence:[start,end].filter(Boolean).map(pick),radius_m:1000,departure:new Date().toISOString(),ratings_required:journey.requirements.ratings_required,minimum_rating:journey.requirements.minimum_rating,max_item_price_usd:journey.requirements.restaurant_budget_usd})});
   const d=await r.json();if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);
   if(d.status==='blocked_by_provider_access')appendChat('assistant','Requested review evidence is unavailable: no rating provider is configured. No candidate will be called highly rated.');
@@ -598,6 +600,7 @@ async function recommendFood(f,cats,start,end){
    address:c.place.address,hours:c.place.opening_hours,source:c.place.data_sources.join(' + '),score:{meets_request:1,needs_review:.6,not_confirmed:.2}[c.classification],
    evidence:[c.explanation.interpretation,...c.explanation.verified_facts].join(' · ')}));
  }catch(e){console.warn('food recommendation unavailable',e.message);return null;}
+ finally{journey.menuChecks=Math.max(0,(journey.menuChecks||1)-1);}
 }
 
 /* ---------- typed place details (server) ---------- */

@@ -799,6 +799,10 @@ async function handlePlan(text,isFollowUp=false){
     }
     if(planner.weatherIntent==='ask'&&state.routes.length){if(weatherContext.status!=='ok')await loadWeather();appendChat('assistant',weatherAnswer());return;}
     if(typeof applyJourney==='function'&&result.journey){
+      // "coffee from A to B, about 1 hour": the model gives the hour as a walking budget (time_minutes) and leaves the
+      // walk's own times empty, and the City Walk said "no limit set". With stops, the hour is the whole outing.
+      const J=result.journey;
+      if(J.outing_minutes==null&&J.walking_minutes==null&&Number.isFinite(result.time_minutes)&&result.time_minutes>0&&typeof journeyIntentPresent==='function'&&journeyIntentPresent(J))J.outing_minutes=Math.round(result.time_minutes);
       const jc=await applyJourney(result.journey);
       if(journey.businessOnly)return;
       if(jc.length)appendChat('assistant',`${planner.interpretation==='llm'?'AI':'Limited local'} journey interpretation: ${jc.join(' · ')}.`);

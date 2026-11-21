@@ -1425,3 +1425,6 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
 @media(max-width:740px){.nav-buttons{gap:5px}.nav-buttons>.nav-pill,.nav-buttons .nav-more>summary.nav-pill{padding:0 10px}}
 /* Navigation card: the next stop on one line (a long landmark name took two). */
 .nav-stats #navStop{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Phones have no Shift + Enter: the keyboard hint only made noise under the chat box (2026-11-21). */
+@media (hover:none) and (pointer:coarse){.chat-hint{display:none}}

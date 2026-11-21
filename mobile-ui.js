@@ -414,6 +414,7 @@
     if (typeof planner !== 'undefined' && planner.parsing) return 'Understanding your walk…';
     const cta = $('ctaLabel')?.textContent || '';
     if (typeof streetwiseHost !== 'undefined' && streetwiseHost.waking) return STREETWISE_WAKE_MESSAGE; // api-config.js
+    if (typeof journey !== 'undefined' && journey.menuChecks > 0) return journey.menuItem ? `Checking menus for ${journey.menuItem}…` : 'Checking menus…';
     if (typeof state !== 'undefined' && state.routingBusy) return /Finding places/.test(cta) ? 'Resolving places · calculating walking routes…' : 'Calculating walking routes…';
     return null;
   }

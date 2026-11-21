@@ -133,7 +133,7 @@ const I18N_ZH = {
  'Location permission was turned off. Navigation stopped updating.': '定位权限已关闭，导航已停止更新。',
  'No device direction — map follows the route instead; arrow hidden': '没有手机朝向数据：地图改为跟随路线方向，不显示朝向箭头',
  'No direction data — heading arrow hidden': '没有方向数据，不显示朝向箭头', 'Low-confidence instruction — check the map': '这条指引不太确定，请看地图',
- 'Next:': '下一个：', 'Keep this screen on while you walk: iPhone pauses navigation when the screen locks or you switch apps.': '走路时请保持屏幕亮着：iPhone 锁屏或切到别的 App 时，导航会暂停。', 'Navigate to start': '导航到起点', 'Replan from my location': '从我的位置重新规划', 'Resume navigation?': '继续上次的导航？', 'Discard': '放弃',
+ 'Next:': '下一个：', 'Keep this screen on while you walk: iPhone pauses navigation when the screen locks or you switch apps.': '走路时请保持屏幕亮着：iPhone 锁屏或切到别的 App 时，导航会暂停。', 'Navigate to start': '导航到起点', 'Replan from my location': '从我的位置重新规划', 'Resume navigation?': '继续上次的导航？', 'Pick up where you stopped.': '从上次停下的地方继续。', 'The route server is still waking up; re-routing waits until it answers.': '路线服务器还在启动，重新规划要等它响应。', 'Discard': '放弃',
  'Choose how to begin. STROLLANE will not pretend you are at the start.': '请选择怎么开始。STROLLANE 不会假装你已经在起点。',
  'At the start — now following your planned walk.': '已到起点，现在开始按计划路线走。', 'Location is not available in this browser.': '这个浏览器无法使用定位。',
  'Re-planned from your location. Tap Start Navigation.': '已从你的位置重新规划。请点“开始导航”。',
@@ -238,6 +238,7 @@ for (const k of ['Clear', 'Cloudy', 'Fog', 'Rain', 'Snow', 'Showers', 'Storm', '
 const i18nTerm = (s) => I18N_ZH[i18nKey(String(s))] || String(s);
 const i18nTermOnly = (s) => I18N_ZH[i18nKey(String(s))] || null;
 const I18N_ZH_PATTERNS = [
+ [/^Checking menus for (.+)…$/, (_, a) => `正在核对菜单上有没有${typeof i18nLabel === 'function' ? i18nLabel(a) : a}…`], [/^Checking menus…$/, '正在核对菜单…'],
  [/^(-?[\d.,]+) km$/, '$1 公里'], [/^(-?[\d.,]+) mi$/, '$1 英里'],
  // walker ratings and comments (feedback-ui.js)
  [/^(\d+) rated walks? · matched the request ([\d.]+|—) \/ 5$/, '$1 次评分 · 与要求相符 $2 / 5'], [/^(\d+) more comments?$/, '还有 $1 条评论'],
