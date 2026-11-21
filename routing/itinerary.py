@@ -18,7 +18,7 @@ Method (reported in the response, never claimed optimal unless it is):
   5. Each leg is routed with the experience cost (λ 0.8, the user's weights); if that breaks a budget the legs fall back to
      shortest paths. Legs are stitched into one Route Object (continuous OSM edges, same contract as /api/routes).
 """
-import itertools, math, re, time
+import itertools, math, re, time, unicodedata
 
 from .engine import RoutingError, WALK_SPEED_M_PER_MIN, preference_weights
 from . import validation as qa
@@ -48,6 +48,42 @@ def _norm(name):
 
 def _near_m(a, b):
     return math.hypot((a['lon'] - b['lon']) * 84414.3, (a['lat'] - b['lat']) * 111049.7)
+
+
+# Words one source writes and another leaves out ("Saint Ann's and the Holy Trinity Episcopal Church" in
+# OpenStreetMap, "St. Ann & the Holy Trinity Church" in the landmark list): left out when names are compared.
+_OPTIONAL = set('the of and a an at in on s episcopal catholic roman protestant presbyterian baptist methodist lutheran '
+                'reformed orthodox greek russian complex graveyard parish former nyc'.split())
+
+
+# A word in the longer name only that makes it another place beside the first: "Seward Park" and "New York Public
+# Library, Seward Park Branch", "City Hall" and "City Hall Park".
+_ANOTHER_PLACE = set('library branch playground garden park school hospital station bridge field plaza square'.split())
+
+
+def _name_words(name):
+    plain = ''.join(ch for ch in unicodedata.normalize('NFKD', str(name)) if not unicodedata.combining(ch))  # José → Jose
+    words = [{'st': 'saint', 'sts': 'saint', 'ste': 'saint'}.get(t, t) for t in _norm(plain).split()]
+    return [t for t in words if t not in _OPTIONAL]
+
+
+def _same_place(a, b, within_m=80):
+    """One place under two sources (an OpenStreetMap record and a landmark record that were not linked): the same
+    name within 300 m, or within within_m and every word of the shorter name in the longer one (two words at least,
+    or the longer name starts with it). "Saint Ann's and the Holy Trinity Episcopal Church" / "St. Ann & the Holy
+    Trinity Church" are one place; "Jefferson Market Garden" / "Jefferson Market Library" and "331 West 85th Street
+    House" / "337 West 85th Street House" are two."""
+    d = _near_m(a, b)
+    wa, wb = _name_words(a['name']), _name_words(b['name'])
+    if not wa or not wb:
+        return False
+    if wa == wb:
+        return d < 300
+    if d >= within_m:
+        return False
+    short, long_ = sorted((wa, wb), key=len)
+    return (set(short) <= set(long_) and (len(short) >= 2 or long_[:len(short)] == short)
+            and not (set(long_) - set(short)) & _ANOTHER_PLACE)
 
 
 def _visit(doc, default=0):
@@ -202,12 +238,16 @@ class Planner:
             (required if sl['required'] else optional).append(item)
         pool_items = []
         fixed = [p for p in points if p['role'] in ('origin', 'end', 'stop')]
+        taken = []
         for c in req['pool']['candidates']:
             # the same place under another source / ID is not a second stop
             if any(_norm(c['name']) == _norm(f['name']) or _near_m(c, f) < 60 for f in fixed):
                 continue
+            if any(_same_place(c, t) for t in taken):
+                continue
             k, err = add(c, 'pool')
             if k is not None:
+                taken.append(c)
                 pool_items.append({'type': 'stop', 'idx': [k], 'visit': c['visit_min'], 'order': None, 'label': c['name'], 'score': c['score'], 'group': c.get('group')})
         if len(points) > MAX_POINTS:
             raise ValueError(f'Too many places to compare ({len(points)}); narrow the request.')

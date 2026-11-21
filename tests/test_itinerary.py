@@ -96,6 +96,25 @@ class A_Itinerary(unittest.TestCase):
         none = plan(stops=[ROCK], pool={**pool, 'candidates': [{**ROCK, 'id': 'dup', 'visit_min': 30}]})
         self.assertEqual(none['itinerary']['pool']['requested'], 0, 'a pool place equal to a chosen stop is not offered twice')
 
+    def test_one_place_under_two_sources_is_one_stop(self):
+        from routing.itinerary import _same_place
+        pt = lambda name, dlat=0.0: {'name': name, 'lat': 40.7795 + dlat, 'lon': -73.9580}
+        same = [("Saint Ann's and the Holy Trinity Episcopal Church", 'St. Ann & the Holy Trinity Church'),
+                ('Church of St. Ignatius Loyola Complex', 'Church of Saint Ignatius Loyola'), ('Unisphere', 'Unisphere and Surrounding Reflecting Pool'),
+                ('Fraunces Tavern', 'Fraunces Tavern Museum'), ('Woodhaven Library', 'Queens Public Library at Woodhaven')]
+        apart = [('Jefferson Market Garden', 'Jefferson Market Library'), ('331 West 85th Street House', '337 West 85th Street House'),
+                 ('Seward Park', 'New York Public Library, Seward Park Branch'), ('City Hall', 'City Hall Park'), ('José de San Martín', 'José Martí'),
+                 ('St. Vartan Cathedral', 'Saint Vartan Park'), ('Central Park Zoo', 'Central Garden'), ('Bay Terrace Playground', 'Queens Public Library at Bay Terrace')]
+        for a, b in same:
+            self.assertTrue(_same_place(pt(a), pt(b, .0003)), (a, b))
+        for a, b in apart:
+            self.assertFalse(_same_place(pt(a), pt(b, .0003)), (a, b))
+        self.assertFalse(_same_place(pt('Fraunces Tavern'), pt('Fraunces Tavern Museum', .002)), 'two hundred metres apart: two places')
+        lpc = next(r for r in PLACES['historic_lpc'] if r['id'] == 'lpc:LP-00267')  # Saint Patrick's Cathedral Complex
+        osm = {**lpc, 'id': 'osm:way/dup', 'name': "St. Patrick's Cathedral", 'lat': lpc['lat'] + .0002}
+        r = plan(stops=[ROCK], pool={'max_stops': 4, 'candidates': [{**lpc, 'score': .9, 'visit_min': 10}, {**osm, 'score': .8, 'visit_min': 10}]})
+        self.assertEqual(r['itinerary']['pool']['requested'], 1, 'the landmark record and the OpenStreetMap record are one stop')
+
     def test_distance_limit(self):
         r = plan(stops=[ROCK], slots=[{'slot_id': 'm', 'label': 'Museum', 'candidates': cands('museums', HOTEL, 3)}], constraints={'max_km': .5})
         self.assertFalse(r['itinerary']['constraints']['feasible'])
