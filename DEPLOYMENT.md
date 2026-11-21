@@ -119,3 +119,11 @@ segment ID, a dimension, a direction (worse / better than the score shown), that
 time-of-day bucket: no location, account, free text or IP address. Rules (MIN_REPORTS, MIN_DAYS, MIN_AGREEMENT,
 MAX_DELTA, SHRINK, HALF_LIFE_DAYS, TIME_SENSITIVE) are at the top of `routing/feedback.py`; `tests/test_feedback.py`
 checks them.
+
+## Cache-busting
+
+The Pages workflow runs `scripts/stamp_assets.py _site` on the copied site: every local script and stylesheet gets
+`?v=<content hash>` and `sw.js` gets a cache name built from them, so a changed file always reaches visitors. The `?v=`
+numbers in the repository no longer need raising by hand (a forgotten raise kept route-story.js stale after PR #47).
+`tests/script-globals.test.cjs` fails when two page scripts declare the same global `const`/`let`/`class`, which would
+stop the second file from running (route-photos.js and street-photos.js, 2026-11-20).

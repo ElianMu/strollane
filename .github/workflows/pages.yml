@@ -38,6 +38,8 @@ jobs:
           mkdir -p _site/data/pedestrian
           cp data/pedestrian/score-indicators.json _site/data/pedestrian/
           touch _site/.nojekyll
+          # ?v= on every local script and stylesheet, and the service worker's cache name, from the files' contents
+          python3 scripts/stamp_assets.py _site
           du -sh _site
           size=$(du -sm _site | cut -f1)
           if [ "$size" -gt 990 ]; then echo "::error::_site is ${size} MB; GitHub Pages allows 1 GB"; exit 1; fi
