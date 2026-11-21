@@ -1585,17 +1585,19 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
  body .city-walk .cw-fit.over{background:var(--danger-surface);color:var(--danger-text)}
 }
 
-/* The request card is glass: the map shows through, blurred, so it reads as part of the map and you still see where
-   you are. Text and controls keep solid ground: the fields are a frosted grey and turn solid while you type; Create is
-   solid ink. People who ask for less transparency (or more contrast), and browsers without backdrop blur, get the
-   solid card. */
+/* The request card is light glass (chosen 2026-11-21 over a solid card and a search-bar layout): a near-white pane
+   over a strong blur, so the map shows only as soft colour, with a thin light edge. The fields are white with a
+   hairline, so they read as fields on any map, and turn fully solid while you type; Create is solid ink. A first
+   try at 46% with a saturation boost looked muddy (blotches of park green and water blue). People who ask for less
+   transparency (or more contrast), and browsers without backdrop blur, get the solid card. */
 @media (max-width:740px){
- body #mComposer.m-composer{border:0;border-radius:22px;padding:12px 12px 10px;box-shadow:var(--ds-float);
-  background:color-mix(in srgb,var(--bg-panel) 46%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.8);backdrop-filter:blur(14px) saturate(1.8)}
+ body #mComposer.m-composer{border:0;border-radius:22px;padding:12px 12px 10px;
+  background:color-mix(in srgb,var(--bg-panel) 80%,transparent);-webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px);
+  box-shadow:var(--ds-float),inset 0 0 0 1px color-mix(in srgb,var(--bg-panel) 70%,transparent)}
  body[data-mview="results"] #mComposer.m-composer{border-radius:18px;padding:6px 6px 6px 14px}
- body #mComposer{--ds-glass-fill:color-mix(in srgb,var(--text) 7%,transparent)}   /* a tint of the text colour: fields keep their shape on any map */
+ body #mComposer{--ds-glass-fill:color-mix(in srgb,var(--bg-panel) 92%,transparent)}
  body #mComposer .m-walk-presets .walk-pill:not([aria-pressed=true]),body #mComposer .intent-box:not(:focus),body #mComposer .m-mic-slot .mic-btn,
- body #mComposer .m-route-ends .m-context,body #mComposer .m-route-ends .m-swap,body #mComposer .m-compact-new{background:var(--ds-glass-fill)}
+ body #mComposer .m-route-ends .m-context,body #mComposer .m-route-ends .m-swap,body #mComposer .m-compact-new{background:var(--ds-glass-fill);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--text) 8%,transparent)}
  body #mComposer .m-status{background:color-mix(in srgb,var(--bg-panel) 70%,transparent)}
  body #mComposer .m-status.error{background:color-mix(in srgb,var(--danger-surface) 88%,transparent)}
  body #mComposer .m-status.clarify,body #mComposer .m-status.hint{background:color-mix(in srgb,var(--warn-surface) 88%,transparent)}
@@ -1609,7 +1611,8 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
 }
 
 /* After you send a request the box shrinks back, and at one line high it showed a line and a half of the text,
-   cut through the middle. It now shows two whole lines (16px type, 21.6px lines, 9px padding). */
+   cut through the middle. It now shows two whole lines (16px type, 21.6px lines). A textarea draws overflowing text
+   into its bottom padding, so the box has none: two lines end exactly at its edge and a third never peeks in. */
 @media (max-width:740px){
- body:not([data-mview="typing"]) .m-composer-slot #intentText:not(:placeholder-shown):not(:focus){height:62px;min-height:62px}
+ body:not([data-mview="typing"]) .m-composer-slot #intentText:not(:placeholder-shown):not(:focus){height:56px;min-height:56px;padding-top:11px;padding-bottom:0;overflow:hidden}
 }
