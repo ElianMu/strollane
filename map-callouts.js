@@ -108,7 +108,7 @@ function calloutBox(map) {
 function calloutCard(it, w) {
  const p = it.photo, credit = p.kind === 'street' ? ['Street view here', p.date, p.author, 'Mapillary'].filter(Boolean).join(' · ') : [p.author, p.license].filter(Boolean).join(' · ');
  const ih = Math.round(w * 0.62);
- return `<figure class="map-callout" data-key="${calloutEsc(it.key)}" style="width:${w}px"><img src="${calloutEsc(p.thumb)}" alt="${calloutEsc(it.name)}" style="height:${ih}px" decoding="async" referrerpolicy="no-referrer"><figcaption>${it.seq != null ? `<span class="mc-seq">${calloutEsc(it.seq)}</span>` : ''}<strong>${calloutEsc(it.name)}</strong>${it.note ? `<small>${calloutEsc(it.note)}</small>` : ''}<a href="${calloutEsc(p.page)}" target="_blank" rel="noopener" title="${calloutEsc(credit)} — Wikimedia Commons">${calloutEsc(credit)}</a></figcaption></figure>`;
+ return `<figure class="map-callout" data-key="${calloutEsc(it.key)}" style="width:${w}px"><img ${typeof photoImg === 'function' ? photoImg(p, calloutEsc) : `src="${calloutEsc(p.thumb)}"`} alt="${calloutEsc(it.name)}" style="height:${ih}px" decoding="async" referrerpolicy="no-referrer"><figcaption>${it.seq != null ? `<span class="mc-seq">${calloutEsc(it.seq)}</span>` : ''}<strong>${calloutEsc(it.name)}</strong>${it.note ? `<small>${calloutEsc(it.note)}</small>` : ''}<a href="${calloutEsc(p.page)}" target="_blank" rel="noopener" title="${calloutEsc(credit)} — Wikimedia Commons">${calloutEsc(credit)}</a></figcaption></figure>`;
 }
 
 function calloutsEnsureRoot(map) {

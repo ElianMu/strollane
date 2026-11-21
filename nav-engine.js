@@ -20,7 +20,14 @@ const NAV_CONFIG={
  earlyM:90,approachM:30,nowM:8,passM:6,
  arriveM:15,
  rerouteMinSeconds:20,
+ earlyGapM:150,           // the far ("in 90 m") prompt only when the previous maneuver is at least this far back
+ minAlertGapS:8,          // no far prompt within this many seconds of the last prompt (every maneuver still gets one)
 };
+// How many prompts a maneuver gets. Every turn used to get three (90 m, 30 m, now): on a dense walk that was a
+// prompt every ~17 s (Wall St → Battery Park: 38 in 11 min). A street-name change, a slight turn, a fork or a crossing
+// gets one, as it comes up; a real turn gets the far one and the approach when the previous maneuver is far enough
+// back, else the approach and the "now".
+const NAV_ALERT_LEVELS={continue:['approach'],keep_left:['approach'],keep_right:['approach'],slight_left:['approach'],slight_right:['approach'],cross:['approach']};
 const NAV_STATES=['IDLE','READY','STARTING','NAVIGATING','GPS_WEAK','POSSIBLY_OFF_ROUTE','OFF_ROUTE','REROUTING','PAUSED','ARRIVED_AT_STOP','ARRIVED','ERROR','STOPPED'];
 // Allowed transitions; anything else is ignored (prevents duplicate starts, double reroutes and repeated arrivals).
 const NAV_TRANSITIONS={
@@ -52,7 +59,7 @@ class NavEngine{
   if(route.validation&&route.validation.navigation_allowed===false){this.blocked=route.validation.blocking_issues||['Route failed validation'];}
  }
  reset(progress=0){
-  Object.assign(this,{progress,lastFix:null,lastMatchT:null,offCount:0,offSince:null,backCount:0,rejoinCount:0,alerted:{},arrivedStops:new Set(),
+  Object.assign(this,{progress,lastFix:null,lastMatchT:null,offCount:0,offSince:null,backCount:0,rejoinCount:0,lastAlertT:null,alerted:{},arrivedStops:new Set(),
    next:this.maneuvers.findIndex(m=>m.distance_along_route_m>progress+this.cfg.passM&&m.type!=='depart'),lastOutput:null});
   if(this.next<0)this.next=this.maneuvers.length-1;
  }
@@ -178,11 +185,16 @@ class NavEngine{
    const early=Math.min(cfg.earlyM+Math.min(acc,40)/2,gap*.8),approach=Math.min(cfg.approachM+Math.min(acc,30)/2,Math.max(12,gap*.5));
    const key=nm.maneuver_id;this.alerted[key]=this.alerted[key]||{};
    if(onRoute&&!nm.type.startsWith('arrive')){
+    const levels=NAV_ALERT_LEVELS[nm.type]||(gap>=cfg.earlyGapM?['early','approach']:['approach','now']);
+    const now=out.timestamp??Date.now();
     for(const [lvl,th] of [['now',cfg.nowM+Math.min(acc,20)/4],['approach',approach],['early',early]]){
      if(d<=th&&!this.alerted[key][lvl]){
       // a nearer level supersedes farther ones: never "in 90 m" after "turn now"
       if(lvl!=='early'||!this.alerted[key].approach){this.alerted[key][lvl]=true;if(lvl==='now')this.alerted[key].approach=this.alerted[key].early=true;if(lvl==='approach')this.alerted[key].early=true;
-       this.emit({type:'alert',level:lvl,maneuver:nm,distance_m:Math.max(0,d)});}
+       const recent=this.lastAlertT!=null&&now-this.lastAlertT<cfg.minAlertGapS*1000;
+       // a level this maneuver does not use is still spoken when it is the first one reached (GPS jumped past the others)
+       const first=!this.alerted[key].spoken;
+       if((levels.includes(lvl)||first&&lvl==='now')&&!(lvl==='early'&&recent)){this.alerted[key].spoken=true;this.lastAlertT=now;this.emit({type:'alert',level:lvl,maneuver:nm,distance_m:Math.max(0,d)});}}
       break;
      }
     }
@@ -225,4 +237,4 @@ function spokenInstruction(m,d,lang='en',units='metric'){
  const dist=d!=null&&d>12?`In ${formatNavDistance(d,units).replace(' m',' meters').replace(' km',' kilometers').replace(' ft',' feet').replace(' mi',' miles')}, `:'';
  const text=m.instruction_text;return dist+(dist?text[0].toLowerCase()+text.slice(1):text);
 }
-if(typeof module!=='undefined')module.exports={NavEngine,NAV_CONFIG,NAV_STATES,NAV_TRANSITIONS,formatNavDistance,spokenInstruction};
+if(typeof module!=='undefined')module.exports={NavEngine,NAV_CONFIG,NAV_STATES,NAV_TRANSITIONS,NAV_ALERT_LEVELS,formatNavDistance,spokenInstruction};

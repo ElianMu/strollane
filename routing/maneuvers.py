@@ -6,7 +6,9 @@ and no language model decides a turn.
 At each node where one edge hands over to the next:
   · the turn angle is measured on the walked polyline 12 m before and after the node (not on one tiny sidewalk segment);
   · the node's other walkable options are counted from the network (a bend with no other way to go is not an instruction);
-  · names come from OSM, else the matched LION street (marked as derived), else a description of the way (sidewalk, path…);
+  · names come from OSM, else the matched LION street (marked as derived), else a description of the way (sidewalk, path…)
+    with where it leads: the next named street on the walk, or the stop / destination it reaches ("onto the path toward
+    W 4th St");
   · crossings, paths, stairs, bridges and tunnels are named as such.
 Close decisions (< 12 m apart) are merged into one instruction with at most one "then" hint; decisions where the edges do not join are
 emitted as low-confidence "check the map" notices instead of a guessed turn.
@@ -16,6 +18,7 @@ import math
 
 MX, MY = 84414.3, 111049.7
 WINDOW_M, MERGE_M, NOTICE_GAP_M = 12.0, 12.0, 2.0
+TOWARD_M = 600.0   # how far ahead an unnamed path looks for the street or stop it leads to
 PATHLIKE = {'footway', 'path', 'pedestrian', 'steps', 'cycleway', 'bridleway', 'track'}
 ZH_TURN = {'depart': '出发', 'continue': '继续直行', 'slight_left': '稍向左转', 'turn_left': '左转', 'sharp_left': '向左急转',
            'slight_right': '稍向右转', 'turn_right': '右转', 'sharp_right': '向右急转', 'keep_left': '靠左', 'keep_right': '靠右',
@@ -107,6 +110,8 @@ def way_label(e, lang='en'):
         return ('the bridge path' if lang == 'en' else '桥上步道'), 'way_type'
     if hw & PATHLIKE:
         return ('the sidewalk' if 'sidewalk' in fw else 'the path') if lang == 'en' else ('人行道' if 'sidewalk' in fw else '步道'), 'way_type'
+    if 'service' in hw:   # a driveway, alley or parking aisle: not a street a walker would look for by that word
+        return ('the service road' if lang == 'en' else '辅路'), 'way_type'
     return ('the street' if lang == 'en' else '街道'), 'way_type'
 
 
@@ -161,6 +166,34 @@ def build(route, net, stops=None):
     scale = pl.length / run if run else 1.0   # polyline vs network lengths differ by rounding only
     rid = route.get('route_id')
     out = []
+    ends = sorted(((min(run, st['distance_along_route_m']), st.get('name'), bool(st.get('final'))) for st in (stops or [])), key=lambda x: x[0])
+
+    def toward(k, leaving=None):
+        """(en, zh) "toward …" for an unnamed way entered at edge k: the first named street the walk reaches on it within
+        TOWARD_M (not the one being left), or the stop / destination it reaches first. A path, a sidewalk without a
+        name or a service road said only "the path" / "the street" (a third of the metres of some walks): this names
+        where it goes, from the route's own edges."""
+        start = bounds[k]
+        for j in range(k + 1, len(edges)):
+            if bounds[j] - start > TOWARD_M:
+                break
+            for s_at, nm, final in ends:
+                if start < s_at <= bounds[j]:
+                    return stop_words(nm, final)
+            lab, src = way_label(edges[j])
+            if src != 'way_type' and lab != leaving:
+                return f' toward {lab}', f'，往{lab}方向'
+        for s_at, nm, final in ends:
+            if start < s_at <= start + TOWARD_M:
+                return stop_words(nm, final)
+        if not ends and run - start <= TOWARD_M:
+            return stop_words(None, True)
+        return '', ''
+
+    def stop_words(nm, final):
+        if nm:
+            return f' toward {nm}', f'，往{nm}方向'
+        return (' toward your destination', '，朝目的地方向') if final else ('', '')
 
     def add(kind, k_edge, s, before, after, text_en, text_zh, label, conf, src, extra=None):
         out.append({'maneuver_id': f'{rid}-m{len(out)}', 'route_id': rid, 'leg_id': None, 'type': kind, 'street_name': label,
@@ -172,10 +205,11 @@ def build(route, net, stops=None):
     b0 = pl.bearing_around(0, before=False)
     lab, src = way_label(first)
     labz, _ = way_label(first, 'zh')
+    to_en, to_zh = toward(0) if src == 'way_type' else ('', '')
     head = COMPASS[int(((b0 or 0) + 22.5) // 45) % 8] if b0 is not None else None
         # depart: direction from the first metres of the walk
-    add('depart', 0, 0.0, None, b0, f'Head {head} on {lab}' if head else f'Start on {lab}',
-        f'向{COMPASS_ZH[int(((b0 or 0) + 22.5) // 45) % 8]}出发，沿{labz}' if b0 is not None else f'沿{labz}出发', lab,
+    add('depart', 0, 0.0, None, b0, (f'Head {head} on {lab}' if head else f'Start on {lab}') + to_en,
+        (f'向{COMPASS_ZH[int(((b0 or 0) + 22.5) // 45) % 8]}出发，沿{labz}' if b0 is not None else f'沿{labz}出发') + to_zh, lab,
         'high' if src == 'osm_name' else 'medium', f'route edges · {src}')
     for k in range(1, len(edges)):
         e1, e2 = edges[k - 1], edges[k]
@@ -205,6 +239,7 @@ def build(route, net, stops=None):
         lab1, _ = way_label(e1)
         lab2, src2 = way_label(e2)
         lab2z, _ = way_label(e2, 'zh')
+        to_en, to_zh = toward(k, lab1) if src2 == 'way_type' and kind2 != 'crossing' else ('', '')
         if not alts and abs(delta) < 165:
             continue   # a bend with no other way to go: no instruction needed
         t = classify(delta, alts, after)
@@ -216,23 +251,23 @@ def build(route, net, stops=None):
             if kind2 == 'crossing':
                 text, zh, typ = f'{EN_TURN[t]} and cross the street', f'{ZH_TURN[t]}，过马路', 'cross'
             else:
-                text, zh, typ = f'{EN_TURN[t]} onto {lab2}', f'{ZH_TURN[t]}进入{lab2z}', t
+                text, zh, typ = f'{EN_TURN[t]} onto {lab2}{to_en}', f'{ZH_TURN[t]}进入{lab2z}{to_zh}', t
         elif t == 'continue':
             if not name_change or kind1 == 'crossing':
                 continue
-            text, zh, typ = f'Continue onto {lab2}', f'继续直行进入{lab2z}', 'continue'
+            text, zh, typ = f'Continue onto {lab2}{to_en}', f'继续直行进入{lab2z}{to_zh}', 'continue'
         else:
             typ = t
             if kind2 == 'path' and kind1 != 'path':
                 typ = 'enter_path'
-                text, zh = f'{EN_TURN[t]} onto {lab2}', f'{ZH_TURN[t]}，进入{lab2z}'
+                text, zh = f'{EN_TURN[t]} onto {lab2}{to_en}', f'{ZH_TURN[t]}，进入{lab2z}{to_zh}'
             else:
-                text, zh = f'{EN_TURN[t]} onto {lab2}', f'{ZH_TURN[t]}进入{lab2z}'
+                text, zh = f'{EN_TURN[t]} onto {lab2}{to_en}', f'{ZH_TURN[t]}进入{lab2z}{to_zh}'
         near_threshold = min(abs(abs(delta) - x) for x in (25, 50, 120, 165)) < 6
         conf = 'high' if src2 == 'osm_name' and not near_threshold else 'medium' if not near_threshold else 'low'
         add(typ if typ != 'cross' else 'cross', k, s, before, after, text, zh, lab2, conf,
             f'route edges {e1["edge_id"]} → {e2["edge_id"]}; {len(alts)} other way(s) at node {node}; name: {src2}',
-            {'turn_angle': round(delta), 'node_id': node})
+            {'turn_angle': round(delta), 'node_id': node, **({'toward': to_en.replace(' toward ', '', 1)} if to_en else {})})
     # merge decisions that are too close to announce separately
     merged = [out[0]]
     for m in out[1:]:
@@ -243,10 +278,14 @@ def build(route, net, stops=None):
             # footways) said nothing a walker can use. Later close decisions are drawn on the map, not read out.
             if 'then' not in prev and m['instruction_text'] != prev['instruction_text'] and not (
                     m['type'] == prev['type'] and m.get('street_name') == prev.get('street_name')):
-                prev['then'] = m['instruction_text']
-                prev['then_zh'] = m['instruction_zh']
-                prev['instruction_text'] += f', then {m["instruction_text"][0].lower() + m["instruction_text"][1:]}'
-                prev['instruction_zh'] += f'，随后{m["instruction_zh"]}'
+                then_en, then_zh = m['instruction_text'], m['instruction_zh']
+                if m.get('toward') and m.get('toward') == prev.get('toward'):   # "…toward X, then … toward X": once is enough
+                    then_en = then_en.replace(f' toward {m["toward"]}', '')
+                    then_zh = then_zh.replace(f'，往{m["toward"]}方向', '').replace('，朝目的地方向', '')
+                prev['then'] = then_en
+                prev['then_zh'] = then_zh
+                prev['instruction_text'] += f', then {then_en[0].lower() + then_en[1:]}'
+                prev['instruction_zh'] += f'，随后{then_zh}'
             prev['merged'] = prev.get('merged', 0) + 1
             continue
         merged.append(m)

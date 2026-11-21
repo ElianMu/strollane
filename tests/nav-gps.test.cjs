@@ -97,6 +97,15 @@ test('the rejoin never jumps past a stop not yet reached',()=>{
  for(const {fix} of walk(e,stopM+120,stopM+200,{t0:t+1}))e.update(fix);
  assert(e.progress<=stopM+20,`progress ${Math.round(e.progress)} m, stop at ${Math.round(stopM)} m`);
 });
+test('voice prompts: every maneuver spoken, at most two each, one for a fork, a slight turn, a crossing or a name change',()=>{
+ // Regression: every turn was announced three times (90 m, 30 m, now); a dense walk talked every ~17 s.
+ const [e,ev]=fresh();for(const {fix} of walk(e,0,route.distance_m)){e.update(fix);if(e.state==='ARRIVED_AT_STOP')e.continueFromStop();}
+ const per=new Map();for(const a of ev.filter(x=>x.type==='alert'))per.set(a.maneuver.maneuver_id,[...(per.get(a.maneuver.maneuver_id)||[]),a]);
+ const turns=e.maneuvers.filter(m=>!m.type.startsWith('arrive')&&m.type!=='depart'&&m.distance_along_route_m>15);
+ for(const m of turns)assert(per.has(m.maneuver_id),'not spoken: '+m.instruction_text);
+ for(const [,list] of per){assert(list.length<=2,`${list.length} prompts for ${list[0].maneuver.instruction_text}`);
+  if(['continue','keep_left','keep_right','slight_left','slight_right','cross'].includes(list[0].maneuver.type))assert.equal(list.length,1,list[0].maneuver.instruction_text);}
+});
 test('walking direction reversed: progress follows back only after consistent evidence',()=>{
  const [e]=fresh();for(const {fix} of walk(e,0,600))e.update(fix);const top=e.progress;
  const back=walk(e,600,450,{t0:500});e.update(back[0].fix);e.update(back[12].fix);assert(e.progress>=top-1,'two fixes do not pull progress back');

@@ -153,6 +153,31 @@ class A_SyntheticManeuvers(unittest.TestCase):
         texts = [m['instruction_text'] for m in ms if m['type'] not in ('depart', 'arrive')]
         self.assertTrue(texts and all(t.count('W 42nd St') == 1 for t in texts), texts)
 
+    def test_an_unnamed_path_says_where_it_leads(self):
+        # S→C on Main St, right onto an unnamed path C→P that ends on Park Row (P→Q), with a junction at P
+        path = {'highway': 'footway'}
+        net = FakeNet({**GRID, 'P': (100, 80), 'Q': (100, 200), 'R': (200, 80)},
+                      [('S', 'C', ST), ('C', 'N', ST), ('C', 'P', path), ('P', 'Q', {'name': 'Park Row', 'highway': 'residential'}),
+                       ('P', 'R', {'name': 'Side St', 'highway': 'residential'})])
+        ms = mv.build(route_through(net, ['S', 'C', 'P', 'Q']), net)
+        turn = next(m for m in ms if m['distance_along_route_m'] == 100.0)
+        self.assertIn('onto the path toward Park Row', turn['instruction_text'])
+        self.assertIn('往Park Row方向', turn['instruction_zh'])
+        self.assertEqual(turn['toward'], 'Park Row')
+        # a path that ends at the destination, and a service road
+        ms = mv.build(route_through(net, ['S', 'C', 'P']), net)
+        self.assertIn('toward your destination', next(m for m in ms if m['type'] not in ('depart', 'arrive'))['instruction_text'])
+        svc = FakeNet(GRID, [('S', 'C', ST), ('C', 'E', {'highway': 'service'}), ('C', 'N', ST)])
+        self.assertIn('the service road', mv.build(route_through(svc, ['S', 'C', 'E']), svc)[1]['instruction_text'])
+
+    def test_an_itinerary_path_leads_toward_the_stop(self):
+        path = {'highway': 'footway'}
+        net = FakeNet({**GRID, 'P': (100, 80)}, [('S', 'C', ST), ('C', 'N', ST), ('C', 'P', path)])
+        r = route_through(net, ['S', 'C', 'P'])
+        ms = mv.build(r, net, stops=[{'name': 'Café Lulu', 'distance_along_route_m': 150, 'final': False},
+                                     {'name': None, 'distance_along_route_m': 228, 'final': True}])
+        self.assertIn('toward Café Lulu', ms[1]['instruction_text'])
+
     def test_loop_route(self):
         net = FakeNet({'A': (0, 0), 'B': (100, 0), 'C': (100, 100), 'D': (0, 100), 'X': (200, 0), 'Y': (100, 200), 'Z': (-100, 100)},
                       [('A', 'B', ST), ('B', 'C', ST), ('C', 'D', ST), ('D', 'A', ST), ('B', 'X', ST), ('C', 'Y', ST), ('D', 'Z', ST)])

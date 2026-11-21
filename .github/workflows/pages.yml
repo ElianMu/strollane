@@ -40,7 +40,21 @@ jobs:
           touch _site/.nojekyll
           # ?v= on every local script and stylesheet, and the service worker's cache name, from the files' contents
           python3 scripts/stamp_assets.py _site
-          du -sh _site
+      # Copies of the place photos, served with the site: straight from Wikimedia some of them came back as broken
+      # images on iPhones. Only photos the cache lacks are downloaded; if this step fails the site still works and
+      # loads those photos from Wikimedia, as before.
+      - uses: actions/cache@v4
+        with:
+          path: .thumb-cache
+          key: thumbs-${{ hashFiles('data/places/photos.json') }}
+          restore-keys: thumbs-
+      - name: Copy the place photos into _site
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python3 scripts/fetch_photo_thumbs.py --cache .thumb-cache --out _site/data/places/thumbs
+      - name: Check the site size
+        run: |
+          du -sh _site _site/data/places/thumbs 2>/dev/null || true
           size=$(du -sm _site | cut -f1)
           if [ "$size" -gt 990 ]; then echo "::error::_site is ${size} MB; GitHub Pages allows 1 GB"; exit 1; fi
       - uses: actions/configure-pages@v5

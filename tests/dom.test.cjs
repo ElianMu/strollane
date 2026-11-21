@@ -541,6 +541,11 @@ const run=s=>vm.runInContext(s,context);
   // the More menu closes on a tap elsewhere
   {const more=w.document.querySelector('#navOverlay .nav-more');more.open=true;w.document.querySelector('#navRepeat').click();assert(more.open,'a tap inside keeps it open');
    w.document.body.click();assert(!more.open,'a tap elsewhere closes the More menu');}
+  // back from the lock screen: a fresh fix at once, not the next scheduled one
+  {let asked=0;w.navigator.geolocation.getCurrentPosition=(ok)=>{asked++;ok({coords:{latitude:40.7537,longitude:-73.9797,accuracy:8,speed:1.2,heading:null},timestamp:Date.now()});};
+   run("nav.engine.state='NAVIGATING';nav.last={lat:40.7536,lon:-73.9798,timestamp:Date.now()-120000};navCatchUp()");
+   assert.equal(asked,1,'a fresh position is asked for when the walker comes back');assert(Date.now()-run('nav.last.timestamp')<5000,'and used');
+   run("navCatchUp()");assert.equal(asked,1,'not again right after');}
   // the instructions follow the interface language
   run("navFollowLanguage('zh')");assert.equal(run('nav.voiceLang'),'zh');assert.equal(w.document.querySelector('#navLang').value,'zh');run("navFollowLanguage('en')");
   run('stopWatch();keepServerWarm(false)');

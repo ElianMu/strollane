@@ -117,6 +117,7 @@ function beginNavigation(route,opts={}){
  nav.follow=true;startWatch();keepServerWarm(true);
  window.addEventListener('deviceorientationabsolute',onOrientation,true);window.addEventListener('deviceorientation',onOrientation,true);
  requestWakeLock();saveNavSession();renderNavStart();
+ if(navIOS&&!opts.temporary&&!opts.continuesJourney)toast('Keep this screen on while you walk: iPhone pauses navigation when the screen locks or you switch apps.');
  speak(route.maneuvers?.[0]?(nav.voiceLang==='zh'?route.maneuvers[0].instruction_zh:route.maneuvers[0].instruction_text):'');
 }
 /** Buildings and city data layers stay visible during navigation (Apple Maps-style) — only the pre-navigation
@@ -215,7 +216,21 @@ function onOrientation(e){
 async function requestWakeLock(){try{nav.wakeLock=await navigator.wakeLock?.request('screen');}catch(e){nav.wakeLock=null;}}
 // The browser drops the screen wake lock whenever the page is hidden (another app, the lock screen): without taking it
 // again the phone went to sleep mid-walk after the first glance at another app.
-if(typeof document!=='undefined')document.addEventListener('visibilitychange',()=>{if(!document.hidden&&nav.engine&&nav.engine.state!=='ARRIVED')requestWakeLock();});
+// A web page gets no GPS and cannot speak while the phone is locked or another app is in front (iPhone pauses the
+// page; only an installed native app can navigate in the background). Coming back, navigation catches up at once:
+// a fresh fix instead of waiting for the next one, then the current instruction is spoken.
+if(typeof document!=='undefined')document.addEventListener('visibilitychange',()=>{if(!document.hidden)navCatchUp();});
+function navCatchUp(){
+ const eng=nav.engine;if(!eng||['ARRIVED','PAUSED','STOPPED'].includes(eng.state))return;
+ requestWakeLock();
+ const away=nav.last?(Date.now()-(nav.last.timestamp||Date.now()))/1000:0;
+ if(away<10||!navigator.geolocation)return;
+ navigator.geolocation.getCurrentPosition(p=>{if(nav.engine!==eng)return;onFix(p);
+  const o=eng.lastOutput,m=o?.next_maneuver;if(m&&!m.type.startsWith('arrive'))speak(spokenInstruction(m,o.distance_to_next_m,nav.voiceLang,nav.units));},
+  ()=>{},{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+}
+/** Once per walk on an iPhone: locking the screen pauses a web page, so the walker knows to keep it open. */
+const navIOS=typeof navigator!=='undefined'&&(/iP(hone|ad|od)/.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
 
 /* ---------- engine events: voice, arrivals, re-routing ---------- */
 function onNavEvent(ev){
@@ -380,8 +395,9 @@ function renderNavPlace(out){
  const prog=out?.progress_m??nav.engine?.progress??0,places=nav.temporary?[]:navPlacesAlong(nav.route);
  const next=places.find(p=>p.along>prog+15&&p.along<(nav.engine?.netLen??Infinity)+30);
  if(!next){box.classList.add('hidden');box.innerHTML='';return;}
- const ph=typeof photosFor==='function'?photosFor([next])[0]:null,credit=ph?[ph.author,ph.license].filter(Boolean).join(' · '):'';
- box.innerHTML=`${ph?`<img src="${esc(ph.thumb)}" alt="${esc(next.name)}" referrerpolicy="no-referrer" width="40" height="40">`:''}<span><span class="np-line"><b>Next:</b> ${esc(next.name)} · ${navDistLabel(next.along-prog)}</span>${ph?`<a href="${esc(ph.page)}" target="_blank" rel="noopener">${esc(credit)}</a>`:''}</span>`;
+ // the same photo as the route cards (index copy first), else what Commons lookups found
+ const ph=(typeof placePhoto==='function'?placePhoto(next):null)||(typeof photosFor==='function'?photosFor([next])[0]:null),credit=ph?[ph.author,ph.license].filter(Boolean).join(' · '):'';
+ box.innerHTML=`${ph?`<img ${typeof photoImg==='function'?photoImg(ph,esc):`src="${esc(ph.thumb)}"`} alt="${esc(next.name)}" referrerpolicy="no-referrer" width="40" height="40">`:''}<span><span class="np-line"><b>Next:</b> ${esc(next.name)} · ${navDistLabel(next.along-prog)}</span>${ph?`<a href="${esc(ph.page)}" target="_blank" rel="noopener">${esc(credit)}</a>`:''}</span>`;
  box.classList.remove('hidden');
 }
 function showNavCard(o){$('navOverlay').classList.remove('hidden');if(o.status!=null){$('navStatus').textContent=o.status;$('navStatus').classList.remove('hidden');}$('navRetry').classList.toggle('hidden',!o.retry);}

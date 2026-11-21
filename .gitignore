@@ -17,3 +17,5 @@ data/dimensions/work/
 data/cache/
 data/cache/
 screenshots/bottom-sheet/
+.thumb-cache/
+data/places/thumbs/

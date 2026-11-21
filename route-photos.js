@@ -17,7 +17,9 @@
    Wikimedia sees the visitor's IP and the places looked up. Thumbnails are 320 px from thumb.wikimedia.org.
    Turn off with window.STROLLANE_PHOTOS = false.                                                                 */
 
-const PHOTO = {MAX_KM: 0.3, WIDTH: 330, BATCH: 50, FREE: /^(CC[ -]?BY|CC0|CC-BY|Public domain|PD)/i};
+const PHOTO = {MAX_KM: 0.3, WIDTH: 330, BATCH: 50, FREE: /^(CC[ -]?BY|CC0|CC-BY|Public domain|PD)/i,
+ // copies of the index's thumbnails published with the site (scripts/fetch_photo_thumbs.py, Pages workflow)
+ LOCAL: 'data/places/thumbs/'};
 const routePhotos = {cache: new Map(), inflight: null, queue: new Set(), failed: false};
 
 /** Commons metadata is third-party HTML. Parse it in an inert document (DOMParser: no scripts, no image loads, no
@@ -54,8 +56,14 @@ function photosEnabled() { return typeof window !== 'undefined' && window.STROLL
 function photoThumbClean(url) {
  return String(url || '').replace(/^https:\/\/thumb\.wikimedia\.org\//, 'https://upload.wikimedia.org/').replace(/[?#].*$/, '');
 }
-/** Photos that failed to load in this browser: never offered again this session (the place then gets its street
-    view, or no photo), so a broken-image icon is never left on a card or on the map. */
+/** The <img> source attributes of a photo: the copy published with the site first, Wikimedia as the fallback.
+    Straight from Wikimedia, some thumbnails came back as broken images on iPhones (2026-11-21) while loading on a
+    desktop; the site's own copy does not depend on Wikimedia answering that connection. */
+function photoImg(x, esc = photoEsc) {
+ return x.local ? `src="${esc(x.local)}" data-fallback="${esc(x.thumb)}"` : `src="${esc(x.thumb)}"`;
+}
+/** Photos that failed to load in this browser (the copy and Wikimedia both): never offered again this session (the
+    place then gets its street view, or no photo), so a broken-image icon is never left on a card or on the map. */
 const photoBroken = new Set();
 function photoOk(x) { return Boolean(x && x.thumb && !photoBroken.has(x.thumb)); }
 function photoRedraw() {
@@ -70,7 +78,10 @@ function photoRedraw() {
 if (typeof document !== 'undefined' && document.addEventListener) {
  document.addEventListener('error', (e) => {
   const img = e.target;
-  if (!img || img.tagName !== 'IMG' || !img.closest || !img.closest('.rp-photo, .map-callout')) return;
+  if (!img || img.tagName !== 'IMG' || !img.closest || !img.closest('.rp-photo, .map-callout, #navPlace')) return;
+  const fallback = img.getAttribute('data-fallback');
+  if (fallback) { img.removeAttribute('data-fallback'); img.setAttribute('src', fallback); return; } // the copy is missing: Wikimedia
+  if (img.closest('#navPlace')) { img.remove(); return; }
   const src = img.getAttribute('src');
   if (!src || photoBroken.has(src)) return;
   photoBroken.add(src);
@@ -218,7 +229,7 @@ function photoFromIndex(id, name) {
  const e = photoIndex.doc?.items?.[id]; if (!e) return null;
  const base = photoIndex.doc.thumb_base || 'https://upload.wikimedia.org/wikipedia/commons/thumb/';
  const file = decodeURIComponent(String(e[0]).split('/')[2] || '');
- return {kind: 'commons', wd: e[3] || null, name: name || e[7] || '', thumb: base + e[0], page: 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(file.replace(/ /g, '_')),
+ return {kind: 'commons', wd: e[3] || null, name: name || e[7] || '', thumb: base + e[0], local: PHOTO.LOCAL + e[0], page: 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(file.replace(/ /g, '_')),
   author: e[1] || '', license: e[2] || '', via: e[4] || ''};
 }
 const placeStreetPhotos = {cache: new Map(), asked: new Set(), inflight: false, failed: false};
@@ -281,7 +292,7 @@ function photoFigures(photos, cls) {
  if (!photos.length) return '';
  return `<div class="${cls}">${photos.map((x) => {
   const credit = x.kind === 'street' ? ['Street view here', x.date, x.author, 'Mapillary'].filter(Boolean).join(' · ') : [x.author, x.license].filter(Boolean).join(' · ');
-  return `<figure class="rp-photo"><img src="${photoEsc(x.thumb)}" alt="${photoEsc(x.name)}" decoding="async" referrerpolicy="no-referrer" width="${x.w || 320}" height="${x.h || 213}"><figcaption><strong>${photoEsc(x.name)}</strong><a href="${photoEsc(x.page)}" target="_blank" rel="noopener" title="${photoEsc(credit)} — Wikimedia Commons">${photoEsc(credit)}</a></figcaption></figure>`;
+  return `<figure class="rp-photo"><img ${photoImg(x)} alt="${photoEsc(x.name)}" decoding="async" referrerpolicy="no-referrer" width="${x.w || 320}" height="${x.h || 213}"><figcaption><strong>${photoEsc(x.name)}</strong><a href="${photoEsc(x.page)}" target="_blank" rel="noopener" title="${photoEsc(credit)} — Wikimedia Commons">${photoEsc(credit)}</a></figcaption></figure>`;
  }).join('')}</div>`;
 }
 
