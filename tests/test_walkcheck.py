@@ -59,6 +59,17 @@ class Evaluation(unittest.TestCase):
         self.assertEqual(e['by_user_type']['tourist']['n'], 1)
         self.assertEqual(set(e['comparison']), {'Quiet & Relax'}, 'the greenery answer has no prediction, so it is not compared')
 
+    def test_comments_for_other_walkers(self):
+        rows = [check({'overall': 4}, comment='Quiet side streets, lovely.'), check({'overall': 2}, user_type='tourist'),
+                check({'overall': 5}, user_type='tourist', comment='Call me at 212 555 0199 ' + 'x' * 400)]
+        rows[0]['at'], rows[2]['at'] = '2026-11-18T15:00:00+00:00', '2026-11-20T23:00:00+00:00'
+        said = wc.evaluate(rows)['recent_comments']
+        self.assertEqual([c['date'] for c in said], ['2026-11-20', '2026-11-18'], 'newest first, day only')
+        self.assertEqual(set(said[0]), {'date', 'user_type', 'overall', 'comment'}, 'no route, time, code or prediction')
+        self.assertEqual((said[1]['comment'], said[1]['overall'], said[1]['user_type']), ('Quiet side streets, lovely.', 4, 'leisure'))
+        self.assertNotIn('555', said[0]['comment']); self.assertLessEqual(len(said[0]['comment']), wc.COMMENT_SHOWN_CHARS)
+        self.assertEqual(wc.evaluate([check({'overall': 3})])['recent_comments'], [])
+
     def test_predicted_vs_perceived(self):
         # five walks: predicted Quiet 20, 40, 60, 80, 100 and ratings that rise with it
         rows = [check({'overall': 3, 'quiet': q}, predicted={**PRED, 'Quiet & Relax': p}) for p, q in ((20, 1), (40, 2), (60, 3), (80, 4), (100, 5))]

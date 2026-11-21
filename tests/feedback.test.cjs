@@ -39,7 +39,15 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'feedback-u
  // Before walking: what walkers said (ratings of walks of this type, reported streets on this route).
  assert(run('walkerSaysRatings({n:0,enabled:true},"leisure")').includes('No walker has rated a walk yet. Be the first'));
  const said=run('walkerSaysRatings({n:5,ratings:{overall:{mean:4.2},match:{mean:3.8},quiet:{n:3,mean:4},green:{n:0,mean:null}},by_user_type:{leisure:{n:2,mean_overall:4.5,mean_match:4}}},"leisure")');
- assert(said.includes('All rated walks (5)')&&said.includes('overall 4.2 · match 3.8')&&said.includes('Leisure Walker walks (2)')&&said.includes('4.0 · —'));
+ assert(said.includes('★ 4.2')&&said.includes('5 rated walks')&&said.includes('matched the request 3.8 / 5')&&said.includes('Leisure Walker walks (2): ★ 4.5'));
+ // What walkers wrote: the same walk type first, then the newest; three shown, the rest behind a button
+ ctx.evalD={n:6,recent_comments:[{date:'2026-11-20',user_type:'tourist',overall:3,comment:'Busy but fine'},{date:'2026-11-19',user_type:'leisure',overall:5,comment:'So <b>quiet</b>'},
+  {date:'2026-11-18',user_type:'custom',overall:null,comment:'Ok'},{date:'2026-11-10',user_type:'leisure',overall:4,comment:'Nice trees'},{date:'2026-11-01',user_type:'tourist',overall:2,comment:'Too long'}]};
+ const wrote=run('walkerSaysComments(evalD,"leisure")');
+ assert(wrote.indexOf('So &lt;b&gt;quiet&lt;/b&gt;')<wrote.indexOf('Nice trees')&&wrote.indexOf('Nice trees')<wrote.indexOf('Busy but fine'),'same walk type first, newest first, text escaped');
+ assert(!wrote.includes('Too long')&&wrote.includes('2 more comments')&&wrote.includes('★★★★★'));
+ assert(run('walkerSaysComments(evalD,"leisure",true)').includes('Too long'),'all of them on request');
+ assert(run('walkerSaysComments({n:2,recent_comments:[]},"leisure")').includes('No comments yet'));
  ctx.r3={edges:[{matched_segments:[{segment_id:'QN-1',street_name:'31 Ave'}]},{matched_segments:[{segment_id:'QN-2',street_name:'Steinway St'}]}]};
  assert.equal(run('JSON.stringify(routeSegmentIds(r3))'),'["QN-1","QN-2"]');
  const st=run("walkerSaysStreets({'QN-1':{quiet:{n:4,worse:3,better:1,status:'applied',delta:-6.5}}},r3)");
@@ -47,5 +55,10 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'feedback-u
  assert.equal(run("walkerSaysStreets({},r3)"),'');
  assert(run('walkerSaysBox(r3)').includes('I walked this – rate it now'));
  assert(run('walkCheckBox(r2)').includes('<details class="walk-check" data-route="rt-2" open>'),'the rating form opens ready to answer');
+ // a short panel: stars, did it match, a comment and Send; everything else under "More detail"
+ {const b=run('walkCheckBox(r2)'),main=b.slice(0,b.indexOf('walk-check-more'));
+  assert(main.includes('class="walk-stars"')&&main.includes('>Not really<')&&main.includes('>Yes<')&&main.includes('data-k="comment"')&&main.includes('Send rating'));
+  assert(!main.includes('How quiet')&&!main.includes('Study code')&&!main.includes('worth it'),'the research questions are one tap further');
+  assert(b.slice(b.indexOf('walk-check-more')).includes('Study code'));}
  console.log('feedback UI ok');
 })().catch(e=>{console.error(e);process.exit(1);});

@@ -30,7 +30,7 @@ const I18N_ZH = {
  // navigation and menus
  'Plan walk': '规划步行', 'Start & destination': '起点与终点', 'Customize walk': '自定义步行', 'Time & 12 dimensions': '时间与 12 个维度',
  'Explore urban data': '浏览城市数据', 'Explore Urban Data': '浏览城市数据', 'NYC GIS layers': '纽约 GIS 图层', 'Map layers': '地图图层', 'Weather & legend': '天气与图例',
- 'Map': '地图', 'Dark': '深色', 'Light': '浅色', 'Reset map view': '重置地图视图', 'Back to Manhattan, Brooklyn & Queens': '回到曼哈顿、布鲁克林和皇后区', 'Data legend': '数据图例',
+ 'Map': '地图', 'Dark': '深色', 'Light': '浅色', 'Reset map view': '重置地图视图', 'Back to Manhattan, Brooklyn & Queens': '回到曼哈顿、布鲁克林和皇后区', 'Manhattan, Brooklyn & Queens': '曼哈顿、布鲁克林和皇后区', 'Data legend': '数据图例',
  'Show or hide': '显示或隐藏', 'Data sources': '数据来源', 'Status & coverage': '状态与覆盖范围', 'About': '关于', 'This prototype': '本原型',
  'Export to Kepler': '导出到 Kepler', 'GIS data': 'GIS 数据', 'Kepler studio': 'Kepler 工作台', 'Menu': '菜单', 'Back': '返回', '← Map': '← 地图',
  'Weather loading…': '天气加载中…', 'Weather…': '天气…', 'Find routes →': '查找路线 →', '⚙ Prefs': '⚙ 偏好', 'Navigate': '导航', 'Edit': '编辑', 'New': '新建',
@@ -125,8 +125,8 @@ const I18N_ZH = {
  // navigation mode
  'Starting…': '正在开始…', 'Retry': '重试', 'Continue to next stop': '前往下一站', 'Skip optional stop': '跳过可选停留点', 'You have arrived': '你已到达', 'Walk complete.': '步行结束。',
  'End navigation': '结束导航', '◎ Recenter': '◎ 回到当前位置', 'Voice on': '语音开启', 'Pause': '暂停', 'More': '更多', 'Repeat': '重复', 'North up': '正北朝上', 'Exit': '退出',
- '➤ Start Navigation': '➤ 开始导航', 'Resume': '继续', 'Voice off': '语音关闭', 'Heading up': '前进方向朝上', 'Route up': '路线方向朝上', 'AR · compass': 'AR · 指南针',
- 'Raise to view: on': '抬起手机即显示：开', 'Raise to view: off': '抬起手机即显示：关', 'To the start of your walk': '前往路线起点',
+ '➤ Start Navigation': '➤ 开始导航', 'Resume': '继续', 'Voice off': '语音关闭', 'Heading up': '前进方向朝上', 'Route up': '路线方向朝上', 'AR · compass': 'AR · 指南针', 'AR view': 'AR 视图',
+ 'Raise to view: on': '抬起手机即显示：开', 'Raise to view: off': '抬起手机即显示：关', 'Raise: on': '抬起：开', 'Send rating': '提交评分', 'Did it match what you asked for?': '和你的要求相符吗？', 'Not really': '不太相符', 'Partly': '部分相符', 'More detail (optional)': '更多细节（可选）', 'Add a comment (optional, public)': '写条评论（可选，公开）', 'No location or name is sent.': '不会发送位置或姓名。', 'No comments yet.': '还没有评论。', 'How quiet did it feel?': '感觉安静吗？', 'How green did it feel?': '感觉绿意多吗？', 'Thanks, saved.': '谢谢，已保存。', 'Raise: off': '抬起：关', 'Raise the phone to open the camera view': '抬起手机即打开相机视图', 'To the start of your walk': '前往路线起点',
  'Weak GPS signal — position approximate': 'GPS 信号弱，位置只是大致位置', 'Checking whether you left the route…': '正在确认你是否偏离了路线…', 'Off route': '已偏离路线',
  'Off route — recalculating on the walking network…': '已偏离路线，正在步行路网上重新规划…', 'Paused': '已暂停', 'Arrived at stop': '已到达途经点', 'Navigation problem': '导航出现问题',
  'Waiting for GPS…': '正在等待 GPS…', 'Getting your location…': '正在获取你的位置…', 'Could not recalculate — your last route is still shown. Tap Retry.': '无法重新规划，仍显示原来的路线。请点“重试”。',
@@ -239,6 +239,9 @@ const i18nTerm = (s) => I18N_ZH[i18nKey(String(s))] || String(s);
 const i18nTermOnly = (s) => I18N_ZH[i18nKey(String(s))] || null;
 const I18N_ZH_PATTERNS = [
  [/^(-?[\d.,]+) km$/, '$1 公里'], [/^(-?[\d.,]+) mi$/, '$1 英里'],
+ // walker ratings and comments (feedback-ui.js)
+ [/^(\d+) rated walks? · matched the request ([\d.]+|—) \/ 5$/, '$1 次评分 · 与要求相符 $2 / 5'], [/^(\d+) more comments?$/, '还有 $1 条评论'],
+ [/^(Tourist|Curious Local|Leisure Walker|Your own priorities) walks \((\d+)\): ★ ([\d.]+|—)$/, (_, t, n, v) => `${{'Tourist': '游客', 'Curious Local': '好奇的本地人', 'Leisure Walker': '休闲散步者', 'Your own priorities': '自选偏好'}[t]}路线（${n}）：★ ${v}`],
  // navigation card
  [/^Then: (.+)$/, (_, a) => `然后：${a}`], [/^Next stop: (.+?)(?: · \+(\d+))?$/, (_, a, n) => `下一站：${i18nPlaceName(a) || a}${n ? ` · 另有 ${n} 站` : ''}`],
  [/^Next: (.+) · ([\d.,]+) (m|km|ft|mi)$/, (_, a, d, u) => `下一个：${i18nPlaceName(a) || a} · ${d} ${{m: '米', km: '公里', ft: '英尺', mi: '英里'}[u]}`],

@@ -581,7 +581,7 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if self.path == '/api/evaluation':
             # Evaluation dashboard data (routing/walkcheck.py evaluate): ratings, predicted vs perceived, sample size,
-            # sources, missing values and limits, all from stored walk feedback. Comments are counted, not returned.
+            # sources, missing values and limits, all from stored walk feedback, and the 30 newest comments (day only).
             book = walk_checks()
             book.refresh()
             self.send_json(200, {'enabled': book.enabled, 'generated_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),

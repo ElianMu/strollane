@@ -170,6 +170,19 @@ class A_SyntheticManeuvers(unittest.TestCase):
         svc = FakeNet(GRID, [('S', 'C', ST), ('C', 'E', {'highway': 'service'}), ('C', 'N', ST)])
         self.assertIn('the service road', mv.build(route_through(svc, ['S', 'C', 'E']), svc)[1]['instruction_text'])
 
+    def test_a_generic_name_is_no_name(self):
+        # a park path named "Pedestrian Path" is "the path"; "toward" skips it for the next real name, and a
+        # sidewalk named after its street gives the street
+        path, generic = {'highway': 'footway'}, {'highway': 'footway', 'name': 'Pedestrian Path'}
+        net = FakeNet({**GRID, 'P': (100, 80), 'Q': (100, 160), 'R': (100, 260), 'X': (200, 80), 'Y': (200, 160)},
+                      [('S', 'C', ST), ('C', 'N', ST), ('C', 'P', path), ('P', 'Q', generic), ('Q', 'R', {'name': 'Eastern Parkway South Sidewalk', 'highway': 'footway'}),
+                       ('P', 'X', ST), ('Q', 'Y', ST)])
+        ms = mv.build(route_through(net, ['S', 'C', 'P', 'Q', 'R']), net)
+        text = ' | '.join(m['instruction_text'] for m in ms)
+        self.assertNotIn('Pedestrian Path', text)
+        self.assertIn('toward Eastern Parkway', text); self.assertNotIn('toward Eastern Parkway South Sidewalk', text)
+        self.assertEqual(mv.toward_name('Pedestrian Path'), None)
+
     def test_an_itinerary_path_leads_toward_the_stop(self):
         path = {'highway': 'footway'}
         net = FakeNet({**GRID, 'P': (100, 80)}, [('S', 'C', ST), ('C', 'N', ST), ('C', 'P', path)])

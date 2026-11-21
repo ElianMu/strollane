@@ -206,6 +206,9 @@ SOURCES = [
 ]
 
 
+COMMENTS_SHOWN, COMMENT_SHOWN_CHARS = 30, 280
+
+
 def evaluate(checks):
     """Everything evaluation.html shows, from the stored records alone. With no records: {'n': 0}."""
     n = len(checks)
@@ -249,6 +252,11 @@ def evaluate(checks):
     out['worth_detour'] = {w: sum(c.get('worth_detour') == w for c in checks) for w in WORTH}
     out['compared_with_shortest'] = {w: sum(c.get('compared_with_shortest') == w for c in checks) for w in COMPARED}
     out['comments'] = sum(1 for c in checks if c.get('comment'))
+    # What walkers wrote, newest first, for other walkers to read (the form says comments are public; they were
+    # cleaned of e-mail addresses, links and phone numbers when stored). Day only, no time, no route.
+    said = sorted((c for c in checks if c.get('comment')), key=lambda c: c['at'], reverse=True)[:COMMENTS_SHOWN]
+    out['recent_comments'] = [{'date': str(c['at'])[:10], 'user_type': c.get('user_type'), 'overall': (c.get('ratings') or {}).get('overall'),
+                               'comment': c['comment'][:COMMENT_SHOWN_CHARS]} for c in said]
     out['study_participants'] = len({c['study_code'] for c in checks if c.get('study_code')})
     return out
 

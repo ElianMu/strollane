@@ -1302,24 +1302,126 @@ html[lang^=zh] .intro-row h1 br{display:none}
 #rightPanel.bar-offscreen:has(#navStart:not(.hidden):not(:disabled)) .sheet-quick-start{display:block;position:absolute;left:12px;top:6px;border:0;border-radius:8px;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;padding:7px 12px}
 /* notices on a phone sit above the walk action bar, not over Start Navigation */
 @media(max-width:740px){body:has(#rightPanel:not([data-level="hidden"]):not(.bar-offscreen) .walk-actions #navStart:not(.hidden)) .toast{bottom:calc(150px + env(safe-area-inset-bottom))}}
-/* Photo callouts on the map (map-callouts.js): real photos of places the walk passes, tied to them by a line */
+/* Photo callouts on the map (map-callouts.js): a framed photo with one line under it, tied to its place by a thin
+   leader line that leaves the card at the middle of the side facing the place and stops at the stop's own marker. */
 .map-callouts{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
 .map-callouts.hidden{display:none}
 .mc-lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.mc-lines line{stroke:var(--text);stroke-width:2;stroke-linecap:round}
-.mc-lines line.halo{stroke:var(--bg);stroke-width:5;opacity:.85}
-.mc-lines circle{fill:none;stroke:var(--text);stroke-width:2}
-.map-callout{position:absolute;left:0;top:0;margin:0;pointer-events:auto;cursor:pointer;background:var(--bg);color:var(--text);border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;box-shadow:0 8px 22px color-mix(in srgb,var(--shadow) 28%,transparent);will-change:transform;transition:box-shadow .15s}
-.map-callout:hover{box-shadow:0 10px 28px color-mix(in srgb,var(--shadow) 40%,transparent)}
-.map-callout img{display:block;width:100%;object-fit:cover;background:var(--g24)}
-.map-callout figcaption{display:grid;grid-template-columns:auto 1fr;column-gap:6px;row-gap:2px;padding:6px 8px 7px;align-items:start}
-.map-callout figcaption>*:not(.mc-seq){grid-column:2}
-.map-callout figcaption:not(:has(.mc-seq))>*{grid-column:1/-1}
-.mc-seq{grid-row:1/3;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#0a0b0c;color:#d8f365;font-size:10px;font-weight:700;margin-top:1px}
-.map-callout strong{font-size:11.5px;line-height:1.25;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.map-callout small{font-size:10px;line-height:1.3;color:var(--g9d);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.map-callout a{font-size:8.5px;color:var(--g8c);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto}
+.mc-lines line{stroke:var(--text);stroke-width:1.5;stroke-linecap:round;stroke-opacity:.78}
+.mc-lines line.halo{stroke:var(--bg);stroke-width:4.5;stroke-opacity:.9}
+.mc-lines circle{fill:var(--text);stroke:var(--bg);stroke-width:2}
+.map-callout{position:absolute;left:0;top:0;margin:0;padding:3px;pointer-events:auto;cursor:pointer;background:var(--bg);color:var(--text);border:0;border-radius:11px;
+ box-shadow:0 0 0 1px color-mix(in srgb,var(--text) 10%,transparent),0 6px 16px color-mix(in srgb,var(--shadow) 26%,transparent);will-change:transform;transition:box-shadow .15s}
+.map-callout:hover{box-shadow:0 0 0 1px color-mix(in srgb,var(--text) 18%,transparent),0 8px 22px color-mix(in srgb,var(--shadow) 36%,transparent)}
+.map-callout img{display:block;width:100%;object-fit:cover;border-radius:8px;background:var(--g24)}
+.map-callout figcaption{display:flex;flex-direction:column;gap:1px;padding:5px 4px 3px;min-width:0}
+.mc-name{display:flex;align-items:center;gap:5px;min-width:0}
+.mc-seq{flex:none;display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#0a0b0c;color:#d8f365;font-size:9.5px;font-weight:700;line-height:1}
+.map-callout strong{min-width:0;font-size:11.5px;line-height:1.25;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.map-callout a{font-size:8.5px;line-height:1.3;color:var(--g8c);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto}
 .map-callout a:hover{text-decoration:underline}
-@media(max-width:740px){.map-callout figcaption{padding:5px 7px 6px}.map-callout strong{font-size:11px}.map-callout small{display:none}}
+@media(max-width:740px){.map-callout strong{font-size:11px}.map-callout a{font-size:8px}}
 #mapPhotosToggle[aria-pressed="false"]{opacity:.55}
 .cw-how{margin-top:8px}.cw-how summary{cursor:pointer;font-size:11px;color:var(--g9d)}
+
+/* ---- Layout pass, 2026-11-21: one line where one line is enough, fewer rows, less on the map ------------------- */
+/* Walk actions on a phone: Start Navigation and the three small actions on one row (two rows took ~110 px of the
+   screen). The desktop panel is too narrow for that and keeps its two rows. */
+@media(max-width:740px){
+ .right-bottom.walk-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;column-gap:8px;row-gap:6px;padding:10px 14px 12px}
+ .walk-actions #navStartWhy{grid-column:1/-1}
+ .walk-actions .nav-start{height:48px;justify-content:center;white-space:nowrap}
+ .walk-actions .nav-start .cta-arrow{display:none}
+ .walk-actions-row{gap:6px}
+ .walk-actions-row .route-preview-btn{flex:none;width:58px;height:48px;flex-direction:column;gap:3px;padding:0 2px;font-size:10px;font-weight:600;border-radius:10px}
+ .walk-actions-row .route-preview-btn svg{width:17px;height:17px}
+}
+@media(max-width:380px){.walk-actions-row .route-preview-btn{width:50px;font-size:9.5px}.walk-actions .nav-start{font-size:13px}}
+/* One walk: its card takes the full width. */
+.route-cards.single{grid-auto-columns:100%}
+/* City Walk stops: the actions side by side, under the stop. */
+.cw-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.cw-acts .cw-alt{margin:0}
+@media(max-width:740px){
+ /* the question on one line; the card opaque enough that map labels do not show through it */
+ .m-composer{background:color-mix(in srgb,var(--bg-panel) 94%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+ .m-composer-q{font-size:clamp(15px,4.3vw,19px);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 2px 8px}
+ .m-walk-presets .walk-activity{min-height:40px;padding:3px 11px}
+ .m-walk-presets .walk-pill{min-height:34px}
+ .m-walk-presets .walk-activity-tag{font-size:10.5px}
+ /* MapLibre's own attribution stays; the second credit line and the coordinates are desktop detail */
+ .map-workspace .map-footer{display:none}
+}
+/* City Walk card: the three numbers on one row (they took two rows with a full-width third cell), a calmer title. */
+.cw-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cw-grid>div,.cw-grid>div:nth-child(odd),.cw-grid>div:nth-child(even),.cw-grid>div.cw-wide{grid-column:auto;padding:10px 10px;border-right:1px solid var(--line)}
+.cw-grid>div:first-child{padding-left:0}
+.cw-grid>div:last-child{border-right:0;padding-right:0}
+.cw-grid strong{font-size:17px;white-space:nowrap}
+.cw-grid small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-theme{font-size:21px;line-height:1.18}
+@media(max-width:740px){
+ /* the two header buttons the same size (the check link was 30 px, the menu 44 px) */
+ .topbar .top-actions .icon-button,.topbar .top-actions .mobile-more summary{width:40px;height:40px}
+ /* menu: the same row style for every entry, shorter rows, one line of description */
+ .mobile-more-body{max-height:calc(100dvh - 90px);overflow-y:auto}
+ .mobile-more-body>button{min-height:42px;padding:6px 12px}
+ .mobile-more-body>button small,.mobile-more-body a.more-link small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ .mobile-more-body a.more-link{flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;min-height:42px;padding:6px 12px;font-size:14px;font-weight:600;color:var(--text)}
+ .mobile-more-body a.more-link small{margin-left:0;font-size:12px;font-weight:400;color:var(--muted)}
+}
+@media(max-width:740px){
+ /* the routes sheet opened with ~38 px of empty space above its first card */
+ #rightPanel .right-scroll{padding-top:6px}
+ #rightPanel .right-scroll>.city-walk{margin-top:2px}
+}
+/* Taps on controls are never a double-tap zoom: tapping 1× → 2× → 4× in the 3D preview zoomed the whole page on
+   iPhone (controls cut off at the screen edge); pinch zoom still works. */
+button,a,summary,select,input,label,[role="button"],.rp-bar,.rp-top,.nav-overlay,.walk-actions{touch-action:manipulation}
+/* Navigation More menu: every option on one row (Raise to view wrapped onto a second row). */
+.nav-more-body{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:5px;scrollbar-width:none}
+.nav-more-body::-webkit-scrollbar{display:none}
+.nav-more-body .nav-pill,.nav-more-body select{flex:none;min-height:40px;height:40px;padding:0 9px;font-size:12.5px;white-space:nowrap}
+.nav-more-body select{padding:0 4px}
+@media(max-width:380px){.nav-more-body .nav-pill{padding:0 7px;font-size:12px}.nav-more-body{gap:4px;padding:6px}}
+/* Rating after a walk: stars, did it match, a comment, Send. The research questions sit under "More detail". */
+.walk-check-main{display:flex;justify-content:center;margin:6px 0 4px}
+.walk-stars{display:flex;gap:2px}
+.walk-stars button{width:46px;height:46px;padding:0;border:0;background:none;font-size:32px;line-height:1;color:var(--line-strong);cursor:pointer;transition:transform .1s}
+.walk-stars button.on{color:var(--text)}
+.walk-stars button:active{transform:scale(.92)}
+.walk-check-match{flex-direction:column;align-items:stretch;gap:7px;margin-top:12px}
+.walk-check-match .walk-check-scale{display:flex}
+.walk-check-match .walk-check-scale button{flex:1}
+.walk-check-comment{display:block;width:100%;margin-top:12px;min-height:56px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);padding:9px 11px;font-size:16px;line-height:1.35}
+.walk-check .walk-check-send{display:block;width:100%;height:46px;margin-top:10px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:600}
+.walk-check-more{margin-top:10px}
+.walk-check-more>summary{cursor:pointer;font-size:12px;color:var(--muted)}
+.walk-check>.walker-status{display:block;margin-top:8px;font-size:11px;color:var(--muted)}
+.modal .walk-check-q{font-size:13px}
+/* What walkers said: the average, then what they wrote. */
+.walker-says-score{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:2px}
+.walker-says-score strong{font-size:20px;font-weight:650;color:var(--text)}
+.walker-says-score span,.walker-says-type{font-size:11.5px;color:var(--muted)}
+.walker-says-type{display:block;margin-top:2px}
+.walker-comments{list-style:none;margin:8px 0 0;padding:0}
+.walker-comments li{padding:8px 0;border-top:1px solid var(--line)}
+.walker-comments p{margin:0 0 3px;font-size:13px;line-height:1.45;color:var(--text)}
+.walker-comments small{font-size:11px;color:var(--muted)}
+.wc-stars{letter-spacing:1px;color:var(--text)}
+.walker-comments-more{background:none;border:0;padding:6px 0 0;font-size:12px;font-weight:600;color:var(--text);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* Taps never zoom the page (a quick second tap on the 3D preview speed button zoomed the whole page on iPhone and
+   left it cut off); pinch zoom still works. The map handles its own gestures. */
+html{touch-action:manipulation}
+button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipulation}
+/* Navigation More menu: one row (it wrapped onto two, leaving an empty left half). */
+.nav-more-body{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.nav-more-body::-webkit-scrollbar{display:none}
+.nav-more-body>*{flex:none}
+.nav-more-body{gap:5px}
+.nav-more-body .nav-pill{padding:0 9px;white-space:nowrap}
+.nav-more-body select{min-width:0;padding:0 4px}
+/* the bottom row of the navigation card fits one line on a 390 px phone (Exit wrapped to its own row) */
+@media(max-width:740px){.nav-buttons{gap:5px}.nav-buttons>.nav-pill,.nav-buttons .nav-more>summary.nav-pill{padding:0 10px}}
+/* Navigation card: the next stop on one line (a long landmark name took two). */
+.nav-stats #navStop{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

@@ -88,12 +88,16 @@ function wireWalkerRoute(root,r){
  }));
 }
 
-/* Walk feedback (routing/walkcheck.py, RESEARCH_PROTOCOL.md): after a walk the walker rates it 1–5 (overall, match
-   with the request, quiet, greenery, optionally the dimensions they asked for) and may leave a comment. The server
-   adds its own predicted scores for the walked route, so evaluation.html can compare prediction and experience.
-   Voluntary; sends no location, name or account. Comments are public in the project's data branch. */
+/* Walk feedback (routing/walkcheck.py, RESEARCH_PROTOCOL.md): after a walk the walker rates it. The panel is short on
+   purpose (people who just finished a walk do not fill in forms): stars for the walk, whether it matched the request,
+   an optional comment. Quiet, greenery, the other requested dimensions, the detour and the walk-along study code are
+   one tap further, under "More detail". The server adds its own predicted scores for the walked route, so
+   evaluation.html can compare prediction and experience. Voluntary; sends no location, name or account. Comments are
+   public: other walkers read them under the walk options. */
 const WALK_TYPE_LABEL={tourist:'Tourist','curious-local':'Curious Local',leisure:'Leisure Walker',custom:'Your own priorities'};
-const WALK_RATINGS=[['overall','Overall, how satisfied are you with this walk?'],['match','How well did it match what you asked for?'],['quiet','How quiet did it feel?'],['green','How green did it feel?']];
+const WALK_RATINGS=[['quiet','How quiet did it feel?'],['green','How green did it feel?']];
+// "Did it match?" on the same 1–5 scale the evaluation uses: not really 1, partly 3, yes 5
+const WALK_MATCH=[[1,'Not really'],[3,'Partly'],[5,'Yes']];
 function walkCheckType(){const a=typeof walkActivity==='function'?walkActivity():null;return a?a.key:'custom';}
 /** Dimensions the walker expressed: {name: {weight, direction}} (sliders, pills or an entry). */
 function walkCheckPriorities(){
@@ -102,21 +106,26 @@ function walkCheckPriorities(){
  return out;
 }
 function walkScale(key){return `<span class="walk-check-scale" role="group">${[1,2,3,4,5].map(k=>`<button type="button" data-rate="${esc(key)}" data-v="${k}" aria-pressed="false">${k}</button>`).join('')}</span>`;}
+function walkStars(key,label){return `<span class="walk-stars" role="group" aria-label="${esc(label)}">${[1,2,3,4,5].map(k=>`<button type="button" data-rate="${esc(key)}" data-v="${k}" aria-pressed="false" aria-label="${k} of 5">★</button>`).join('')}</span>`;}
 function walkCheckBox(r){
  if(!r)return '';
  const detour=Number(r.detour_percentage)||0,type=walkCheckType(),pri=walkCheckPriorities();
  const extra=Object.keys(pri).filter(n=>n!=='Nature'&&n!=='Quiet & Relax'&&pri[n].direction==='high');
  return `<details class="walk-check" data-route="${esc(r.route_id)}" open><summary>Rate this walk (optional)</summary>
-  <small class="walk-check-type">Walk type: ${esc(WALK_TYPE_LABEL[type])}${Object.keys(pri).length?' · '+esc(Object.keys(pri).join(', ')):''}</small>
-  ${WALK_RATINGS.map(([k,q])=>`<div class="walk-check-q">${esc(q)}${k==='overall'?' <b>*</b>':''} ${walkScale(k)}</div>`).join('')}
-  <small class="walk-check-hint">1 not at all · 5 very. Only the first is required.</small>
-  ${extra.length?`<div class="walk-check-dims"><small>The other dimensions you asked for:</small>${extra.map(n=>`<div class="walk-check-q">${esc(typeof dimLabel==='function'?dimLabel(n):n)} ${walkScale('dim:'+n)}</div>`).join('')}</div>`:''}
-  ${detour>=1?`<div class="walk-check-q">Was the extra ${Math.round(detour)}% distance worth it? <span class="walk-check-scale">${['yes','no'].map(k=>`<button type="button" data-worth="${k}" aria-pressed="false">${k==='yes'?'Yes':'No'}</button>`).join('')}</span></div>`:''}
-  <label class="walk-check-code">Anything else? (optional; public, so no names, contacts or addresses) <textarea data-k="comment" maxlength="500" rows="3"></textarea></label>
-  <label class="walk-check-code">Study code (walk-along participants only) <input data-k="code" maxlength="6" placeholder="e.g. P07" autocomplete="off"></label>
-  <div class="walk-check-q hidden" data-k="compare">Walk-along: of your two walks for this trip, which fitted your request better? <span class="walk-check-scale">${[['this','This one'],['shortest','The other one'],['same','No difference']].map(([k,l])=>`<button type="button" data-compared="${k}" aria-pressed="false">${l}</button>`).join('')}</span></div>
-  <button type="button" class="walk-check-send" data-k="send" disabled>Send</button>
-  <small class="walker-status" data-k="walk-check-status">Sends your ratings, the walk type, your priorities and this route's ID. The server adds its own predicted scores for the route. No location or name. <a href="./evaluation.html" target="_blank" rel="noopener">See all results</a></small></details>`;
+  <div class="walk-check-main">${walkStars('overall','Overall, how satisfied are you with this walk?')}</div>
+  <div class="walk-check-q walk-check-match"><span>Did it match what you asked for?</span><span class="walk-check-scale">${WALK_MATCH.map(([v,l])=>`<button type="button" data-rate="match" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</span></div>
+  <textarea class="walk-check-comment" data-k="comment" maxlength="500" rows="2" placeholder="Add a comment (optional, public)" aria-label="Comment, optional and shown to other walkers"></textarea>
+  <button type="button" class="walk-check-send" data-k="send" disabled>Send rating</button>
+  <details class="walk-check-more"><summary>More detail (optional)</summary>
+   <small class="walk-check-type">Walk type: ${esc(WALK_TYPE_LABEL[type])}${Object.keys(pri).length?' · '+esc(Object.keys(pri).join(', ')):''}</small>
+   ${WALK_RATINGS.map(([k,q])=>`<div class="walk-check-q">${esc(q)} ${walkScale(k)}</div>`).join('')}
+   ${extra.map(n=>`<div class="walk-check-q">${esc(typeof dimLabel==='function'?dimLabel(n):n)} ${walkScale('dim:'+n)}</div>`).join('')}
+   ${detour>=1?`<div class="walk-check-q">Was the extra ${Math.round(detour)}% distance worth it? <span class="walk-check-scale">${['yes','no'].map(k=>`<button type="button" data-worth="${k}" aria-pressed="false">${k==='yes'?'Yes':'No'}</button>`).join('')}</span></div>`:''}
+   <small class="walk-check-hint">1 not at all · 5 very.</small>
+   <label class="walk-check-code">Study code (walk-along participants only) <input data-k="code" maxlength="6" placeholder="e.g. P07" autocomplete="off"></label>
+   <div class="walk-check-q hidden" data-k="compare">Walk-along: of your two walks for this trip, which fitted your request better? <span class="walk-check-scale">${[['this','This one'],['shortest','The other one'],['same','No difference']].map(([k,l])=>`<button type="button" data-compared="${k}" aria-pressed="false">${l}</button>`).join('')}</span></div>
+  </details>
+  <small class="walker-status" data-k="walk-check-status">No location or name is sent. <a href="./evaluation.html" target="_blank" rel="noopener">All results</a></small></details>`;
 }
 function walkCheckPayload(r,st,code,comment){
  const dims={};for(const [k,v] of Object.entries(st.rate))if(k.startsWith('dim:'))dims[k.slice(4)]=v;
@@ -132,7 +141,8 @@ function wireWalkCheck(root,r){
  const send=box.querySelector('[data-k="send"]'),status=box.querySelector('[data-k="walk-check-status"]');
  box.querySelectorAll('[data-rate]').forEach(b=>b.addEventListener('click',()=>{
   st.rate[b.dataset.rate]=Number(b.dataset.v);
-  box.querySelectorAll('[data-rate]').forEach(x=>{if(x.dataset.rate===b.dataset.rate)x.setAttribute('aria-pressed',String(x===b));});
+  box.querySelectorAll('[data-rate]').forEach(x=>{if(x.dataset.rate===b.dataset.rate){x.setAttribute('aria-pressed',String(x===b));
+   if(x.closest('.walk-stars'))x.classList.toggle('on',Number(x.dataset.v)<=Number(b.dataset.v));}}); // stars fill up to the one tapped
   send.disabled=st.rate.overall==null;
  }));
  for(const attr of ['worth','compared'])box.querySelectorAll(`[data-${attr}]`).forEach(b=>b.addEventListener('click',()=>{
@@ -147,7 +157,7 @@ function wireWalkCheck(root,r){
     body:JSON.stringify(walkCheckPayload(r,st,(codeIn?.value||'').trim(),(box.querySelector('[data-k="comment"]')?.value||'').trim()))});
    const j=await res.json().catch(()=>({}));
    if(!res.ok)throw new Error(j.code==='feedback_disabled'?'feedback is not switched on for this server yet.':(j.error||`HTTP ${res.status}`));
-   status.textContent=j.check?.predicted?'Thanks, saved, with this route\'s predicted scores for comparison.':'Thanks, saved (the route could not be verified, so it is left out of the prediction comparison).';
+   status.textContent=j.check?.predicted?'Thanks, saved.':'Thanks, saved (this route could not be verified, so it is left out of the score comparison).';
    box.querySelectorAll('button,input,textarea').forEach(x=>x.disabled=true);
    if(typeof loadWalkerEvaluation==='function')loadWalkerEvaluation(true);
   }catch(e){status.textContent='Not saved: '+e.message;send.disabled=st.rate.overall==null;}
@@ -158,7 +168,7 @@ function openWalkRating(r){
  r=r||(typeof state!=='undefined'?state.routes.find(x=>x.id===state.activeRoute)?.raw:null);
  const overlay=document.getElementById('modalOverlay');
  if(!r||!overlay){if(typeof toast==='function')toast('Choose a route first.');return;}
- const over=document.getElementById('modalOverline');if(over)over.textContent='AFTER YOUR WALK';
+ const over=document.getElementById('modalOverline');if(over)over.textContent='';
  document.getElementById('modalTitle').textContent='How was your walk?';
  const c=document.getElementById('modalContent');c.innerHTML=walkCheckBox(r);wireWalkCheck(c,r);
  overlay.classList.remove('hidden');
@@ -176,13 +186,23 @@ function loadWalkerEvaluation(force){
  return walkerSays.loading;
 }
 function routeSegmentIds(r){const ids=new Set();for(const e of r.edges||[])for(const m of e.matched_segments||[])if(m.segment_id)ids.add(m.segment_id);return [...ids].slice(0,600);}
+const walkStarText=v=>v?'★'.repeat(v)+'☆'.repeat(5-v):'';
+/** The average rating, in one line: "★ 4.2 · 12 rated walks · Tourist walks 4.5 (5)". */
 function walkerSaysRatings(d,type){
  if(!d)return '<small class="walker-status">Loading what walkers said…</small>';
  if(!d.n)return `<p class="walker-says-empty">No walker has rated a walk yet${d.enabled===false?'':'. Be the first: rate this one when you finish'}.</p>`;
  const t=d.by_user_type?.[type],r=d.ratings,f=(v)=>v==null?'—':Number(v).toFixed(1);
- return `<div class="data-pair"><span>All rated walks (${d.n})</span><span>overall ${f(r.overall.mean)} · match ${f(r.match.mean)} / 5</span></div>
-  ${t?`<div class="data-pair"><span>${esc(WALK_TYPE_LABEL[type])} walks (${t.n})</span><span>overall ${f(t.mean_overall)} · match ${f(t.mean_match)} / 5</span></div>`:''}
-  ${r.quiet.n||r.green.n?`<div class="data-pair"><span>Felt quiet · green</span><span>${f(r.quiet.mean)} · ${f(r.green.mean)} / 5</span></div>`:''}`;
+ return `<div class="walker-says-score"><strong>★ ${f(r.overall.mean)}</strong><span>${d.n} rated walk${d.n===1?'':'s'} · matched the request ${f(r.match.mean)} / 5</span></div>
+  ${t?`<small class="walker-says-type">${esc(WALK_TYPE_LABEL[type])} walks (${t.n}): ★ ${f(t.mean_overall)}</small>`:''}`;
+}
+/** What walkers wrote: walks of the same type first, then the newest. Three shown, the rest one tap away. */
+function walkerSaysComments(d,type,all=false){
+ const list=(d?.recent_comments||[]).slice().sort((a,b)=>(b.user_type===type)-(a.user_type===type)||String(b.date).localeCompare(String(a.date)));
+ if(!list.length)return d?.n?'<p class="walker-says-empty">No comments yet.</p>':'';
+ const day=s=>{const t=new Date(s+'T12:00:00Z');return isNaN(t)?s:t.toLocaleDateString(undefined,{month:'short',day:'numeric'});};
+ const shown=all?list:list.slice(0,3);
+ return `<ul class="walker-comments">${shown.map(c=>`<li><p>${esc(c.comment)}</p><small>${c.overall?`<span class="wc-stars" aria-label="${c.overall} of 5">${walkStarText(c.overall)}</span> · `:''}${esc(WALK_TYPE_LABEL[c.user_type]||'')} · ${esc(day(c.date))}</small></li>`).join('')}</ul>
+  ${!all&&list.length>3?`<button type="button" class="walker-comments-more" data-k="more-comments">${list.length-3} more comment${list.length-3===1?'':'s'}</button>`:''}`;
 }
 function walkerSaysStreets(segs,r){
  const names=new Map();for(const e of r.edges||[])for(const m of e.matched_segments||[])if(m.segment_id&&!names.has(m.segment_id))names.set(m.segment_id,m.street_name||m.segment_id);
@@ -190,17 +210,21 @@ function walkerSaysStreets(segs,r){
  if(!rows.length)return '';
  return `<div class="walker-says-streets"><small>Streets on this route walkers reported:</small>${rows.map(({id,k,x})=>`<div class="data-pair"><span>${esc(names.get(id)||id)} · ${esc(walkerLabelOf(k))}</span><span>${x.worse} worse · ${x.better} better${x.status==='applied'?` · routing ${x.delta>0?'+':''}${x.delta}`:''}</span></div>`).join('')}</div>`;
 }
-/** The block at the top of "Why this route". */
+/** The rate area under the walk options: the walkers' average, what they wrote, the streets they reported on this
+    route, and the button to rate this walk. */
 function walkerSaysBox(r){
  if(!r)return '';
+ const d=walkerSays.evaluation,type=walkCheckType();
  return `<section class="walker-says" aria-label="What walkers said"><div class="walker-says-head"><strong>What walkers said</strong></div>
-  <div data-k="walker-says-ratings">${walkerSaysRatings(walkerSays.evaluation,walkCheckType())}</div><div data-k="walker-says-streets"></div>
+  <div data-k="walker-says-ratings">${walkerSaysRatings(d,type)}</div><div data-k="walker-comments">${d?walkerSaysComments(d,type):''}</div><div data-k="walker-says-streets"></div>
   <button type="button" class="walker-rate-now" data-k="rate-now">I walked this – rate it now</button></section>`;
 }
 function wireWalkerSays(root,r){
  const box=root.querySelector('.walker-says');if(!box)return;
  box.querySelector('[data-k="rate-now"]').addEventListener('click',()=>openWalkRating(r));
- loadWalkerEvaluation().then(d=>{const el=box.querySelector('[data-k="walker-says-ratings"]');if(el&&d)el.innerHTML=walkerSaysRatings(d,walkCheckType());});
+ const comments=box.querySelector('[data-k="walker-comments"]');
+ comments?.addEventListener('click',e=>{if(e.target.closest('[data-k="more-comments"]'))comments.innerHTML=walkerSaysComments(walkerSays.evaluation,walkCheckType(),true);});
+ loadWalkerEvaluation().then(d=>{const el=box.querySelector('[data-k="walker-says-ratings"]');if(el&&d){el.innerHTML=walkerSaysRatings(d,walkCheckType());if(comments)comments.innerHTML=walkerSaysComments(d,walkCheckType());}});
  const ids=routeSegmentIds(r);
  if(ids.length)streetwiseFetch('/api/feedback/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({segment_ids:ids}),signal:AbortSignal.timeout(30000)})
   .then(x=>x.json()).then(j=>{const el=box.querySelector('[data-k="walker-says-streets"]');if(el&&j.segments)el.innerHTML=walkerSaysStreets(j.segments,r);}).catch(()=>{});

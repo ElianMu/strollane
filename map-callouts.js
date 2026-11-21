@@ -10,8 +10,12 @@
    Layout: each card is tried at 8 positions around its place and takes the one that stays inside the free part of
    the map, does not cover other cards or the route line, and lies on the far side of the route; places are laid out
    in order of importance, and a place with no free position gets no card. Cards follow the map while it moves and
-   are laid out again when it stops. Phones show at most 2 smaller cards, above the routes sheet. */
-const CALLOUT = {MAX: 4, MAX_PHONE: 2, W: 132, W_PHONE: 108, GAP: 64, MIN_ZOOM: 12.5, PAD: 10};
+   are laid out again when it stops. Phones show at most 2 smaller cards, above the routes sheet.
+
+   Look: a framed photo with one line under it (stop number · name, then the credit), so a card covers little of the
+   map; the leader line is thin, leaves the card at the middle of the side facing the place and stops at the edge of
+   the stop's own marker (a place that is not a stop gets a small dot). */
+const CALLOUT = {MAX: 4, MAX_PHONE: 2, W: 150, W_PHONE: 124, GAP: 56, MIN_ZOOM: 12.5, PAD: 10};
 const mapCallouts = {on: true, items: [], root: null, svg: null, raf: 0, key: ''};
 
 function calloutEsc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c])); }
@@ -106,9 +110,10 @@ function calloutBox(map) {
 }
 
 function calloutCard(it, w) {
- const p = it.photo, credit = p.kind === 'street' ? ['Street view here', p.date, p.author, 'Mapillary'].filter(Boolean).join(' · ') : [p.author, p.license].filter(Boolean).join(' · ');
- const ih = Math.round(w * 0.62);
- return `<figure class="map-callout" data-key="${calloutEsc(it.key)}" style="width:${w}px"><img ${typeof photoImg === 'function' ? photoImg(p, calloutEsc) : `src="${calloutEsc(p.thumb)}"`} alt="${calloutEsc(it.name)}" style="height:${ih}px" decoding="async" referrerpolicy="no-referrer"><figcaption>${it.seq != null ? `<span class="mc-seq">${calloutEsc(it.seq)}</span>` : ''}<strong>${calloutEsc(it.name)}</strong>${it.note ? `<small>${calloutEsc(it.note)}</small>` : ''}<a href="${calloutEsc(p.page)}" target="_blank" rel="noopener" title="${calloutEsc(credit)} — Wikimedia Commons">${calloutEsc(credit)}</a></figcaption></figure>`;
+ const p = it.photo, street = p.kind === 'street';
+ const credit = street ? ['Street view', p.date, p.author, 'Mapillary'].filter(Boolean).join(' · ') : [p.author, p.license].filter(Boolean).join(' · ');
+ const ih = Math.round(w * 0.6);
+ return `<figure class="map-callout${street ? ' street' : ''}" data-key="${calloutEsc(it.key)}" style="width:${w}px" title="${calloutEsc(it.name + (it.note ? ' — ' + it.note : ''))}"><img ${typeof photoImg === 'function' ? photoImg(p, calloutEsc) : `src="${calloutEsc(p.thumb)}"`} alt="${calloutEsc(it.name)}" style="height:${ih}px" decoding="async" referrerpolicy="no-referrer"><figcaption><span class="mc-name">${it.seq != null ? `<span class="mc-seq">${calloutEsc(it.seq)}</span>` : ''}<strong>${calloutEsc(it.name)}</strong></span><a href="${calloutEsc(p.page)}" target="_blank" rel="noopener" title="${calloutEsc(credit)} — ${street ? 'Mapillary' : 'Wikimedia Commons'}">${calloutEsc(credit)}</a></figcaption></figure>`;
 }
 
 function calloutsEnsureRoot(map) {
@@ -174,6 +179,14 @@ function calloutsLayout() {
  calloutsFollow();
 }
 
+/** Where the leader line meets a card: the middle of the side that faces the place (slid towards the place along
+    that side, but never into the rounded corners), not the nearest corner. */
+function calloutAnchor(a, x, y, w, h) {
+ const cx = x + w / 2, cy = y + h / 2, dx = a.x - cx, dy = a.y - cy, inset = 14;
+ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+ if (Math.abs(dx) * h > Math.abs(dy) * w) return [dx > 0 ? x + w : x, clamp(a.y, y + inset, y + h - inset)];
+ return [clamp(a.x, x + inset, x + w - inset), dy > 0 ? y + h : y];
+}
 /** Keep cards and leader lines attached to their places while the map moves. */
 function calloutsFollow() {
  const map = typeof state !== 'undefined' ? state.map : null, root = mapCallouts.root;
@@ -184,12 +197,12 @@ function calloutsFollow() {
   const it = mapCallouts.items[i]; if (!it) return;
   const a = map.project([it.lon, it.lat]), x = a.x + Number(el.dataset.dx), y = a.y + Number(el.dataset.dy), w = el.offsetWidth, h = el.offsetHeight;
   el.style.transform = `translate(${Math.round(x)}px,${Math.round(y)}px)`;
-  // the line meets the card at the nearest point of its edge
-  const ex = Math.max(x, Math.min(a.x, x + w)), ey = Math.max(y, Math.min(a.y, y + h));
-  // start the line at a ring around the place, so the place's own map marker (a stop number) stays visible
-  const L = Math.hypot(ex - a.x, ey - a.y) || 1, R = it.seq != null ? 13 : 6, sx = a.x + (ex - a.x) / L * R, sy = a.y + (ey - a.y) / L * R;
+  const [ex, ey] = calloutAnchor(a, x, y, w, h);
+  // the line stops at the edge of the stop's own numbered marker (left visible); any other place gets a small dot
+  const stop = it.seq != null, L = Math.hypot(ex - a.x, ey - a.y) || 1, R = stop ? 12 : 4, sx = a.x + (ex - a.x) / L * R, sy = a.y + (ey - a.y) / L * R;
+  if (L <= R + 2) return;
   const seg = `x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}"`;
-  lines.push(`<line class="halo" ${seg}/><line ${seg}/><circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="${R}"/>`);
+  lines.push(`<line class="halo" ${seg}/><line ${seg}/>${stop ? '' : `<circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="3.5"/>`}`);
  });
  mapCallouts.svg.innerHTML = lines.join('');
 }
@@ -206,4 +219,4 @@ if (typeof window !== 'undefined') {
  // nav mode hides them; leaving it shows them again
  new MutationObserver(() => calloutsLayout()).observe(document.body, {attributes: true, attributeFilter: ['class']});
 }
-if (typeof module !== 'undefined' && module.exports) module.exports = {calloutPlace, calloutArrange};
+if (typeof module !== 'undefined' && module.exports) module.exports = {calloutPlace, calloutArrange, calloutAnchor};

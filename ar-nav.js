@@ -87,8 +87,8 @@ async function arStart(opts={}){
  try{
   ar.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
  }catch(e){
-  if(opts.auto){ar.raiseArmed=false;return toast('Raise to view paused — tap AR · compass to turn the camera back on.');}
-  return toast(e.name==='NotAllowedError'?'Camera access was denied. Allow the camera for this site to use AR · compass.':`Camera unavailable (${e.name||e.message}).`);
+  if(opts.auto){ar.raiseArmed=false;return toast('Raise to view paused — tap AR view to turn the camera back on.');}
+  return toast(e.name==='NotAllowedError'?'Camera access was denied. Allow the camera for this site to use AR view.':`Camera unavailable (${e.name||e.message}).`);
  }
  els.video.srcObject=ar.stream;
  ar.heading=null;ar.compassAcc=null;ar.raiseArmed=true;
@@ -112,7 +112,7 @@ function arPark(){
  ar.on=false;cancelAnimationFrame(ar.raf);
  try{ar.els.video.pause();}catch(e){}
  ar.els.root.classList.add('hidden');document.body.classList.remove('ar-mode');
- $('navAr')?.setAttribute('aria-pressed','false');if($('navAr'))$('navAr').textContent='AR · compass';
+ $('navAr')?.setAttribute('aria-pressed','false');if($('navAr'))$('navAr').textContent='AR view';
  clearTimeout(ar.parkTimer);ar.parkTimer=setTimeout(arStop,AR_PARK_MS);
 }
 function arFlash(text,ms){const el=ar.els?.flash;if(!el)return;el.textContent=text;el.classList.add('show');clearTimeout(arFlash.t);arFlash.t=setTimeout(()=>el.classList.remove('show'),ms||3500);}
@@ -125,7 +125,7 @@ function arStop(){
  ar.stream?.getTracks().forEach(t=>t.stop());ar.stream=null;
  if(ar.els){ar.els.video.srcObject=null;ar.els.root.classList.add('hidden');}
  document.body.classList.remove('ar-mode');
- $('navAr')?.setAttribute('aria-pressed','false');if($('navAr'))$('navAr').textContent='AR · compass';
+ $('navAr')?.setAttribute('aria-pressed','false');if($('navAr'))$('navAr').textContent='AR view';
 }
 // A manual "Map view" while the phone is still upright must not bounce straight back into AR: wait for one lower.
 function arToggle(){if(ar.on){ar.suppressRaise=true;arStop();}else arStart();}
@@ -141,7 +141,7 @@ function arOnTilt(e){
  if(want==='up'&&ar.raise&&!ar.on&&ar.raiseArmed&&!ar.suppressRaise){ar.tiltSince=now+1e9;arStart({auto:true});}
  else if(want==='down'&&ar.on){ar.tiltSince=now+1e9;if(ar.raise)arPark();else arStop();}
 }
-function arSetRaise(on){ar.raise=on;try{localStorage.setItem('strollane.ar.raise',on?'1':'0');}catch(e){}const b=$('navArRaise');if(b){b.setAttribute('aria-pressed',String(on));b.textContent=on?'Raise to view: on':'Raise to view: off';}}
+function arSetRaise(on){ar.raise=on;try{localStorage.setItem('strollane.ar.raise',on?'1':'0');}catch(e){}const b=$('navArRaise');if(b){b.setAttribute('aria-pressed',String(on));b.textContent=on?'Raise: on':'Raise: off';b.title='Raise the phone to open the camera view';}}
 
 /** Camera field of view (deg) — typical phone main camera; portrait is narrower horizontally. */
 function arFov(){const portrait=innerHeight>=innerWidth;return portrait?{h:52,v:66}:{h:66,v:52};}

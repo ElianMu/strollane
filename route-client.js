@@ -87,7 +87,7 @@ async function generateRoutes(userText=null,isFollowUp=false){
   const told=routeStory.last;if(told?.shown.length){
    if(typeof i18n!=='undefined'&&i18n.lang==='zh'){const names=told.shown.map(id=>{const t=told.stories[id];return t.short+(t.tag&&!/最佳匹配/.test(t.short)?'（最佳匹配）':'');});appendChat('assistant',`有 ${names.length} 条路线可选：${names.join('、')}。${told.extra.length?`"更多路线"里还有 ${told.extra.length} 条。`:''}`);}
    else{const names=told.shown.map(id=>{const t=told.stories[id];return t.short+(t.tag?' (best match)':'');});appendChat('assistant',`${names.length} walk${names.length>1?'s':''} to choose from: ${names.join(', ')}.${told.extra.length?` ${told.extra.length} more under “More routes”.`:''}`);}}
-  if(state.mapReady&&!isFollowUp){const bx=routeBounds(state.routes,80);if(bx)state.map.fitBounds([[bx[0],bx[1]],[bx[2],bx[3]]],{padding:routeFitPadding(65),maxZoom:15.5,duration:700});}
+  if(state.mapReady&&!isFollowUp)fitRoutesInView(700);
   await loadRoutePOIs(run);
  }catch(err){
   if(run!==planner.runId)return;
@@ -132,6 +132,8 @@ function renderRouteCards(){
  $('routeCount').textContent=`${story.shown.length} WALK${story.shown.length===1?'':'S'}`;
  const weatherActive=planner.routeResponse?.weather_routing?.routing?.active;
  const usedPhotos=new Set();
+ // one walk: its card takes the full width (a lone card at 86% looked like a carousel with nothing to swipe to)
+ root.classList.toggle('single',order.filter(x=>!(x.raw&&!shownSet.has(x.id)&&!routeStory.showAll)).length<=1);
  root.innerHTML=order.map(x=>{
   const r=x.raw,st=story.stories[x.id]||{},selected=x.id===state.activeRoute,feasible=r.constraints.feasible,extra=!shownSet.has(x.id);
   x.label=st.name||r.route_name; // the map label, navigation and summary use the same name as the card

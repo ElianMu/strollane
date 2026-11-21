@@ -556,7 +556,7 @@ async function planJourney(isFollowUp=false){
   $('rankingStatus').textContent=planner.lastExplanation;
   renderRouteCards();syncMapData();updateProfile();updateWhyRoute();renderRouteEdges();renderPOIs();renderCityWalk();renderJourneyPanel();
   appendChat('assistant',planner.lastExplanation);
-  if(state.mapReady){const bx=routeBounds(state.routes,80);if(bx)state.map.fitBounds([[bx[0],bx[1]],[bx[2],bx[3]]],{padding:routeFitPadding(65),maxZoom:15.5,duration:700});}
+  if(state.mapReady)fitRoutesInView(700);
   autoVerifyMenus();cacheStopPlaces();
   loadRoutePOIs(run).catch(()=>{}); // the same nearby-places lookup an A→B plan runs; without it the panel kept saying "Generate or select a route"
  }catch(err){

@@ -2,7 +2,7 @@
 // Navigation, step 3 of the Experience-first plan:
 // - the top card names the next listed place ahead ("Next: Madison Square Park · 200 m") from the same place index the
 //   route cards use, with its distance along the route, and its photo with author and licence when one exists;
-// - the AR button says what it is ("AR · compass") and the 3D button says it is a map ("3D map preview").
+// - the AR button says what it is ("AR view", the compass in its title) and the 3D button says it is a map ("3D map preview").
 // Simulated walking (GPS fixes at walking speed) along a real engine route (local server.py); Wikimedia answers from real recorded responses.
 const { launch, newPage, openApp, shot } = require('./harness');
 const { wikimedia } = require('./wikimedia-fixture');
@@ -18,7 +18,7 @@ let failed = 0, total = 0; const check = (n, ok, d) => { total++; if (!ok) faile
   await page.waitForTimeout(1500); await page.waitForFunction(() => state.routes.length && !state.routingBusy, null, { timeout: 90000 }).catch(() => {}); await page.waitForTimeout(2500);
   const labels = await page.evaluate(() => ({ preview: $('routePreviewBtn').textContent.trim(), ar: $('navAr').textContent.trim(), arTitle: $('navAr').title }));
   check('3D button says it is a map: "3D map preview"', labels.preview === '3D map preview', labels);
-  check('AR button says it uses the compass: "AR · compass"', labels.ar === 'AR · compass' && /compass/.test(labels.arTitle), labels);
+  check('AR button says what it is ("AR view"); its title says it uses the compass', labels.ar === 'AR view' && /compass/.test(labels.arTitle), labels);
   const c0 = await page.evaluate(() => state.routes.find((r) => r.id === state.activeRoute).raw.geometry.coordinates[0]);
   await context.setGeolocation({ latitude: c0[1], longitude: c0[0], accuracy: 8 });
   await page.locator('#navStart').scrollIntoViewIfNeeded(); await page.click('#navStart'); await page.waitForTimeout(1500);

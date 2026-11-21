@@ -23,9 +23,13 @@ async function crimeMetadata(){
 }
 
 // --- catalog & tiles ---------------------------------------------------------------------------------------
-/** First visit: every connected dataset with default_visible is switched on, once. */
+/** First visit: every connected dataset with default_visible is switched on, once. On a phone only the quiet context
+    layers are (parks, landmarks, historic districts, plazas, buildings): with all 59 on, clusters of coloured counts
+    and 700 tree dots buried the walk itself. Every other layer is one tap away in Map layers. */
+const URBAN_PHONE_DEFAULTS=new Set(['parks','natural_areas','waterfront_parks','community_gardens','pedestrian_plazas','landmarks','historic_districts','building_footprints','building_heights']);
 function applyUrbanDefaults(c){if(urbanData.defaultsApplied)return;urbanData.defaultsApplied=true;
- for(const d of c.datasets)if(d.status==='CONNECTED'&&d.default_visible!==false)toggleUrbanDataset(d.id,true,true);renderActiveCount();renderUrbanLegend();}
+ const phone=typeof window!=='undefined'&&window.matchMedia?.('(max-width:740px)').matches;
+ for(const d of c.datasets)if(d.status==='CONNECTED'&&d.default_visible!==false&&(!phone||URBAN_PHONE_DEFAULTS.has(d.id)))toggleUrbanDataset(d.id,true,true);renderActiveCount();renderUrbanLegend();}
 async function ensureUrbanCatalog(){
  if(urbanData.catalog)return urbanData.catalog;
  urbanData.loading=urbanData.loading||streetwiseJson('./data/layers/catalog.json',{cache:'no-cache',signal:AbortSignal.timeout(20000)}); // revalidate: GitHub Pages lets browsers reuse it for 10 minutes

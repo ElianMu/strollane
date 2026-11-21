@@ -67,8 +67,11 @@ function render(d) {
       <table><tbody>
         <tr><td>Extra distance worth it</td><td class="num">yes ${d.worth_detour.yes} · no ${d.worth_detour.no} · no detour ${d.worth_detour['no-detour']}</td></tr>
         <tr><td>Walk-along: which of two walks fitted better</td><td class="num">recommended ${d.compared_with_shortest.this} · shortest ${d.compared_with_shortest.shortest} · no difference ${d.compared_with_shortest.same}</td></tr>
-        <tr><td>Answers with a comment (comments are read in the data, not shown here)</td><td class="num">${d.comments}</td></tr>
+        <tr><td>Answers with a comment</td><td class="num">${d.comments}</td></tr>
       </tbody></table></section>
+    <section><h2>What walkers wrote · 步行者评论</h2>
+      ${(d.recent_comments || []).length ? `<ul class="comments">${d.recent_comments.map((c) => `<li><p>${esc(c.comment)}</p><small>${c.overall ? `${'★'.repeat(c.overall)}${'☆'.repeat(5 - c.overall)} · ` : ''}${esc(TYPE_LABEL[c.user_type] || c.user_type || '')} · ${esc(c.date)}</small></li>`).join('')}</ul>` : '<div class="status">No comment yet.</div>'}
+      <p class="sub">The ${(d.recent_comments || []).length} newest, as written (e-mail addresses, links and phone numbers removed).</p></section>
     <section><h2>Missing values · 缺失值</h2>
       <table><tbody>${Object.entries(d.missing).map(([k, v]) => `<tr><td>${esc(k.replace(/_/g, ' '))}</td><td class="num">${v} of ${d.n}</td></tr>`).join('')}</tbody></table>
       <p class="sub">Score builds in these answers: ${d.score_versions.map(esc).join(', ') || '—'}.</p></section>

@@ -2,7 +2,7 @@
    never cover another place, and a crowded corner still gets its card. Numbers from a real Harlem City Walk
    (Columbia → Apollo Theater, 1440×900 desktop, legend open). */
 const assert=require('node:assert/strict');
-const {calloutPlace,calloutArrange}=require('../map-callouts.js');
+const {calloutPlace,calloutArrange,calloutAnchor}=require('../map-callouts.js');
 const box={x0:10,y0:10,x1:649,y1:798,obstacles:[{x:458,y:429,w:236,h:363},{x:18,y:762,w:182,h:31},{x:18,y:16,w:205,h:41},{x:165,y:70,w:115,h:35},{x:266,y:16,w:380,h:46}]};
 const pts=[[175,475],[233,504],[453,318],[603,389]];
 const order=pts.map(([x,y],i)=>({a:{x,y},it:{rank:i+1},w:132,h:i===3?148:176}));
@@ -22,4 +22,10 @@ assert.equal(calloutPlace({x:30,y:30},[],[],{x0:10,y0:10,x1:60,y1:60,obstacles:[
 {const b={x0:0,y0:0,x1:500,y1:500,obstacles:[]};
  const kept=calloutPlace({x:200,y:200},[],[],b,100,80,64,[],{dx:-170,dy:-100});assert.deepEqual([kept.x,kept.y],[30,100]);
  const moved=calloutPlace({x:200,y:200},[],[],b,100,80,64,[],{dx:-260,dy:-100});assert(moved.x>=0,'off-map spot is not kept');}
+// the leader line leaves the card at the middle of the side facing the place, never from a corner
+{const card=[100,100,120,100];
+ assert.deepEqual(calloutAnchor({x:400,y:150},...card),[220,150],'place to the right: right side, at its height');
+ assert.deepEqual(calloutAnchor({x:160,y:400},...card),[160,200],'place below: bottom side');
+ assert.deepEqual(calloutAnchor({x:400,y:400},...card),[206,200],'diagonal: the side it faces most, kept clear of the rounded corner');
+ assert.deepEqual(calloutAnchor({x:-200,y:90},...card),[100,114]);}
 console.log('map-callouts: ok');

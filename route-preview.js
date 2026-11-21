@@ -23,6 +23,8 @@ function previewBuild(){
  q('rpClose').addEventListener('click',previewStop);
  preview.els.play.addEventListener('click',()=>previewSetPlaying(!preview.playing));
  preview.els.speed.addEventListener('click',()=>{preview.speed={1:2,2:4,4:1}[preview.speed];preview.els.speed.textContent=`${preview.speed}×`;});
+ // a quick second tap is a speed change, never a zoom of the page or the map (iPhone double-tap zoom)
+ for(const el of [preview.els.speed,preview.els.play,root.querySelector('.rp-bar')].filter(Boolean))el.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();});
  preview.els.scrub.addEventListener('input',e=>{preview.s=e.target.value/1000*preview.eng.netLen;previewSetPlaying(false);previewApply(true);});
  document.addEventListener('keydown',e=>{if(!preview.on)return;if(e.key==='Escape')previewStop();else if(e.key===' '&&e.target===document.body){e.preventDefault();previewSetPlaying(!preview.playing);}});
  return preview.els;

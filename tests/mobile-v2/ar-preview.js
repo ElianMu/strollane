@@ -118,7 +118,7 @@ const tilt = async (page, beta) => {
   // The setting lives in More and is remembered.
   await page.evaluate(() => strollaneAr.setRaise(false)); await tilt(page, 20); await tilt(page, 86);
   const off = await page.evaluate(() => ({ on: strollaneAr.state.on, label: document.getElementById('navArRaise')?.textContent, saved: localStorage.getItem('strollane.ar.raise') }));
-  check('Raise to view off: lowering still leaves AR, raising does not re-open it; label + saved', off.label === 'Raise to view: off' && off.saved === '0' && !off.on, off);
+  check('Raise to view off: lowering still leaves AR, raising does not re-open it; label + saved', off.label === 'Raise: off' && off.saved === '0' && !off.on, off);
   await page.evaluate(() => strollaneAr.setRaise(true));
   // Parked camera is released when the app goes to the background.
   await tilt(page, 86); await page.evaluate(() => strollaneAr.state.on || strollaneAr.start()); await page.waitForTimeout(500); await tilt(page, 20);

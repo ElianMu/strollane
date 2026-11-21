@@ -15,6 +15,7 @@ emitted as low-confidence "check the map" notices instead of a guessed turn.
 Turn classes (|angle|): < 25° straight · 25–50° slight · 50–120° turn · 120–165° sharp · ≥ 165° U-turn.
 """
 import math
+import re
 
 MX, MY = 84414.3, 111049.7
 WINDOW_M, MERGE_M, NOTICE_GAP_M = 12.0, 12.0, 2.0
@@ -92,9 +93,24 @@ def pretty_street(name):
     return ' '.join(out)
 
 
+# OSM names that only say what kind of way it is ("Pedestrian Path" in a park): no better than "the path", and
+# "the path toward Pedestrian Path" said nothing.
+GENERIC_NAME = re.compile(r'^(?:the )?(?:pedestrian (?:path|walkway|way|bridge)|foot ?path|footway|path|walkway|walk|trail|sidewalk|'
+                          r'promenade|esplanade|stairs?|steps|crosswalk|pathway|bike path|shared path|greenway path)$', re.I)
+
+
+def toward_name(label):
+    """The name to give in "toward …", or None: a sidewalk called after its street gives the street ("Eastern Parkway
+    South Sidewalk" → "Eastern Parkway"); a generic name gives none."""
+    if not label:
+        return None
+    base = re.sub(r'\s+(?:(?:north|south|east|west)(?:ern)?\s+)?sidewalk$', '', label.strip(), flags=re.I)
+    return None if not base or GENERIC_NAME.match(base) else base
+
+
 def way_label(e, lang='en'):
     """(label, confidence source) for an edge: OSM name, else derived street, else the kind of way."""
-    if e.get('name'):
+    if e.get('name') and not GENERIC_NAME.match(str(e['name']).strip()):
         return e['name'], 'osm_name'
     pa = e.get('pedestrian_access') or {}
     fw = set(_as_list(pa.get('footway')))
@@ -181,8 +197,9 @@ def build(route, net, stops=None):
                 if start < s_at <= bounds[j]:
                     return stop_words(nm, final)
             lab, src = way_label(edges[j])
-            if src != 'way_type' and lab != leaving:
-                return f' toward {lab}', f'，往{lab}方向'
+            name = toward_name(lab) if src != 'way_type' else None
+            if name and name != leaving and lab != leaving:
+                return f' toward {name}', f'，往{name}方向'
         for s_at, nm, final in ends:
             if start < s_at <= start + TOWARD_M:
                 return stop_words(nm, final)

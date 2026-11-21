@@ -638,6 +638,21 @@ function routeFitPadding(base=65){
   const bottom=st>H*.3&&st<H-40?H-st:H*.5;
   return {top:Math.round(Math.min(cb+20,H*.35)),bottom:Math.round(Math.min(bottom+20,H*.6)),left:28,right:72};
 }
+/** Frame the planned walk (all its routes) in the free part of the map; on phones that is between the request card
+ * and the routes sheet. */
+function fitRoutesInView(duration=700){
+  if(!state.mapReady||!state.routes?.length)return;
+  const bx=routeBounds(state.routes,80);if(!bx)return;
+  state.mapMovedByUser=false;
+  state.map.fitBounds([[bx[0],bx[1]],[bx[2],bx[3]]],{padding:routeFitPadding(65),maxZoom:15.5,duration});
+}
+/** Phones: the walk was framed while the routes sheet was still moving (or full height), which left it small at the
+ * top of the map (zoom ~12.9 for a 1.4 km walk). When the sheet settles, frame it again, unless the walker has moved
+ * the map since. */
+function refitRoutesForSheet(){
+  if(state.mapMovedByUser||document.body.classList.contains('nav-mode')||document.body.classList.contains('preview-mode'))return;
+  fitRoutesInView(450);
+}
 /** Direction chevrons drawn inside the route line (Apple/Mapbox navigation style), one image per map theme. */
 function addRouteArrowImages(m){
   for(const [name,ink] of [['route-arrow-dark','#0B0B0B'],['route-arrow-light','#FFFFFF']]){
@@ -651,6 +666,8 @@ function setupMap(){
   try{
     const m=state.map=new maplibregl.Map({container:'map',style:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',center:CENTER,zoom:10.7,pitch:0,bearing:0,attributionControl:true});
     m.addControl(new maplibregl.NavigationControl({showCompass:true,visualizePitch:true}), 'bottom-right');
+    // a pan or zoom by the walker (not by the app) stops the app from re-framing the walk under them
+    for(const ev of ['dragstart','zoomstart','rotatestart'])m.on(ev,e=>{if(e.originalEvent)state.mapMovedByUser=true;});
     m.on('load',()=>{
       state.mapReady=true;$('mapFallback').classList.add('hidden');m.fitBounds(STUDY_BOUNDS,{padding:24,duration:0,maxZoom:11.1});
       try{state.mapTheme=localStorage.getItem('strollane.mapTheme')==='dark'?'dark':'light';}catch(e){state.mapTheme='light';}

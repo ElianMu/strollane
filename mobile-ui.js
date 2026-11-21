@@ -149,6 +149,8 @@
       panel.dataset.level = level === 'custom' ? BottomSheet.levelFor(h, geom) : level;
     }
     const open = level !== 'hidden';
+    // the routes sheet settled at a new height: frame the walk again in the map left free (app.js)
+    if (which === 'right' && open && level !== 'full' && typeof refitRoutesForSheet === 'function') { clearTimeout(setLevel.refit); setLevel.refit = setTimeout(refitRoutesForSheet, 320); }
     panel.inert = !open; panel.setAttribute('aria-hidden', String(!open));
     active = open ? which : (active === which ? null : active);
     // One sheet at a time: opening one hides every other one.
