@@ -41,17 +41,19 @@ jobs:
           # ?v= on every local script and stylesheet, and the service worker's cache name, from the files' contents
           python3 scripts/stamp_assets.py _site
       # Copies of the place photos, served with the site: straight from Wikimedia some of them came back as broken
-      # images on iPhones. Only photos the cache lacks are downloaded; if this step fails the site still works and
-      # loads those photos from Wikimedia, as before.
-      - uses: actions/cache@v4
+      # images on iPhones. place-photos.yml downloads them, a little each day, into an Actions cache; this deploy
+      # copies what the cache holds (after a 2-minute top-up). Photos not in it yet load from Wikimedia, as before.
+      - uses: actions/cache/restore@v4
         with:
           path: .thumb-cache
-          key: thumbs-${{ hashFiles('data/places/photos.json') }}
-          restore-keys: thumbs-
+          key: thumbs-${{ hashFiles('data/places/photos.json') }}-deploy
+          restore-keys: |
+            thumbs-${{ hashFiles('data/places/photos.json') }}-
+            thumbs-
       - name: Copy the place photos into _site
         continue-on-error: true
-        timeout-minutes: 20
-        run: python3 scripts/fetch_photo_thumbs.py --cache .thumb-cache --out _site/data/places/thumbs
+        timeout-minutes: 6
+        run: python3 scripts/fetch_photo_thumbs.py --cache .thumb-cache --out _site/data/places/thumbs --budget 120 --workers 2
       - name: Check the site size
         run: |
           du -sh _site _site/data/places/thumbs 2>/dev/null || true

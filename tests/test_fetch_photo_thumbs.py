@@ -4,6 +4,7 @@ import json
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 from urllib import error
 
@@ -64,9 +65,36 @@ class FetchPhotoThumbs(unittest.TestCase):
             self.assertEqual((have, total), (1, 3))
             self.assertEqual(waits, [1.0])
 
+    def test_reports_why_photos_were_not_downloaded(self):
+        def opener(req, timeout=0):
+            raise error.HTTPError('u', 403, 'forbidden', {}, None)
+        out = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, unittest.mock.patch('sys.stdout', out):
+            idx = self.index(d, ['a/aa/A.jpg/330px-A.jpg', 'b/bb/B.jpg/330px-B.jpg'])
+            fpt.build(Path(d) / 'out', None, index=idx, opener=opener, sleep=lambda s: None)
+        self.assertIn('::notice::photos: 0/2 on hand; 0 of 2 missing downloaded; tries: HTTP 403 2', out.getvalue())
+
+    def test_the_cache_folder_can_be_the_output_folder(self):
+        with tempfile.TemporaryDirectory() as d:
+            idx = self.index(d, ['8/8a/A.jpg/330px-A.jpg'])
+            for _ in range(2):
+                have, _total = fpt.build(Path(d) / 'c', Path(d) / 'c', index=idx, opener=lambda r, timeout=0: Resp(JPEG),
+                                         sleep=lambda s: None)
+                self.assertEqual(have, 1)
+
+    def test_a_daily_workflow_fills_the_cache_and_the_deploy_reads_it(self):
+        daily = (ROOT / '.github/workflows/place-photos.yml').read_text()
+        self.assertIn('actions/cache/save@v4', daily)
+        self.assertIn("key: thumbs-${{ hashFiles('data/places/photos.json') }}-${{ github.run_id }}", daily,
+                      'each run saves under a new key, so what it downloaded is kept')
+        self.assertIn('workflow_dispatch', daily)
+        deploy = (ROOT / '.github/workflows/pages.yml').read_text()
+        self.assertIn('actions/cache/restore@v4', deploy)
+        self.assertIn("thumbs-${{ hashFiles('data/places/photos.json') }}-\n", deploy.replace('\r', ''))
+
     def test_the_site_workflow_runs_it_and_keeps_wikimedia_as_fallback(self):
         wf = (ROOT / '.github/workflows/pages.yml').read_text()
-        self.assertIn('scripts/fetch_photo_thumbs.py --cache .thumb-cache --out _site/data/places/thumbs', wf)
+        self.assertIn('scripts/fetch_photo_thumbs.py --cache .thumb-cache --out _site/data/places/thumbs --budget 120', wf)
         self.assertIn('continue-on-error: true', wf)
         js = (ROOT / 'route-photos.js').read_text()
         self.assertIn("LOCAL: 'data/places/thumbs/'", js)

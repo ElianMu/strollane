@@ -11,13 +11,18 @@ The files are the same 330 px thumbnails, under their Commons licences; the cred
 Commons page) is shown with every photo as before. They are not committed: the GitHub Pages workflow runs this script,
 with a cache, so only new photos are downloaded.
 
-Usage: python3 scripts/fetch_photo_thumbs.py --out _site/data/places/thumbs [--cache .thumb-cache]
+Wikimedia throttles downloads from GitHub's machines (the first deploy got fewer than half the photos in its 15
+minutes), so the downloading is done by its own daily workflow (.github/workflows/place-photos.yml), a little more
+each run into an Actions cache; the site deploy only copies what that cache holds, after a short top-up.
+
+Usage: python3 scripts/fetch_photo_thumbs.py --out _site/data/places/thumbs [--cache .thumb-cache] [--budget S] [--workers N]
 """
 import argparse
 import json
 import shutil
 import sys
 import time
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib import error, parse, request
@@ -41,19 +46,25 @@ def disk_path(path):
     return p
 
 
-def fetch(url, opener=request.urlopen, tries=4, sleep=time.sleep):
-    """Bytes of one thumbnail, or None. Waits and tries again on 429 and 5xx (Retry-After, at most 30 s)."""
+def fetch(url, opener=request.urlopen, tries=4, sleep=time.sleep, seen=None):
+    """Bytes of one thumbnail, or None. Waits and tries again on 429 and 5xx (Retry-After, at most 60 s).
+    seen, a Counter, gets one count per attempt: 'ok', 'not an image', 'HTTP <code>' or 'network'."""
+    seen = seen if seen is not None else Counter()
     for k in range(tries):
         try:
             with opener(request.Request(url, headers={'User-Agent': UA}), timeout=30) as r:
                 body = r.read()
-                return body if body[:3] in (b'\xff\xd8\xff', b'\x89PN', b'GIF', b'RIF') else None
+                good = body[:3] in (b'\xff\xd8\xff', b'\x89PN', b'GIF', b'RIF')
+                seen['ok' if good else 'not an image'] += 1
+                return body if good else None
         except error.HTTPError as e:
+            seen[f'HTTP {e.code}'] += 1
             if e.code != 429 and e.code < 500:
                 return None
             wait = e.headers.get('Retry-After') if e.headers else None
-            sleep(min(30, float(wait) if wait and wait.isdigit() else 2 ** (k + 1)))
+            sleep(min(60, float(wait) if wait and wait.isdigit() else 2 ** (k + 2)))
         except (error.URLError, TimeoutError, OSError):
+            seen['network'] += 1
             sleep(2 ** (k + 1))
     return None
 
@@ -66,11 +77,13 @@ def build(out, cache=None, index=INDEX, opener=request.urlopen, workers=4, sleep
     paths = thumb_paths(doc)
     missing = [p for p in paths if not (store / disk_path(p)).is_file()]
     started = time.time()
+    seen = Counter()
 
     def one(p):
         if time.time() - started > budget_s:
+            seen['skipped, out of time'] += 1
             return False
-        body = fetch(base + p, opener=opener, sleep=sleep)
+        body = fetch(base + p, opener=opener, sleep=sleep, seen=seen)
         if not body:
             return False
         f = store / disk_path(p)
@@ -86,11 +99,15 @@ def build(out, cache=None, index=INDEX, opener=request.urlopen, workers=4, sleep
         if not src.is_file():
             continue
         have += 1
-        if cache:
+        if cache and Path(cache).resolve() != Path(out).resolve():
             dst = Path(out) / disk_path(p)
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(src, dst)
     print(f'{have}/{len(paths)} photo thumbnails in {out} ({len(missing) - got} not downloaded this time)')
+    if missing:
+        # An annotation, so the reason a run fell short can be read from the run summary.
+        tally = ', '.join(f'{k} {v}' for k, v in seen.most_common())
+        print(f'::notice::photos: {have}/{len(paths)} on hand; {got} of {len(missing)} missing downloaded; tries: {tally}')
     return have, len(paths)
 
 
@@ -98,8 +115,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--out', required=True, type=Path)
     ap.add_argument('--cache', type=Path)
+    ap.add_argument('--budget', type=float, default=15 * 60, help='seconds to spend downloading')
+    ap.add_argument('--workers', type=int, default=4)
     a = ap.parse_args(argv)
-    have, total = build(a.out, a.cache)
+    have, total = build(a.out, a.cache, workers=a.workers, budget_s=a.budget)
     if total and have < total * 0.5:
         print('::warning::fewer than half the photos were copied; the site falls back to Wikimedia for the rest', file=sys.stderr)
 

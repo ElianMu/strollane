@@ -1,0 +1,43 @@
+# Downloads copies of the place photos (scripts/fetch_photo_thumbs.py) into an Actions cache that the site deploy
+# (pages.yml) copies into the published site. Wikimedia throttles downloads from GitHub's machines, so each run takes
+# what it can in 40 minutes and saves it; the next run continues. Run it by hand (Actions → Fetch place photos → Run
+# workflow) after the photo index changes, then push or re-run the site deploy to publish the new copies.
+name: Fetch place photos
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: place-photos
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            data/places/photos.json
+            scripts/fetch_photo_thumbs.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/cache/restore@v4
+        with:
+          path: .thumb-cache
+          key: thumbs-${{ hashFiles('data/places/photos.json') }}-none
+          restore-keys: |
+            thumbs-${{ hashFiles('data/places/photos.json') }}-
+            thumbs-
+      - name: Download the photos the cache lacks
+        run: python3 scripts/fetch_photo_thumbs.py --out .thumb-cache --budget 2400 --workers 2
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .thumb-cache
+          key: thumbs-${{ hashFiles('data/places/photos.json') }}-${{ github.run_id }}

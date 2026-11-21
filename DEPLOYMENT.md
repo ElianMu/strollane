@@ -107,9 +107,14 @@ API from the whole repository.
 The workflow also publishes copies of the place photos (`scripts/fetch_photo_thumbs.py`: the ~1,900 330 px Commons
 thumbnails of `data/places/photos.json`, about 65 MB, into `data/places/thumbs/`). Loaded straight from
 upload.wikimedia.org some of them came back as broken images on iPhones; the browser now loads the copy first,
-Wikimedia second, and the street photo when both fail. An Actions cache keeps the copies between deploys, so only new
-photos are downloaded; if the step fails the site deploys anyway and loads those photos from Wikimedia. When the
-artifact is not found yet, the deploy step waits a minute and runs once more.
+Wikimedia second, and the street photo when both fail. Wikimedia throttles GitHub's machines (the first deploy got
+fewer than half in 15 minutes), so a separate workflow, **Fetch place photos** (`place-photos.yml`), downloads them
+into an Actions cache: daily at 07:17 UTC and by hand (Actions → Fetch place photos → Run workflow), 40 minutes a
+run, each run continuing where the last stopped. The site deploy copies whatever that cache holds after a 2-minute
+top-up, so photos fetched after a deploy appear with the next one (re-run the deploy to publish them sooner). Each
+run's summary has a notice with how many photos it has and why the rest failed (HTTP 429, 403, network). If the step
+fails the site deploys anyway and loads those photos from Wikimedia. When the artifact is not found yet, the deploy
+step waits a minute and runs once more.
 
 ## Walker feedback (routing/feedback.py)
 
