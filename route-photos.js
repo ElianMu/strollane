@@ -17,7 +17,7 @@
    Wikimedia sees the visitor's IP and the places looked up. Thumbnails are 320 px from thumb.wikimedia.org.
    Turn off with window.STROLLANE_PHOTOS = false.                                                                 */
 
-const PHOTO = {MAX_KM: 0.3, WIDTH: 320, BATCH: 50, FREE: /^(CC[ -]?BY|CC0|CC-BY|Public domain|PD)/i};
+const PHOTO = {MAX_KM: 0.3, WIDTH: 330, BATCH: 50, FREE: /^(CC[ -]?BY|CC0|CC-BY|Public domain|PD)/i};
 const routePhotos = {cache: new Map(), inflight: null, queue: new Set(), failed: false};
 
 /** Commons metadata is third-party HTML. Parse it in an inert document (DOMParser: no scripts, no image loads, no
@@ -47,6 +47,38 @@ function photoKm(a, b) { const k = Math.PI / 180, x = (b.lon - a.lon) * Math.cos
 function photosEnabled() { return typeof window !== 'undefined' && window.STROLLANE_PHOTOS !== false && typeof fetch === 'function'; }
 
 /** Photos already loaded for these places (in their order), each {wd, name, thumb, w, h, page, author, license}. */
+/** One form for every Commons thumbnail: upload.wikimedia.org, no query string. Since 2026 the API answers with
+    thumb.wikimedia.org/…?utm_source=…&utm_campaign=…; iPhone Safari's tracking protection and content blockers can
+    refuse such a URL (a broken image on the map, 2026-11-21), while the same file from upload.wikimedia.org, as in
+    data/places/photos.json, loads. */
+function photoThumbClean(url) {
+ return String(url || '').replace(/^https:\/\/thumb\.wikimedia\.org\//, 'https://upload.wikimedia.org/').replace(/[?#].*$/, '');
+}
+/** Photos that failed to load in this browser: never offered again this session (the place then gets its street
+    view, or no photo), so a broken-image icon is never left on a card or on the map. */
+const photoBroken = new Set();
+function photoOk(x) { return Boolean(x && x.thumb && !photoBroken.has(x.thumb)); }
+function photoRedraw() {
+ if (photoRedraw.t) return;
+ photoRedraw.t = setTimeout(() => {
+  photoRedraw.t = 0;
+  if (typeof journey !== 'undefined' && journey.plan && typeof renderCityWalk === 'function') renderCityWalk();
+  if (typeof state !== 'undefined' && state.routes?.length && typeof renderRouteCards === 'function') renderRouteCards();
+  if (typeof calloutsRefresh === 'function') calloutsRefresh();
+ }, 60);
+}
+if (typeof document !== 'undefined' && document.addEventListener) {
+ document.addEventListener('error', (e) => {
+  const img = e.target;
+  if (!img || img.tagName !== 'IMG' || !img.closest || !img.closest('.rp-photo, .map-callout')) return;
+  const src = img.getAttribute('src');
+  if (!src || photoBroken.has(src)) return;
+  photoBroken.add(src);
+  const fig = img.closest('figure');
+  if (fig && !fig.classList.contains('map-callout')) fig.remove();
+  photoRedraw();
+ }, true);
+}
 function photosFor(places) {
  return (places || []).map((p) => { const x = routePhotos.cache.get(p.wd); return x && x.thumb ? {...x, name: p.name} : null; }).filter(Boolean);
 }
@@ -84,7 +116,7 @@ async function photosFetch(places) {
   const info = page.imageinfo?.[0], m = info?.extmetadata || {};
   const license = photoStrip(m.LicenseShortName?.value), author = photoAuthorOf(m) || (/public domain|^PD|^CC0/i.test(license) ? '' : null); // no author → only public domain / CC0 can be shown
   if (!info?.thumburl || !PHOTO.FREE.test(license) || author == null) { routePhotos.cache.set(id, {none: true}); continue; }
-  routePhotos.cache.set(id, {wd: id, thumb: info.thumburl, w: info.thumbwidth, h: info.thumbheight, page: info.descriptionurl, author: author.slice(0, 80), license, licenseUrl: m.LicenseUrl?.value || null});
+  routePhotos.cache.set(id, {wd: id, thumb: photoThumbClean(info.thumburl), w: info.thumbwidth, h: info.thumbheight, page: info.descriptionurl, author: author.slice(0, 80), license, licenseUrl: m.LicenseUrl?.value || null});
   found = true;
  }
  for (const t of titles) if (!routePhotos.cache.has(want[t])) routePhotos.cache.set(want[t], {none: true});
@@ -193,16 +225,17 @@ const placeStreetPhotos = {cache: new Map(), asked: new Set(), inflight: false, 
 /** The photo to show for one place {id, wd?, name, lat, lon}, or null (not found yet, or none). */
 function placePhoto(p) {
  if (!p) return null;
- const ix = photoFromIndex(p.id, p.name); if (ix) return ix;
+ const ix = photoFromIndex(p.id, p.name); if (photoOk(ix)) return ix;
  const wd = photoIdFor(p);
- if (wd) { const x = routePhotos.cache.get(wd); if (x && x.thumb) return {kind: 'commons', ...x, name: p.name}; }
- const st = placeStreetPhotos.cache.get(p.id); return st ? {...st, name: p.name} : null;
+ if (wd) { const x = routePhotos.cache.get(wd); if (photoOk(x)) return {kind: 'commons', ...x, name: p.name}; }
+ const st = placeStreetPhotos.cache.get(p.id); return photoOk(st) ? {...st, name: p.name} : null;
 }
 /** Has every Wikimedia route been tried for this place, with nothing found? */
 function photoWikimediaNone(p) {
- if (!photoIndex.doc || photoIndex.doc.items?.[p.id]) return false;
+ if (!photoIndex.doc) return false;
+ if (photoIndex.doc.items?.[p.id]) return !photoOk(photoFromIndex(p.id, p.name)); // its photo would not load here
  const wd = photoIdFor(p);
- if (wd) return Boolean(routePhotos.cache.get(wd)?.none);
+ if (wd) { const x = routePhotos.cache.get(wd); return Boolean(x?.none || (x?.thumb && !photoOk(x))); }
  return photoIds.cache.has(p.id) && photoIds.cache.get(p.id) == null;
 }
 /** Start whatever loading these places still need; `done` runs when new photos arrive (call again from it). */

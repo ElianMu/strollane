@@ -13,8 +13,8 @@ const fake=(url)=>{calls.push(url);let body;
  return Promise.resolve({json:()=>Promise.resolve(body)});};
 class DP{parseFromString(h){const t=String(h).replace(/<[^>]+>/g,'');return{body:{textContent:t,querySelectorAll:()=>[],querySelector:()=>({textContent:t})}};}}
 const ctx={window:{},fetch:fake,DOMParser:DP,console,Map,Set,Promise,AbortSignal};ctx.window=ctx;vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(__dirname,'..','route-photos.js'),'utf8')+';this.api={photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName,placePhotosEnsure,placePhoto};',ctx);
-const {photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName,placePhotosEnsure,placePhoto}=ctx.api;
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','route-photos.js'),'utf8')+';this.api={photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName,placePhotosEnsure,placePhoto,photoThumbClean,photoBroken};',ctx);
+const {photosResolve,photosFor,photoIdFor,photoSearchNames,photoSameName,placePhotosEnsure,placePhoto,photoThumbClean,photoBroken}=ctx.api;
 assert.ok(photoSameName('Church of St. Joseph of the Holy Family',"St. Joseph of the Holy Family's Church"));
 assert.ok(!photoSameName("St. Mary's Protestant Episcopal Church, Parish House, and Sunday School",'Sheltering Arms Park'));
 assert.ok(!photoSameName('Church of St. Joseph of the Holy Family','Holy Name Church'),'one shared word is not enough');
@@ -41,6 +41,11 @@ setTimeout(()=>{
    assert.equal(asked.length,1,'asked the API host once');assert.equal(asked[0][0],'/api/place-photos');assert.equal(asked[0][1].places[0].id,'osm:node/1');
    const ph=placePhoto(cafe);assert.equal(ph&&ph.kind,'street','street-level photo shown');assert.equal(ph.author,'walker');
    assert(renders<20,'no endless redraw');
+   // a photo that failed to load is not offered again (no broken-image icon on a card or on the map)
+   photoBroken.add('https://images.example/t.jpg');assert.equal(placePhoto(cafe),null,'broken photo dropped');photoBroken.clear();
+   // thumbnails from the Commons API: one host, no tracking parameters (iPhone Safari refused the other form)
+   assert.equal(photoThumbClean('https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/George_Bruce_Library_HDR_2022_jeh.jpg/330px-George_Bruce_Library_HDR_2022_jeh.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail'),
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/George_Bruce_Library_HDR_2022_jeh.jpg/330px-George_Bruce_Library_HDR_2022_jeh.jpg');
    console.log('stop-photos: ok');},80);
  },20);
 },50);
