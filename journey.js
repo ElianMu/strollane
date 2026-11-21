@@ -143,18 +143,57 @@ async function foodRecordsNearPath(cats,path,radiusKm,cuisine){
  }
  return [...found.values()];
 }
-async function findNamedPlace(name){
+/* A name several places share ("Grand Army Plaza" is a plaza in Manhattan and another in Brooklyn): with a reference
+   point `near` (the other end of the walk, else the map's centre), the one nearest to it. The theme lists alone missed
+   the Brooklyn one (it is only in the citywide search), so when the best list match is more than 3 km from `near`, the
+   citywide search is asked too. 2026-11-21: "From Grand Army Plaza to Brooklyn Bridge Park" started in Manhattan.
+   "…, Brooklyn" / "布鲁克林的…" names the borough. The other same-name places are kept on the result (`alsoAt`), so the
+   walker can be told which one was used. */
+const BORO_HINTS=[[/(?:,\s*|\s+in\s+|\s*\()(brooklyn|queens|manhattan)\)?\s*$/i,null],[/^(布鲁克林|皇后区|曼哈顿)的?\s*/,null]];
+const BORO_ZH={'布鲁克林':'Brooklyn','皇后区':'Queens','曼哈顿':'Manhattan'};
+function nameBoroughHint(name){
+ const a=BORO_HINTS[0][0].exec(name);if(a)return {name:name.slice(0,a.index).trim(),boro:titleCase(a[1])};
+ const b=BORO_HINTS[1][0].exec(name);if(b)return {name:name.slice(b[0].length).trim(),boro:BORO_ZH[b[1]]};
+ return {name,boro:null};
+}
+const NAMED_FAR_KM=3,NAMED_SAME_KM=1;
+async function findNamedPlace(name,near=null){
  // Index first (real records with provenance), then the five-borough search providers.
  // An exact name anywhere in the index beats a longer name that merely starts with it ("Union Square" is the square,
  // not "Union Square Drinking Fountain"); among longer names the shortest wins, Wikidata-linked records first.
- const n=normName(name),exact=[],longer=[];
- for(const c of ['attractions','museums','historic','historic_lpc','culture','parks','hotels','shopping']){
-  for(const r of await loadPlaces(c).catch(()=>[])){const rn=normName(r.name);if(rn===n)exact.push(r);else if(rn.startsWith(n+' '))longer.push(r);}
- }
+ const lookup=async(nm)=>{const n=normName(nm),exact=[],longer=[];
+  for(const c of ['attractions','museums','historic','historic_lpc','culture','parks','hotels','shopping']){
+   for(const r of await loadPlaces(c).catch(()=>[])){const rn=normName(r.name);if(rn===n)exact.push(r);else if(rn.startsWith(n+' '))longer.push(r);}
+  }
+  return {n,exact,longer};};
+ let {n,exact,longer}=await lookup(name),boro=null;
+ if(!exact.length){const h=nameBoroughHint(name);if(h.boro&&h.name){boro=h.boro;({n,exact,longer}=await lookup(h.name));name=h.name;}}
+ const inBoro=(p)=>!boro||(p.boro||p.borough||(p.search_only?null:'Manhattan'))===boro;
+ exact=exact.filter(inBoro);longer=longer.filter(inBoro);
  const pick=(a)=>a.sort((x,y)=>Boolean(y.wd)-Boolean(x.wd)||x.name.length-y.name.length)[0];
- const hit=exact.length?pick(exact):pick(longer);
- if(hit)return poiPlace(hit);
- try{const {places}=await searchPlaces(name,{near:{lat:40.758,lon:-73.985},limit:3});return places.find(p=>!p.pending)||null;}catch(e){return null;}
+ let best=exact.length?poiPlace(pick(exact)):longer.length?poiPlace(pick(longer)):null;
+ const same=exact.map(poiPlace);
+ if(near||!best||boro){
+  if(!best||boro||(near&&haversineKm(best,near)>NAMED_FAR_KM)){
+   try{const {places}=await searchPlaces(name,{near:near||{lat:40.758,lon:-73.985},limit:6});
+    for(const p of places)if(!p.pending&&normName(p.name)===n&&inBoro(p))same.push(p);
+    if(!best)best=places.find(p=>!p.pending&&inBoro(p))||null;
+   }catch(e){}
+  }
+  const ref=near||best;
+  const spread=same.filter(p=>best&&haversineKm(p,best)>NAMED_SAME_KM);
+  if(ref&&same.length&&(spread.length||!best))best=same.slice().sort((a,b)=>haversineKm(a,ref)-haversineKm(b,ref))[0];
+ }
+ if(!best)return null;
+ const others=[];for(const p of same)if(haversineKm(p,best)>NAMED_SAME_KM&&!others.some(o=>haversineKm(o,p)<=NAMED_SAME_KM))others.push(p);
+ return others.length?{...best,alsoAt:others.map(p=>p.borough||p.neighborhood||'elsewhere')}:best;
+}
+function mapCentre(){try{const c=state.map?.getCenter();return c?{lat:c.lat,lon:c.lng}:null;}catch(e){return null;}}
+/** The note when a name had several places: "“Grand Army Plaza” is also in Brooklyn; I used the one in Manhattan." */
+function namedPlaceNote(asked,p){
+ if(!p?.alsoAt?.length)return null;
+ const here=p.borough||p.neighborhood||'the one chosen';
+ return `“${asked}” is also in ${[...new Set(p.alsoAt)].join(' and ')}; I used the one in ${here}. Say “${asked}, ${p.alsoAt[0]}” for the other.`;
 }
 
 /* ---------- language: local fallback parser (labelled), same output shape as the LLM's `journey` ---------- */
@@ -279,12 +318,19 @@ async function applyJourney(j){
  for(const f of j.food){const same=journey.food.findIndex(x=>x.category===f.category);if(same>=0)journey.food[same]=f;else journey.food.push(f);
   changes.push(f.item?`${f.item} (${f.category})`:f.cuisine?`${f.cuisine} ${f.category}`:f.category);}
  for(const s of j.services){if(!journey.services.some(x=>x.type===s)){journey.services.push({type:s,scope:j.service_scope||'near_start',addAsStop:Boolean(j.service_stop)});changes.push(SERVICE_LABEL[s]+(j.service_stop?' (stop)':''));}}
+ // the named ends first, each with the other as its reference point (then the map's centre): same-name places
+ const fixedOrigin=j.origin&&!['gps','hotel'].includes(j.origin);
+ const gpsNear=j.origin==='gps'&&state.gps?{lat:state.gps.lat,lon:state.gps.lon}:null;
+ let destP=j.destination?await findNamedPlace(j.destination,gpsNear||mapCentre()):null;
+ const origP=fixedOrigin?await findNamedPlace(j.origin,destP||mapCentre()):null;
+ if(destP?.alsoAt&&origP)destP=await findNamedPlace(j.destination,origP);
+ for(const [asked,p] of [[j.origin,origP],[j.destination,destP]]){const note=fixedOrigin||asked===j.destination?namedPlaceNote(asked,p):null;if(note)appendChat('assistant',note);}
  // a stop is a place between the ends: the start or the destination is never also added as a stop
  const endNames=[j.origin,j.destination,getPlace('start')?.name,journey.endMode==='fixed'?getPlace('end')?.name:null].filter(x=>x&&!['gps','hotel'].includes(x)).map(normName);
  for(const n of j.named_stops){
   if(journey.named.some(x=>normName(x.place.name)===normName(n.name)))continue;
   if(endNames.includes(normName(n.name)))continue;
-  const p=await findNamedPlace(n.name);
+  const p=await findNamedPlace(n.name,origP||destP||getPlace('start')||mapCentre());
   if(!p){if(n.required!==false&&!journey.unresolved.includes(n.name))journey.unresolved.push(n.name);changes.push(`“${n.name}” not found in NYC place data`);continue;}
   if(journey.named.some(x=>x.place.id===p.id)||endNames.includes(normName(p.name)))continue; // two names for one place ("The Met" / "Metropolitan Museum of Art")
   journey.unresolved=journey.unresolved.filter(name=>normName(name)!==normName(n.name));
@@ -292,8 +338,8 @@ async function applyJourney(j){
  }
  if(j.origin==='hotel'){if(journey.hotel){setJourneyPlace('start',journey.hotel);changes.push('start: my hotel');}else changes.push('start: my hotel (set your hotel first)');}
  else if(j.origin==='gps'){if(state.gps){state.start='gps';$('searchStart').value='My current location';changes.push('start: my location');}else changes.push('start: GPS (allow location first)');}
- else if(j.origin){const p=await findNamedPlace(j.origin);if(p){setJourneyPlace('start',p);changes.push(`start: ${p.name}`);}}
- if(j.destination){const p=await findNamedPlace(j.destination);if(p){setJourneyPlace('end',p);setEndMode('fixed');changes.push(`end: ${p.name}`);}}
+ else if(j.origin){const p=origP;if(p){setJourneyPlace('start',p);changes.push(`start: ${p.name}`);}}
+ if(j.destination){const p=destP;if(p){setJourneyPlace('end',p);setEndMode('fixed');changes.push(`end: ${p.name}`);}}
  if(j.end_mode&&j.end_mode!=='fixed'){setEndMode(j.end_mode);changes.push({hotel:'end: back to my hotel',round:'end: back to start',open:'flexible end'}[j.end_mode]);}
  // discovery never drops a destination: with one set, discovered stops go along the way
  else if(journey.active&&!j.destination&&journey.endMode==='fixed'&&(j.interests.length||Object.keys(j.more||{}).length)&&!getPlace('end')){setEndMode('open');changes.push('flexible end (discover for me)');}

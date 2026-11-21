@@ -149,6 +149,19 @@ const run=s=>vm.runInContext(s,context);
   if(url.startsWith('./data/layers/')||url.startsWith('./data/places/')){const f=path.join(root,url.slice(2));return fs.existsSync(f)?resp(fs.readFileSync(f,'utf8')):resp('<!DOCTYPE html><title>404</title>',404,'text/html');}
   if(url.endsWith('/api/navigation/progress'))return resp({state:'off_route',distance_from_route_m:82,remaining_m:700,remaining_min:9,reroute_recommended:true});
   throw new Error('Network intentionally blocked in DOM test')};
+ // A name two places share: the one nearest the other end of the walk (2026-11-21: "From Grand Army Plaza to
+ // Brooklyn Bridge Park" started at Manhattan's Grand Army Plaza). The Brooklyn plaza comes from the citywide search.
+ {const keep=w.fetch;w.fetch=async(url,opt)=>{url=String(url);
+   if(url.startsWith('https://photon.komoot.io/'))return resp({features:[{properties:{name:'Grand Army Plaza',osm_type:'W',osm_id:2,osm_key:'place',osm_value:'square',district:'Brooklyn',city:'New York',state:'New York'},geometry:{coordinates:[-73.97092,40.67383]}}]});
+   if(url.startsWith('https://geosearch.planninglabs.nyc/'))return resp({features:[]});
+   return keep(url,opt);};
+  const bk=await run("findNamedPlace('Grand Army Plaza',{lat:40.7023,lon:-73.9963})");
+  assert(bk&&bk.lat<40.7,'the Brooklyn plaza when the other end is Brooklyn Bridge Park');assert.equal(JSON.stringify(bk.alsoAt),'["Manhattan"]');
+  const mh=await run("findNamedPlace('Grand Army Plaza',{lat:40.7812,lon:-73.9665})");
+  assert(mh&&mh.lat>40.76,'the Manhattan plaza when the other end is Central Park');
+  const named=await run("findNamedPlace('Grand Army Plaza, Brooklyn')");assert(named&&named.lat<40.7,'"…, Brooklyn" names the borough');
+  assert.equal(run("zhChat(namedPlaceNote('Grand Army Plaza',{borough:'Brooklyn',alsoAt:['Manhattan']}))"),'“Grand Army Plaza”在曼哈顿也有一个，这次用的是布鲁克林的。想换成另一个，可以说“Grand Army Plaza, Manhattan”。');
+  w.fetch=keep;}
  // No preset ends any more (start = GPS or the request, destination optional): this fixture walk sets its own.
  run("state.start='bryant';state.end='columbia';$('searchStart').value='Bryant Park';$('searchEnd').value='Columbia University'");
  run("planner.weights.Nature=90;planner.origins.Nature='manual';planner.directions.Nature='high';setBudget(72);planner.maxDetourPct=25");
@@ -226,11 +239,11 @@ const run=s=>vm.runInContext(s,context);
   run("exploreMap.active=false;setSidePanel('right',true);applyRouteResponse(planner.routeResponse)");assert(!cl.contains('right-collapsed'),'new walks reveal the walk panel');
   run("exploreMap.active=true;setSidePanel('right',true);applyRouteResponse(planner.routeResponse)");assert(cl.contains('right-collapsed'),'Explore keeps the map wide');
   w.KEEP=keep;run("{const [a,l,r,id]=JSON.parse(KEEP);exploreMap.active=a;sidePanels.left=l;sidePanels.right=r;applySidePanels();state.activeRoute=id;}");}
- // The numbers behind the card's "why" sentence, on the selected card (not only inside Technical details):
- // priority score, the shortest route's score, and the indicators it is measured by.
+ // The numbers behind the card's "why" sentence, one tap away in the card's Details (since 2026-11-21 not on the card
+ // face, where they read as a formula): priority score, the shortest route's score, and the indicators.
  run('renderRouteCards()');
- const basisEls=[...w.document.querySelectorAll('.route-card .rc-basis')];assert.equal(basisEls.length,1,'only the selected card carries the numbers');
- const basisEl=basisEls[0];assert.equal(basisEl.closest('.route-card').dataset.route,best.route_id);
+ assert.equal(w.document.querySelectorAll('.route-card .route-pick .rc-basis').length,0,'the card face shows no score formula');
+ const basisEl=w.document.querySelector(`.route-card[data-route="${best.route_id}"] details.route-numbers .rc-basis`);assert(basisEl,'the numbers are in Details');
  assert(basisEl.textContent.includes(`${best.dimension_scores.Nature}`)&&basisEl.textContent.includes('Based on:'));
  assert(basisEl.textContent.includes(basis.dimensions.Nature.find(x=>x.role==='up').label));
  if(fxShortest&&fxShortest!==best)assert(basisEl.textContent.includes(`shortest route ${fxShortest.dimension_scores.Nature}`));
