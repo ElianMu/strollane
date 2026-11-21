@@ -31,6 +31,14 @@ const journey={
  autoInterests:[],         // interests WE recommended because no destination was given (dropped once one is)
  autoOuting:null,          // the outing length WE chose for that recommendation (the user's own time always wins)
 };
+/** A new request typed into the home box starts from nothing: on the live site a failed "coffee" walk left its café
+    (and the café search) in place, so the next, coffee-free request still planned a coffee stop. The start and the
+    destination the user set stay; the next message's history starts empty. */
+function startFreshRequest(){
+ Object.assign(journey,{interests:[],requirements:{},counts:{},unresolved:[],food:[],services:[],named:[],extra:{},removed:new Set(),replaced:{},
+  autoInterests:[],autoOuting:null,lastFound:null});
+ if(typeof planner!=='undefined'){planner.conversations=[];for(const id of ['chatHistory','chatLog'])if(document.getElementById(id))document.getElementById(id).innerHTML='';}
+}
 const POI_CACHE={};
 // Typical short-visit estimates (minutes); always shown as estimates and editable per stop.
 const VISIT_MIN={museums:45,attractions:20,historic:10,historic_lpc:10,parks:20,culture:20,shopping:25,cafes:15,bakeries:10,restaurants:45,bars:30,
@@ -595,7 +603,9 @@ async function recommendFood(f,cats,start,end){
   const d=await r.json();if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);
   if(d.status==='blocked_by_provider_access')appendChat('assistant','Requested review evidence is unavailable: no rating provider is configured. No candidate will be called highly rated.');
   const keep=d.candidates.filter(c=>c.classification==='meets_request').slice(0,6);
-  for(const c of keep){const id=c.place.index_id||c.place.place_id;journey.recs[id+'|'+f.item]=c;if(c.menu&&c.menu.status!=='not_checked')journey.menu[id+'|'+f.item]=c.menu;}
+  for(const c of keep){const id=c.place.index_id||c.place.place_id;journey.recs[id+'|'+f.item]=c;
+   if(c.item_status==='coffee_shop_tag')journey.menu[id+'|'+f.item]={status:'coffee_shop_tag',reason:'A coffee shop by its OpenStreetMap listing; the menu was not read.'};
+   else if(c.menu&&c.menu.status!=='not_checked')journey.menu[id+'|'+f.item]=c.menu;}
   return keep.map(c=>({id:c.place.index_id||c.place.place_id,name:c.place.name,lat:c.place.coordinates.lat,lon:c.place.coordinates.lon,category:c.place.category,
    address:c.place.address,hours:c.place.opening_hours,source:c.place.data_sources.join(' + '),score:{meets_request:1,needs_review:.6,not_confirmed:.2}[c.classification],
    evidence:[c.explanation.interpretation,...c.explanation.verified_facts].join(' · ')}));
@@ -652,7 +662,7 @@ async function placeById(id){
  for(const c of Object.keys(POI_CACHE)){const r=(await POI_CACHE[c]).find(x=>x.id===id);if(r)return poiPlace(r);}
  return null;
 }
-const MENU_LABEL={confirmed_menu_match:'Confirmed menu match',probable_match_review:'Probable match — review needed',unverified:'Unverified',not_found_in_checked_sources:'Not found in checked sources',checking:'Checking official menu…'};
+const MENU_LABEL={confirmed_menu_match:'Confirmed menu match',coffee_shop_tag:'Coffee shop',probable_match_review:'Probable match — review needed',unverified:'Unverified',not_found_in_checked_sources:'Not found in checked sources',checking:'Checking official menu…'};
 
 /* ---------- nearby / along-route search (find, without adding) ---------- */
 async function findServices(type,scope){

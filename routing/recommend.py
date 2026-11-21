@@ -18,7 +18,7 @@ from . import menu, providers
 from .engine import WALK_SPEED_M_PER_MIN, RoutingError
 from .places import store, _metres
 
-EVIDENCE_RANK = {'confirmed_menu_match': 0, 'probable_match_review': 1, 'unverified': 2, 'not_checked': 2, 'not_found_in_checked_sources': 3, None: 2}
+EVIDENCE_RANK = {'confirmed_menu_match': 0, 'coffee_shop_tag': 0.5, 'probable_match_review': 1, 'unverified': 2, 'not_checked': 2, 'not_found_in_checked_sources': 3, None: 2}
 CHECK_LIMIT, WORKERS, DEADLINE_S = 6, 3, 10   # Shared remaining-time budget, including queued checks.
 GRACE_S = 15   # extra wait, only while no check has confirmed the item yet (a walk with no match fails)
 
@@ -175,8 +175,10 @@ def recommend_food(planner, doc):
             excluded.append('not reachable on the walking network')
         if max_detour is not None and detour_m is not None and detour_m / WALK_SPEED_M_PER_MIN > max_detour:
             excluded.append(f'detour {detour_m / WALK_SPEED_M_PER_MIN:.0f} min exceeds {max_detour:g} min')
+        if item and status != 'confirmed_menu_match' and menu.shop_serves(c['place_id'], item):
+            status = 'coffee_shop_tag'
         if item:
-            meets = 'meets_request' if status == 'confirmed_menu_match' else 'needs_review' if status == 'probable_match_review' else 'not_confirmed'
+            meets = 'meets_request' if status in ('confirmed_menu_match', 'coffee_shop_tag') else 'needs_review' if status == 'probable_match_review' else 'not_confirmed'
         else:
             meets = 'meets_request'
         results.append({'place': {k: c[k] for k in ('place_id', 'index_id', 'name', 'category', 'address', 'borough', 'coordinates', 'official_website', 'opening_hours',
@@ -209,6 +211,8 @@ def explain(r, item):
     if item and m.get('status') == 'confirmed_menu_match':
         price = f", listed at ${m['price']:.2f}" if m.get('price') else ''
         facts.append(f"“{m.get('matched_item')}” is on the official menu ({m.get('menu_source_url')}){price}; checked {m.get('checked_at')}.")
+    if item and r.get('item_status') == 'coffee_shop_tag':
+        facts.append(f"A coffee shop by its OpenStreetMap listing, so it serves {item}; the menu itself was not read.")
     if insp.get('grade'):
         facts.append(f"NYC Health inspection grade {insp['grade']} ({insp.get('grade_date')}); last inspected {insp.get('last_inspection')}.")
     for rt in (r.get('ratings') or {}).get('ratings', []):
@@ -219,14 +223,15 @@ def explain(r, item):
         derived.append(f"Adds {r['detour_m']:.0f} m / {r['detour_min']:.0f} min of walking on the pedestrian network.")
     if r.get('open_at_arrival') is True:
         derived.append(f"Open at the estimated arrival {r['eta'][11:16]} according to its mapped hours.")
-    if item and m.get('status') != 'confirmed_menu_match':
+    if item and m.get('status') != 'confirmed_menu_match' and r.get('item_status') != 'coffee_shop_tag':
         unknown.append(f"Whether it serves {item}: {m.get('reason') or 'no official menu could be checked'}")
     if not (r.get('ratings') or {}).get('ratings'):
         unknown.append('Ratings and review counts: no rating provider is configured.' if (r.get('ratings') or {}).get('status') == 'blocked_by_provider_access' else 'Ratings: not available.')
     if r.get('open_at_arrival') is None:
         unknown.append('Opening hours at arrival: not mapped or not machine-readable.')
     unknown.append('Today’s stock and prices: a menu listing does not confirm them.')
-    interp = ('Recommended: the requested item is confirmed and the detour is short.' if r['classification'] == 'meets_request' and item else
+    interp = ('Recommended: a coffee shop with a short detour.' if r.get('item_status') == 'coffee_shop_tag' else
+              'Recommended: the requested item is confirmed and the detour is short.' if r['classification'] == 'meets_request' and item else
               'Possible match: please review the menu evidence.' if r['classification'] == 'needs_review' else
               'Listed for reference only: it does not meet the request on current evidence.' if r['classification'] == 'not_confirmed' else
               'Excluded: ' + '; '.join(r['excluded_because']) if r['classification'] == 'excluded' else 'Matches the requested kind of place.')

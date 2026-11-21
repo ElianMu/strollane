@@ -14,6 +14,9 @@ const STUDY_AREAS = [
   {id: 'lic', label: 'Queens', box: [-73.9630, 40.5410, -73.7000, 40.8010]},  // all of Queens; id kept from the first (LIC-only) box
 ];
 const STUDY_BOUNDS = [[-74.042, 40.541], [-73.700, 40.883]];
+// The first view: Manhattan below Central Park and the Brooklyn waterfront, where most walks are asked for. The whole
+// study area (STUDY_BOUNDS) opened at zoom 9.5 on phones, Yonkers to the Rockaways with Manhattan a sliver.
+const HOME_BOUNDS = [[-74.022, 40.700], [-73.948, 40.782]];
 const STUDY_AREA_NAME = 'Manhattan, Brooklyn and Queens';
 const STREET_PAGE_SIZE = 1750;
 const OVERLAY_PAGE_SIZE = 1600;
@@ -361,7 +364,7 @@ function zhChatParts(text){
 function zhChat(t){let s=String(t||'');for(const [re,to] of ZH_CHAT)s=s.replace(re,to);return s;}
 function appendChat(role,message){
   planner.conversations.push({role,content:message,tech:role==='assistant'&&TECH_CHAT.test(message)});$('conversationSection').classList.remove('hidden');
-  const row=m=>`<div class="chat-message ${m.role==='user'?'user-message':'assistant-message'}"><div class="chat-name">${m.role==='user'?'YOU':'✦ STROLLANE'}</div><div class="chat-copy">${esc(m.role==='assistant'&&typeof i18n!=='undefined'&&i18n.lang==='zh'?zhChat(m.content):m.content)}</div></div>`;
+  const row=m=>`<div class="chat-message ${m.role==='user'?'user-message':'assistant-message'}"><div class="chat-name">${m.role==='user'?'You':'✦ Strollane'}</div><div class="chat-copy">${esc(m.role==='assistant'&&typeof i18n!=='undefined'&&i18n.lang==='zh'?zhChat(m.content):m.content)}</div></div>`;
   $('chatHistory').innerHTML=planner.conversations.filter(m=>!m.tech).map(row).join('');
   if($('chatLog'))$('chatLog').innerHTML=planner.conversations.map(row).join('');
   $('chatHistory').scrollTop=$('chatHistory').scrollHeight;
@@ -630,6 +633,15 @@ function applyUiTheme(theme){
 /** Map padding for "show the whole route": on phones the request card covers the top and the results sheet the
  * bottom, so the route is framed in the band of map that is actually visible (Google/Apple Maps behaviour);
  * desktop keeps the uniform margin. */
+/** Padding that keeps the home view in the free part of the map: below the request card on phones, clear of the map
+ * buttons on the right and the legend at the bottom. */
+function homeFitPadding(){
+  if(!window.matchMedia||!matchMedia('(max-width:740px)').matches)return 40;
+  const card=document.getElementById('mComposer'),H=innerHeight;
+  const cb=card&&card.offsetParent?card.getBoundingClientRect().bottom:(document.querySelector('.topbar')?.getBoundingClientRect().bottom||60);
+  return {top:Math.round(Math.min(cb+12,H*.5)),bottom:64,left:14,right:62};
+}
+function fitHome(duration=0){if(state.mapReady)state.map.fitBounds(HOME_BOUNDS,{padding:homeFitPadding(),duration,maxZoom:13.6});}
 function routeFitPadding(base=65){
   if(!window.matchMedia||!matchMedia('(max-width:740px)').matches)return base;
   const H=innerHeight,card=document.getElementById('mComposer'),sheet=document.getElementById('rightPanel');
@@ -669,7 +681,7 @@ function setupMap(){
     // a pan or zoom by the walker (not by the app) stops the app from re-framing the walk under them
     for(const ev of ['dragstart','zoomstart','rotatestart'])m.on(ev,e=>{if(e.originalEvent)state.mapMovedByUser=true;});
     m.on('load',()=>{
-      state.mapReady=true;$('mapFallback').classList.add('hidden');m.fitBounds(STUDY_BOUNDS,{padding:24,duration:0,maxZoom:11.1});
+      state.mapReady=true;$('mapFallback').classList.add('hidden');fitHome(0);
       try{state.mapTheme=localStorage.getItem('strollane.mapTheme')==='dark'?'dark':'light';}catch(e){state.mapTheme='light';}
       tuneBasemap(m);
       for(const id of ['nyc-roads','nyc-trees','nyc-landmarks','candidate-routes','selected-route','points','route-pois'])m.addSource(id,{type:'geojson',data:emptyFC()});
@@ -996,7 +1008,7 @@ function setupControls(){
   $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('chatForm').requestSubmit()}});
   $('gpsStart').addEventListener('click',()=>requestGPS(true));
   $('mapLocate').addEventListener('click',()=>requestGPS(false,true));
-  $('mapReset').addEventListener('click',()=>{if(state.mapReady){state.map.fitBounds(STUDY_BOUNDS,{padding:24,duration:800,maxZoom:11.1})}});
+  $('mapReset').addEventListener('click',()=>fitHome(800));
   $('retryStreets').addEventListener('click',()=>{if(state.loading.streets)return;if(state.dataComplete.streets){toast('All Manhattan street lines are already loaded.');return}loadManhattanStreets()});
   for(const kind of ['start','end'])$(kind==='start'?'pickStart':'pickEnd').addEventListener('click',()=>{
     if(!state.mapReady){toast('Wait for the map to connect.');return}

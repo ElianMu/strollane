@@ -21,7 +21,7 @@ const tilt = async (page, beta) => {
 };
 
 (async () => {
-  const browser = await chromium.launch({ args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
+  const browser = await chromium.launch({ args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'], ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}) });
   const { page, context, log } = await newPage(browser, { width: 440, height: 956, geo: { latitude: 40.7536, longitude: -73.9832, accuracy: 8 } });
   await context.grantPermissions(['geolocation', 'camera', 'accelerometer', 'gyroscope', 'magnetometer']);
   await openApp(page, 1500);

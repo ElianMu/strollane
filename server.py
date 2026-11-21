@@ -186,7 +186,16 @@ def validate_journey(j):
                    if isinstance(j.get('more'), dict) else {},
            'remove': [s(x) for x in (j.get('remove') or [])[:5] if s(x)],
            'requirements': j.get('requirements'), 'counts': j.get('counts') or {}}
+    # "with a coffee stop" came back as food AND as a named stop "coffee", which the map search turned into a café
+    # called Coffeed in Queens. A named stop that only repeats a food item or kind of place is not a place name.
+    said = {GENERIC_STOP.sub('', w.lower()).strip() for f in out['food'] for w in (f['item'] or '', f['cuisine'] or '', f['category'])}
+    out['named_stops'] = [x for x in out['named_stops'] if GENERIC_STOP.sub('', x['name'].lower()).strip() not in said | GENERIC_STOP_WORDS]
     return out
+
+GENERIC_STOP = re.compile(r"^(?:an?|the|some|one|grab|get)\s+|\s+(?:stop|break|place|shop|spot|run)s?$")
+GENERIC_STOP_WORDS = {'coffee', 'cafe', 'café', 'cafes', 'tea', 'espresso', 'latte', 'lunch', 'dinner', 'breakfast', 'brunch', 'food',
+                      'snack', 'dessert', 'drink', 'drinks', 'restaurant', 'restaurants', 'bakery', 'bakeries', 'bar', 'bars',
+                      '咖啡', '咖啡店', '咖啡馆', '午饭', '午餐', '晚饭', '晚餐', '早餐', '餐厅', '面包店', '酒吧', ''}
 
 # Per-client rate limits (requests per rolling minute). Render puts the client address in X-Forwarded-For.
 RATE_LIMITS = {'interpret': 12, 'menu': 10, 'itinerary': 30, 'routes': 60, 'recommend': 6, 'places': 60, 'ratings': 20, 'agent': 3, 'photos': 20}

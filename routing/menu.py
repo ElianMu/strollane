@@ -43,6 +43,22 @@ SYNONYMS = {'cappuccino': ['cappuccino', 'capuccino', 'cappucino', 'cappuccini']
 class UnsafeURL(ValueError):
     pass
 
+# Coffee is what a coffee shop sells: a café that OpenStreetMap tags cuisine=coffee_shop (or that is named a coffee shop,
+# espresso bar or roaster) serves a plain "coffee" without anyone reading its menu. Without this a coffee walk from
+# Washington Square Park failed on the live site (2026-11-21) whenever the six menu checks found no readable menu.
+# The evidence is labelled as such (recommend.py: item_status coffee_shop_tag), never as a menu match.
+SHOP_ITEMS = {'coffee': re.compile(r"coffee|espress?o|esprsso|caff[eèé]\b|roaster", re.I)}
+
+
+def shop_serves(place_id, item):
+    pat = SHOP_ITEMS.get(canonical_item(item))
+    if not pat or not place_id:
+        return False
+    from .places import store
+    raw = store().raw(place_id) or {}
+    return 'coffee_shop' in str(raw.get('cuisine') or '') or (raw.get('cat') == 'cafes' and bool(pat.search(raw.get('name') or '')))
+
+
 def canonical_item(item):
     """Only known exact spelling/plural aliases; modifiers such as vegan stay intact."""
     if not isinstance(item,str):return item

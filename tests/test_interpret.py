@@ -268,6 +268,16 @@ class ReplyLanguage(unittest.TestCase):
         self.assertNotIn('Chinese', self.sent_prompt(dict(DOC)))
 
 
+class GenericNamedStops(unittest.TestCase):
+    def test_a_food_word_is_not_a_named_place(self):
+        # Live 2026-11-21: "with a coffee stop" came back with named_stops=[coffee]; the map search found "Coffeed".
+        j = {'interests': [], 'services': [], 'food': [{'category': 'cafes', 'item': 'coffee', 'cuisine': None, 'required': True}],
+             'named_stops': [{'name': n, 'required': True, 'order': None} for n in ('coffee', 'a coffee stop', 'lunch', '咖啡', 'Joe Coffee Company', 'Blue Bottle')],
+             'service_scope': None, 'hotel': None, 'origin': None, 'destination': None, 'end_mode': None, 'walking_minutes': None,
+             'outing_minutes': None, 'distance_km': None, 'more': {}, 'remove': [], 'requirements': None, 'counts': {}}
+        self.assertEqual([x['name'] for x in server.validate_journey(j)['named_stops']], ['Joe Coffee Company', 'Blue Bottle'])
+
+
 class EndsAndOtherBindings(unittest.TestCase):
     """Bindings the 2026-11-21 eval (eval/interpret_cases.jsonl) found the model getting wrong; each goes back to the
     model once with the reason, like every other rejected binding."""

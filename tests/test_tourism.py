@@ -348,3 +348,23 @@ class G_Endpoints(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class CoffeeShopsServeCoffee(unittest.TestCase):
+    """Live 2026-11-21: a coffee walk from Washington Square Park failed when no café menu could be read."""
+    def test_a_tagged_coffee_shop_meets_a_plain_coffee_request_without_a_menu(self):
+        from routing import recommend as rec
+        with mock.patch.dict(os.environ, NO_KEYS), mock.patch.object(menu, 'verify', side_effect=fake_menu('unverified')), \
+                mock.patch.object(menu, 'cached_evidence', return_value=None), mock.patch.object(menu, 'candidate_venues', return_value=set()):
+            r = recommend_food(P, {'item': 'coffee', 'categories': ['cafes'], 'near': {'lat': 40.7308, 'lon': -73.9973}, 'radius_m': 900,
+                                   'departure': WED_NOON})
+        good = [c for c in r['candidates'] if c['classification'] == 'meets_request']
+        self.assertEqual(r['status'], 'ok')
+        self.assertTrue(good and all(c['item_status'] == 'coffee_shop_tag' for c in good))
+        self.assertTrue(any('OpenStreetMap listing' in f for f in good[0]['explanation']['verified_facts']))
+        names = {c['place']['name'] for c in good}
+        self.assertNotIn('Kung Fu Tea', names, 'a bubble tea shop is not a coffee shop')
+
+    def test_other_items_still_need_the_menu(self):
+        self.assertFalse(menu.shop_serves('anything', 'cappuccino'))
+        self.assertFalse(menu.shop_serves('anything', 'croissant'))

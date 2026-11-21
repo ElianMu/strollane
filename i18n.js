@@ -30,7 +30,7 @@ const I18N_ZH = {
  // navigation and menus
  'Plan walk': '规划步行', 'Start & destination': '起点与终点', 'Customize walk': '自定义步行', 'Time & 12 dimensions': '时间与 12 个维度',
  'Explore urban data': '浏览城市数据', 'Explore Urban Data': '浏览城市数据', 'NYC GIS layers': '纽约 GIS 图层', 'Map layers': '地图图层', 'Weather & legend': '天气与图例',
- 'Map': '地图', 'Dark': '深色', 'Light': '浅色', 'Reset map view': '重置地图视图', 'Back to Manhattan, Brooklyn & Queens': '回到曼哈顿、布鲁克林和皇后区', 'Manhattan, Brooklyn & Queens': '曼哈顿、布鲁克林和皇后区', 'Data legend': '数据图例',
+ 'Map': '地图', 'Dark': '深色', 'Light': '浅色', 'Reset map view': '重置地图视图', 'Back to Manhattan, Brooklyn & Queens': '回到曼哈顿、布鲁克林和皇后区', 'Manhattan, Brooklyn & Queens': '曼哈顿、布鲁克林和皇后区', 'Downtown & Midtown Manhattan': '曼哈顿下城和中城', 'Walker ratings': '步行者评分', 'How walkers rated their walks': '步行者怎么评价他们走过的路线', 'Data legend': '数据图例',
  'Show or hide': '显示或隐藏', 'Data sources': '数据来源', 'Status & coverage': '状态与覆盖范围', 'About': '关于', 'This prototype': '本原型',
  'Export to Kepler': '导出到 Kepler', 'GIS data': 'GIS 数据', 'Kepler studio': 'Kepler 工作台', 'Menu': '菜单', 'Back': '返回', '← Map': '← 地图',
  'Weather loading…': '天气加载中…', 'Weather…': '天气…', 'Find routes →': '查找路线 →', '⚙ Prefs': '⚙ 偏好', 'Navigate': '导航', 'Edit': '编辑', 'New': '新建',
@@ -154,7 +154,7 @@ const I18N_ZH = {
  'Weather unavailable': '天气不可用', 'Weather n/a': '天气不可用', 'Weather-aware routing': '考虑天气的路线规划', 'Refresh': '刷新', 'Export sections to Kepler.gl': '导出分区到 Kepler.gl',
  'Building theme': '建筑主题', 'Environment theme': '环境主题', 'Open to load the dataset catalog.': '展开以加载数据集目录。', 'Street base (LION)': '街道底图（LION）', '↻ Streets': '↻ 街道',
  'Parks & gardens': '公园与花园', 'Street trees': '行道树', 'Historic districts': '历史街区', 'Landmark lots': '地标地块', 'Streets': '街道', 'Buildings': '建筑', 'Historic': '历史', 'Traffic': '交通', 'Public Services': '公共服务',
- 'Places & facilities': '地点与设施', 'YOU': '你', 'Best match': '最佳匹配', 'best match': '最佳匹配', 'Shortest': '最短', 'Fastest': '最快',
+ 'Places & facilities': '地点与设施', 'YOU': '你', 'You': '你', 'Best match': '最佳匹配', 'best match': '最佳匹配', 'Shortest': '最短', 'Fastest': '最快',
  'Looking for street photos…': '正在查找街景照片…', 'Street evidence · raw units': '街道数据 · 原始单位', 'Original points / polygons': '原始点 / 面', 'Validated score · 0–100': '已验证分数 · 0–100',
  'Custom maximum (minutes)': '自定义上限（分钟）', 'Places near this walk have not been looked up yet.': '还没有查找这条路线附近的地点。', 'Generate or select a route to discover POIs.': '生成或选择一条路线以查看沿途地点。',
  // common dynamic labels
@@ -166,7 +166,7 @@ const I18N_ZH = {
 // definitions) stay in English on purpose.
 Object.assign(I18N_ZH, {
  // City Walk card
- 'NOT FEASIBLE': '无法满足', 'no limit set': '未设上限', 'How this plan was made': '这份行程是怎么排出来的', 'Find cappuccino': '找卡布奇诺',
+ 'NOT FEASIBLE': '无法满足', 'no limit set': '未设上限', 'walking limit only': '只限制步行时间', 'How this plan was made': '这份行程是怎么排出来的', 'Find cappuccino': '找卡布奇诺',
  'Describe what you want to see, eat or do — or add stops — then Plan My Walk.': '描述你想看、想吃或想做的事，或者添加途经点，然后点"规划我的步行"。',
  'Hours listed but not machine-readable': '列有营业时间，但格式无法自动识别', 'Open at arrival per OSM hours': '按 OSM 营业时间，到达时在营业',
  'Opening hours (OSM) say closed at arrival time': '按 OSM 营业时间，到达时已关门', 'Closes during the planned visit (OSM hours)': '按 OSM 营业时间，停留期间会关门',
@@ -176,7 +176,7 @@ Object.assign(I18N_ZH, {
  'Matches the requested kind of place.': '符合你要的地点类型。', 'rule-based (no language model)': '按规则判断（未用语言模型）',
  'Ratings and review counts: no rating provider is configured.': '评分和评论数：没有接入评分来源。', 'Ratings: not available.': '评分：暂无。',
  'Opening hours at arrival: not mapped or not machine-readable.': '到达时是否营业：没有记录，或格式无法识别。', 'Today’s stock and prices: a menu listing does not confirm them.': '今天有没有货、价格多少：菜单上列着并不代表确定。',
- 'Confirmed menu match': '菜单上已确认有', 'Probable match — review needed': '可能有，需要核对', 'Unverified': '未核实', 'Not found in checked sources': '查过的来源里没有',
+ 'Confirmed menu match': '菜单上已确认有', 'Coffee shop': '咖啡店', 'A coffee shop by its OpenStreetMap listing; the menu was not read.': '地图资料标注为咖啡店，未读取菜单。', 'Probable match — review needed': '可能有，需要核对', 'Unverified': '未核实', 'Not found in checked sources': '查过的来源里没有',
  'Checking official menu…': '正在查官方菜单…', 'not checked': '未查', 'source': '来源', 'optional': '可选',
  'Wikidata-listed': 'Wikidata 收录', 'hours listed': '列有营业时间', 'OSM tag: serves espresso': 'OSM 标注：供应意式浓缩', 'OSM tag: serves coffee': 'OSM 标注：供应咖啡',
  // kinds of stops (journey.js labels and place categories)

@@ -332,7 +332,7 @@
     // one-tap options (More Nature, Quieter Streets, …) + the follow-up conversation. On the desktop they stay apart
     // (the conversation is step 05 of the left panel, the options sit in the right panel).
     moveNode('refineQuick', $('mRefineQuickSlot'));
-    if ($('conversationLabel')) { $('conversationLabel').dataset.desktopLabel = $('conversationLabel').textContent; $('conversationLabel').textContent = '01 / REFINE YOUR WALK'; }
+    if ($('conversationLabel')) { $('conversationLabel').dataset.desktopLabel = $('conversationLabel').textContent; $('conversationLabel').textContent = 'REFINE YOUR WALK'; }
     if (ta) {
       ta.dataset.desktopPlaceholder = ta.getAttribute('placeholder') || '';
       ta.setAttribute('placeholder', PHONE_PLACEHOLDER);
@@ -512,7 +512,9 @@
     // The box holds exactly the sentence the priority pills wrote: those preferences are already set, so plan
     // through Path B with them instead of asking the Agent to re-read its own words.
     if (typeof isWalkPresetRequest === 'function' && isWalkPresetRequest(text)) { if (placesConfirmed()) runPlan(() => planManual(text)); return; }
-    runPlan(() => handlePlan(text, hasRoutes()));
+    const followUp = hasRoutes();
+    if (!followUp && typeof startFreshRequest === 'function') startFreshRequest();
+    runPlan(() => handlePlan(text, followUp));
   }
   /** Path B — manual FROM / TO: same validation and the same routing calls, no text required. */
   function createFromForm() {
@@ -724,7 +726,7 @@
     $('mContext').addEventListener('click', () => setView('plan'));
     document.querySelectorAll('.swap-ends').forEach((b) => b.addEventListener('click', swapEnds));
     $('mCompactEdit').addEventListener('click', () => { setView('typing'); ta.focus(); });
-    $('mNewWalk').addEventListener('click', () => { ta.value = ''; lastSubmitted = ''; showStatus(null); setView('typing'); ta.focus(); });
+    $('mNewWalk').addEventListener('click', () => { ta.value = ''; lastSubmitted = ''; if (typeof startFreshRequest === 'function') startFreshRequest(); showStatus(null); setView('typing'); ta.focus(); });
     $('mSheetBack').addEventListener('click', closeSecondary);
     $('mSheetAlt').addEventListener('click', () => setView(view === 'plan' ? 'customize' : 'plan'));
     $('mSheetGo').addEventListener('click', createFromForm);

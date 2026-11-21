@@ -116,11 +116,11 @@ function renderCityWalk(){
    ${menuRows}
    ${stopMenuItems(s).some(item=>journey.recs[s.id+'|'+item])?stopMenuItems(s).map(item=>journey.recs[s.id+'|'+item]?recExplain(journey.recs[s.id+'|'+item]):'').join(''):s.evidence&&!cwSaysSame(s.evidence,s.category)?`<small>${esc(s.evidence)}</small>`:''}
    ${s.alternatives?.length||s.role!=='end'?`<span class="cw-acts">${s.alternatives?.length?`<button type="button" class="cw-alt" data-cw-replace="${esc(s.slot_id)}" data-cw-id="${esc(s.id)}">Replace</button>`:''}${s.role!=='end'?`<button type="button" class="cw-alt" data-cw-remove="${esc(s.id)}">Remove</button>`:''}</span>`:''}</span></li>`;}).join('');
- root.innerHTML=`<div class="section-row"><div class="section-overline">YOUR CITY WALK</div><span class="small-count">${c.feasible?'WITHIN LIMITS':'NOT FEASIBLE'}</span></div>
+ root.innerHTML=`<div class="section-row"><div class="section-overline">YOUR CITY WALK</div><span class="small-count cw-fit ${c.feasible?'ok':'over'}">${c.feasible?'WITHIN LIMITS':'NOT FEASIBLE'}</span></div>
   <div class="cw-theme">${esc(route?.route_name||'City walk')}</div>
   <p class="soft-copy">${zh?`从 ${esc(it.start.name)} 出发${endStop?`，到 ${esc(endStop.name)}`:''}${it.end_mode==='round'?'并返回':it.end_mode==='hotel'?'，回到你的酒店':it.end_mode==='open'?' · 终点灵活':''}。`:`From ${esc(it.start.name)}${endStop?` to ${esc(endStop.name)}`:''}${it.end_mode==='round'?' and back':it.end_mode==='hotel'?' back to your hotel':it.end_mode==='open'?' · flexible end':''}.`}</p>
-  <div class="cw-grid"><div><span>Walking</span><strong>${(t.walk_m/1000).toFixed(2)} km</strong><small>${Math.round(t.walk_min)} min</small></div><div><span>Stops</span><strong>${t.stops}</strong><small>${Math.round(t.visit_min)} min stay (est.)</small></div>
-   <div class="cw-wide"><span>Total outing</span><strong>${Math.round(t.outing_min)} min</strong><small>${c.max_outing_minutes?`limit ${c.max_outing_minutes}`:'no limit set'}</small></div></div>
+  <div class="cw-grid"><div><span>Walking</span><strong>${(t.walk_m/1000).toFixed(2)} km</strong><small>${Math.round(t.walk_min)} min${c.max_minutes&&!c.max_outing_minutes?` · limit ${c.max_minutes}`:''}</small></div><div><span>Stops</span><strong>${t.stops}</strong><small>${Math.round(t.visit_min)} min stay (est.)</small></div>
+   <div class="cw-wide"><span>Total outing</span><strong>${Math.round(t.outing_min)} min</strong><small>${c.max_outing_minutes?`limit ${c.max_outing_minutes}`:c.max_minutes?'walking limit only':'no limit set'}</small></div></div>
   ${c.violations.length?`<p class="cw-warn">${esc(c.violations.join('; '))}${zh?'。必去的停留点不会被悄悄去掉：请移除一个，或放宽限制。':'. Required stops are never dropped silently: remove one or extend the limit.'}</p>`:''}
   <ol class="cw-stops">${stopRows}</ol>
   ${it.skipped.length?`<p class="soft-copy">${zh?'没排进去：':'Skipped: '}${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}

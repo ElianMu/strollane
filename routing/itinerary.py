@@ -124,9 +124,9 @@ def validate_request(doc):
         check_public_access(p)
         items=required_items(s)
         for item in items:
-            from .menu import cached_evidence
+            from .menu import cached_evidence, shop_serves
             evidence = cached_evidence(p['id'], item)
-            if not evidence or evidence['status'] != 'confirmed_menu_match':
+            if (not evidence or evidence['status'] != 'confirmed_menu_match') and not shop_serves(p['id'], item):
                 raise RoutingError('Required menu item is not verified for chosen place; check the official menu first')
         order = s.get('order')
         stops.append({**p, 'required': s.get('required', True) is not False, 'order': order if type(order) is int else None,
@@ -137,8 +137,9 @@ def validate_request(doc):
         for candidate in cands: check_public_access(candidate)
         items=required_items(sl)
         if items:
-            from .menu import cached_evidence
-            cands = [c for c in cands if all((cached_evidence(c['id'], item) or {}).get('status') == 'confirmed_menu_match' for item in items)]
+            from .menu import cached_evidence, shop_serves
+            cands = [c for c in cands if all((cached_evidence(c['id'], item) or {}).get('status') == 'confirmed_menu_match' or shop_serves(c['id'], item)
+                                             for item in items)]
         if not cands and sl.get('required', True) is not False:
             raise RoutingError('Required place has no candidates: ' + str(sl.get('label') or sl.get('slot_id') or 'stop'))
         if cands:

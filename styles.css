@@ -1428,3 +1428,159 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
 
 /* Phones have no Shift + Enter: the keyboard hint only made noise under the chat box (2026-11-21). */
 @media (hover:none) and (pointer:coarse){.chat-hint{display:none}}
+
+/* ── Design pass 2026-11-21: phones ───────────────────────────────────────────────────────────────────────────────
+   Learned from Apple Maps (one sheet over a live map; content sits on the sheet, not in boxes inside it), Citymapper
+   (options compared at a glance; one clear "go") and Komoot (photos of the places on the way, read as a sequence).
+   · One surface per level: sections sit on the sheet, set apart by space; only things you pick (a route option,
+     a stop) are cards.
+   · Labels in sentence case: the tracked capitals are lower-cased here (Chinese is unaffected), no "01 /" numbers
+     on sections that are not steps.
+   · One filled ink button per screen. Every other control is a grey fill or plain text; no outlines.
+   · Radius by size: sheet 20, card 14, control 12, pill fully round. */
+@media (max-width:740px){
+ body{--ds-fill:var(--g21);--ds-fill-2:var(--g28);--ds-line:var(--g2e);--ds-ink:var(--accent);--ds-on-ink:var(--accent-ink);--ds-muted:var(--text-secondary);
+  --ds-float:0 10px 30px color-mix(in srgb,var(--shadow) 20%,transparent),0 1px 3px color-mix(in srgb,var(--shadow) 14%,transparent)}
+
+ /* header: the brand and the menu; the ratings page moved into the menu */
+ body .topbar{border-bottom:0;box-shadow:0 1px 0 var(--ds-line)}
+ body .top-actions .eval-link{display:none}
+ body #mobileMore>summary.icon-button{border:0;background:var(--ds-fill);width:40px;height:40px}
+ body .mobile-more-body>a.more-link{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;min-height:44px;padding:8px 10px;border-radius:var(--r-sm);color:var(--text);text-decoration:none;font-size:13px}
+ body .mobile-more-body>a.more-link small{color:var(--ds-muted);font-size:11px}
+ body .mobile-more-body>a.more-link:active{background:var(--ds-fill)}
+
+ /* section labels: sentence case, quiet, no tracking */
+ body .section-overline,body .rc-tag,body .cw-grid span,body .street-photos-title,body .why-measures-title{text-transform:lowercase;letter-spacing:0}
+ body .section-overline::first-letter,body .rc-tag::first-letter,body .cw-grid span::first-letter,body .street-photos-title::first-letter,body .why-measures-title::first-letter{text-transform:uppercase}
+ body .cw-grid span,body .street-photos-title{display:block}
+ body .right-scroll .section-overline,body .city-walk .section-overline,body .conversation-section .section-overline{font-size:15px;font-weight:650;color:var(--text);line-height:1.3}
+ body .right-scroll .small-count{display:inline-block;text-transform:lowercase;letter-spacing:0;font-size:12.5px;font-weight:500;color:var(--ds-muted)}
+ body .right-scroll .small-count::first-letter{text-transform:uppercase}
+ body .right-scroll .section-row{align-items:baseline;margin:0 0 10px}
+
+ /* the request card on the map */
+ body .m-composer-full{border:0;border-radius:20px;box-shadow:var(--ds-float)}
+ body .m-composer-q{font-size:clamp(15px,4.1vw,19px);font-weight:650;letter-spacing:-.012em}
+ body .m-walk-presets .walk-pill{border:0;background:var(--ds-fill);color:var(--text);border-radius:12px;box-shadow:none}
+ body .m-walk-presets .walk-pill[aria-pressed=true]{background:var(--ds-ink);color:var(--ds-on-ink)}
+ body .m-walk-presets .walk-pill[aria-pressed=true] .walk-activity-tag{color:color-mix(in srgb,var(--ds-on-ink) 72%,transparent)}
+ body .m-walk-presets .walk-activity-tag{color:var(--ds-muted)}
+ body #mComposer .intent-box{border:0;background:var(--ds-fill);border-radius:12px;box-shadow:none}
+ body #mComposer .intent-box:focus{background:var(--bg-panel);box-shadow:0 0 0 1.5px var(--ds-ink)}
+ body #mComposer .m-mic-slot .mic-btn{border:0;background:var(--ds-fill);border-radius:12px}
+ body #mComposer .m-create{border-radius:12px;font-weight:650;letter-spacing:-.005em}
+ body .m-route-ends .m-context,body .m-route-ends .m-swap{border:0;background:var(--ds-fill);border-radius:12px;box-shadow:none}
+ body .m-route-ends .m-context-edit{color:var(--text);font-weight:600}
+ body .m-composer-compact{border:0;border-radius:16px;box-shadow:var(--ds-float)}
+ body .m-composer-compact .m-compact-new{border:0;background:var(--ds-fill);border-radius:999px;font-weight:600}
+
+ /* status under the card: a tinted note, not a framed box */
+ body .m-status{border:0;border-radius:12px;box-shadow:none}
+ body .m-status.busy{background:var(--ds-fill)}
+ body .m-status.error{background:var(--danger-surface)}
+ body .m-status.clarify,body .m-status.hint{background:var(--warn-surface)}
+ body .m-status-actions button{border:0;background:var(--bg-panel);border-radius:999px;font-weight:600}
+
+ /* map controls: floating, borderless */
+ body .map-workspace .map-actions button{border:0;border-radius:12px;background:var(--bg-panel);box-shadow:var(--ds-float)}
+ body .ud-legend-head{letter-spacing:0;text-transform:none;font-size:12px;font-weight:600}
+
+ /* the sheet: the "Your routes" label becomes the invisible tap target of the grip */
+ body .right-panel{border-radius:20px 20px 0 0}
+ body .right-panel .sheet-handle{position:relative}
+ body .right-panel .sheet-toggle{position:absolute;inset:0;width:100%;font-size:0;color:transparent;background:transparent}
+
+ /* route options: the only cards on the sheet */
+ body .route-cards .route-card{border:1px solid var(--ds-line);border-radius:14px;box-shadow:none;background:var(--bg-panel)}
+ body .route-cards .route-card.selected{border-color:var(--ds-ink);box-shadow:0 0 0 1px var(--ds-ink)}
+ body .route-card .rc-tag{display:block;padding-left:14px;font-size:12.5px;font-weight:600;color:var(--text);background:radial-gradient(circle at 4px 50%,var(--signal) 3.6px,color-mix(in srgb,var(--text) 35%,transparent) 4.1px,transparent 4.8px) no-repeat}
+ body .route-card .rc-chips span{border:0;background:var(--ds-fill);padding:6px 9px}
+ body .route-card .rc-name{font-size:17px;letter-spacing:-.01em}
+ body .route-more{border:0;background:var(--ds-fill);border-radius:12px;font-weight:600}
+ body .m-route-fromto{border:0;background:var(--ds-fill);border-radius:12px}
+ body .m-route-fromto .m-ft-edit{border:0;background:transparent;font-weight:600;color:var(--text)}
+
+ /* refine and chat */
+ body .refine-actions{display:flex;flex-wrap:wrap;gap:8px}
+ body .refine-actions button{flex:0 0 auto;width:auto;padding:9px 14px;text-align:center}
+ body .refine-actions button,body .cw-refine .mini-outline{border:0;background:var(--ds-fill);border-radius:999px;color:var(--text);font-weight:550;box-shadow:none}
+ body .refine-actions button:active,body .cw-refine .mini-outline:active{background:var(--ds-fill-2)}
+ body .chat-message{border:0;border-radius:14px;box-shadow:none}
+ body .chat-message.assistant-message{background:var(--ds-fill)}
+ body .chat-message.user-message{background:var(--ds-ink);color:var(--ds-on-ink);max-width:88%}
+ body .chat-message.user-message .chat-name{color:color-mix(in srgb,var(--ds-on-ink) 65%,transparent)}
+ body .chat-name{font-size:12px;font-weight:600;color:var(--ds-muted)}
+ body .chat-form{border:0;background:var(--ds-fill);border-radius:16px;box-shadow:none}
+ body .chat-form textarea{background:transparent;border:0}
+
+ /* walker feedback: on the sheet, not boxed twice */
+ body .walker-feedback-near,body .walker-feedback-near .walker-feedback-slot,body .walker-feedback-near .walker-says{border:0;background:transparent;padding-left:0;padding-right:0;box-shadow:none}
+ body .walker-feedback-near .walker-says-head strong{font-size:14px}
+ body .walker-feedback-near .walker-rate-now,body .walker-says .walker-rate-now{border:0!important;background:var(--ds-fill)!important;border-radius:12px;font-weight:600;font-size:13px;padding:12px}
+ body .subtle-divider+.subtle-divider{display:none}
+
+ /* along this walk */
+ body .poi-more{border:0;background:var(--ds-fill);border-radius:12px;font-weight:600}
+ body .export-button.export-end{border:0;background:transparent;color:var(--ds-muted);justify-content:flex-start;padding-left:0}
+
+ /* the City Walk: a timeline of stops, photo under the name */
+ body .city-walk{border:0;background:transparent;padding:0;box-shadow:none}
+ body .city-walk .cw-theme{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+ body .city-walk .cw-grid{border:0;background:var(--ds-fill);border-radius:14px;padding:12px 4px;gap:0}
+ body .city-walk .cw-grid>div{border:0;padding:0 12px}
+ body .city-walk .cw-grid>div+div{box-shadow:-1px 0 0 var(--ds-line)}
+ body .city-walk .cw-grid span{font-size:12px;font-weight:500;color:var(--ds-muted)}
+ body .city-walk .cw-grid strong{font-size:19px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+ body .cw-stops{gap:0;margin:14px 0 6px}
+ body .cw-stop{position:relative;grid-template-columns:26px 1fr;gap:12px;padding-bottom:16px}
+ body .cw-stop:not(:last-child)::before{content:'';position:absolute;left:12.5px;top:28px;bottom:2px;width:1.5px;background:var(--ds-line)}
+ body .cw-stop .cw-seq{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;border:0;background:var(--ds-ink);color:var(--ds-on-ink)}
+ body .cw-stop.end .cw-seq{background:var(--ds-fill);color:var(--text);box-shadow:inset 0 0 0 1.5px var(--ds-ink)}
+ body .cw-stop .cw-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+ body .cw-stop .cw-body>strong{font-size:15.5px;line-height:1.3}
+ body .cw-stop .cw-photo{order:9;max-width:none;width:100%;margin:8px 0 0}
+ body .cw-stop .cw-photo .rp-photo img{height:148px;border-radius:12px}
+ body .cw-stop .cw-acts{order:10;margin-top:6px}
+
+ /* the walk's own buttons at the bottom: one ink "go", three grey ones the same size */
+ body .walk-actions .nav-start{border-radius:14px}
+ body .walk-actions .nav-start .cta-arrow{display:none}
+ body .walk-actions-row .route-preview-btn{border:0;background:var(--ds-fill);border-radius:12px;box-shadow:none}
+
+ /* stop actions read as text; the City Walk keeps its distance from the options below */
+ body .cw-stop .cw-alt{border:0;background:transparent;color:var(--ds-muted);font-size:12px;font-weight:600;padding:2px 0;margin-right:14px;text-decoration:underline;text-decoration-color:var(--ds-line);text-underline-offset:3px}
+ body .city-walk{margin-bottom:22px}
+ body .city-walk .cw-how{margin-top:6px}
+
+ /* the rating panel */
+ body .walk-check-scale{gap:6px}
+ body .walk-check-scale button{border:0;background:var(--ds-fill);color:var(--text);border-radius:12px;font-weight:600}
+ body .walk-check-scale button[aria-pressed=true]{background:var(--ds-ink);color:var(--ds-on-ink)}
+ body .walk-check-comment{border:0;background:var(--ds-fill);border-radius:12px}
+ body .walk-check-comment:focus{background:var(--bg-panel);box-shadow:0 0 0 1.5px var(--ds-ink)}
+ body .walk-check-send{border:0;background:var(--ds-ink);color:var(--ds-on-ink);border-radius:14px}
+ body .modal-overlay .modal{border:0;border-radius:20px;box-shadow:var(--ds-float)}
+
+ /* navigation: the turn is the loudest thing on screen; status sits above the bottom card, clear of the instruction */
+ body .nav-overlay .nav-top,body .nav-overlay .nav-bottom{border:0;border-radius:20px;box-shadow:var(--ds-float)}
+ body .nav-overlay .nav-arrow{border:0;background:var(--ds-ink);color:var(--ds-on-ink);border-radius:14px}
+ body .nav-overlay .nav-pill{border:0;background:var(--ds-fill);color:var(--text)}
+ body .nav-overlay .nav-pill[aria-pressed=false]{color:var(--ds-muted)}
+ body .nav-overlay .nav-pill.nav-ar{color:var(--text)}
+ body .nav-overlay .nav-pill.nav-ar[aria-pressed="true"],body .nav-overlay .nav-pill.primary{background:var(--ds-ink);color:var(--ds-on-ink)}
+ body .nav-overlay .nav-pill.danger{background:var(--danger-surface);color:var(--danger-text)}
+ body .nav-overlay .nav-status{top:auto;bottom:calc(150px + env(safe-area-inset-bottom));border:0;box-shadow:var(--ds-float);background:var(--bg-panel)}
+ body.ar-mode .nav-overlay .nav-status{bottom:calc(170px + env(safe-area-inset-bottom))}
+ body .nav-overlay .nav-status.gps_weak,body .nav-overlay .nav-status.possibly_off_route{background:var(--warn-surface)}
+ body .nav-overlay .nav-status.off_route,body .nav-overlay .nav-status.rerouting,body .nav-overlay .nav-status.error{background:var(--danger-surface)}
+ body .nav-overlay .nav-status.arrived,body .nav-overlay .nav-status.arrived_at_stop{background:var(--ok-surface);color:var(--ok-text)}
+}
+
+@media (max-width:740px){
+ /* the walk's title says "City walk" already: the label above it gives way to a status tag */
+ body .city-walk>.section-row:has(.cw-fit) .section-overline{display:none}
+ body .city-walk .cw-fit{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
+ body .city-walk .cw-fit.ok{background:var(--ok-surface);color:var(--ok-text)}
+ body .city-walk .cw-fit.over{background:var(--danger-surface);color:var(--danger-text)}
+}

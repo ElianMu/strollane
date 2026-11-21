@@ -22,7 +22,7 @@ const OFFLINE_STYLE = {
   sources: {}, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#0d1a1e' } }],
 };
 
-async function launch() { return chromium.launch(); }
+async function launch() { return chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}); }
 
 async function newPage(browser, { width, height, geo, mobile = width <= 740 }) {
   const context = await browser.newContext({

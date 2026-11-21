@@ -58,7 +58,7 @@ let failed = 0, total = 0; const check = (n, ok, d) => { total++; if (!ok) faile
         chipsBeforeChat: !!(chips && form && (chips.compareDocumentPosition(form) & Node.DOCUMENT_POSITION_FOLLOWING)),
         afterRoutes: !!(cards.compareDocumentPosition(sec) & Node.DOCUMENT_POSITION_FOLLOWING), countShown: vis($('conversationCount')) };
     });
-    check('phone results: one "01 / REFINE YOUR WALK" section (quick options + conversation) right after the routes', r.label === '01 / REFINE YOUR WALK' && r.heads.length === 1 && r.heads[0] === '01 / REFINE YOUR WALK' && r.inside && r.visible && r.chips >= 4 && r.chipsBeforeChat && r.afterRoutes && !r.countShown, r);
+    check('phone results: one "REFINE YOUR WALK" section (quick options + conversation) right after the routes', r.label === 'REFINE YOUR WALK' && r.heads.length === 1 && r.heads[0] === 'REFINE YOUR WALK' && r.inside && r.visible && r.chips >= 4 && r.chipsBeforeChat && r.afterRoutes && !r.countShown, r);
     // the sheet label stays inside its handle (it overlapped the first line of the sheet before)
     const o = await page.evaluate(() => { const h = $('rightPanel').querySelector('.sheet-handle').getBoundingClientRect(), t = $('rightPanel').querySelector('.sheet-toggle').getBoundingClientRect(); return { hb: Math.round(h.bottom), tb: Math.round(t.bottom) }; });
     check('"Your routes" label inside the sheet handle (no overlap with the content)', o.tb <= o.hb, o);
