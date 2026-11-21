@@ -113,12 +113,12 @@ function renderCityWalk(){
   <div class="cw-theme">${esc(route?.route_name||'City walk')}</div>
   <p class="soft-copy">${zh?`从 ${esc(it.start.name)} 出发${it.end_mode==='round'?'并返回':it.end_mode==='hotel'?'，回到你的酒店':it.end_mode==='open'?' · 终点灵活':''}。`:`From ${esc(it.start.name)}${it.end_mode==='round'?' and back':it.end_mode==='hotel'?' back to your hotel':it.end_mode==='open'?' · flexible end':''}.`}</p>
   <div class="cw-grid"><div><span>Walking</span><strong>${(t.walk_m/1000).toFixed(2)} km</strong><small>${Math.round(t.walk_min)} min</small></div><div><span>Stops</span><strong>${t.stops}</strong><small>${Math.round(t.visit_min)} min stay (est.)</small></div>
-   <div><span>Total outing</span><strong>${Math.round(t.outing_min)} min</strong><small>${c.max_outing_minutes?`limit ${c.max_outing_minutes}`:'no limit set'}</small></div><div><span>Experience</span><strong>${route?.personalized_score?.utility??'N/A'}</strong><small>route match</small></div></div>
+   <div class="cw-wide"><span>Total outing</span><strong>${Math.round(t.outing_min)} min</strong><small>${c.max_outing_minutes?`limit ${c.max_outing_minutes}`:'no limit set'}</small></div></div>
   ${c.violations.length?`<p class="cw-warn">${esc(c.violations.join('; '))}${zh?'。必去的停留点不会被悄悄去掉：请移除一个，或放宽限制。':'. Required stops are never dropped silently: remove one or extend the limit.'}</p>`:''}
   <ol class="cw-stops">${stopRows}</ol>
   ${it.skipped.length?`<p class="soft-copy">${zh?'没排进去：':'Skipped: '}${esc(it.skipped.map(s=>`${s.name} (${s.reason})`).join('; '))}</p>`:''}
   <div class="cw-refine">${[['museums','More museums'],['historic','More historic'],['coffee','Add coffee'],['cappuccino','Find cappuccino'],['restaurant','Add restaurant'],['hotel','Return to hotel'],['less','Less walking'],['extend','Extend time']].map(([k,l])=>`<button type="button" class="mini-outline" data-refine="${k}">${l}</button>`).join('')}</div>
-  <details class="cw-how"><summary>How this plan was made</summary><small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}</small></details>`;
+  <details class="cw-how"><summary>How this plan was made</summary><small class="cw-method">${esc(it.method.join(' · '))}. Matrix: ${it.matrix.points} places, ${esc(it.matrix.basis)}. ${esc(it.coverage)}${route?.personalized_score?.utility!=null?` Experience match of the walking route: ${route.personalized_score.utility}.`:''}</small></details>`;
  if(photoWant.length&&typeof placePhotosEnsure==='function')placePhotosEnsure(photoWant,()=>{if(journey.plan===it)renderCityWalk();});
  if(typeof calloutsRefresh==='function')calloutsRefresh();
  root.querySelectorAll('[data-refine]').forEach(b=>b.addEventListener('click',()=>refineWalk(b.dataset.refine)));

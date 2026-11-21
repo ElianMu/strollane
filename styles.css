@@ -867,6 +867,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .cw-grid{gap:0;margin:12px 0;border-top:1px solid var(--line)}
 .cw-grid>div{background:transparent;border:0;border-radius:0;padding:10px 0;border-bottom:1px solid var(--line)}
 .cw-grid>div:nth-child(odd){padding-right:12px;border-right:1px solid var(--line)}.cw-grid>div:nth-child(even){padding-left:12px}
+.cw-grid>div.cw-wide{grid-column:1/-1;padding-right:0;border-right:0}
+.route-numbers .rc-basis{margin:0 0 8px}
 .cw-grid span{color:var(--subtle);letter-spacing:.08em}.cw-grid strong{font-size:18px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
 .cw-theme{font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.1;color:var(--text)}
 /* Map controls: one family — 44px, 12px radius, near-black glass, hairline, line icons */
