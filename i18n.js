@@ -203,6 +203,12 @@ Object.assign(I18N_ZH, {
  'Step-free access cannot be verified with the current curb-ramp and elevator data. No route is recommended.': '现有的路缘坡道和电梯数据无法核实无台阶通行，因此不推荐路线。',
  'Step-free access needs verified curb-ramp and elevator data, which is not connected. No route recommendation will be returned.': '无台阶通行需要经过核实的路缘坡道和电梯数据，目前尚未接入，因此不会推荐路线。',
  'Step-free access cannot be verified, so no route is recommended.': '无法核实无台阶通行，因此不推荐路线。',
+ 'The route server has just woken up and is still warming up. Trying once more…': '路线服务器刚被唤醒，还在预热，正在自动再试一次…',
+ 'Waking the route server. The first request after a pause can take up to a minute…': '正在唤醒路线服务器，闲置后的第一次请求最多要等一分钟…',
+ 'The route server is not answering right now. Nothing was changed. Try again in a minute.': '路线服务器暂时没有响应，什么都没有改动。请一分钟后再试。',
+ 'The server took too long to answer. Please try again in a moment.': '服务器响应太慢，请稍后再试。',
+ 'The route server is not answering right now. Please try again in a moment.': '路线服务器暂时没有响应，请稍后再试。',
+ 'Something went wrong. Please try again in a moment.': '出了点问题，请稍后再试。',
  'Install STROLLANE on your home screen for a faster, full-screen view.': '把 STROLLANE 安装到手机主屏幕，像 App 一样打开。', 'Waterfront': '滨水',
  'Cafes': '咖啡馆', 'Restaurants': '餐厅', 'Bakeries': '面包甜点店', 'Bars': '酒吧',
 });

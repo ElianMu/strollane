@@ -70,7 +70,7 @@ async function generateRoutes(userText=null,isFollowUp=false){
   if(location.protocol==='file:')throw new Error('The routing engine runs in server.py; start it and open http://127.0.0.1:8080.');
   const request=buildRouteRequest(a,b);
   await streetwiseAwake(t=>{$('ctaLabel').textContent='Waking the route server…';$('rankingStatus').textContent=t;});if(run!==planner.runId)return;$('ctaLabel').textContent='Planning your walk…';
-  const res=await streetwiseFetch('/api/routes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request),signal:AbortSignal.timeout(30000)});
+  const res=await streetwiseRetryOnce('/api/routes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request)},30000,t=>{if(run===planner.runId)$('rankingStatus').textContent=t;});
   const json=await res.json().catch(()=>({}));
   if(run!==planner.runId)return;
   if(!res.ok)throw new Error(json.error||`Routing engine HTTP ${res.status}`);

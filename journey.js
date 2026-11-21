@@ -501,7 +501,7 @@ async function planJourney(isFollowUp=false){
   resetRoutes(true);renderRouteCards();
   await streetwiseAwake(t=>{$('ctaLabel').textContent='Waking the route server…';$('rankingStatus').textContent=t;});if(run!==planner.runId)return;$('ctaLabel').textContent='Finding places & routing…';
   const req=await itineraryRequest();
-  const res=await streetwiseFetch('/api/itinerary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req),signal:AbortSignal.timeout(45000)});
+  const res=await streetwiseRetryOnce('/api/itinerary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)},45000,t=>{if(run===planner.runId)$('rankingStatus').textContent=t;});
   const json=await res.json().catch(()=>({}));if(run!==planner.runId)return;
   if(!res.ok)throw new Error(json.error||`Itinerary service HTTP ${res.status}`);
   journey.plan=json.itinerary;journey.request=req;

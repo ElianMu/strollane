@@ -70,6 +70,21 @@ async function streetwiseAwake(note, maxWaitMs = 90000, pauseMs = 2500) {
 // Silent: no note, and a failure here is ignored (planning checks again and says so in words).
 if (typeof window !== 'undefined' && streetwiseHost.remote) setTimeout(() => { streetwiseAwake(null).catch(() => {}); }, 0);
 
+/** A request sent once more when it outlives its time limit. Right after the route server wakes (a hosted instance
+    with a small CPU share), the first walk also builds the server's caches and a background field, and can take longer
+    than its limit; the same request a minute later answers (2026-11-21: the first walk after a night timed out at
+    30 s, the second attempt worked). The second try gets twice the time, and `note(text)` says why the walker waits. */
+const STREETWISE_SLOW_MESSAGE = 'The route server has just woken up and is still warming up. Trying once more…';
+function streetwiseTimedOut(e) { return Boolean(e && (e.name === 'TimeoutError' || /signal timed out|aborted due to timeout/i.test(e.message || ''))); }
+async function streetwiseRetryOnce(url, options, ms, note) {
+  try { return await streetwiseFetch(url, {...options, signal: AbortSignal.timeout(ms)}); }
+  catch (e) {
+    if (!streetwiseTimedOut(e)) throw e;
+    if (note) note(STREETWISE_SLOW_MESSAGE);
+    return await streetwiseFetch(url, {...options, signal: AbortSignal.timeout(ms * 2)});
+  }
+}
+
 /** A request that outlived its time limit, said in words a visitor can act on (instead of "signal timed out"). */
 function streetwiseErrorText(err) {
   if (err && (err.name === 'TimeoutError' || /signal timed out|aborted due to timeout/i.test(err.message || ''))) {
