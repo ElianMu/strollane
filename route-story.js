@@ -142,6 +142,19 @@ function storyPlacesNear(r) {
  routeStory.near[r.route_id] = found;
  return found;
 }
+/** Places of the lists within maxM of the route line, nearest first; the start and the destination themselves only
+    with ends = true. For photos (route-client.js routePhotoPlaces), not for naming the walk. */
+function storyPlacesWithin(r, maxM, ends) {
+ if (!routeStory.lists) return [];
+ const c = r.geometry?.coordinates || [];
+ if (c.length < 2) return [];
+ let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
+ for (const [x, y] of c) { w = Math.min(w, x); e = Math.max(e, x); s = Math.min(s, y); n = Math.max(n, y); }
+ const pad = maxM / 70000, k = storyMeters((s + n) / 2);
+ return routeStory.lists.filter((p) => p.lon > w - pad && p.lon < e + pad && p.lat > s - pad && p.lat < n + pad)
+  .map((p) => ({...p, d: storyDistToLine(p, c, k)})).filter((p) => p.d <= maxM && (ends || !storyEndsNear(p, r)))
+  .sort((a, b) => a.d - b.d);
+}
 function storyPlaceChip(places) {
  if (!places?.length) return null;
  const by = {};

@@ -323,6 +323,11 @@ const ZH_CHAT=[
   (m,from,what,end,time)=>`没有给终点，所以从${from==='your location'?'你的位置':from}出发推荐一条路线：按你的偏好选${what==='the places you asked for'?'你要的地点':what.split(' and ').map(w=>ZH_KINDS[w]||w).join('和')}，${end==='coming back to the start'?'最后回到起点':'在最后一个景点结束'}，${
    time.replace(/^about (\d+) minutes in all \(say a time to change it\)$/,'总共约 $1 分钟（说个时间就能改）').replace(/^within your (\d+)-minute outing$/,'控制在你的 $1 分钟外出时间内').replace(/^within your (\d+)-minute walking limit$/,'控制在你的 $1 分钟步行上限内')}。随时说一个终点，就会改成走到那里。`],
  [/^Could not build the walk: /,'没能生成这条步行路线：'],
+ [/^No route: The route server took too long to answer\. Try again; the first request after a pause is the slow one\. No route was fabricated\./,'没有路线：路线服务器响应太慢。请再试一次，服务器闲置后的第一次请求会比较慢。没有编造任何路线。'],
+ [/^No route: The server took too long to answer\. Please try again in a moment\. No route was fabricated\./,'没有路线：服务器响应太慢，请稍后再试。没有编造任何路线。'],
+ [/^No route: (.*) No route was fabricated\./,'没有路线：$1 没有编造任何路线。'],
+ [/^No Feasible Route: none of the (\d+) candidate routes meets your limits \((.*)\)\. Increase the limit or change endpoints\. Over-limit routes are shown for comparison only(?:; the map shows the shortest \((\d+) min\) as a dashed preview)?\.$/,
+  (m,n,why,min)=>`没有满足限制的路线：${n} 条候选路线都超出了你的限制（${why.replace(/(\d+) min exceeds the (\d+)-minute limit/g,'$1 分钟，超过 $2 分钟上限')}）。请放宽限制或换个起终点。超出限制的路线仅供比较${min?`；地图上的虚线是最短的那条（${min} 分钟）`:''}。`],
  [/ Your previous route is still shown and unchanged\./g,'之前的路线仍然显示，没有改动。'],
  [/^No explicit preference change recognized( by limited local preview)?\. I’ll check route options using current settings\.$/,'没有识别到明确的偏好变化，将按当前设置查找路线。'],
  [/^Updated: (.*)\. Re-planning…$/,'已更新：$1。正在重新规划…'],

@@ -151,10 +151,20 @@ function renderRouteCards(){
     a photo already on an earlier card is used again only when nothing else is left (so the cards look different). */
 /** Places with a (possible) photo along a route: the well-known places of route-story.js first, then every place in
     the photo index within 50 m of the line (landmarks, museums, parks, hotels, shops…), without duplicates. */
+const ROUTE_PHOTO={ENOUGH:6,WIDE_M:120};
 function routePhotoPlaces(r){
  const story=(typeof storyPlacesNear==='function'?storyPlacesNear(r):null)||[],seen=new Set(),out=[];
  const add=(p)=>{const k=p.wd||p.id||p.name;if(!k||seen.has(k)||seen.has(p.name))return;seen.add(k);seen.add(p.name);out.push(p);};
- story.forEach(add);(typeof photoPlacesNear==='function'?photoPlacesNear(r):[]).forEach(add);
+ const near=(m)=>typeof photoPlacesNear==='function'?photoPlacesNear(r,m):[];
+ story.forEach(add);near(50).forEach(add);
+ // Brooklyn and Queens have far fewer photographed places within 50 m (Astoria Park → Socrates Sculpture Park: one).
+ // Then look up to 120 m (a park's point is its middle, often more than 50 m from a path along its edge), and last
+ // at the start and the destination themselves: not "along the way" for naming the walk, but worth a picture.
+ if(out.length<ROUTE_PHOTO.ENOUGH&&typeof storyPlacesWithin==='function'){
+  const ends=(p)=>typeof storyEndsNear==='function'&&storyEndsNear(p,r);
+  storyPlacesWithin(r,ROUTE_PHOTO.WIDE_M,false).forEach(add);near(ROUTE_PHOTO.WIDE_M).filter(p=>!ends(p)).forEach(add);
+  storyPlacesWithin(r,ROUTE_PHOTO.WIDE_M,true).forEach(add);near(ROUTE_PHOTO.WIDE_M).forEach(add);
+ }
  return out.slice(0,14);
 }
 const photoKey=(x)=>x.thumb;
@@ -162,7 +172,10 @@ function cardPhotos(r,st,shown=[],used=new Set()){
  if(typeof placePhoto!=='function')return'';
  const places=routePhotoPlaces(r).slice(0,10),others=new Set(shown.filter(o=>o!==r).flatMap(o=>routePhotoPlaces(o).map(p=>p.wd||p.id)));
  const ranked=[...places.filter(p=>p.name===st.via),...places.filter(p=>p.name!==st.via&&!others.has(p.wd||p.id)),...places.filter(p=>p.name!==st.via&&others.has(p.wd||p.id))];
- const photos=ranked.map(placePhoto).filter(x=>x&&x.kind!=='street'),fresh=photos.filter(x=>!used.has(photoKey(x))),pick=(fresh.length?fresh:photos).slice(0,3);
+ let photos=ranked.map(placePhoto).filter(x=>x&&x.kind!=='street');
+ // no photo of any place on this walk: what the street at those places looks like (labelled "Street view here")
+ if(!photos.length)photos=ranked.map(placePhoto).filter(x=>x&&x.kind==='street').slice(0,2);
+ const fresh=photos.filter(x=>!used.has(photoKey(x))),pick=(fresh.length?fresh:photos).slice(0,3);
  pick.forEach(x=>used.add(photoKey(x)));
  return photoFigures(pick,'rc-photos');
 }

@@ -264,6 +264,9 @@ function i18nLookup(text) {
  const one = i18nPhrase(text);
  if (one) return one;
  const key = i18nKey(String(text || ''));
+ // a text node that continues a line: " · shortest route 97" after a bold "Architecture 99"
+ const lead = /^· (.+)$/.exec(key);
+ if (lead) { const rest = i18nLookup(lead[1]); return rest ? `· ${rest}` : null; }
  if (!key.includes(' · ')) return null;
  let hit = false;
  const out = key.split(' · ').map((p) => { const z = i18nPhrase(p); if (z) { hit = true; return z; } return p; });

@@ -189,14 +189,14 @@ function photoFromIndex(id, name) {
  return {kind: 'commons', wd: e[3] || null, name: name || e[7] || '', thumb: base + e[0], page: 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(file.replace(/ /g, '_')),
   author: e[1] || '', license: e[2] || '', via: e[4] || ''};
 }
-const streetPhotos = {cache: new Map(), asked: new Set(), inflight: false, failed: false};
+const placeStreetPhotos = {cache: new Map(), asked: new Set(), inflight: false, failed: false};
 /** The photo to show for one place {id, wd?, name, lat, lon}, or null (not found yet, or none). */
 function placePhoto(p) {
  if (!p) return null;
  const ix = photoFromIndex(p.id, p.name); if (ix) return ix;
  const wd = photoIdFor(p);
  if (wd) { const x = routePhotos.cache.get(wd); if (x && x.thumb) return {kind: 'commons', ...x, name: p.name}; }
- const st = streetPhotos.cache.get(p.id); return st ? {...st, name: p.name} : null;
+ const st = placeStreetPhotos.cache.get(p.id); return st ? {...st, name: p.name} : null;
 }
 /** Has every Wikimedia route been tried for this place, with nothing found? */
 function photoWikimediaNone(p) {
@@ -212,21 +212,21 @@ function placePhotosEnsure(places, done) {
  if (!photoIndex.doc) { photoIndexLoad(() => { if (list.length && typeof done === 'function') done(); }); return; }
  const rest = list.filter((p) => !photoIndex.doc.items[p.id]);
  if (rest.length) photosResolve(rest, done);
- const want = rest.filter((p) => !streetPhotos.asked.has(p.id) && photoWikimediaNone(p)).slice(0, 8);
- if (!want.length || streetPhotos.inflight || streetPhotos.failed || typeof streetwiseFetch !== 'function') return;
- want.forEach((p) => streetPhotos.asked.add(p.id));
- streetPhotos.inflight = true;
+ const want = rest.filter((p) => !placeStreetPhotos.asked.has(p.id) && photoWikimediaNone(p)).slice(0, 8);
+ if (!want.length || placeStreetPhotos.inflight || placeStreetPhotos.failed || typeof streetwiseFetch !== 'function') return;
+ want.forEach((p) => placeStreetPhotos.asked.add(p.id));
+ placeStreetPhotos.inflight = true;
  streetwiseFetch('/api/place-photos', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({places: want.map((p) => ({id: String(p.id).slice(0, 80), lon: p.lon, lat: p.lat}))}), signal: AbortSignal.timeout(30000)})
   .then((r) => r.json()).then((d) => {
-   if (d && d.configured === false) { streetPhotos.failed = true; return; }
+   if (d && d.configured === false) { placeStreetPhotos.failed = true; return; }
    let any = false;
    for (const [id, ph] of Object.entries(d?.photos || {})) {
     if (!/^https:\/\//.test(ph.thumb || '') || !/^https:\/\/www\.mapillary\.com\//.test(ph.page || '')) continue;
-    streetPhotos.cache.set(id, {kind: 'street', thumb: ph.thumb, page: ph.page, author: ph.username || '', license: 'CC BY-SA', date: String(ph.captured_on || '').slice(0, 7), distance: ph.distance_m});
+    placeStreetPhotos.cache.set(id, {kind: 'street', thumb: ph.thumb, page: ph.page, author: ph.username || '', license: 'CC BY-SA', date: String(ph.captured_on || '').slice(0, 7), distance: ph.distance_m});
     any = true;
    }
    if (any && typeof done === 'function') done();
-  }).catch(() => {}).finally(() => { streetPhotos.inflight = false; if (list.some((p) => !streetPhotos.asked.has(p.id) && photoWikimediaNone(p)) && typeof done === 'function') done(); });
+  }).catch(() => {}).finally(() => { placeStreetPhotos.inflight = false; if (list.some((p) => !placeStreetPhotos.asked.has(p.id) && photoWikimediaNone(p)) && typeof done === 'function') done(); });
 }
 /** Places with an index photo within maxM metres of a route line, nearest first: [{id, name, lat, lon, d}]. */
 function photoPlacesNear(r, maxM = 50) {
@@ -252,4 +252,4 @@ function photoFigures(photos, cls) {
  }).join('')}</div>`;
 }
 
-if (typeof window !== 'undefined') { window.routePhotos = routePhotos; Object.assign(routePhotos, {for: photosFor, load: photosLoad, resolve: photosResolve, idFor: photoIdFor, figures: photoFigures, LIMITS: PHOTO, place: placePhoto, ensure: placePhotosEnsure, near: photoPlacesNear, index: photoIndex, street: streetPhotos}); }
+if (typeof window !== 'undefined') { window.routePhotos = routePhotos; Object.assign(routePhotos, {for: photosFor, load: photosLoad, resolve: photosResolve, idFor: photoIdFor, figures: photoFigures, LIMITS: PHOTO, place: placePhoto, ensure: placePhotosEnsure, near: photoPlacesNear, index: photoIndex, street: placeStreetPhotos}); }

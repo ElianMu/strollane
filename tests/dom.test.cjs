@@ -645,7 +645,7 @@ const run=s=>vm.runInContext(s,context);
   // short labels with numbers or names: the whole text, or each " · " part; names and addresses are kept
   {const cases=[['13 min','13 分钟'],['1.02 km','1.02 公里'],['105 min stay (est.)','停留约 105 分钟（估计）'],['Museum +1','博物馆 +1'],['3 PLANNED','已规划 3 个'],
     ['cafes · 78 West 3rd Street','咖啡馆 · 78 West 3rd Street'],['Moderate · 50','中等 · 50'],['Coffee (café)','咖啡（咖啡馆）'],['15 °C · feels 13 °C · Clear','15 °C · 体感 13 °C · 晴'],
-    ['安静放松 Quiet & Relax 60 · shortest route 47','安静放松 Quiet & Relax 60 · 最短路线 47'],['Your priority 60 · shortest route 47 (+13, similar) · 4.2% longer','你的优先级 60 · 最短路线 47（+13，相近） · 长 4.2%'],
+    ['安静放松 Quiet & Relax 60 · shortest route 47','安静放松 Quiet & Relax 60 · 最短路线 47'],['· shortest route 97','· 最短路线 97'],['Your priority 60 · shortest route 47 (+13, similar) · 4.2% longer','你的优先级 60 · 最短路线 47（+13，相近） · 长 4.2%'],
     ['Wikipedia in 7 editions · NYC designated landmark · hours listed','维基百科 7 种语言版本 · 纽约市指定地标 · 列有营业时间'],['Up to 90 min · stairs allowed','最长 90 分钟 · 可以走楼梯'],['◇ Culture','◇ 文化 Culture'],
     ['3 stop(s), 1.02 km on the OSM pedestrian graph, 13 min walking + 105 min visits. Within your limits.','3 个停留点，步行网络上 1.02 公里，步行 13 分钟 + 停留 105 分钟。在你的限制范围内。']];
    const els=cases.map(([en])=>{const e=d.createElement('p');d.body.appendChild(e);e.textContent=en;return e;});
@@ -657,6 +657,8 @@ const run=s=>vm.runInContext(s,context);
    els.concat(keep).forEach(e=>e.remove());}
   // the page's own chat summaries and the walk's name are written in Chinese
   assert.equal(run("zhChat('AI journey interpretation: interest: Museum · +1 Museum · coffee (cafes) · flexible end (discover for me).')"),'AI 行程理解：兴趣：博物馆 · 再加 1 个博物馆 · 咖啡（咖啡馆） · 终点灵活（为我推荐）。');
+  assert.equal(run("zhChat('No Feasible Route: none of the 2 candidate routes meets your limits (116 min exceeds the 100-minute limit; 124 min exceeds the 100-minute limit). Increase the limit or change endpoints. Over-limit routes are shown for comparison only; the map shows the shortest (113 min) as a dashed preview.')"),'没有满足限制的路线：2 条候选路线都超出了你的限制（116 分钟，超过 100 分钟上限; 124 分钟，超过 100 分钟上限）。请放宽限制或换个起终点。超出限制的路线仅供比较；地图上的虚线是最短的那条（113 分钟）。');
+  assert.equal(run("zhChat('No route: The route server took too long to answer. Try again; the first request after a pause is the slow one. No route was fabricated.')"),'没有路线：路线服务器响应太慢。请再试一次，服务器闲置后的第一次请求会比较慢。没有编造任何路线。');
   assert.equal(run("zhChat('AI interpretation: Culture 50 · max 90 min · avoidDetours: yes. Checking feasible pedestrian paths…')"),'AI 理解：文化 Culture 50 · 最长 90 分钟 · 避免绕行：是。正在查找可走的步行路线…');
   {w.__jk=run('[journey.interests.slice(),journey.food.slice(),journey.named.slice()]');run("journey.interests=['museums'];journey.food=[{category:'cafes',item:'coffee'}];journey.named=[]");
    assert.equal(run('journeyTheme()'),'城市漫步：博物馆 · 咖啡（咖啡馆）');run("setLanguage('en',false)");assert.equal(run('journeyTheme()'),'City walk: Museums · Coffee (café)');run("setLanguage('zh',false)");
