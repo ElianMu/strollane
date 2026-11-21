@@ -38,7 +38,7 @@ const tilt = async (page, beta) => {
   const p1 = await page.evaluate(() => ({ mode: document.body.classList.contains('preview-mode'), pitch: Math.round(state.map.getPitch()), s: strollanePreview.state.s,
     playing: strollanePreview.state.playing, instr: document.getElementById('rpInstr').textContent, walker: state.map.getSource('preview-walker')?._data?.features?.length,
     hidden: ['.m-composer', '.right-panel', '.topbar'].every((q) => getComputedStyle(document.querySelector(q)).display === 'none') }));
-  check('preview opens full-screen: first-person pitch, walker marker, UI chrome hidden, playing', p1.mode && p1.pitch >= 65 && p1.walker === 1 && p1.hidden && p1.playing, p1);
+  check('preview opens full-screen: first-person pitch, walker marker, UI chrome hidden, playing', p1.mode && p1.pitch >= 50 && p1.walker === 1 && p1.hidden && p1.playing, p1);
   check('preview shows the next instruction from the real maneuvers', p1.instr.length > 3 && p1.instr !== 'Preview of your walk', p1.instr);
   await shot(page, 'preview-phone.png');
   await page.waitForTimeout(1500);
@@ -146,7 +146,7 @@ const tilt = async (page, beta) => {
   check('desktop: AR hidden (no touch camera/compass), 3D preview offered', await d.page.evaluate(() => document.getElementById('navAr').classList.contains('hidden')) && await d.page.locator('#routePreviewBtn').isVisible());
   await d.page.click('#routePreviewBtn'); await d.page.waitForTimeout(900);
   const dw = await d.page.evaluate(() => ({ mapW: Math.round(document.getElementById('map').getBoundingClientRect().width), canvasW: document.querySelector('#map canvas').clientWidth, pitch: Math.round(state.map.getPitch()) }));
-  check('desktop preview: map takes the full window, first-person pitch', dw.mapW === 1440 && Math.abs(dw.canvasW - 1440) <= 1 && dw.pitch >= 65, dw);
+  check('desktop preview: map takes the full window, first-person pitch', dw.mapW === 1440 && Math.abs(dw.canvasW - 1440) <= 1 && dw.pitch >= 50, dw);
   await shot(d.page, 'preview-desktop.png');
   await d.page.keyboard.press('Escape'); await d.page.waitForTimeout(900);
   check('desktop: Esc closes the preview and the three-column layout returns', await d.page.evaluate(() => !document.body.classList.contains('preview-mode') && getComputedStyle(document.querySelector('.left-panel')).display !== 'none'));

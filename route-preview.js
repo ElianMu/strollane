@@ -4,7 +4,9 @@
    the stops called out as you pass them. It's a preview of the real route geometry from the STROLLANE engine, not a
    simulation of street-level imagery. Depends on: state, $, esc, toast, formatNavDistance, NavEngine, activeRouteObject. */
 const preview={on:false,eng:null,route:null,s:0,playing:false,speed:1,raf:0,lastT:0,bearing:null,saved:null,els:null,reduced:false};
-const PREVIEW_PITCH=72,PREVIEW_ZOOM=17.6,PREVIEW_LOOK_M=45;
+const PREVIEW_PITCH=56,PREVIEW_ZOOM=17.2,PREVIEW_LOOK_M=45;
+/** Text that only clutters a tilted fly-over: house numbers, district names, the route's own name along the line. */
+const PREVIEW_HIDE=['housenumber','udg-districts-label','route-names'];
 
 function previewBuild(){
  if(preview.els)return preview.els;
@@ -50,16 +52,18 @@ function previewStart(){
  document.body.classList.add('preview-mode');els.root.classList.remove('hidden');
  m.resize(); // desktop: side panels collapse, the map takes the window
  previewEnsureLayers();
+ preview.saved.hidden=PREVIEW_HIDE.filter(id=>m.getLayer(id)).map(id=>[id,m.getLayoutProperty(id,'visibility')]);
+ for(const [id] of preview.saved.hidden)m.setLayoutProperty(id,'visibility','none');
  if(typeof m.setSky==='function'){try{preview.saved.sky=m.getSky?.();m.setSky(previewSky());}catch(e){}}
  previewApply(true);
  // reduced motion: start paused, the walker scrubs instead of watching an animation
  previewSetPlaying(!preview.reduced);
  preview.raf=requestAnimationFrame(previewFrame);
 }
-/** Sky and fog behind the pitched 3D view follow the theme (dark night sky / white daylight sky). */
+/** Sky and fog behind the pitched 3D view follow the theme; the far ground fades into the sky instead of ending in a hard white band. */
 function previewSky(){
  const light=document.documentElement.dataset.mapTheme==='light';
- return light?{'sky-color':'#FFFFFF','horizon-color':'#F1F1F1','fog-color':'#FFFFFF','sky-horizon-blend':.9,'horizon-fog-blend':.9,'fog-ground-blend':.35,'atmosphere-blend':0}
+ return light?{'sky-color':'#E4E9EC','horizon-color':'#F2F1EC','fog-color':'#F2F1EC','sky-horizon-blend':.6,'horizon-fog-blend':.8,'fog-ground-blend':.55,'atmosphere-blend':0}
   :{'sky-color':'#0B0B0B','horizon-color':'#161615','fog-color':'#0B0B0B','sky-horizon-blend':.9,'horizon-fog-blend':.9,'fog-ground-blend':.35,'atmosphere-blend':0};
 }
 function previewStop(){
@@ -68,6 +72,7 @@ function previewStop(){
  const m=state.map;
  m.getSource('preview-walker')?.setData(emptyFC());
  if(typeof m.setSky==='function'){try{m.setSky(preview.saved?.sky||{});}catch(e){}}
+ for(const [id,v] of preview.saved?.hidden||[])if(m.getLayer(id))m.setLayoutProperty(id,'visibility',v||'visible');
  preview.els?.root.classList.add('hidden');document.body.classList.remove('preview-mode');m.resize();
  const s=preview.saved;
  if(s){m.setMaxPitch(s.maxPitch);m.easeTo({center:s.center,zoom:s.zoom,bearing:s.bearing,pitch:s.pitch,padding:s.padding,duration:700});}
