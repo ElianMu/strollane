@@ -455,8 +455,12 @@ body.nav-mode .selected-route-summary,body.nav-mode #urbanInspector,body.nav-mod
  .nav-top{top:10px;padding:12px 14px;gap:12px;border-radius:16px}.nav-arrow{width:54px;height:54px}.nav-dist{font-size:26px}.nav-instr{font-size:14.5px}
  .nav-bottom{bottom:12px;padding:10px 12px}.nav-pill{min-height:44px;padding:0 12px}.nav-status{top:102px}.nav-recenter{bottom:170px}.nav-stop{bottom:170px}
 }
-.nav-more{position:relative}.nav-more summary{list-style:none;display:flex;align-items:center;cursor:pointer}.nav-more summary::-webkit-details-marker{display:none}
-.nav-more-body{position:absolute;bottom:52px;left:0;display:flex;flex-wrap:wrap;gap:6px;width:max-content;max-width:260px;padding:8px;border-radius:14px;background:color-mix(in srgb,var(--g0b) 96%,transparent);border:1px solid var(--g42);box-shadow:0 12px 30px color-mix(in srgb,var(--shadow) 50%,transparent)}
+/* The More menu opens above the whole bottom bar, inside its width: anchored to the More button it ran off the right
+   edge of a phone (the button sits near the right end of the bar). */
+.nav-more{position:static}.nav-more summary{list-style:none;display:flex;align-items:center;cursor:pointer}.nav-more summary::-webkit-details-marker{display:none}
+.nav-more[open] summary{border-color:var(--lime)}
+#navOverlay:has(.nav-more[open]) .nav-recenter{opacity:0;pointer-events:none}
+.nav-more-body{position:absolute;bottom:calc(100% + 8px);left:0;right:0;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;box-sizing:border-box;padding:8px;border-radius:14px;background:color-mix(in srgb,var(--g0b) 96%,transparent);border:1px solid var(--g42);box-shadow:0 12px 30px color-mix(in srgb,var(--shadow) 50%,transparent)}
 .nav-buttons .nav-pill.danger{margin-left:auto}
 /* Explore analytics */
 .explore-tools{display:flex;gap:6px;margin:6px 0}.explore-tools input{flex:1;min-width:0;background:var(--g11);border:1px solid var(--g3d);color:var(--gee);border-radius:6px;padding:5px 8px;font-size:10.5px}

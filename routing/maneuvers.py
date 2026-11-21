@@ -8,7 +8,7 @@ At each node where one edge hands over to the next:
   · the node's other walkable options are counted from the network (a bend with no other way to go is not an instruction);
   · names come from OSM, else the matched LION street (marked as derived), else a description of the way (sidewalk, path…);
   · crossings, paths, stairs, bridges and tunnels are named as such.
-Close decisions (< 12 m apart) are merged into one instruction with a "then" hint; decisions where the edges do not join are
+Close decisions (< 12 m apart) are merged into one instruction with at most one "then" hint; decisions where the edges do not join are
 emitted as low-confidence "check the map" notices instead of a guessed turn.
 Turn classes (|angle|): < 25° straight · 25–50° slight · 50–120° turn · 120–165° sharp · ≥ 165° U-turn.
 """
@@ -238,10 +238,16 @@ def build(route, net, stops=None):
     for m in out[1:]:
         prev = merged[-1]
         if m['type'] != 'notice' and prev['type'] not in ('depart', 'notice') and m['distance_along_route_m'] - prev['distance_along_route_m'] < MERGE_M:
-            prev['then'] = m['instruction_text']
-            prev['then_zh'] = m['instruction_zh']
-            prev['instruction_text'] += f', then {m["instruction_text"][0].lower() + m["instruction_text"][1:]}'
-            prev['instruction_zh'] += f'，随后{m["instruction_zh"]}'
+            # one "then" at most, and never the same words again: "Turn left onto W 42nd St, then turn left onto W 42nd
+            # St" and "Turn right onto the path, then turn right onto the path, then …" (four times, a zig-zag between
+            # footways) said nothing a walker can use. Later close decisions are drawn on the map, not read out.
+            if 'then' not in prev and m['instruction_text'] != prev['instruction_text'] and not (
+                    m['type'] == prev['type'] and m.get('street_name') == prev.get('street_name')):
+                prev['then'] = m['instruction_text']
+                prev['then_zh'] = m['instruction_zh']
+                prev['instruction_text'] += f', then {m["instruction_text"][0].lower() + m["instruction_text"][1:]}'
+                prev['instruction_zh'] += f'，随后{m["instruction_zh"]}'
+            prev['merged'] = prev.get('merged', 0) + 1
             continue
         merged.append(m)
     # arrivals: stops along the way and the destination

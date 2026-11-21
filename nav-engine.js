@@ -52,7 +52,7 @@ class NavEngine{
   if(route.validation&&route.validation.navigation_allowed===false){this.blocked=route.validation.blocking_issues||['Route failed validation'];}
  }
  reset(progress=0){
-  Object.assign(this,{progress,lastFix:null,lastMatchT:null,offCount:0,offSince:null,backCount:0,alerted:{},arrivedStops:new Set(),
+  Object.assign(this,{progress,lastFix:null,lastMatchT:null,offCount:0,offSince:null,backCount:0,rejoinCount:0,alerted:{},arrivedStops:new Set(),
    next:this.maneuvers.findIndex(m=>m.distance_along_route_m>progress+this.cfg.passM&&m.type!=='depart'),lastOutput:null});
   if(this.next<0)this.next=this.maneuvers.length-1;
  }
@@ -119,6 +119,16 @@ class NavEngine{
   }
   // rejoin after a long gap anywhere ahead (never behind) when the windowed match is far away
   if(m&&m.d>40&&dt>20){const g=this.match(p,this.progress,this.netLen,fix);if(g&&g.d<m.d)m=g;}
+  // rejoin ahead after a detour: the walker left the route (took a parallel street) and came back to it further on.
+  // The walking window cannot see that far, so progress stayed where they left and the walk was "off route" to the end.
+  // Look along the stretch they could have walked since leaving (never past the next stop not yet reached) and accept
+  // it after 3 consistent fixes.
+  if(m&&this.offSince!=null&&m.d>Math.max(this.cfg.offM,(acc??20)+10)){
+   const away=Math.max(0,(t-this.offSince)/1000),stop=this.maneuvers.find(x=>x.type==='arrive_stop'&&!this.arrivedStops.has(x.maneuver_id)&&x.distance_along_route_m>=this.progress);
+   const hi=Math.min(this.netLen,this.progress+this.cfg.walkMaxMps*away*1.5+60,stop?stop.distance_along_route_m+this.cfg.arriveM:Infinity);
+   const g=hi>this.progress+5?this.match(p,this.progress+5,hi,fix):null;
+   if(g&&g.d<=Math.max(20,(acc??20)+5)){if(++this.rejoinCount>=3){m=g;this.progress=g.s;this.rejoinCount=0;this.backCount=0;}}else this.rejoinCount=0;
+  }else this.rejoinCount=0;
   const out={timestamp:t,accuracy_m:acc,location_quality:quality,raw:[fix.lon,fix.lat]};
   if(!m){this.lastFix=fix;return this.finish(out);}
   const unc=Math.max(0,m.d-(acc??20));

@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_again.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Copy the web files into _site
@@ -44,8 +44,17 @@ jobs:
           size=$(du -sm _site | cut -f1)
           if [ "$size" -gt 990 ]; then echo "::error::_site is ${size} MB; GitHub Pages allows 1 GB"; exit 1; fi
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+      # The ~850 MB artifact is sometimes not visible to deploy-pages yet ("No artifacts named github-pages were found";
+      # it happened to f61b78a and bb599a2c). Wait a minute and deploy once more instead of leaving the site stale.
       - id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Wait before deploying again
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 60
+      - id: deployment_again
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4

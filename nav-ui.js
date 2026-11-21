@@ -66,6 +66,8 @@ function foodEvidenceStatus(r){
 /* ---------- start ---------- */
 async function startNavigation(){
  const r=activeRouteObject();if(!r||nav.engine)return;
+ primeSpeech(); // inside the tap: iOS Safari speaks nothing until a first utterance was started by the user
+
  if(r.constraints?.feasible===false)return toast('This walk is over your limits. Pick another walk or change your time.');
  if(r.validation&&!r.validation.navigation_allowed)return toast('This route failed its route check and cannot be navigated.');
  if(!navigator.geolocation)return toast('Location is not available in this browser.');
@@ -92,7 +94,7 @@ function askStartChoice(r,here,away){
 /** Plain A→B walking route from the engine (used for "navigate to start" and simple re-routes). */
 async function requestRoute(from,to){
  try{const body={...buildRouteRequest({lat:from.lat,lon:from.lon},{lat:to.lat,lon:to.lon}),weather:null};
-  const res=await streetwiseFetch('/api/routes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(30000)});
+  const res=await streetwiseRetryOnce('/api/routes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},30000,msg=>nav.engine?showNavCard({status:msg}):toast(msg));
   const j=await res.json();if(!res.ok)throw new Error(j.error||`HTTP ${res.status}`);
   const best=j.routes.find(x=>x.recommended)||j.routes.slice().sort((a,b)=>a.distance_m-b.distance_m)[0];
   if(best?.validation&&!best.validation.navigation_allowed)throw new Error('the new route failed its route check');
@@ -108,12 +110,11 @@ function beginNavigation(route,opts={}){
  // (reroute() has already folded the just-finished leg into nav.totalWalkedM before calling this).
  if(!opts.continuesJourney){nav.totalWalkedM=0;nav.totalVisitMin=0;nav.journeyStart=Date.now();}
  else if(opts.restoreTotals){nav.totalWalkedM=opts.restoreTotals.walkedM||0;nav.totalVisitMin=opts.restoreTotals.visitMin||0;nav.journeyStart=opts.restoreTotals.journeyStart||Date.now();}
- nav.engine=eng;nav.temporary=Boolean(opts.temporary);nav.route=route;
+ nav.engine=eng;nav.temporary=Boolean(opts.temporary);nav.route=route;nav.offNote=null;
  if(opts.restore){eng.next=opts.restore.next;opts.restore.arrived.forEach(a=>eng.arrivedStops.add(a));}
  eng.on(onNavEvent);eng.transition('READY');eng.transition('STARTING','start');
  document.body.classList.add('nav-mode');setDataLayersForNav(true);drawNavRoute(route);showNavCard({});
- nav.follow=true;nav.watch=navigator.geolocation.watchPosition(onFix,onFixError,{enableHighAccuracy:true,maximumAge:1000,timeout:20000});
- nav.tick=setInterval(()=>{eng.tick();renderNav();},3000);
+ nav.follow=true;startWatch();keepServerWarm(true);
  window.addEventListener('deviceorientationabsolute',onOrientation,true);window.addEventListener('deviceorientation',onOrientation,true);
  requestWakeLock();saveNavSession();renderNavStart();
  speak(route.maneuvers?.[0]?(nav.voiceLang==='zh'?route.maneuvers[0].instruction_zh:route.maneuvers[0].instruction_text):'');
@@ -175,7 +176,20 @@ function restoreNavLayerPriority(){
  for(const [id,op] of navLayerPriorityBackup)if(urbanData.active.has(id))setUrbanOpacity(id,op);
  navLayerPriorityBackup.clear();
 }
-function stopWatch(){if(nav.watch!=null)navigator.geolocation.clearWatch(nav.watch);nav.watch=null;clearInterval(nav.tick);}
+function stopWatch(){if(nav.watch!=null)navigator.geolocation.clearWatch(nav.watch);nav.watch=null;clearInterval(nav.tick);nav.tick=null;}
+/** GPS and the 3 s staleness tick start together (Resume after Pause used to restart only the GPS). */
+function startWatch(){
+ stopWatch();
+ nav.watch=navigator.geolocation.watchPosition(onFix,onFixError,{enableHighAccuracy:true,maximumAge:1000,timeout:20000});
+ nav.tick=setInterval(()=>{nav.engine?.tick();renderNav();},3000);
+}
+/** The route server (Render free tier) sleeps after 15 minutes without a request, and live navigation sends none:
+ * a re-route after a long walk met a cold server and timed out. While navigating, it is asked for its status every
+ * 5 minutes. */
+function keepServerWarm(on){
+ clearInterval(nav.warm);nav.warm=null;
+ if(on&&typeof streetwiseFetch==='function')nav.warm=setInterval(()=>{streetwiseFetch('/api/routing/status',{signal:AbortSignal.timeout(20000)}).catch(()=>{});},5*60e3);
+}
 
 /* ---------- GPS and compass ---------- */
 function onFix(p){
@@ -199,6 +213,9 @@ function onOrientation(e){
  if(!nav.last||(nav.last.speed??0)<=.6){nav.heading=h;nav.headingSrc='device compass';}
 }
 async function requestWakeLock(){try{nav.wakeLock=await navigator.wakeLock?.request('screen');}catch(e){nav.wakeLock=null;}}
+// The browser drops the screen wake lock whenever the page is hidden (another app, the lock screen): without taking it
+// again the phone went to sleep mid-walk after the first glance at another app.
+if(typeof document!=='undefined')document.addEventListener('visibilitychange',()=>{if(!document.hidden&&nav.engine&&nav.engine.state!=='ARRIVED')requestWakeLock();});
 
 /* ---------- engine events: voice, arrivals, re-routing ---------- */
 function onNavEvent(ev){
@@ -217,7 +234,7 @@ function onNavEvent(ev){
   if(typeof promptWalkCheck==='function')promptWalkCheck();
  }else if(ev.type==='off_route'){
   speak(nav.voiceLang==='zh'?'您已偏离路线，正在重新规划。':'You are off route. Recalculating.');reroute();
- }else if(ev.type==='state'){if(ev.to==='NAVIGATING')nav.rerouteFails=0;renderNav();}
+ }else if(ev.type==='state'){if(ev.to==='NAVIGATING'){nav.rerouteFails=0;nav.offNote=null;}renderNav();}
 }
 /** What is left of the original City Walk budget after the distance/time already spent (this leg + every earlier
  * leg since the walk began). Never resets the total on reroute, and never silently relaxes it: if what is left
@@ -254,11 +271,11 @@ async function reroute(manual=false){
    const reached=new Set([...eng.arrivedStops].map(id=>eng.maneuvers.find(m=>m.maneuver_id===id)?.stop_id).filter(id=>id!=null));
    const remaining=journey.plan.stops.filter(s=>s.role!=='end'&&!reached.has(s.id));
    const budget=remainingJourneyBudget();
-   if(budget.exhausted){eng.transition('OFF_ROUTE','budget exhausted');showNavCard({status:budget.reason,retry:false});return;}
+   if(budget.exhausted){eng.transition('OFF_ROUTE','budget exhausted');nav.offNote=budget.reason;showNavCard({status:budget.reason,retry:false});return;}
    const req={...journey.request,departure:new Date().toISOString(),origin:{id:'gps',name:'My location',lat:here.lat,lon:here.lon},slots:[],pool:{max_stops:0,candidates:[]},
     constraints:{...journey.request.constraints,...budget.constraints},
-    stops:remaining.map((s,i)=>({id:s.id,name:s.name,lat:s.lat,lon:s.lon,required:s.required||true,order:i+1,visit_min:s.visit_min,hours:s.hours,required_item:s.required_item,required_items:s.required_items}))};
-   const res=await streetwiseFetch('/api/itinerary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req),signal:AbortSignal.timeout(30000)});
+    stops:remaining.map((s,i)=>({id:s.id,name:s.name,lat:s.lat,lon:s.lon,required:s.required!==false,order:i+1,visit_min:s.visit_min,hours:s.hours,required_item:s.required_item,required_items:s.required_items}))};
+   const res=await streetwiseRetryOnce('/api/itinerary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)},30000,msg=>showNavCard({status:msg}));
    json=await res.json();if(!res.ok)throw new Error(json.error||`HTTP ${res.status}`);newRoute=json.routes[0];
   }else{
    const end=nav.route.geometry.coordinates.at(-1);newRoute=await requestRoute(here,{lon:end[0],lat:end[1]});
@@ -364,26 +381,33 @@ function renderNavPlace(out){
  const next=places.find(p=>p.along>prog+15&&p.along<(nav.engine?.netLen??Infinity)+30);
  if(!next){box.classList.add('hidden');box.innerHTML='';return;}
  const ph=typeof photosFor==='function'?photosFor([next])[0]:null,credit=ph?[ph.author,ph.license].filter(Boolean).join(' · '):'';
- box.innerHTML=`${ph?`<img src="${esc(ph.thumb)}" alt="${esc(next.name)}" referrerpolicy="no-referrer" width="40" height="40">`:''}<span><span class="np-line"><b>Next:</b> ${esc(next.name)} · ${formatNavDistance(next.along-prog,nav.units)}</span>${ph?`<a href="${esc(ph.page)}" target="_blank" rel="noopener">${esc(credit)}</a>`:''}</span>`;
+ box.innerHTML=`${ph?`<img src="${esc(ph.thumb)}" alt="${esc(next.name)}" referrerpolicy="no-referrer" width="40" height="40">`:''}<span><span class="np-line"><b>Next:</b> ${esc(next.name)} · ${navDistLabel(next.along-prog)}</span>${ph?`<a href="${esc(ph.page)}" target="_blank" rel="noopener">${esc(credit)}</a>`:''}</span>`;
  box.classList.remove('hidden');
 }
 function showNavCard(o){$('navOverlay').classList.remove('hidden');if(o.status!=null){$('navStatus').textContent=o.status;$('navStatus').classList.remove('hidden');}$('navRetry').classList.toggle('hidden',!o.retry);}
 function hideNav(){$('navOverlay').classList.add('hidden');document.body.classList.remove('nav-mode');}
+/** A distance for the navigation card, with Chinese units in the Chinese interface ("55 米"). The general translator
+ * leaves a bare "120 m" alone on purpose (the segment list stays English), so the card says it itself. */
+function navDistLabel(m){
+ const t=formatNavDistance(m,nav.units);
+ return typeof i18n!=='undefined'&&i18n.lang==='zh'?t.replace(/ m$/,' 米').replace(/ km$/,' 公里').replace(/ ft$/,' 英尺').replace(/ mi$/,' 英里'):t;
+}
 function renderNav(out=nav.engine?.lastOutput){
  const eng=nav.engine;if(!eng)return;
  const st=eng.state,nm=out?.next_maneuver||eng.maneuvers[eng.next];
  const d=out?.distance_to_next_m??(nm?nm.distance_along_route_m-eng.progress:null);
  $('navArrow').innerHTML=navArrow(nm?.type);
- $('navDist').textContent=nm&&!nm.type.startsWith('arrive')||d>15?formatNavDistance(d,nav.units):'';
+ $('navDist').textContent=nm&&!nm.type.startsWith('arrive')||d>15?navDistLabel(d):'';
  $('navInstr').textContent=nm?(nav.voiceLang==='zh'?nm.instruction_zh:nm.instruction_text):'Follow the route';
  const after=out?.after_next;$('navThen').textContent=after?`Then: ${nav.voiceLang==='zh'?after.instruction_zh:after.instruction_text}`:'';
  $('navConf').textContent=nm?.confidence==='low'?'Low-confidence instruction — check the map':'';
  renderNavPlace(out);
  // After a failed recalculation the reason must stay on screen (the 3 s tick re-renders), not collapse to "Off route".
- const msg=st==='OFF_ROUTE'&&nav.rerouteFails?'Could not recalculate — your last route is still shown. Tap Retry.':STATE_TEXT[st]||(st==='STARTING'?'Waiting for GPS…':'');
+ // The same for a used-up time/distance budget: its reason used to give way to a bare "Off route" at the next tick.
+ const msg=st==='OFF_ROUTE'&&nav.offNote?nav.offNote:st==='OFF_ROUTE'&&nav.rerouteFails?'Could not recalculate — your last route is still shown. Tap Retry.':STATE_TEXT[st]||(st==='STARTING'?'Waiting for GPS…':'');
  $('navStatus').textContent=msg+(out?.accuracy_m&&['GPS_WEAK'].includes(st)?` (±${Math.round(out.accuracy_m)} m)`:'');
  $('navStatus').className='nav-status '+st.toLowerCase();$('navStatus').classList.toggle('hidden',!msg); // the state class must not wipe 'hidden' (an empty pill showed while navigating)
- $('navRemain').textContent=out?formatNavDistance(out.remaining_m,nav.units):formatNavDistance(eng.netLen,nav.units);
+ $('navRemain').textContent=navDistLabel(out?out.remaining_m:eng.netLen);
  $('navTime').textContent=out?`${Math.max(1,Math.round(out.remaining_min))} min`:`${Math.round(eng.netLen/80)} min`;
  const stops=out?.remaining_stops||[];$('navStop').textContent=nav.temporary?'To the start of your walk':stops.length?`Next stop: ${stops[0]}${stops.length>1?` · +${stops.length-1}`:''}`:'Destination';
  $('navStopActions').classList.toggle('hidden',st!=='ARRIVED_AT_STOP');
@@ -398,6 +422,13 @@ function renderNav(out=nav.engine?.lastOutput){
  $('navArrived').classList.toggle('hidden',st!=='ARRIVED');
  drawNavPosition(out);if(st!=='ARRIVED')saveNavSession();
 }
+/** iOS Safari only lets a page speak after a first utterance started inside a user gesture; Start Navigation awaits
+ * the location before its first instruction, so that one came too late and the walk stayed silent. A silent utterance
+ * in the tap itself unlocks speech for the rest of the walk. */
+function primeSpeech(){
+ if(!nav.voice||!('speechSynthesis' in window))return;
+ try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}
+}
 function speak(text){
  if(!nav.voice||!text||!('speechSynthesis' in window))return;
  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=nav.voiceLang==='zh'?'zh-CN':'en-US';
@@ -411,7 +442,7 @@ function walkedMostOfIt(eng){
 }
 function exitNavigation(){
  const eng=nav.engine,askCheck=!nav.checkAsked&&walkedMostOfIt(eng);if(eng){eng.transition('STOPPED','user exit');}
- stopWatch();try{speechSynthesis.cancel();}catch(e){}nav.wakeLock?.release?.().catch(()=>{});
+ stopWatch();keepServerWarm(false);try{speechSynthesis.cancel();}catch(e){}nav.wakeLock?.release?.().catch(()=>{});nav.wakeLock=null;
  window.removeEventListener('deviceorientationabsolute',onOrientation,true);window.removeEventListener('deviceorientation',onOrientation,true);
  nav.engine=null;nav.queue=[];nav.last=null;nav.heading=null;drawNavPosition(null);clearNavSession();hideNav();setDataLayersForNav(false);renderNavStart();
  state.map?.easeTo({bearing:0,pitch:0,padding:{top:0,bottom:0,left:0,right:0},duration:400});
@@ -435,10 +466,12 @@ function clearNavSession(){try{sessionStorage.removeItem(nav.sessionKey);}catch(
 async function offerNavResume(){
  let s=null;try{s=JSON.parse(sessionStorage.getItem(nav.sessionKey)||'null');}catch(e){}
  if(!s)return;if(Date.now()>s.expires){clearNavSession();return;}
+ // The saved route carries everything turn-by-turn needs; the server is only needed to re-route. An unreachable
+ // (sleeping) server used to discard the walk on a page refresh; now only a changed walking network does.
  let netVersion=null;try{netVersion=(await streetwiseJson('/api/routing/status',{signal:AbortSignal.timeout(20000)})).network_version;}catch(e){}
- if(!netVersion||netVersion!==s.route.network_version){clearNavSession();toast(netVersion?'The walking network was updated since your navigation started — please plan the walk again.':'Navigation could not be restored (routing service unreachable).');return;}
+ if(netVersion&&netVersion!==s.route.network_version){clearNavSession();toast('The walking network was updated since your navigation started — please plan the walk again.');return;}
  const box=$('navChoice');box.classList.remove('hidden');
- box.innerHTML=`<div class="nav-choice-card"><strong>Resume navigation?</strong><p>${esc(s.route.route_name||'Your walk')} · ${formatNavDistance(s.route.distance_m-s.progress.progress_m,nav.units)} left. The same route is restored (signature ${esc(s.route.route_signature)}).</p>
+ box.innerHTML=`<div class="nav-choice-card"><strong>Resume navigation?</strong><p>${esc(s.route.route_name||'Your walk')} · ${formatNavDistance(s.route.distance_m-s.progress.progress_m,nav.units)} left. The same route is restored (signature ${esc(s.route.route_signature)}).${netVersion?'':' The route server is not answering yet, so re-routing may wait until it does.'}</p>
   <button type="button" class="primary-cta" data-c="resume">Resume</button><button type="button" class="mini-outline" data-c="discard">Discard</button></div>`;
  box.onclick=e=>{const c=e.target.dataset?.c;if(!c)return;box.classList.add('hidden');
   if(c==='resume'){
@@ -446,6 +479,12 @@ async function offerNavResume(){
    if(s.journeyCtx&&typeof journey!=='undefined'){journey.plan=s.journeyCtx.plan;journey.request=s.journeyCtx.request;}
    beginNavigation(s.route,{progress_m:s.progress.progress_m,restore:s.progress,continuesJourney:true,restoreTotals:s.totals});
   }else clearNavSession();};
+}
+/** Turn instructions and the voice follow the interface language (the EN / 中文 menu can still change the voice alone):
+ * in the Chinese interface the instructions used to stay English until that menu was changed. */
+function navFollowLanguage(lang){
+ nav.voiceLang=lang==='zh'?'zh':'en';const sel=$('navLang');if(sel)sel.value=nav.voiceLang;
+ if(nav.engine)renderNav();
 }
 function setupNavUI(){
  $('navStart').addEventListener('click',startNavigation);
@@ -457,10 +496,13 @@ function setupNavUI(){
  $('navUnits').addEventListener('click',()=>{nav.units=nav.units==='metric'?'imperial':'metric';renderNav();});
  $('navMode').addEventListener('click',()=>{nav.viewMode={heading:'route',route:'north',north:'heading'}[nav.viewMode];renderNav();updateCamera(true);});
  $('navPause').addEventListener('click',()=>{const e=nav.engine;if(!e)return;
-  if(e.state==='PAUSED'){e.transition('NAVIGATING','resume');nav.watch=navigator.geolocation.watchPosition(onFix,onFixError,{enableHighAccuracy:true,maximumAge:1000,timeout:20000});}
+  if(e.state==='PAUSED'){e.transition('NAVIGATING','resume');startWatch();}
   else if(e.transition('PAUSED','user')){stopWatch();try{speechSynthesis.cancel();}catch(x){}}renderNav();});
  $('navContinue').addEventListener('click',()=>{nav.engine?.continueFromStop();renderNav();});
  $('navSkip').addEventListener('click',()=>{const e=nav.engine;if(e?.state==='ARRIVED_AT_STOP'){e.continueFromStop();renderNav();}});
  $('navRetry').addEventListener('click',()=>reroute(true));
+ navFollowLanguage(typeof i18n!=='undefined'?i18n.lang:'en');
+ // the More menu closes when the walker taps anywhere else (it covers part of the map)
+ document.addEventListener('click',e=>{const more=document.querySelector('#navOverlay .nav-more[open]');if(more&&!more.contains(e.target))more.open=false;});
  offerNavResume();
 }

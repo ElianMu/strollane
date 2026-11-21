@@ -517,7 +517,7 @@ const run=s=>vm.runInContext(s,context);
   const secondStopM={...stopM,maneuver_id:'rt-extra-stop',stop_id:'place:cafe-B',distance_along_route_m:stopM.distance_along_route_m+50};
   rr.maneuvers.push(secondStopM);rr.maneuvers.sort((a,b)=>a.distance_along_route_m-b.distance_along_route_m);
   w.NAVR2=rr;
-  run("journey.plan={stops:[{id:'place:cafe-A',name:'Café',role:'stop',lat:40.758,lon:-73.978},{id:'place:cafe-B',name:'Café',role:'stop',lat:40.759,lon:-73.977},{id:'end',name:'End',role:'end',lat:40.76,lon:-73.98}]};"+
+  run("journey.plan={stops:[{id:'place:cafe-A',name:'Café',role:'stop',lat:40.758,lon:-73.978},{id:'place:cafe-B',name:'Café',role:'stop',lat:40.759,lon:-73.977,required:false},{id:'end',name:'End',role:'end',lat:40.76,lon:-73.98}]};"+
       "journey.request={origin:{id:'o',name:'Origin',lat:40.753,lon:-73.983},end:{mode:'fixed',place:null},constraints:{max_minutes:30,max_km:2,max_outing_minutes:40},preferences:{weights:{}},theme:'t'};");
   run("nav.engine=new NavEngine(NAVR2);nav.route=NAVR2;nav.last={lat:40.7536,lon:-73.9798};nav.lastReroute=0;nav.totalWalkedM=0;nav.totalVisitMin=0;"+
       "nav.engine.state='OFF_ROUTE';nav.engine.progress=800;nav.engine.arrivedStops.add(NAVR2.maneuvers.find(m=>m.stop_id==='place:cafe-A').maneuver_id);");
@@ -525,6 +525,7 @@ const run=s=>vm.runInContext(s,context);
   const body=calls.slice(before).find(c=>c.url.endsWith('/api/itinerary'))?.body;
   assert(body,'reroute posted a new itinerary request');
   assert.deepEqual(body.stops.map(s=>s.id),['place:cafe-B'],'the reached stop is dropped by id, not by its (shared) name; the end stays in req.end, not req.stops');
+  assert.equal(body.stops[0].required,false,'an optional stop stays optional after a re-route (it was made required)');
   assert(body.constraints.max_minutes<30&&body.constraints.max_minutes>0,`budget must shrink by what was already walked, got ${body.constraints.max_minutes}`);
   assert.equal(Math.round(body.constraints.max_minutes*10),Math.round((30-800/80)*10),'deduction matches progress at the 80 m/min walking pace');
   // Budget already exhausted: reroute must say so and must NOT ask the server for a fresh, implicitly-reset budget.
@@ -532,6 +533,17 @@ const run=s=>vm.runInContext(s,context);
   const before2=calls.length;await run('reroute(true)');
   assert.equal(calls.length,before2,'exhausted budget must not call the itinerary endpoint');
   assert(w.document.querySelector('#navStatus').textContent.includes('used up'),'the walker is told the budget ran out, not given a silently reset one');
+  run('renderNav()');assert(w.document.querySelector('#navStatus').textContent.includes('used up'),'the reason stays on screen at the next render, not a bare "Off route"');
+  // Pause then Resume: the GPS watch and the 3 s tick both run again
+  run("nav.engine.state='NAVIGATING';nav.watch=null;nav.tick=null;");w.document.querySelector('#navPause').click();
+  assert.equal(run('nav.engine.state'),'PAUSED');assert.equal(run('nav.tick'),null);
+  w.document.querySelector('#navPause').click();assert.equal(run('nav.engine.state'),'NAVIGATING');assert(run('nav.tick')!=null,'Resume restarts the staleness tick');assert(run('nav.watch')!=null);
+  // the More menu closes on a tap elsewhere
+  {const more=w.document.querySelector('#navOverlay .nav-more');more.open=true;w.document.querySelector('#navRepeat').click();assert(more.open,'a tap inside keeps it open');
+   w.document.body.click();assert(!more.open,'a tap elsewhere closes the More menu');}
+  // the instructions follow the interface language
+  run("navFollowLanguage('zh')");assert.equal(run('nav.voiceLang'),'zh');assert.equal(w.document.querySelector('#navLang').value,'zh');run("navFollowLanguage('en')");
+  run('stopWatch();keepServerWarm(false)');
  }
  // Independent criteria stay separate, and a legacy response cannot silently ignore them.
  run("applyInterpretation({weights:{},crime:{mode:'set',direction:'high',weight:90},waterfront:{mode:'set',direction:'high',weight:90}},'local')");

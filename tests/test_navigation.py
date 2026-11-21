@@ -129,6 +129,30 @@ class A_SyntheticManeuvers(unittest.TestCase):
         turn = ms[1]
         self.assertIn('then', turn['instruction_text']); self.assertEqual(len([m for m in ms if m['type'] not in ('depart', 'arrive')]), 1)
 
+    def test_a_zigzag_of_close_turns_is_one_instruction_with_one_then(self):
+        # four turns 4 m apart between footways (a building's walkways): at most two instructions, one "then" each, and no
+        # "turn right onto the path, then turn right onto the path" repeating the same words
+        path = {'highway': 'footway'}
+        pts = {'A': (0, -100), 'B': (0, 0), 'C': (4, 0), 'D': (4, 4), 'E': (8, 4), 'F': (8, 100)}
+        alts = {'X': (-50, 0), 'Y': (60, 0), 'W': (4, 60), 'V': (60, 4)}
+        net = FakeNet({**pts, **alts}, [('A', 'B', ST), ('B', 'C', path), ('C', 'D', path), ('D', 'E', path), ('E', 'F', path),
+                                        ('B', 'X', ST), ('C', 'Y', ST), ('D', 'W', ST), ('E', 'V', ST)])
+        ms = mv.build(route_through(net, ['A', 'B', 'C', 'D', 'E', 'F']), net)
+        said = [m for m in ms if m['type'] not in ('depart', 'arrive')]
+        self.assertLessEqual(len(said), 2, [m['instruction_text'] for m in said])
+        for m in said:
+            self.assertLessEqual(m['instruction_text'].count('then'), 1, m['instruction_text'])
+            first, _, then = m['instruction_text'].partition(', then ')
+            self.assertNotEqual(first.lower(), then.lower())
+
+    def test_the_same_words_are_not_said_twice(self):
+        w42 = {'name': 'W 42nd St', 'highway': 'footway', 'footway': 'sidewalk'}
+        net = FakeNet({'A': (0, -100), 'B': (0, 0), 'C': (-6, 0), 'D': (-6, -100), 'X': (50, 0), 'Y': (0, 60), 'Z': (-60, 0)},
+                      [('A', 'B', ST), ('B', 'C', w42), ('C', 'D', w42), ('B', 'X', ST), ('B', 'Y', ST), ('C', 'Z', ST)])
+        ms = mv.build(route_through(net, ['A', 'B', 'C', 'D']), net)
+        texts = [m['instruction_text'] for m in ms if m['type'] not in ('depart', 'arrive')]
+        self.assertTrue(texts and all(t.count('W 42nd St') == 1 for t in texts), texts)
+
     def test_loop_route(self):
         net = FakeNet({'A': (0, 0), 'B': (100, 0), 'C': (100, 100), 'D': (0, 100), 'X': (200, 0), 'Y': (100, 200), 'Z': (-100, 100)},
                       [('A', 'B', ST), ('B', 'C', ST), ('C', 'D', ST), ('D', 'A', ST), ('B', 'X', ST), ('C', 'Y', ST), ('D', 'Z', ST)])

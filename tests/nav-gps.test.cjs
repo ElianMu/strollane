@@ -80,6 +80,23 @@ test('leaving the route: possibly → confirmed off-route once; back on route re
  for(let i=20;i>=0;i--)e.update({...lonlat(offset(p,i*6,0)),accuracy:8,timestamp:(361+20-i)*1000});
  assert.equal(e.state,'NAVIGATING','back on the route');
 });
+test('a detour along a parallel street that rejoins the route further on: navigation resumes there (not off route to the end)',()=>{
+ // Regression: the walking window only looks ~30 m ahead of where the walker left, so after rejoining 120 m further on
+ // the engine stayed OFF_ROUTE to the end, with no arrival, whenever re-routing was unavailable (no network, cold server).
+ const [e,ev]=fresh();let t=0;
+ for(const {fix} of walk(e,0,150))e.update(fix),t=fix.timestamp/1000;
+ for(let s=150;s<=270;s+=1.35){t+=1;const p=e.pointAt(s),b=e.bearingAt(s)*Math.PI/180;e.update({...lonlat(offset(p,60*Math.cos(b),-60*Math.sin(b))),accuracy:8,timestamp:t*1000,speed:1.35});}
+ assert(ev.some(x=>x.type==='off_route'),'60 m away for 90 s is off route');
+ for(const {fix} of walk(e,272,stopM-40,{t0:t+1}))e.update(fix);
+ assert.equal(e.state,'NAVIGATING','back on the route further on');assert(e.progress>stopM-80,`progress ${Math.round(e.progress)} m`);
+});
+test('the rejoin never jumps past a stop not yet reached',()=>{
+ const [e]=fresh();let t=0;for(const {fix} of walk(e,0,stopM-150))e.update(fix),t=fix.timestamp/1000;
+ // walk far off the route for a long time, then appear on the route well past the stop
+ for(let i=0;i<200;i++){t+=1;const p=e.pointAt(stopM-150);e.update({...lonlat(offset(p,0,120)),accuracy:8,timestamp:t*1000,speed:1.35});}
+ for(const {fix} of walk(e,stopM+120,stopM+200,{t0:t+1}))e.update(fix);
+ assert(e.progress<=stopM+20,`progress ${Math.round(e.progress)} m, stop at ${Math.round(stopM)} m`);
+});
 test('walking direction reversed: progress follows back only after consistent evidence',()=>{
  const [e]=fresh();for(const {fix} of walk(e,0,600))e.update(fix);const top=e.progress;
  const back=walk(e,600,450,{t0:500});e.update(back[0].fix);e.update(back[12].fix);assert(e.progress>=top-1,'two fixes do not pull progress back');

@@ -125,6 +125,23 @@ const I18N_ZH = {
  // navigation mode
  'Starting…': '正在开始…', 'Retry': '重试', 'Continue to next stop': '前往下一站', 'Skip optional stop': '跳过可选停留点', 'You have arrived': '你已到达', 'Walk complete.': '步行结束。',
  'End navigation': '结束导航', '◎ Recenter': '◎ 回到当前位置', 'Voice on': '语音开启', 'Pause': '暂停', 'More': '更多', 'Repeat': '重复', 'North up': '正北朝上', 'Exit': '退出',
+ '➤ Start Navigation': '➤ 开始导航', 'Resume': '继续', 'Voice off': '语音关闭', 'Heading up': '前进方向朝上', 'Route up': '路线方向朝上', 'AR · compass': 'AR · 指南针',
+ 'Raise to view: on': '抬起手机即显示：开', 'Raise to view: off': '抬起手机即显示：关', 'To the start of your walk': '前往路线起点',
+ 'Weak GPS signal — position approximate': 'GPS 信号弱，位置只是大致位置', 'Checking whether you left the route…': '正在确认你是否偏离了路线…', 'Off route': '已偏离路线',
+ 'Off route — recalculating on the walking network…': '已偏离路线，正在步行路网上重新规划…', 'Paused': '已暂停', 'Arrived at stop': '已到达途经点', 'Navigation problem': '导航出现问题',
+ 'Waiting for GPS…': '正在等待 GPS…', 'Getting your location…': '正在获取你的位置…', 'Could not recalculate — your last route is still shown. Tap Retry.': '无法重新规划，仍显示原来的路线。请点“重试”。',
+ 'Location permission was turned off. Navigation stopped updating.': '定位权限已关闭，导航已停止更新。',
+ 'No device direction — map follows the route instead; arrow hidden': '没有手机朝向数据：地图改为跟随路线方向，不显示朝向箭头',
+ 'No direction data — heading arrow hidden': '没有方向数据，不显示朝向箭头', 'Low-confidence instruction — check the map': '这条指引不太确定，请看地图',
+ 'Next:': '下一个：', 'Navigate to start': '导航到起点', 'Replan from my location': '从我的位置重新规划', 'Resume navigation?': '继续上次的导航？', 'Discard': '放弃',
+ 'Choose how to begin. STROLLANE will not pretend you are at the start.': '请选择怎么开始。STROLLANE 不会假装你已经在起点。',
+ 'At the start — now following your planned walk.': '已到起点，现在开始按计划路线走。', 'Location is not available in this browser.': '这个浏览器无法使用定位。',
+ 'Re-planned from your location. Tap Start Navigation.': '已从你的位置重新规划。请点“开始导航”。',
+ 'The walking network was updated since your navigation started — please plan the walk again.': '导航开始后步行路网已更新，请重新规划路线。',
+ 'This route failed its route check and cannot be navigated.': '这条路线没有通过路线检查，无法导航。',
+ 'This walk is over your limits. Pick another walk or change your time.': '这条路线超出了你设定的限制。请换一条路线或调整时间。',
+ 'Location permission was denied. Allow location for this site to navigate.': '定位权限被拒绝。请允许本网站使用定位后再导航。',
+ 'Your position is unavailable (GPS off?).': '无法获取你的位置（GPS 是否关闭了？）。', 'Locating timed out. Try again outdoors.': '定位超时，请到室外再试。',
  // short pill labels (walk-presets.js): a gloss in front of the same short English label
  'Quiet': '安静 Quiet', 'Comfort': '舒适 Comfort', 'Vibrancy': '活力 Vibrancy', 'Scenic': '景观 Scenic', 'Safety': '安全 Safety', 'Transit': '公交 Transit', 'Food': '餐饮 Food',
  // journey and results labels
@@ -221,7 +238,12 @@ for (const k of ['Clear', 'Cloudy', 'Fog', 'Rain', 'Snow', 'Showers', 'Storm', '
 const i18nTerm = (s) => I18N_ZH[i18nKey(String(s))] || String(s);
 const i18nTermOnly = (s) => I18N_ZH[i18nKey(String(s))] || null;
 const I18N_ZH_PATTERNS = [
- [/^(-?[\d.,]+) km$/, '$1 公里'], [/^(-?[\d.,]+) mi$/, '$1 英里'], [/^(\d+) min$/, '$1 分钟'], [/^(\d+) min stay \(est\.\)$/, '停留约 $1 分钟（估计）'],
+ [/^(-?[\d.,]+) km$/, '$1 公里'], [/^(-?[\d.,]+) mi$/, '$1 英里'],
+ // navigation card
+ [/^Then: (.+)$/, (_, a) => `然后：${a}`], [/^Next stop: (.+?)(?: · \+(\d+))?$/, (_, a, n) => `下一站：${i18nPlaceName(a) || a}${n ? ` · 另有 ${n} 站` : ''}`],
+ [/^Next: (.+) · ([\d.,]+) (m|km|ft|mi)$/, (_, a, d, u) => `下一个：${i18nPlaceName(a) || a} · ${d} ${{m: '米', km: '公里', ft: '英尺', mi: '英里'}[u]}`],
+ [/^Suggested visit (\d+) min \(estimate\)$/, '建议停留 $1 分钟（估计）'], [/^You are (.+) from the start of this route\.$/, (_, d) => `你离这条路线的起点还有 ${i18nPhrase(d) || d}。`],
+ [/^Could not recalculate \((.+)\)\. Your last route is still shown\.$/, '无法重新规划（$1）。仍显示原来的路线。'], [/^(\d+) min$/, '$1 分钟'], [/^(\d+) min stay \(est\.\)$/, '停留约 $1 分钟（估计）'],
  [/^limit (\d+)$/, '上限 $1 分钟'], [/^(\d+) PLANNED$/, '已规划 $1 个'], [/^(\d+) STOPS?$/, '$1 个途经点'], [/^(\d+) WALKS?$/, '$1 条路线'],
  [/^(\d+) NEAR ROUTE$/, '沿途 $1 个'], [/^(\d+)\/12 MEASURED$/, '已测量 $1/12'], [/^(\d+) EDGES$/, '$1 条路段'], [/^Up to (\d+) min$/, '最长 $1 分钟'],
  [/^([A-Z][\w &/'’-]{0,40}) \+(\d+)$/, (m, a, n) => (i18nTermOnly(a) ? `${i18nTermOnly(a)} +${n}` : null)],
@@ -346,6 +368,7 @@ function setLanguage(lang, remember = true) {
  document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
  i18n.busy = true; try { i18nApply(document.body); } finally { i18n.busy = false; }
  if (lang === 'zh') i18nLoadPlaces();
+ if (typeof navFollowLanguage === 'function') navFollowLanguage(lang); // turn instructions and voice in the same language
  if (lang === 'zh' && !i18n.observer && typeof MutationObserver !== 'undefined') {
   i18n.observer = new MutationObserver((records) => {
    if (i18n.lang !== 'zh' || i18n.busy) return;
