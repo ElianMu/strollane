@@ -8,6 +8,10 @@
 #
 # GitHub may delay scheduled runs at busy times, so an occasional gap is possible. GitHub also pauses schedules in a
 # public repository after 60 days without commits; re-enable it under Actions if that happens.
+# Measured 2026-11-19/20: 8 runs in two days instead of about 288, with gaps of 5 to 8 hours, so the service did go to
+# sleep and the first walk after a night timed out. For a ping that really comes every 10 minutes, point a free external
+# monitor (cron-job.org or UptimeRobot) at https://streetwise-api.onrender.com/api/routing/status. The page also sends a
+# walk request once more when the first try times out right after a wake-up (api-config.js streetwiseRetryOnce).
 name: Keep API awake
 
 on:
