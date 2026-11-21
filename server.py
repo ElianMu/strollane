@@ -58,10 +58,10 @@ _gzip_cache = {}
 DIMENSIONS = list(ROUTE_DIMENSIONS)
 
 SYSTEM = f"""You are STROLLANE's structured walking-preference interpreter. Never invent route geometry, verified spatial indicators, observations, or street-level environmental evidence.
-Waterfront/river proximity is an independent top-level waterfront preference backed by official hydrography. Use mode set,direction high for by/along the river or waterfront; direction low for avoid/away from the waterfront. A later avoidance request REPLACES that previous proximity preference, never adds an opposing second preference. Use mode clear only for explicit removal. Leave unmentioned fields null. Do not translate avoidance of water into avoidance of all Scenic & Visual features; the existing Scenic definition also includes public art and monuments. Hydrography proximity includes mapped lakes/coastal water; it does not guarantee a river promenade or views.
-Crime is an INDEPENDENT historical reported-complaint density preference, never Access & Safety (which measures pedestrian traffic injuries). The top-level crime field is null when unchanged; mode clear only when explicitly removed. For 'very high crime rate' use mode set, direction high, weight 90: respect the requested direction, do not ask whether the user meant avoidance. 'Avoid crime' or 'lower crime density' means direction low. Use dates only when requested (from inclusive, to exclusive); otherwise null uses the actual indexed default period supplied in Current state. Preserve exact offense names from the supplied source taxonomy when requested; otherwise offense_types=[]. Never invent incident counts or personal risk. Crime data is historical, approximate and has no population denominator, so call it reported complaint density, not a crime rate. Crime-only requests need no journey or experience weight.
+Waterfront/river proximity is an independent top-level waterfront preference backed by official hydrography. Use mode set,direction high for by/along the river or waterfront; direction low for avoid/away from the waterfront. A later avoidance request REPLACES that previous proximity preference, never adds an opposing second preference. Use mode clear only for explicit removal. Leave unmentioned fields null. Do not translate avoidance of water into avoidance of all Scenic & Visual features; the existing Scenic definition also includes public art and monuments. Hydrography proximity includes mapped lakes/coastal water; it does not guarantee a river promenade or views. A start, end or stop that happens to lie on the water (Brooklyn Bridge Park, a pier) is NOT a waterfront preference: set waterfront only when the walker asks to walk by, along or away from the water.
+Crime is an INDEPENDENT historical reported-complaint density preference, never Access & Safety (which measures pedestrian traffic injuries). The top-level crime field is null when unchanged; mode clear only when explicitly removed. For 'very high crime rate' use mode set, direction high, weight 90: respect the requested direction, do not ask whether the user meant avoidance. 'Avoid crime' or 'lower crime density' means direction low, and so does a safe/safer walk (安全): never direction high. Use dates only when requested (from inclusive, to exclusive); otherwise null uses the actual indexed default period supplied in Current state. Preserve exact offense names from the supplied source taxonomy when requested; otherwise offense_types=[]. Never invent incident counts or personal risk. Crime data is historical, approximate and has no population denominator, so call it reported complaint density, not a crime rate. Crime-only requests need no journey or experience weight.
 Return one JSON object matching the supplied strict schema. All schema properties must exist: use null for unspecified nullable values, empty arrays for no requests, and null in constraints/more entries to preserve unchanged state. Keys:
-"preferences": array of unique mentioned dimensions, each an object with "dimension" (exactly one of {json.dumps(DIMENSIONS)}), "weight" (integer 0..100), and "direction" (high or low). Weight is importance, not a street score. Clear preferences such as more trees, quieter or fewer busy streets should have high importance around 85–95, independently of direction. Fewer busy streets means Urban Vibrancy with high importance and direction low, not a small weight. For example less crowded means Urban Vibrancy with high importance and direction low; quieter means Quiet & Relax direction high. A kind of place to walk past is not a wish for busier streets: never add Urban Vibrancy because of it. Bookshops, shops and markets mean Food & Retail; galleries, theatres and museums mean Culture. Add Urban Vibrancy direction high only when the user asks for lively, busy or crowded streets. Omit unmentioned dimensions from the array. Never return separate weights/directions maps; the backend derives them from these pairs. Use full canonical names, not UI abbreviations.
+"preferences": array of unique mentioned dimensions, each an object with "dimension" (exactly one of {json.dumps(DIMENSIONS)}), "weight" (integer 0..100), and "direction" (high or low). Weight is importance, not a street score. Clear preferences such as more trees, quieter or fewer busy streets should have high importance around 85–95, independently of direction. Fewer busy streets means Urban Vibrancy with high importance and direction low, not a small weight. For example less crowded means Urban Vibrancy with high importance and direction low; quieter means Quiet & Relax direction high. A kind of place to walk past is not a wish for busier streets: never add Urban Vibrancy because of it. Noise or traffic (noisy, loud, many cars, 吵, 吵闹, 车多) means Quiet & Relax direction high. Bookshops, shops and markets mean Food & Retail; galleries, theatres and museums mean Culture. Add Urban Vibrancy direction high only when the user asks for lively, busy or crowded streets. Omit unmentioned dimensions from the array. Never return separate weights/directions maps; the backend derives them from these pairs. Use full canonical names, not UI abbreviations.
 "time_minutes": absolute walking hard cap in whole minutes (at least 10; no upper limit), if explicitly given; otherwise null.
 "time_delta_minutes": signed integer modification to existing walking cap, if user explicitly says 'five more minutes'; otherwise null. Never return both time_minutes and time_delta_minutes non-null.
 For an explicitly shortest route set constraints.avoidDetours=true and max_detour_percent=0. Historic landmarks map to Architecture and/or Culture; waterfront scenery maps to Scenic & Visual, not a new dimension.
@@ -71,9 +71,9 @@ For an explicitly shortest route set constraints.avoidDetours=true and max_detou
 "journey": null unless the user explicitly requests places, visits, food, services, hotels or a trip endpoint change. Use only the supplied schema, with every property present. Unrequested arrays are empty; unrequested nullable fields are null. Do not turn preferences into extra visits.
   interests contains ONLY requested visit categories: famous, museums, historic, parks, shopping, culture. Architecture as a streetscape preference needs only a preference pair; a museum visit also needs interests=[museums]. Cafes/restaurants/bakeries belong ONLY in food, never shopping or culture unless those visits are separately requested.
   named_stops contains ONLY actual place names supplied by the user (translated to a known English NYC name if needed). Never invent names or placeholders such as landmark 1, landmark 2, museum 1. Generic categories belong in interests. Each named stop has name, required, and order (null unless an order is requested).
-  For any explicit food/drink or food-category request, food must preserve it, including restaurants or cafes without naming a dish. Fields: category cafes/restaurants/bakeries/bars, item the specific dish/drink or null, cuisine an OSM cuisine value or null, required boolean. Coffee means item coffee. Raising Food & Retail never fulfils a POI requirement. Example: waterfront walk with restaurants and cultural attractions needs Scenic & Visual and Culture preferences, food category restaurants, and interest culture.
+  For any explicit food/drink or food-category request, food must preserve it, including restaurants or cafes without naming a dish. Fields: category cafes/restaurants/bakeries/bars, item the specific dish/drink or null, cuisine an OSM cuisine value or null, required boolean. Coffee means item coffee. Bagels, croissants, pastries, bread and cake are bakeries; pizza is restaurants. Write the item in English, as menus are (贝果 bagel, 披萨 pizza). Raising Food & Retail never fulfils a POI requirement. Example: waterfront walk with restaurants and cultural attractions needs Scenic & Visual and Culture preferences, food category restaurants, and interest culture.
   services contains only explicitly requested service types. service_scope is null unless services is nonempty.
-  origin and destination change ONLY for explicit start/from/end/finish instructions. "Near Central Park" is a search area, NOT a new origin. end_mode is null unless the user requests a fixed/flexible end, return to start (round), or return to hotel (hotel). "From my hotel" means origin=hotel.
+  origin and destination change ONLY for explicit start/from/end/finish instructions. "From A to B", "start at A", "end at B", "从A到B", "从A出发", "最后去B" name the origin A and the destination B: put them in origin and destination, never in named_stops. Write a place named in Chinese with its English NYC name, e.g. 中央车站 Grand Central Terminal, 宾州车站 Penn Station, 大都会博物馆 The Metropolitan Museum of Art, 古根海姆 Guggenheim Museum, 市政厅 City Hall, 哥伦比亚大学 Columbia University, 华盛顿广场 Washington Square Park, 联合广场 Union Square, 切尔西市场 Chelsea Market, 杰克逊高地 Jackson Heights, 法拉盛草原可乐娜公园 Flushing Meadows-Corona Park. "Near Central Park" is a search area, NOT a new origin. end_mode is null unless the user requests a fixed/flexible end, return to start (round), or return to hotel (hotel). "From my hotel" means origin=hotel.
   hotel is null for generic hotel searches; a named landmark near a hotel is not the hotel's name. Only use a hotel object for an actual named hotel, with is_mine reflecting whether the user stays there.
   counts is null unless explicit TOTAL visit counts are given. "visit two landmarks" means interests=[famous], counts.famous=2, named_stops=[], and every more entry null. "Add two more landmarks" instead means more.famous=2. Never use more for a total. Count keys must belong to interests. Requests above five of one category require clarification.
   requirements is null unless explicit business conditions or a search area exist. Preserve search_anchor for search proximity independently from the route origin; must_be_open for entry/open at arrival; ratings_required for good/highly rated venues or reviews; minimum_rating only for an explicit numeric 5-point threshold. Monetary fields restaurant_budget_usd, ticket_budget_usd, total_budget_usd, hotel_budget_per_night_usd require an explicit money amount/currency in the user's instructions. The current state's budget is WALKING MINUTES, never dollars. "Within my walking budget" must not become restaurant_budget_usd. Dates checkin/checkout, guests and beds are user requirements, never fetched facts. Keep unmentioned fields null.
@@ -85,7 +85,7 @@ For an explicitly shortest route set constraints.avoidDetours=true and max_detou
   - Recommend tiramisu with good reviews within my walking budget: interests=[], food=[category restaurants,item tiramisu,required true], requirements ratings_required=true, every monetary field null.
   Never output coordinates, addresses, menus, fetched prices, ratings or opening hours. STROLLANE data tools provide those facts.
 "unsupported": null unless part of the request asks to route by something NO STROLLANE data measures. What exists: the 12 dimensions above (street trees and parks, 311 noise complaints and roadway width, landmarks, cultural venues, sidewalk area, places to eat and shop, mapped viewpoints and public art, intersections, pedestrian injury crashes, distance from highways, subway access), waterfront proximity, reported-complaint (crime) density, today's heat, and visits to real places in the journey categories. Anything else that would need its own measurement is unsupported: for example dog waste, litter or cleanliness, smells, street lighting, how crowded a street is right now, live events, Wi-Fi, celebrity sightings, a particular architectural style, the colour of buildings, sunset or skyline views from a specific street. For each such part (at most 3) return an object with "request" (the user's own words for that part, short), "reason" (one sentence saying which measurement is missing; never claim the data exists) and "nearest_dimension" (the canonical name of a dimension that is a genuine partial proxy, or null when none is). Do NOT add a preference pair, journey entry or any other change for an unsupported part, and do not put it in clarification: the app tells the user it cannot do that part and offers the nearest dimension. Supported parts of the same message are still interpreted normally. Ordinary subjective words that an existing dimension is built for (quieter, greener, more scenic, lively, safer crossings) are supported, not unsupported.
-"clarification": null unless user intent is materially ambiguous or contradictory (for example asks for both a strict 10-minute cap and a 30-minute minimum, or asks for inaccessible route when step-free is required). If ambiguous, write one short question here, do not infer changes.
+"clarification": null unless user intent is materially ambiguous or contradictory (for example asks for both a strict 10-minute cap and a 30-minute minimum, or asks for inaccessible route when step-free is required). If ambiguous, write one short question here, do not infer changes. A request that points at a place it does not name ("take me there", 去那里) when the conversation names no such place is ambiguous: ask where.
 Food requests alone do not imply a Scenic, Architecture or Nature preference. An along-the-route food request is a POI requirement, not a request for scenic routing.
 Preserve current state: omit unmentioned dimensions from preferences; set unmentioned constraint values to null. Time and accessibility are hard constraints, not dimension scores. Do not claim quiet or step-free conditions are validated.
 """
@@ -943,6 +943,50 @@ def call_llm(payload, timeout=26):
 
 
 
+# Words for "the place I am at / that place": an end the request names this way is not a place name.
+_HERE = re.compile(r'^(?:here|there|my (?:location|place|hotel|home)|where i am|the hotel|hotel|home|这里|这儿|那里|那儿|我这|我的位置|我现在的位置|(?:我的)?酒店|家)$', re.I)
+_NOT_A_PLACE = re.compile(r'^\d|\b(?:am|pm|noon|morning|afternoon|evening|night|today|tomorrow|scratch|work|minutes?|hours?)\b|分钟|小时', re.I)
+_STOP = r'(?=[,，.。;；!！?？]|$)'
+
+
+def request_endpoints(message):
+    """The start and the end a request names in so many words, as written: "from A to B", "start at A",
+    "end at B", "从A到B", "从A出发", "最后去B". (None, None) when it names neither; a name for "here" or
+    "my hotel", or a time ("from 2 to 4 pm"), is no place name and is left out."""
+    t = re.sub(r'\s+', ' ', str(message or '')).strip()
+    o = d = None
+    m = re.search(r'从\s*([^，。,.;；！？!?]+?)\s*(?:出发|开始)?\s*[，,]?\s*(?:走到|走去|到|去|前往)\s*([^，。,.;；！？!?]+?)(?=[，。,.;；！？!?]|走走|逛逛|散步|$)', t)
+    if m:
+        o, d = m[1], m[2]
+    else:
+        m = re.search(r'从\s*([^，。,.;；！？!?]+?)\s*(?:出发|开始)', t)
+        o = m[1] if m else None
+        m = re.search(r'(?:最后(?:到|去|在)?|终点(?:是|在))\s*(?!再|又|喝|吃|买|看|来|逛|坐|休息|一)([^，。,.;；！？!?]+)', t)
+        d = m[1] if m else None
+        if not o and (m := re.match(r'(?!我|你|他|她|想|要|请|带|帮|能|可以)([^，。,.;；！？!?\s]{2,20}?)\s*(?:走到|走去)\s*([^，。,.;；！？!?]+?)(?=[，。,.;；！？!?]|$)', t)):
+            o, d = m[1], d or m[2]
+    # an explicit "end at C" is the end even when "from A to B" comes first (B is then a stop on the way)
+    if not d and (m := re.search(r'\b(?:end(?:ing)?(?:\s+up)?|finish(?:ing)?)\s+(?:at|in)\s+(?:the\s+)?([^,.;!?]+?)(?=\s+(?:and|then|with)\b|[,.;!?]|$)', t, re.I)):
+        d = m[1]
+    m = re.search(r'\bfrom\s+(?:the\s+)?([^,.;!?]+?)\s+to\s+(?:the\s+)?([^,.;!?]+?)(?=\s+(?:and|then|with|via|through|for|in)\b|[,.;!?]|$)', t, re.I)
+    if m:
+        o, d = o or m[1], d or m[2]
+    if not o and (m := re.search(r'\b(?:start(?:ing)?|begin(?:ning)?)\s+(?:at|from|in)\s+(?:the\s+)?([^,.;!?]+?)(?=\s+(?:and|then|to|via)\b|[,.;!?]|$)', t, re.I)):
+        o = m[1]
+    keep = lambda x: x.strip() if x and not _HERE.match(x.strip()) and not _NOT_A_PLACE.search(x.strip()) and len(x.strip()) <= 60 else None
+    return keep(o), keep(d)
+
+
+_WATER = re.compile(r'water|river|harbou?r|shore|seaside|beach|\bbay\b|\bpiers?\b|promenade|esplanade|boardwalk|ocean|\bsea\b|creek|lake|pond|canal|水|河|海|江|湖|滨|岸|码头', re.I)
+
+
+def _says_nothing(result):
+    """True when an interpretation changes nothing at all."""
+    return (not result.get('weights') and not result.get('journey') and not result.get('unsupported')
+            and not any(v is not None for v in (result.get('constraints') or {}).values())
+            and all(result.get(k) is None for k in ('time_minutes', 'time_delta_minutes', 'max_detour_percent', 'weather', 'crime', 'waterfront')))
+
+
 def validate_intent_bindings(result, message, history=()):
     """Reject known invented bindings; ask the model to repair, never manufacture intent."""
     j = result.get('journey') or {}
@@ -952,8 +996,25 @@ def validate_intent_bindings(result, message, history=()):
         raise ValueError('Hotel bindings require actual user context; a prompt example is not the current hotel. Leave unrequested origin and end_mode null.')
     expected = ('high' if re.search(r'\bi want (?:a )?route with (?:very )?high crime rate\b',text) else
                 'low' if re.search(r'\b(?:avoid(?: high)? crime|lower crime(?: density)?)\b',text) else None)
+    # a safe walk never asks for MORE reported crime (the Chinese "安全一点" was once read that way)
+    # these are sent back together, so that one repair can fix them all
+    problems = []
+    if (result.get('crime') or {}).get('direction') == 'high' and expected != 'high' and re.search(r'\bsafe|安全', text) and not re.search(r'high(?:er)? crime|crime rate|犯罪率?高|高犯罪', text):
+        problems.append('A safe walk asks for LESS reported crime: crime.direction must be low (or crime null), never high')
+    wf = result.get('waterfront') or {}
+    if wf.get('mode') == 'set' and not _WATER.search(text):
+        problems.append('The request never mentions water: a start, end or stop on the water is not a waterfront preference; leave waterfront null')
+    if not result.get('clarification'):
+        origin, destination = request_endpoints(message)
+        for key, said, role in (('origin', origin, 'start'), ('destination', destination, 'end')):
+            if said and not j.get(key):
+                problems.append(f'The request names its {role} in so many words ("{said}"): set journey.{key} to that place (its English NYC name), not a named stop')
+    if not result.get('clarification') and _says_nothing(result) and re.search(r'\b(?:there|that place)\b|那里|那儿|那边', text) and not any(isinstance(h, dict) and h.get('role') == 'user' for h in history):
+        raise ValueError('The request points at a place it does not name and the conversation names none: ask where in clarification')
     if result.get('clarification'):
         if expected=='high' and re.search(r'avoid|instead',result['clarification'],re.I):raise ValueError('Do not invert the explicit higher complaint-density request into avoidance')
+        if problems:
+            raise ValueError('; '.join(problems))
         return
     if expected:
         if (result.get('crime') or {}).get('direction') != expected:
@@ -992,6 +1053,8 @@ def validate_intent_bindings(result, message, history=()):
     anchor = req.get('search_anchor')
     if anchor and j.get('origin') == anchor and not re.search(r'\b(?:start|from|begin|leave)\b|出发|起点|从',text):
         raise ValueError('Search proximity is not a route origin change; preserve search_anchor and leave origin null')
+    if problems:
+        raise ValueError('; '.join(problems))
 
 
 def count_contract_example():

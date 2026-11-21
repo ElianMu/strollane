@@ -1,0 +1,27 @@
+{
+ "base": "https://streetwise-api.onrender.com",
+ "run_at": "2026-11-21",
+ "note": "The first run, before the prompt and binding fixes of 2026-11-21 (server.py request_endpoints and validate_intent_bindings). Scored with the current checks: en15 and zh09 were first checked against a dimension called 'Safety', which does not exist; they are scored here against 'Access & Safety' and the no_more_crime check. Only the failed checks are kept; the full results of a run are written to interpret_results.json.",
+ "summary": {"all": {"cases": 50, "passed": 31}, "english": {"cases": 25, "passed": 17}, "chinese_interface": {"cases": 25, "passed": 14}},
+ "failures": {
+  "en01": ["added a waterfront preference nobody asked for (weight 90)"],
+  "en06": ["origin null, expected astoria park"],
+  "en10": ["food bakeries / bagel missing ([{\"category\":\"cafes\",\"item\":\"bagel\",\"cuisine\":null,\"required\":true}])"],
+  "en12": ["destination null, expected guggenheim"],
+  "en13": ["origin undefined, expected prospect park", "destination undefined, expected park slope"],
+  "en14": ["planned an unclear request instead of asking"],
+  "en16": ["destination undefined, expected gantry"],
+  "en20": ["origin null, expected brooklyn museum", "destination null, expected grand army plaza"],
+  "zh03": ["origin null, expected grand army plaza", "destination null, expected brooklyn bridge park"],
+  "zh07": ["origin null, expected columbia", "destination null, expected central park"],
+  "zh08": ["food bakeries / bagel missing ([{\"category\":\"bakeries\",\"item\":\"贝果\",\"cuisine\":null,\"required\":true}])"],
+  "zh09": ["origin null, expected penn station", "destination null, expected chelsea market", "asked for more reported crime on a safe walk"],
+  "zh11": ["origin null, expected astoria park", "destination null, expected socrates"],
+  "zh14": ["origin \"Central Station\", expected grand central", "food restaurants / pizza missing ([{\"category\":\"restaurants\",\"item\":\"披萨\",\"cuisine\":null,\"required\":true}])", "end_mode null, expected open"],
+  "zh17": ["origin null, expected brooklyn museum", "destination null, expected grand army plaza"],
+  "zh18": ["destination null, expected guggenheim"],
+  "zh20": ["origin null, expected jackson heights"],
+  "zh23": ["Quiet & Relax not raised (weight unset, no direction)"],
+  "zh25": ["origin null, expected washington square"]
+ }
+}

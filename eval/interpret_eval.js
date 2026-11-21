@@ -9,6 +9,7 @@
    clarification          false: the request is clear and must not be answered with a question; true: it must
    unsupported            false: nothing the request asks for is declared impossible
    no_waterfront          the request does not mention water, so no waterfront preference is added
+   no_more_crime          a request for a safe walk never asks for MORE reported crime
    zh_text                a question or reason shown to a Chinese-interface walker is written in Chinese
 
    Run against the live API host (12 requests a minute per client, so this takes about 5 minutes):
@@ -42,6 +43,7 @@ function checkCase(c, r) {
   if (e.clarification === true && !r.clarification) fails.push('planned an unclear request instead of asking');
   if (e.unsupported === false && (r.unsupported || []).length) fails.push(`declared unsupported: ${(r.unsupported || []).map((u) => u.request).join('; ')}`);
   if (e.no_waterfront && r.waterfront && r.waterfront.mode === 'set') fails.push(`added a waterfront preference nobody asked for (weight ${r.waterfront.weight})`);
+  if (e.no_more_crime && r.crime && r.crime.direction === 'high') fails.push('asked for more reported crime on a safe walk');
   if (e.zh_text) {
     const text = [r.clarification, ...(r.unsupported || []).map((u) => u.reason)].filter(Boolean).join(' ');
     if (text && !/[一-鿿]/.test(text)) fails.push(`shown in English to a Chinese-interface walker: "${text.slice(0, 60)}"`);

@@ -16,7 +16,9 @@
      written in a Chinese sentence are not filled into From / To (that step reads English), which the hint says.
    - The 12 dimension names are not renamed: Chinese mode shows a Chinese gloss followed by the unchanged English
      name ("自然 Nature"), so the name on screen always matches the data, the docs and the methodology.
-   - Place names and data-source names.
+   - Data-source names, and place names Wikidata has no Chinese label for. A place that has one (616 of them, in
+     data/places/names-zh.json) is shown with it in front of the English name, "熨斗大厦 Flatiron Building", when a
+     text is exactly that name; a place name inside a sentence stays as it is.
 
    The choice is remembered in this browser only (localStorage), never sent anywhere. */
 const I18N_DIMENSIONS_ZH = {
@@ -262,7 +264,23 @@ function i18nPhrase(text) {
   const out = typeof to === 'function' ? to(...m) : key.replace(re, to);
   if (out != null && out !== key) return out;
  }
- return null;
+ return i18nPlaceName(key);
+}
+/* Chinese names of places (data/places/names-zh.json: Wikidata labels, checked by scripts/curate_place_names_zh.py),
+   loaded the first time the interface is in Chinese. A text that is exactly a place's name is shown as
+   "熨斗大厦 Flatiron Building": the English name, which is what the street signs and the map say, stays beside it. */
+const I18N_PLACES = {names: null, loading: null, url: './data/places/names-zh.json'};
+function i18nPlaceName(key) {
+ const n = I18N_PLACES.names;
+ return n && Object.prototype.hasOwnProperty.call(n, key) ? `${n[key]} ${key}` : null;
+}
+function i18nLoadPlaces() {
+ if (I18N_PLACES.names || I18N_PLACES.loading || typeof fetch !== 'function') return I18N_PLACES.loading;
+ I18N_PLACES.loading = fetch(I18N_PLACES.url).then((r) => (r.ok ? r.json() : null)).then((d) => {
+  I18N_PLACES.names = (d && d.names) || {};
+  if (i18n.lang === 'zh' && typeof document !== 'undefined') { i18n.busy = true; try { i18nApply(document.body); } finally { i18n.busy = false; } }
+ }).catch(() => { I18N_PLACES.names = {}; }); // no Chinese names: places keep their English names, as before
+ return I18N_PLACES.loading;
 }
 /** Chinese for a text node's whole text: one phrase, or " · "-separated parts of which at least one is known (the
     others, usually names and addresses, are kept as they are). */
@@ -285,7 +303,7 @@ for (const [en, zh] of Object.entries(I18N_DIMENSIONS_ZH)) I18N_ZH[en] = `${zh} 
 const I18N_ATTRS = ['placeholder', 'title', 'aria-label'];
 const I18N_SKIP = new Set(['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION', 'CODE', 'PRE']);
 const i18n = {lang: 'en', observer: null, busy: false};
-const I18N_COVERAGE_NOTE = '界面已切换为中文。地名和技术细节（路段列表、评分公式、数据说明）保留英文；12 个维度保留英文原名并附中文注释。可以用中文描述偏好；起点和终点请在输入框里选择。';
+const I18N_COVERAGE_NOTE = '界面已切换为中文。常见地名附中文名（来自 Wikidata），其他地名和技术细节（路段列表、评分公式、数据说明）保留英文；12 个维度保留英文原名并附中文注释。可以用中文描述偏好；起点和终点请在输入框里选择。';
 
 const i18nKey = (s) => s.replace(/\s+/g, ' ').trim();
 function i18nText(node) {
@@ -327,6 +345,7 @@ function setLanguage(lang, remember = true) {
  i18n.lang = lang;
  document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
  i18n.busy = true; try { i18nApply(document.body); } finally { i18n.busy = false; }
+ if (lang === 'zh') i18nLoadPlaces();
  if (lang === 'zh' && !i18n.observer && typeof MutationObserver !== 'undefined') {
   i18n.observer = new MutationObserver((records) => {
    if (i18n.lang !== 'zh' || i18n.busy) return;
@@ -367,6 +386,6 @@ function setupI18n() {
  if (saved === 'zh') setLanguage('zh', false);
 }
 if (typeof window !== 'undefined') {
- Object.assign(window, {setLanguage, toggleLanguage, I18N_ZH, I18N_DIMENSIONS_ZH, i18nLookup, i18nPhrase, i18nLabel});
+ Object.assign(window, {setLanguage, toggleLanguage, I18N_ZH, I18N_DIMENSIONS_ZH, I18N_PLACES, i18nLookup, i18nPhrase, i18nLabel, i18nLoadPlaces});
  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupI18n); else setupI18n();
 }
