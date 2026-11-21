@@ -1460,7 +1460,7 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
  body .right-scroll .section-row{align-items:baseline;margin:0 0 10px}
 
  /* the request card on the map */
- body .m-composer-full{border:0;border-radius:20px;box-shadow:var(--ds-float)}
+ body .m-composer-full{border:0;border-radius:0;box-shadow:none;background:transparent}
  body .m-composer-q{font-size:clamp(15px,4.1vw,19px);font-weight:650;letter-spacing:-.012em}
  body .m-walk-presets .walk-pill{border:0;background:var(--ds-fill);color:var(--text);border-radius:12px;box-shadow:none}
  body .m-walk-presets .walk-pill[aria-pressed=true]{background:var(--ds-ink);color:var(--ds-on-ink)}
@@ -1472,7 +1472,7 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
  body #mComposer .m-create{border-radius:12px;font-weight:650;letter-spacing:-.005em}
  body .m-route-ends .m-context,body .m-route-ends .m-swap{border:0;background:var(--ds-fill);border-radius:12px;box-shadow:none}
  body .m-route-ends .m-context-edit{color:var(--text);font-weight:600}
- body .m-composer-compact{border:0;border-radius:16px;box-shadow:var(--ds-float)}
+ body .m-composer-compact{border:0;border-radius:0;box-shadow:none;background:transparent}
  body .m-composer-compact .m-compact-new{border:0;background:var(--ds-fill);border-radius:999px;font-weight:600}
 
  /* status under the card: a tinted note, not a framed box */
@@ -1583,4 +1583,33 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
  body .city-walk .cw-fit{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
  body .city-walk .cw-fit.ok{background:var(--ok-surface);color:var(--ok-text)}
  body .city-walk .cw-fit.over{background:var(--danger-surface);color:var(--danger-text)}
+}
+
+/* The request card is glass: the map shows through, blurred, so it reads as part of the map and you still see where
+   you are. Text and controls keep solid ground: the fields are a frosted grey and turn solid while you type; Create is
+   solid ink. People who ask for less transparency (or more contrast), and browsers without backdrop blur, get the
+   solid card. */
+@media (max-width:740px){
+ body #mComposer.m-composer{border:0;border-radius:22px;padding:12px 12px 10px;box-shadow:var(--ds-float);
+  background:color-mix(in srgb,var(--bg-panel) 46%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.8);backdrop-filter:blur(14px) saturate(1.8)}
+ body[data-mview="results"] #mComposer.m-composer{border-radius:18px;padding:6px 6px 6px 14px}
+ body #mComposer{--ds-glass-fill:color-mix(in srgb,var(--text) 7%,transparent)}   /* a tint of the text colour: fields keep their shape on any map */
+ body #mComposer .m-walk-presets .walk-pill:not([aria-pressed=true]),body #mComposer .intent-box:not(:focus),body #mComposer .m-mic-slot .mic-btn,
+ body #mComposer .m-route-ends .m-context,body #mComposer .m-route-ends .m-swap,body #mComposer .m-compact-new{background:var(--ds-glass-fill)}
+ body #mComposer .m-status{background:color-mix(in srgb,var(--bg-panel) 70%,transparent)}
+ body #mComposer .m-status.error{background:color-mix(in srgb,var(--danger-surface) 88%,transparent)}
+ body #mComposer .m-status.clarify,body #mComposer .m-status.hint{background:color-mix(in srgb,var(--warn-surface) 88%,transparent)}
+}
+@media (max-width:740px) and (prefers-reduced-transparency:reduce),(max-width:740px) and (prefers-contrast:more){
+ body #mComposer.m-composer{background:var(--bg-panel);-webkit-backdrop-filter:none;backdrop-filter:none}
+ body #mComposer{--ds-glass-fill:var(--ds-fill)}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ @media (max-width:740px){body #mComposer.m-composer{background:color-mix(in srgb,var(--bg-panel) 95%,transparent)}}
+}
+
+/* After you send a request the box shrinks back, and at one line high it showed a line and a half of the text,
+   cut through the middle. It now shows two whole lines (16px type, 21.6px lines, 9px padding). */
+@media (max-width:740px){
+ body:not([data-mview="typing"]) .m-composer-slot #intentText:not(:placeholder-shown):not(:focus){height:62px;min-height:62px}
 }
