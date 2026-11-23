@@ -19,6 +19,10 @@ Storage: the API host's disk is wiped on restart (Render Free) and the project's
 snapshots, so records go to the same store as walker street reports (routing/feedback.py GitHubStore), folder
 walk-checks/ on the feedback-data branch. The branch is public: the form says so, which is why comments are cleaned.
 
+A like or a reply on a comment (ReactionBook, below) goes to its own folder, walk-check-reactions/, on the same
+branch — never into a walk-check record itself, which is a walker's own answer and is never edited after it is sent.
+A reply is public and cleaned the same way as a comment; a like carries no text, just which comment it is for.
+
 Scales: a rating is 1–5; a predicted score is a 0–100 percentile rank among the street segments of the three boroughs.
 They are not the same unit. evaluate() reports both, rank agreement (Spearman) and, as one simple common scale, the
 rating mapped linearly to 0–100 ((r − 1) × 25) minus the predicted score. That mapping is an assumption, stated as such.
@@ -225,9 +229,43 @@ SOURCES = [
 COMMENTS_SHOWN, COMMENT_SHOWN_CHARS = 30, 280
 PHOTOS_IN_FEED = 8   # of the COMMENTS_SHOWN comments, at most this many carry their photo in /api/evaluation
 
+# Likes and replies on a comment (identified by the walk-check record's own 'id'). Kept as a separate reaction store
+# (ReactionBook, folder 'walk-check-reactions') rather than appended to a check, since a walk-check record is the
+# walker's own answer and is never edited after it is sent.
+REACTION_SCHEMA = 1
+REPLY_MAX_CHARS = 300
+REPLIES_SHOWN = 20   # per comment, oldest first
 
-def evaluate(checks):
-    """Everything evaluation.html shows, from the stored records alone. With no records: {'n': 0}."""
+
+def make_like(payload, known_target):
+    """A like on a comment (known_target(id) -> bool, from the currently loaded walk checks)."""
+    if not isinstance(payload, dict):
+        raise ValueError('the request must be a JSON object')
+    target = payload.get('target')
+    if not isinstance(target, str) or not known_target(target):
+        raise ValueError('target must be the id of an existing comment')
+    now = datetime.now(timezone.utc)
+    return {'v': REACTION_SCHEMA, 'type': 'like', 'id': uuid.uuid4().hex[:12], 'target': target, 'at': now.isoformat()}
+
+
+def make_reply(payload, known_target):
+    """A reply to a comment, or ValueError. Text is cleaned the same way as a walk-check comment (public store)."""
+    if not isinstance(payload, dict):
+        raise ValueError('the request must be a JSON object')
+    target = payload.get('target')
+    if not isinstance(target, str) or not known_target(target):
+        raise ValueError('target must be the id of an existing comment')
+    text = clean_text(payload.get('text'))
+    if not text:
+        raise ValueError(f'text is required (at most {REPLY_MAX_CHARS} characters, shown to other walkers)')
+    now = datetime.now(timezone.utc)
+    return {'v': REACTION_SCHEMA, 'type': 'reply', 'id': uuid.uuid4().hex[:12], 'target': target,
+            'text': text[:REPLY_MAX_CHARS], 'at': now.isoformat()}
+
+
+def evaluate(checks, reactions=()):
+    """Everything evaluation.html shows, from the stored records alone. With no records: {'n': 0}. `reactions`
+    (ReactionBook.reactions) supplies the like count and replies shown under each comment."""
     n = len(checks)
     out = {'n': n, 'sources': SOURCES, 'limitations': LIMITATIONS}
     if not n:
@@ -281,8 +319,18 @@ def evaluate(checks):
             return []
         photo_budget[0] -= 1
         return c['photos'][:1]
-    out['recent_comments'] = [{'date': str(c['at'])[:10], 'user_type': c.get('user_type'), 'overall': (c.get('ratings') or {}).get('overall'),
-                               'comment': (c.get('comment') or '')[:COMMENT_SHOWN_CHARS], 'photos': _feed_photos(c)} for c in said]
+    likes, replies = {}, {}
+    for r in reactions:
+        if r.get('type') == 'like' and r.get('target'):
+            likes[r['target']] = likes.get(r['target'], 0) + 1
+        elif r.get('type') == 'reply' and r.get('target') and r.get('text'):
+            replies.setdefault(r['target'], []).append(r)
+    def _replies(c):
+        rows = sorted(replies.get(c['id'], []), key=lambda r: r['at'])[:REPLIES_SHOWN]
+        return [{'text': r['text'], 'date': str(r['at'])[:10]} for r in rows]
+    out['recent_comments'] = [{'id': c['id'], 'date': str(c['at'])[:10], 'user_type': c.get('user_type'), 'overall': (c.get('ratings') or {}).get('overall'),
+                               'comment': (c.get('comment') or '')[:COMMENT_SHOWN_CHARS], 'photos': _feed_photos(c),
+                               'likes': likes.get(c['id'], 0), 'replies': _replies(c)} for c in said]
     out['study_participants'] = len({c['study_code'] for c in checks if c.get('study_code')})
     return out
 
@@ -332,5 +380,56 @@ class WalkCheckBook:
         with self.lock:
             self.checks = self.checks + [check]
 
-    def evaluate(self):
-        return evaluate(self.checks)
+    def evaluate(self, reactions=()):
+        return evaluate(self.checks, reactions)
+
+
+class ReactionBook:
+    """Likes and replies on walk-check comments (same storage pattern as WalkCheckBook, a separate folder so the
+    two never mix on load)."""
+
+    REFRESH_S = 120
+
+    def __init__(self, store=None):
+        self.store, self.reactions, self.loaded_at, self.error = store, [], 0.0, None
+        self.lock, self._limits = threading.Lock(), {}
+
+    @classmethod
+    def from_env(cls):
+        token = os.environ.get('FEEDBACK_GITHUB_TOKEN')
+        return cls(fb.GitHubStore(os.environ.get('FEEDBACK_REPO', 'ElianMu/strollane'), token,
+                                  folder='walk-check-reactions', name='reactions') if token else None)
+
+    @property
+    def enabled(self):
+        return self.store is not None
+
+    def refresh(self):
+        if not self.store or time.time() - self.loaded_at < self.REFRESH_S:
+            return
+        self.loaded_at = time.time()
+        try:
+            rows = self.store.load()
+            with self.lock:
+                self.reactions, self.error = [r for r in rows if r.get('v') == REACTION_SCHEMA], None
+        except Exception as e:
+            self.error = str(e)[:200]
+
+    def allow(self, client, dedup_key=None):
+        """At most 30 likes/replies an hour from one client; `dedup_key` (e.g. ('like', target)) blocks a repeat
+        of that same key within a day (a reply has none: several replies from one walker are fine)."""
+        now, h = time.time(), hash(client)
+        recent = [x for x in self._limits.get(h, []) if now - x[0] < 86400]
+        if sum(now - t < 3600 for t, _ in recent) >= 30 or (dedup_key and any(k == dedup_key for _, k in recent)):
+            return False
+        recent.append((now, dedup_key))
+        self._limits[h] = recent
+        return True
+
+    def add(self, reaction):
+        self.store.append(reaction)
+        with self.lock:
+            self.reactions = self.reactions + [reaction]
+
+    def likes_for(self, target):
+        return sum(1 for r in self.reactions if r.get('type') == 'like' and r.get('target') == target)

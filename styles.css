@@ -1418,6 +1418,15 @@ button,a,summary,select,input,label,[role="button"],.rp-bar,.rp-top,.nav-overlay
 .walker-comments small{font-size:11px;color:var(--muted)}
 .wc-stars{letter-spacing:1px;color:var(--text)}
 .walker-comments-more{background:none;border:0;padding:6px 0 0;font-size:12px;font-weight:600;color:var(--text);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.wc-actions{display:flex;align-items:center;gap:14px;margin-top:4px}
+.wc-like{background:none;border:0;padding:0;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px}
+.wc-like.on{color:var(--red)}
+.wc-reply-toggle{background:none;border:0;padding:0;font-size:12px;font-weight:600;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.wc-replies{margin:8px 0 0;padding-left:12px;border-left:2px solid var(--line)}
+.wc-reply{margin:0 0 6px;font-size:12.5px;line-height:1.4;color:var(--text)}
+.wc-reply-row{display:flex;gap:6px}
+.wc-reply-input{flex:1;min-width:0;border:1px solid var(--line-strong);border-radius:7px;background:var(--g14);color:var(--text);font-size:12px;padding:7px 9px}
+.wc-reply-send{border:0;background:var(--g33);color:var(--text);border-radius:7px;font-size:11.5px;font-weight:600;padding:7px 11px}
 /* Taps never zoom the page (a quick second tap on the 3D preview speed button zoomed the whole page on iPhone and
    left it cut off); pinch zoom still works. The map handles its own gestures. */
 html{touch-action:manipulation}

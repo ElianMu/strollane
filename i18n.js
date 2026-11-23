@@ -126,7 +126,7 @@ const I18N_ZH = {
  'Starting…': '正在开始…', 'Retry': '重试', 'Continue to next stop': '前往下一站', 'Skip optional stop': '跳过可选停留点', 'You have arrived': '你已到达', 'Walk complete.': '步行结束。',
  'End navigation': '结束导航', '◎ Recenter': '◎ 回到当前位置', 'Voice on': '语音开启', 'Pause': '暂停', 'More': '更多', 'Repeat': '重复', 'North up': '正北朝上', 'Exit': '退出',
  '➤ Start Navigation': '➤ 开始导航', 'Resume': '继续', 'Voice off': '语音关闭', 'Heading up': '前进方向朝上', 'Route up': '路线方向朝上', 'AR · compass': 'AR · 指南针', 'AR view': 'AR 视图',
- 'Raise to view: on': '抬起手机即显示：开', 'Raise to view: off': '抬起手机即显示：关', 'Raise: on': '抬起：开', 'Send rating': '提交评分', 'Did it match what you asked for?': '和你的要求相符吗？', 'Not really': '不太相符', 'Partly': '部分相符', 'More detail (optional)': '更多细节（可选）', 'Add a comment (optional, public)': '写条评论（可选，公开）', 'No location or name is sent.': '不会发送位置或姓名。',
+ 'Raise to view: on': '抬起手机即显示：开', 'Raise to view: off': '抬起手机即显示：关', 'Raise: on': '抬起：开', 'Send rating': '提交评分', 'Did it match what you asked for?': '和你的要求相符吗？', 'Not really': '不太相符', 'Partly': '部分相符', 'More detail (optional)': '更多细节（可选）', 'Add a comment (optional, public)': '写条评论（可选，公开）', 'No location or name is sent.': '不会发送位置或姓名。', 'Reply': '回复', 'Write a reply': '写条回复', 'Write a reply, shown to other walkers': '写条回复，会显示给其他步行者', 'Like this comment': '赞这条评论',
  '+ Add photos': '+ 添加照片', 'up to 3': '最多 3 张', 'Your comment and photos are shown to other walkers. Photos are resized and their location data removed.': '你的评论和照片会展示给其他步行者。照片会被压缩，位置信息会被移除。', 'No comments yet.': '还没有评论。', 'How quiet did it feel?': '感觉安静吗？', 'How green did it feel?': '感觉绿意多吗？', 'Thanks, saved.': '谢谢，已保存。', 'Raise: off': '抬起：关', 'Raise the phone to open the camera view': '抬起手机即打开相机视图', 'To the start of your walk': '前往路线起点',
  'Weak GPS signal — position approximate': 'GPS 信号弱，位置只是大致位置', 'Checking whether you left the route…': '正在确认你是否偏离了路线…', 'Off route': '已偏离路线',
  'Off route — recalculating on the walking network…': '已偏离路线，正在步行路网上重新规划…', 'Paused': '已暂停', 'Arrived at stop': '已到达途经点', 'Navigation problem': '导航出现问题',
@@ -243,7 +243,7 @@ const I18N_ZH_PATTERNS = [
  [/^Checking menus for (.+)…$/, (_, a) => `正在核对菜单上有没有${typeof i18nLabel === 'function' ? i18nLabel(a) : a}…`], [/^Checking menus…$/, '正在核对菜单…'],
  [/^(-?[\d.,]+) km$/, '$1 公里'], [/^(-?[\d.,]+) mi$/, '$1 英里'],
  // walker ratings and comments (feedback-ui.js)
- [/^(\d+) rated walks? · matched the request ([\d.]+|—) \/ 5$/, '$1 次评分 · 与要求相符 $2 / 5'], [/^(\d+) more comments?$/, '还有 $1 条评论'],
+ [/^(\d+) rated walks? · matched the request ([\d.]+|—) \/ 5$/, '$1 次评分 · 与要求相符 $2 / 5'], [/^(\d+) more comments?$/, '还有 $1 条评论'], [/^Reply · (\d+)$/, '回复 · $1'],
  [/^(Tourist|Curious Local|Leisure Walker|Your own priorities) walks \((\d+)\): ★ ([\d.]+|—)$/, (_, t, n, v) => `${{'Tourist': '游客', 'Curious Local': '好奇的本地人', 'Leisure Walker': '休闲散步者', 'Your own priorities': '自选偏好'}[t]}路线（${n}）：★ ${v}`],
  // navigation card
  [/^Then: (.+)$/, (_, a) => `然后：${a}`], [/^Next stop: (.+?)(?: · \+(\d+))?$/, (_, a, n) => `下一站：${i18nPlaceName(a) || a}${n ? ` · 另有 ${n} 站` : ''}`],

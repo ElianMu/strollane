@@ -1,6 +1,7 @@
 """Walk feedback and evaluation (routing/walkcheck.py; server /api/walk-checks and /api/evaluation)."""
 import os
 import sys
+import time
 import unittest
 from datetime import datetime, timezone
 
@@ -83,11 +84,30 @@ class Evaluation(unittest.TestCase):
         rows[0]['at'], rows[2]['at'] = '2026-11-18T15:00:00+00:00', '2026-11-20T23:00:00+00:00'
         said = wc.evaluate(rows)['recent_comments']
         self.assertEqual([c['date'] for c in said], ['2026-11-20', '2026-11-18'], 'newest first, day only')
-        self.assertEqual(set(said[0]), {'date', 'user_type', 'overall', 'comment', 'photos'}, 'no route, time, code or prediction')
+        self.assertEqual(set(said[0]), {'id', 'date', 'user_type', 'overall', 'comment', 'photos', 'likes', 'replies'}, 'no route, time, code or prediction')
         self.assertEqual(said[0]['photos'], [])
+        self.assertEqual((said[0]['likes'], said[0]['replies']), (0, []))
         self.assertEqual((said[1]['comment'], said[1]['overall'], said[1]['user_type']), ('Quiet side streets, lovely.', 4, 'leisure'))
         self.assertNotIn('555', said[0]['comment']); self.assertLessEqual(len(said[0]['comment']), wc.COMMENT_SHOWN_CHARS)
         self.assertEqual(wc.evaluate([check({'overall': 3})])['recent_comments'], [])
+
+    def test_likes_and_replies_on_a_comment(self):
+        row = check({'overall': 4}, comment='Nice quiet block.')
+        known = {row['id']}.__contains__
+        like1, like2 = wc.make_like({'target': row['id']}, known), wc.make_like({'target': row['id']}, known)
+        reply = wc.make_reply({'target': row['id'], 'text': 'Agreed, walked it last week too.'}, known)
+        e = wc.evaluate([row], [like1, like2, reply])
+        said = e['recent_comments'][0]
+        self.assertEqual(said['likes'], 2)
+        self.assertEqual(said['replies'], [{'text': 'Agreed, walked it last week too.', 'date': reply['at'][:10]}])
+        with self.assertRaises(ValueError):
+            wc.make_like({'target': 'unknown-id'}, known)
+        with self.assertRaises(ValueError):
+            wc.make_reply({'target': row['id'], 'text': ''}, known)
+        with self.assertRaises(ValueError):
+            wc.make_reply({'target': 'unknown-id', 'text': 'hi'}, known)
+        long_reply = wc.make_reply({'target': row['id'], 'text': 'x' * 900}, known)
+        self.assertEqual(len(long_reply['text']), wc.REPLY_MAX_CHARS)
 
     def test_photo_only_comment_shows_up_and_feed_is_budgeted(self):
         jpeg = 'data:image/jpeg;base64,' + 'AB01+/' * 20 + '=='
@@ -146,8 +166,66 @@ class Server(unittest.TestCase):
         import server
         os.environ.pop('FEEDBACK_GITHUB_TOKEN', None)
         server._WALK_CHECKS = None
+        server._REACTIONS = None
         self.assertFalse(server.walk_checks().enabled)
         self.assertEqual(server.walk_checks().evaluate()['n'], 0)
+        self.assertFalse(server.reactions_book().enabled)
+
+
+class FakeStore:
+    """In-memory stand-in for routing.feedback.GitHubStore: no network, just a list."""
+    def __init__(self):
+        self.rows = []
+
+    def load(self):
+        return list(self.rows)
+
+    def append(self, row):
+        self.rows.append(row)
+
+
+class Reactions(unittest.TestCase):
+    def test_like_and_reply_endpoints(self):
+        import json, threading, urllib.request, urllib.error
+        from http.server import ThreadingHTTPServer
+        import server
+
+        wbook = wc.WalkCheckBook(FakeStore())
+        c = check({'overall': 5}, comment='Loved this block.')
+        wbook.checks, wbook.loaded_at = [c], time.time()
+        rbook = wc.ReactionBook(FakeStore())
+        old_w, old_r = server._WALK_CHECKS, server._REACTIONS
+        server._WALK_CHECKS, server._REACTIONS = wbook, rbook
+        httpd = ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
+        threading.Thread(target=httpd.serve_forever, daemon=True).start()
+        try:
+            def post(path, body):
+                req = urllib.request.Request(f'http://127.0.0.1:{httpd.server_port}{path}', data=json.dumps(body).encode(),
+                                             headers={'Content-Type': 'application/json'}, method='POST')
+                try:
+                    with urllib.request.urlopen(req) as r:
+                        return r.status, json.load(r)
+                except urllib.error.HTTPError as e:
+                    return e.code, json.load(e)
+            st, j = post('/api/walk-checks/like', {'target': c['id']})
+            self.assertEqual((st, j['likes']), (201, 1))
+            st, j = post('/api/walk-checks/like', {'target': c['id']})  # same client, same comment: blocked a day
+            self.assertEqual(st, 429)
+            st, j = post('/api/walk-checks/reply', {'target': c['id'], 'text': 'Thanks for the tip!'})
+            self.assertEqual((st, j['reply']['text']), (201, 'Thanks for the tip!'))
+            st, j = post('/api/walk-checks/reply', {'target': c['id'], 'text': 'A second reply, also fine.'})
+            self.assertEqual(st, 201, 'unlike likes, several replies from one walker are not deduplicated')
+            st, j = post('/api/walk-checks/like', {'target': 'not-a-real-comment'})
+            self.assertEqual(st, 400)
+            st, j = post('/api/walk-checks/reply', {'target': c['id'], 'text': ''})
+            self.assertEqual(st, 400)
+            with urllib.request.urlopen(f'http://127.0.0.1:{httpd.server_port}/api/evaluation') as r:
+                ev = json.load(r)
+            said = ev['recent_comments'][0]
+            self.assertEqual(said['likes'], 1)
+            self.assertEqual([x['text'] for x in said['replies']], ['Thanks for the tip!', 'A second reply, also fine.'])
+        finally:
+            httpd.shutdown(); server._WALK_CHECKS, server._REACTIONS = old_w, old_r
 
 
 if __name__ == '__main__':

@@ -126,7 +126,10 @@ Free disk is wiped on every restart. The API host needs one environment variable
 
 Without the token `/api/feedback` answers 503 `feedback_disabled` and routing ignores feedback.
 The same token stores post-walk checks (`routing/walkcheck.py`, `POST /api/walk-checks`) in
-`walk-checks/checks-YYYY-MM.jsonl` on the same branch; `scripts/summarize_walk_checks.py` summarises them per user type. A report holds a
+`walk-checks/checks-YYYY-MM.jsonl` on the same branch; `scripts/summarize_walk_checks.py` summarises them per user type.
+It also stores likes and replies on a walk-check comment (`POST /api/walk-checks/like`, `POST /api/walk-checks/reply`)
+in `walk-check-reactions/reactions-YYYY-MM.jsonl` on the same branch — its own folder, never a rewrite of the check
+itself. A report holds a
 segment ID, a dimension, a direction (worse / better than the score shown), that score, the UTC hour and the New York
 time-of-day bucket: no location, account, free text or IP address. Rules (MIN_REPORTS, MIN_DAYS, MIN_AGREEMENT,
 MAX_DELTA, SHRINK, HALF_LIFE_DAYS, TIME_SENSITIVE) are at the top of `routing/feedback.py`; `tests/test_feedback.py`

@@ -266,8 +266,61 @@ function walkerSaysComments(d,type,all=false){
  if(!list.length)return d?.n?'<p class="walker-says-empty">No comments yet.</p>':'';
  const day=s=>{const t=new Date(s+'T12:00:00Z');return isNaN(t)?s:t.toLocaleDateString(undefined,{month:'short',day:'numeric'});};
  const shown=all?list:list.slice(0,3);
- return `<ul class="walker-comments">${shown.map(c=>`<li>${c.comment?`<p>${esc(c.comment)}</p>`:''}${(c.photos||[]).map(p=>`<img class="wc-photo" src="${esc(p)}" alt="" loading="lazy">`).join('')}<small>${c.overall?`<span class="wc-stars" aria-label="${c.overall} of 5">${walkStarText(c.overall)}</span> · `:''}${esc(WALK_TYPE_LABEL[c.user_type]||'')} · ${esc(day(c.date))}</small></li>`).join('')}</ul>
+ return `<ul class="walker-comments">${shown.map(c=>`<li>${c.comment?`<p>${esc(c.comment)}</p>`:''}${(c.photos||[]).map(p=>`<img class="wc-photo" src="${esc(p)}" alt="" loading="lazy">`).join('')}<small>${c.overall?`<span class="wc-stars" aria-label="${c.overall} of 5">${walkStarText(c.overall)}</span> · `:''}${esc(WALK_TYPE_LABEL[c.user_type]||'')} · ${esc(day(c.date))}</small>${walkerCommentActions(c)}</li>`).join('')}</ul>
   ${!all&&list.length>3?`<button type="button" class="walker-comments-more" data-k="more-comments">${list.length-3} more comment${list.length-3===1?'':'s'}</button>`:''}`;
+}
+/* Likes and replies on one "what other walkers said" comment (server: routing/walkcheck.py ReactionBook). WALK_LIKED
+   is this tab's own session only (a like is also deduplicated per client on the server for a day); replies and the
+   like count a walker adds are folded back into walkerSays.evaluation so they survive a re-render (e.g. "more comments"). */
+const WALK_LIKED=new Set();
+function walkerCommentById(id){return (walkerSays.evaluation?.recent_comments||[]).find(c=>c.id===id);}
+function walkerCommentActions(c){
+ if(!c.id)return '';   // defensive: an older cached /api/evaluation response without comment ids
+ const liked=WALK_LIKED.has(c.id),replies=c.replies||[];
+ return `<div class="wc-actions">
+  <button type="button" class="wc-like${liked?' on':''}" data-like="${esc(c.id)}" aria-pressed="${liked}" aria-label="Like this comment">♥ <span data-like-count>${c.likes||0}</span></button>
+  <button type="button" class="wc-reply-toggle" data-reply-toggle="${esc(c.id)}" aria-expanded="false">Reply${replies.length?' · '+replies.length:''}</button>
+ </div>
+ <div class="wc-replies hidden" data-replies="${esc(c.id)}">
+  ${replies.map(r=>`<p class="wc-reply">${esc(r.text)}</p>`).join('')}
+  <div class="wc-reply-row"><input type="text" class="wc-reply-input" data-reply-input maxlength="300" placeholder="Write a reply" aria-label="Write a reply, shown to other walkers"><button type="button" class="wc-reply-send" data-reply-send="${esc(c.id)}">Reply</button></div>
+ </div>`;
+}
+async function wcSendLike(btn){
+ const id=btn.dataset.like;
+ if(btn.disabled||WALK_LIKED.has(id))return;
+ btn.disabled=true;
+ try{
+  const res=await streetwiseFetch('/api/walk-checks/like',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:id}),signal:AbortSignal.timeout(15000)});
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(j.error||`HTTP ${res.status}`);
+  WALK_LIKED.add(id);
+  const c=walkerCommentById(id);if(c)c.likes=j.likes??(c.likes||0)+1;
+  btn.classList.add('on');btn.setAttribute('aria-pressed','true');
+  const count=btn.querySelector('[data-like-count]');if(count)count.textContent=String(c?c.likes:j.likes);
+ }catch(e){
+  if(typeof toast==='function')toast('Could not like that: '+e.message);
+  btn.disabled=false;
+ }
+}
+async function wcSendReply(btn){
+ const id=btn.dataset.replySend,box=btn.closest('[data-replies]'),input=box?.querySelector('[data-reply-input]');
+ const text=(input?.value||'').trim();
+ if(!text||btn.disabled)return;
+ btn.disabled=true;
+ try{
+  const res=await streetwiseFetch('/api/walk-checks/reply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:id,text}),signal:AbortSignal.timeout(15000)});
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(j.error||`HTTP ${res.status}`);
+  const c=walkerCommentById(id);if(c)c.replies=[...(c.replies||[]),j.reply];
+  const p=document.createElement('p');p.className='wc-reply';p.textContent=j.reply.text;
+  box.querySelector('.wc-reply-row').insertAdjacentElement('beforebegin',p);
+  input.value='';
+  const toggle=box.closest('li')?.querySelector('[data-reply-toggle]');
+  if(toggle)toggle.textContent='Reply'+(c&&c.replies.length?` · ${c.replies.length}`:'');
+ }catch(e){
+  if(typeof toast==='function')toast('Could not send that reply: '+e.message);
+ }finally{btn.disabled=false;}
 }
 function walkerSaysStreets(segs,r){
  const names=new Map();for(const e of r.edges||[])for(const m of e.matched_segments||[])if(m.segment_id&&!names.has(m.segment_id))names.set(m.segment_id,m.street_name||m.segment_id);
@@ -288,7 +341,20 @@ function wireWalkerSays(root,r){
  const box=root.querySelector('.walker-says');if(!box)return;
  box.querySelector('[data-k="rate-now"]').addEventListener('click',()=>openWalkRating(r));
  const comments=box.querySelector('[data-k="walker-comments"]');
- comments?.addEventListener('click',e=>{if(e.target.closest('[data-k="more-comments"]'))comments.innerHTML=walkerSaysComments(walkerSays.evaluation,walkCheckType(),true);});
+ comments?.addEventListener('click',e=>{
+  if(e.target.closest('[data-k="more-comments"]')){comments.innerHTML=walkerSaysComments(walkerSays.evaluation,walkCheckType(),true);return;}
+  const like=e.target.closest('[data-like]');if(like){wcSendLike(like);return;}
+  const toggle=e.target.closest('[data-reply-toggle]');
+  if(toggle){
+   const open=!toggle.closest('li').querySelector('.wc-replies').classList.toggle('hidden');
+   toggle.setAttribute('aria-expanded',String(open));
+   return;
+  }
+  const send=e.target.closest('[data-reply-send]');if(send){wcSendReply(send);return;}
+ });
+ comments?.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.matches('[data-reply-input]')){e.preventDefault();wcSendReply(e.target.closest('[data-replies]').querySelector('[data-reply-send]'));}
+ });
  loadWalkerEvaluation().then(d=>{const el=box.querySelector('[data-k="walker-says-ratings"]');if(el&&d){el.innerHTML=walkerSaysRatings(d,walkCheckType());if(comments)comments.innerHTML=walkerSaysComments(d,walkCheckType());}});
  const ids=routeSegmentIds(r);
  if(ids.length)streetwiseFetch('/api/feedback/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({segment_ids:ids}),signal:AbortSignal.timeout(30000)})

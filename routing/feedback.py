@@ -198,7 +198,7 @@ class GitHubStore:
                     if e.code != 404:
                         raise
                     text, sha = '', None
-                body = {'message': f"{self.folder}: " + ' '.join(str(report.get(k)) for k in ('segment_id', 'dimension', 'direction', 'user_type', 'match') if k in report),
+                body = {'message': f"{self.folder}: " + ' '.join(str(report.get(k)) for k in ('segment_id', 'dimension', 'direction', 'user_type', 'match', 'type', 'target') if k in report),
                         'content': base64.b64encode((text + json.dumps(report, separators=(',', ':')) + '\n').encode()).decode(),
                         'branch': self.branch}
                 if sha:
