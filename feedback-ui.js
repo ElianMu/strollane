@@ -159,7 +159,7 @@ function walkCheckBox(r){
  return `<details class="walk-check" data-route="${esc(r.route_id)}" open><summary>Rate this walk (optional)</summary>
   <div class="walk-check-main">${walkStars('overall','Overall, how satisfied are you with this walk?')}</div>
   <div class="walk-check-q walk-check-match"><span>Did it match what you asked for?</span><span class="walk-check-scale">${WALK_MATCH.map(([v,l])=>`<button type="button" data-rate="match" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</span></div>
-  <textarea class="walk-check-comment" data-k="comment" maxlength="500" rows="2" placeholder="Add a comment (optional, public)" aria-label="Comment, optional and shown to other walkers"></textarea>
+  <textarea class="walk-check-comment" data-k="comment" maxlength="500" rows="3" placeholder="Add a comment (optional, public)" aria-label="Comment, optional and shown to other walkers"></textarea>
   ${walkCheckPhotosBox()}
   <button type="button" class="walk-check-send" data-k="send" disabled>Send rating</button>
   <details class="walk-check-more"><summary>More detail (optional)</summary>
@@ -181,7 +181,7 @@ function walkCheckPayload(r,st,code,comment){
   route_id:r.route_id,route_signature:r.route_signature,score_version:r.score_version,network_version:r.network_version,distance_m:r.distance_m,detour_pct:r.detour_percentage,
   route_snapshot:{route_id:r.route_id,network_version:r.network_version,route_signature:r.route_signature,ordered_edge_ids:r.ordered_edge_ids}};
 }
-function wireWalkCheck(root,r){
+function wireWalkCheck(root,r,showFeed){
  const box=root.querySelector('.walk-check');if(!box)return;
  const st={rate:{},worth:(Number(r.detour_percentage)||0)<1?'no-detour':null,compared:null,photos:[]};
  const send=box.querySelector('[data-k="send"]'),status=box.querySelector('[data-k="walk-check-status"]');
@@ -224,7 +224,7 @@ function wireWalkCheck(root,r){
    if(!res.ok)throw new Error(j.code==='feedback_disabled'?'feedback is not switched on for this server yet.':(j.error||`HTTP ${res.status}`));
    status.textContent=j.check?.predicted?'Thanks, saved.':'Thanks, saved (this route could not be verified, so it is left out of the score comparison).';
    box.querySelectorAll('button,input,textarea').forEach(x=>x.disabled=true);
-   if(typeof loadWalkerEvaluation==='function')loadWalkerEvaluation(true);
+   if(typeof loadWalkerEvaluation==='function')loadWalkerEvaluation(true).then(d=>{if(d&&showFeed)showFeed(d);});   // the walker's own comment joins the feed below
   }catch(e){status.textContent='Not saved: '+e.message;send.disabled=st.rate.overall==null;}
  });
 }
@@ -235,9 +235,14 @@ function openWalkRating(r){
  if(!r||!overlay){if(typeof toast==='function')toast('Choose a route first.');return;}
  const over=document.getElementById('modalOverline');if(over)over.textContent='';
  document.getElementById('modalTitle').textContent='How was your walk?';
- const c=document.getElementById('modalContent');c.innerHTML=walkCheckBox(r);wireWalkCheck(c,r);
+ const c=document.getElementById('modalContent');
+ c.innerHTML=walkCheckBox(r)+walkerSaysFeed(walkerSays.evaluation,walkCheckType());
+ wireWalkCheck(c,r,wireWalkerFeed(c));
  overlay.classList.remove('hidden');
- c.querySelector('[data-rate="overall"]')?.focus();
+ // the dialog itself takes focus, not the first star: a screen reader still announces the dialog and Tab reaches the
+ // stars, without a focus ring sitting on a control the walker has not chosen yet
+ const dialog=overlay.querySelector('[role="dialog"]');
+ if(dialog){dialog.tabIndex=-1;dialog.focus();}
 }
 function promptWalkCheck(){openWalkRating();}
 
@@ -266,7 +271,7 @@ function walkerSaysComments(d,type,all=false){
  if(!list.length)return d?.n?'<p class="walker-says-empty">No comments yet.</p>':'';
  const day=s=>{const t=new Date(s+'T12:00:00Z');return isNaN(t)?s:t.toLocaleDateString(undefined,{month:'short',day:'numeric'});};
  const shown=all?list:list.slice(0,3);
- return `<ul class="walker-comments">${shown.map(c=>`<li>${c.comment?`<p>${esc(c.comment)}</p>`:''}${(c.photos||[]).map(p=>`<img class="wc-photo" src="${esc(p)}" alt="" loading="lazy">`).join('')}<small>${c.overall?`<span class="wc-stars" aria-label="${c.overall} of 5">${walkStarText(c.overall)}</span> · `:''}${esc(WALK_TYPE_LABEL[c.user_type]||'')} · ${esc(day(c.date))}</small>${walkerCommentActions(c)}</li>`).join('')}</ul>
+ return `<ul class="walker-comments">${shown.map(c=>`<li><small>${c.overall?`<span class="wc-stars" aria-label="${c.overall} of 5">${walkStarText(c.overall)}</span> · `:''}${esc(WALK_TYPE_LABEL[c.user_type]||'')} · ${esc(day(c.date))}</small>${c.comment?`<p>${esc(c.comment)}</p>`:''}${(c.photos||[]).map(p=>`<img class="wc-photo" src="${esc(p)}" alt="" loading="lazy">`).join('')}${walkerCommentActions(c)}</li>`).join('')}</ul>
   ${!all&&list.length>3?`<button type="button" class="walker-comments-more" data-k="more-comments">${list.length-3} more comment${list.length-3===1?'':'s'}</button>`:''}`;
 }
 /* Likes and replies on one "what other walkers said" comment (server: routing/walkcheck.py ReactionBook). WALK_LIKED
@@ -278,7 +283,7 @@ function walkerCommentActions(c){
  if(!c.id)return '';   // defensive: an older cached /api/evaluation response without comment ids
  const liked=WALK_LIKED.has(c.id),replies=c.replies||[];
  return `<div class="wc-actions">
-  <button type="button" class="wc-like${liked?' on':''}" data-like="${esc(c.id)}" aria-pressed="${liked}" aria-label="Like this comment">♥ <span data-like-count>${c.likes||0}</span></button>
+  <button type="button" class="wc-like${liked?' on':''}" data-like="${esc(c.id)}" aria-pressed="${liked}" aria-label="Like this comment"><span class="wc-heart">♥</span> <span data-like-count>${c.likes||0}</span></button>
   <button type="button" class="wc-reply-toggle" data-reply-toggle="${esc(c.id)}" aria-expanded="false">Reply${replies.length?' · '+replies.length:''}</button>
  </div>
  <div class="wc-replies hidden" data-replies="${esc(c.id)}">
@@ -328,6 +333,34 @@ function walkerSaysStreets(segs,r){
  if(!rows.length)return '';
  return `<div class="walker-says-streets"><small>Streets on this route walkers reported:</small>${rows.map(({id,k,x})=>`<div class="data-pair"><span>${esc(names.get(id)||id)} · ${esc(walkerLabelOf(k))}</span><span>${x.worse} worse · ${x.better} better${x.status==='applied'?` · routing ${x.delta>0?'+':''}${x.delta}`:''}</span></div>`).join('')}</div>`;
 }
+/** "★ 4.5 · 6 rated walks", the one line that heads the feed. Empty until a walk has been rated. */
+function walkerSaysMean(d){
+ if(!d?.n)return '';
+ const m=d.ratings?.overall?.mean;
+ return `★ ${m==null?'—':Number(m).toFixed(1)} · ${d.n} rated walk${d.n===1?'':'s'}`;
+}
+/** What other walkers said, under the walker's own rating in the dialog: the heading, the average and the comments
+    with their likes and replies. The results panel shows the fuller walkerSaysBox (the streets walkers reported, the
+    button to rate this walk); neither belongs next to the form the walker is filling in right now. */
+function walkerSaysFeed(d,type){
+ const comments=d?walkerSaysComments(d,type):'';
+ return `<section class="walker-says-feed${comments?'':' hidden'}" aria-label="What other walkers said">
+  <div class="walker-says-head"><strong>What other walkers said</strong><span class="walker-says-mean" data-k="walker-says-mean">${walkerSaysMean(d)}</span></div>
+  <div data-k="walker-comments">${comments}</div></section>`;
+}
+function wireWalkerFeed(root){
+ const box=root.querySelector('.walker-says-feed');if(!box)return;
+ const comments=box.querySelector('[data-k="walker-comments"]');
+ wireWalkerComments(comments);
+ const show=d=>{
+  const mean=box.querySelector('[data-k="walker-says-mean"]');if(mean)mean.textContent=walkerSaysMean(d);
+  comments.innerHTML=d?walkerSaysComments(d,walkCheckType()):'';
+  box.classList.toggle('hidden',!comments.innerHTML.trim());
+  if(typeof i18nApply==='function')i18nApply(box);
+ };
+ loadWalkerEvaluation().then(d=>{if(d)show(d);});
+ return show;   // wireWalkCheck calls this again once the walker's own rating is saved
+}
 /** The rate area under the walk options: the walkers' average, what they wrote, the streets they reported on this
     route, and the button to rate this walk. */
 function walkerSaysBox(r){
@@ -337,11 +370,11 @@ function walkerSaysBox(r){
   <div data-k="walker-says-ratings">${walkerSaysRatings(d,type)}</div><div data-k="walker-comments">${d?walkerSaysComments(d,type):''}</div><div data-k="walker-says-streets"></div>
   <button type="button" class="walker-rate-now" data-k="rate-now">I walked this – rate it now</button></section>`;
 }
-function wireWalkerSays(root,r){
- const box=root.querySelector('.walker-says');if(!box)return;
- box.querySelector('[data-k="rate-now"]').addEventListener('click',()=>openWalkRating(r));
- const comments=box.querySelector('[data-k="walker-comments"]');
- comments?.addEventListener('click',e=>{
+/** Clicks and keys on a list of comments: more, like, open a reply thread, send a reply. The list is replaced wholesale
+    on a re-render, so everything is delegated from the container, which stays. */
+function wireWalkerComments(comments){
+ if(!comments)return;
+ comments.addEventListener('click',e=>{
   if(e.target.closest('[data-k="more-comments"]')){comments.innerHTML=walkerSaysComments(walkerSays.evaluation,walkCheckType(),true);return;}
   const like=e.target.closest('[data-like]');if(like){wcSendLike(like);return;}
   const toggle=e.target.closest('[data-reply-toggle]');
@@ -352,9 +385,15 @@ function wireWalkerSays(root,r){
   }
   const send=e.target.closest('[data-reply-send]');if(send){wcSendReply(send);return;}
  });
- comments?.addEventListener('keydown',e=>{
+ comments.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.matches('[data-reply-input]')){e.preventDefault();wcSendReply(e.target.closest('[data-replies]').querySelector('[data-reply-send]'));}
  });
+}
+function wireWalkerSays(root,r){
+ const box=root.querySelector('.walker-says');if(!box)return;
+ box.querySelector('[data-k="rate-now"]').addEventListener('click',()=>openWalkRating(r));
+ const comments=box.querySelector('[data-k="walker-comments"]');
+ wireWalkerComments(comments);
  loadWalkerEvaluation().then(d=>{const el=box.querySelector('[data-k="walker-says-ratings"]');if(el&&d){el.innerHTML=walkerSaysRatings(d,walkCheckType());if(comments)comments.innerHTML=walkerSaysComments(d,walkCheckType());}});
  const ids=routeSegmentIds(r);
  if(ids.length)streetwiseFetch('/api/feedback/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({segment_ids:ids}),signal:AbortSignal.timeout(30000)})
