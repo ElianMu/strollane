@@ -208,6 +208,7 @@ TRUSTED_PROXY_HOPS = max(0, int(os.environ.get('TRUSTED_PROXY_HOPS', '1' if os.e
 
 
 _WALK_CHECKS = None
+_REACTIONS = None
 
 
 def walk_checks():
@@ -216,6 +217,14 @@ def walk_checks():
         from routing.walkcheck import WalkCheckBook
         _WALK_CHECKS = WalkCheckBook.from_env()
     return _WALK_CHECKS
+
+
+def reactions_book():
+    global _REACTIONS
+    if _REACTIONS is None:
+        from routing.walkcheck import ReactionBook
+        _REACTIONS = ReactionBook.from_env()
+    return _REACTIONS
 
 
 def client_ip(handler):
@@ -590,11 +599,13 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if self.path == '/api/evaluation':
             # Evaluation dashboard data (routing/walkcheck.py evaluate): ratings, predicted vs perceived, sample size,
-            # sources, missing values and limits, all from stored walk feedback, and the 30 newest comments (day only).
-            book = walk_checks()
+            # sources, missing values and limits, all from stored walk feedback, and the 30 newest comments (day only,
+            # each with its like count and replies).
+            book, rbook = walk_checks(), reactions_book()
             book.refresh()
+            rbook.refresh()
             self.send_json(200, {'enabled': book.enabled, 'generated_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
-                                 **book.evaluate(), **({'store_error': book.error} if book.error else {})})
+                                 **book.evaluate(rbook.reactions), **({'store_error': book.error} if book.error else {})})
             return
         if self.path.startswith('/api/feedback/segments/'):
             # Walker reports on one street segment and what they change (routing/feedback.py).
@@ -825,6 +836,31 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json(400, {'error': str(e)})
             except Exception as e:
                 self.send_json(502, {'error': f'Answer not saved: the store did not answer ({str(e)[:120]}).'})
+            return
+        if self.path in ('/api/walk-checks/like', '/api/walk-checks/reply'):
+            # A like or a reply on one "what other walkers said" comment (routing/walkcheck.py ReactionBook),
+            # a separate store from the walk-check records themselves.
+            from routing import walkcheck as wc
+            is_reply = self.path.endswith('/reply')
+            book, rbook = walk_checks(), reactions_book()
+            try:
+                if not book.enabled or not rbook.enabled:
+                    self.send_json(503, {'error': 'Walk checks are not configured on this server (FEEDBACK_GITHUB_TOKEN).', 'code': 'feedback_disabled'}); return
+                book.refresh()
+                doc = read_json(self, 4000 if is_reply else 1000)
+                known = {c['id'] for c in book.checks}.__contains__
+                reaction = wc.make_reply(doc, known) if is_reply else wc.make_like(doc, known)
+                dedup = None if is_reply else ('like', reaction['target'])
+                if not rbook.allow(client_ip(self), dedup):
+                    self.send_json(429, {'error': 'You already liked this comment.' if not is_reply else
+                                         'Too many replies from you in the last hour.'}); return
+                rbook.add(reaction)
+                self.send_json(201, {'saved': True, 'reply': {'text': reaction['text'], 'date': reaction['at'][:10]}}
+                               if is_reply else {'saved': True, 'likes': rbook.likes_for(reaction['target'])})
+            except (ValueError, TypeError, json.JSONDecodeError) as e:
+                self.send_json(400, {'error': str(e)})
+            except Exception as e:
+                self.send_json(502, {'error': f'Not saved: the store did not answer ({str(e)[:120]}).'})
             return
         if self.path == '/api/feedback/lookup':
             # Walker street reports for the streets of one route, so a walker sees them before walking.
