@@ -29,8 +29,9 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'feedback-u
  assert(box.includes('data-rate="dim:Architecture"')&&!box.includes('data-rate="dim:Nature"'),'other requested dimensions can be rated; Nature and Quiet have their own questions');
  assert(box.includes('./evaluation.html'));
  ctx.r2.detour_percentage=0;assert(!run('walkCheckBox(r2)').includes('worth it'),'no detour, no detour question');
- const body=run("walkCheckPayload(r2,{rate:{overall:4,quiet:5,'dim:Architecture':3},worth:'no-detour',compared:'this'},'P07','Nice')");
- assert.deepEqual(Object.keys(body).sort(),['comment','compared_with_shortest','detour_pct','dimension_ratings','distance_m','network_version','priorities','ratings','route_id','route_signature','route_snapshot','score_version','study_code','user_type','worth_detour']);
+ const body=run("walkCheckPayload(r2,{rate:{overall:4,quiet:5,'dim:Architecture':3},worth:'no-detour',compared:'this',photos:['data:image/jpeg;base64,AA==']},'P07','Nice')");
+ assert.deepEqual(Object.keys(body).sort(),['comment','compared_with_shortest','detour_pct','dimension_ratings','distance_m','network_version','photos','priorities','ratings','route_id','route_signature','route_snapshot','score_version','study_code','user_type','worth_detour']);
+ assert.deepEqual(body.photos,['data:image/jpeg;base64,AA==']);
  assert.equal(JSON.stringify(body.ratings),'{"overall":4,"match":null,"quiet":5,"green":null}');
  assert.equal(JSON.stringify(body.dimension_ratings),'{"Architecture":3}');
  assert.equal(JSON.stringify(body.priorities),'{"Nature":{"weight":80,"direction":"high"},"Quiet & Relax":{"weight":80,"direction":"high"},"Architecture":{"weight":70,"direction":"high"}}');
