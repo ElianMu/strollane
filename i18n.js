@@ -154,6 +154,7 @@ const I18N_ZH = {
  'Weather unavailable': '天气不可用', 'Weather n/a': '天气不可用', 'Weather-aware routing': '考虑天气的路线规划', 'Refresh': '刷新', 'Export sections to Kepler.gl': '导出分区到 Kepler.gl',
  'Building theme': '建筑主题', 'Environment theme': '环境主题', 'Open to load the dataset catalog.': '展开以加载数据集目录。', 'Street base (LION)': '街道底图（LION）', '↻ Streets': '↻ 街道',
  'Parks & gardens': '公园与花园', 'Street trees': '行道树', 'Historic districts': '历史街区', 'Landmark lots': '地标地块', 'Streets': '街道', 'Buildings': '建筑', 'Historic': '历史', 'Traffic': '交通', 'Public Services': '公共服务',
+ 'Street, path & transport lines': '街道、步道与交通线路',
  'Places & facilities': '地点与设施', 'YOU': '你', 'You': '你', 'Best match': '最佳匹配', 'best match': '最佳匹配', 'Shortest': '最短', 'Fastest': '最快',
  'Looking for street photos…': '正在查找街景照片…', 'Street evidence · raw units': '街道数据 · 原始单位', 'Original points / polygons': '原始点 / 面', 'Validated score · 0–100': '已验证分数 · 0–100',
  'Custom maximum (minutes)': '自定义上限（分钟）', 'Places near this walk have not been looked up yet.': '还没有查找这条路线附近的地点。', 'Generate or select a route to discover POIs.': '生成或选择一条路线以查看沿途地点。',
