@@ -9,6 +9,8 @@ name: Deploy website (GitHub Pages)
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,11 +19,40 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # Runs the repository's own test suite (Python unit tests, the GIS reference tests, and the Node/jsdom script
+  # tests) before anything is published. Added because nothing previously gated this deploy: a change that broke
+  # /api/interpret validation, the routing engine, or a frontend script could ship straight to the live site with
+  # no automated check in between (the only other workflow that exercises the live product, production-acceptance.yml,
+  # is manual/opt-in). This does not change what ships — only whether a failing build is allowed to.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Python test dependencies
+        run: python3 -m pip install -r requirements.txt -r requirements-dev.txt
+      - name: Python unit tests (tests/test_*.py)
+        run: python3 -m unittest discover -s tests -p "test_*.py" -v
+      - name: GIS reference tests (pytest)
+        run: python3 -m pytest tests/test_dimensions.py -q
+      - name: Install Node dev dependencies
+        run: npm ci
+      - name: Node DOM/script tests (tests/*.test.cjs)
+        run: npm run test:dom
+
   deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
