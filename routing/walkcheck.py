@@ -48,7 +48,14 @@ _EMAIL = re.compile(r'[\w.+-]+@[\w-]+(\.[\w-]+)+')
 _URL = re.compile(r'(https?://|www\.)\S+', re.I)
 _PHONE = re.compile(r'(\+?\d[\d\s().-]{7,}\d)')
 TEXT_MAX = 500
-SCHEMA = 2
+# Photos (feedback-ui.js): resized and re-encoded client-side (a canvas re-encode drops EXIF, including GPS, as a
+# side effect of how canvas export works, not an extra stripping step) before they ever reach this validation, so
+# the cap here is about store size, not about re-checking that the client did its job.
+PHOTO_MAX_CHARS = 220_000       # ≈165 KB raw; comfortably fits a 1024px-long-edge JPEG at quality 0.7
+PHOTOS_MAX = 3
+_PHOTO_DATA_URL = re.compile(r'^data:image/(jpeg|webp);base64,[A-Za-z0-9+/]+=*$')
+SCHEMA = 3   # was 2; added `photos`. Safe to bump without a migration: production has 0 stored records so far
+             # (FEEDBACK_GITHUB_TOKEN was never set — see DEPLOYMENT.md), confirmed via evaluation.html, 2026-11-23.
 
 
 def clean_text(text):
@@ -107,6 +114,15 @@ def make_check(payload, predicted=None, now=None):
         priorities[k] = {'weight': round(w), 'direction': d}
     rid = payload.get('route_id')
     rid = rid if isinstance(rid, str) and ROUTE_ID.match(rid) else None
+    raw_photos = payload.get('photos')
+    photos = []
+    if raw_photos is not None:
+        if not isinstance(raw_photos, list) or len(raw_photos) > PHOTOS_MAX:
+            raise ValueError(f'photos must be a list of at most {PHOTOS_MAX} images')
+        for p in raw_photos:
+            if not isinstance(p, str) or len(p) > PHOTO_MAX_CHARS or not _PHOTO_DATA_URL.match(p):
+                raise ValueError('each photo must be a small JPEG/WebP data URL (resized client-side)')
+            photos.append(p)
 
     def text(k, n):
         v = payload.get(k)
@@ -122,7 +138,7 @@ def make_check(payload, predicted=None, now=None):
             'compared_with_shortest': compared, 'study_code': code, 'route_id': rid,
             'route_signature': text('route_signature', 64), 'score_version': text('score_version', 80),
             'network_version': text('network_version', 40), 'distance_m': num('distance_m', 0, 50000),
-            'detour_pct': num('detour_pct', -5, 400),
+            'detour_pct': num('detour_pct', -5, 400), 'photos': photos,
             'predicted': predicted if isinstance(predicted, dict) else None}
 
 
@@ -207,6 +223,7 @@ SOURCES = [
 
 
 COMMENTS_SHOWN, COMMENT_SHOWN_CHARS = 30, 280
+PHOTOS_IN_FEED = 8   # of the COMMENTS_SHOWN comments, at most this many carry their photo in /api/evaluation
 
 
 def evaluate(checks):
@@ -252,11 +269,20 @@ def evaluate(checks):
     out['worth_detour'] = {w: sum(c.get('worth_detour') == w for c in checks) for w in WORTH}
     out['compared_with_shortest'] = {w: sum(c.get('compared_with_shortest') == w for c in checks) for w in COMPARED}
     out['comments'] = sum(1 for c in checks if c.get('comment'))
-    # What walkers wrote, newest first, for other walkers to read (the form says comments are public; they were
-    # cleaned of e-mail addresses, links and phone numbers when stored). Day only, no time, no route.
-    said = sorted((c for c in checks if c.get('comment')), key=lambda c: c['at'], reverse=True)[:COMMENTS_SHOWN]
+    out['photos'] = sum(1 for c in checks if c.get('photos'))
+    # What walkers wrote (or photographed), newest first, for other walkers to read (the form says this is public;
+    # comments were cleaned of e-mail addresses, links and phone numbers when stored). Day only, no time, no route.
+    # A photo embeds its full data URL, so only the first PHOTOS_IN_FEED comments that have one carry it here —
+    # the rest of the feed stays text-only rather than this one response growing to several MB.
+    said = sorted((c for c in checks if c.get('comment') or c.get('photos')), key=lambda c: c['at'], reverse=True)[:COMMENTS_SHOWN]
+    photo_budget = [PHOTOS_IN_FEED]
+    def _feed_photos(c):
+        if not c.get('photos') or photo_budget[0] <= 0:
+            return []
+        photo_budget[0] -= 1
+        return c['photos'][:1]
     out['recent_comments'] = [{'date': str(c['at'])[:10], 'user_type': c.get('user_type'), 'overall': (c.get('ratings') or {}).get('overall'),
-                               'comment': c['comment'][:COMMENT_SHOWN_CHARS]} for c in said]
+                               'comment': (c.get('comment') or '')[:COMMENT_SHOWN_CHARS], 'photos': _feed_photos(c)} for c in said]
     out['study_participants'] = len({c['study_code'] for c in checks if c.get('study_code')})
     return out
 

@@ -24,7 +24,9 @@ class Records(unittest.TestCase):
                            'lat': 40.7, 'lon': -73.9, 'name': 'someone', 'predicted': {'Nature': 100}}, PRED, NOW)
         self.assertEqual(set(c), {'v', 'id', 'at', 'bucket', 'user_type', 'priorities', 'ratings', 'dimension_ratings',
                                   'comment', 'worth_detour', 'compared_with_shortest', 'study_code', 'route_id',
-                                  'route_signature', 'score_version', 'network_version', 'distance_m', 'detour_pct', 'predicted'})
+                                  'route_signature', 'score_version', 'network_version', 'distance_m', 'detour_pct',
+                                  'predicted', 'photos'})
+        self.assertEqual(c['photos'], [], 'no photos sent: an empty list, not missing')
         self.assertEqual(c['ratings'], {'overall': 4, 'match': None, 'quiet': 5, 'green': None})
         self.assertEqual((c['study_code'], c['bucket'], c['at']), ('P07', 'evening', '2026-11-20T23:00:00+00:00'))
         self.assertEqual(c['predicted'], PRED, 'the prediction is the server\'s, never the client\'s')
@@ -40,6 +42,22 @@ class Records(unittest.TestCase):
                     {'user_type': 'tourist', 'ratings': {'overall': 3}, 'study_code': 'Jane Doe'}, []):
             with self.assertRaises(ValueError):
                 wc.make_check(bad, None, NOW)
+
+    def test_photos(self):
+        jpeg = 'data:image/jpeg;base64,' + 'AB01+/' * 20 + '=='
+        ok = check({'overall': 4}, photos=[jpeg, jpeg])
+        self.assertEqual(ok['photos'], [jpeg, jpeg])
+        self.assertEqual(check({'overall': 4})['photos'], [])
+        with self.assertRaises(ValueError):
+            check({'overall': 4}, photos=[jpeg] * (wc.PHOTOS_MAX + 1))
+        with self.assertRaises(ValueError):
+            check({'overall': 4}, photos='not-a-list')
+        with self.assertRaises(ValueError):
+            check({'overall': 4}, photos=['not-a-data-url'])
+        with self.assertRaises(ValueError):
+            check({'overall': 4}, photos=['data:image/gif;base64,' + 'A' * 20])  # not an accepted image type
+        with self.assertRaises(ValueError):
+            check({'overall': 4}, photos=['data:image/jpeg;base64,' + 'A' * (wc.PHOTO_MAX_CHARS + 1)])
 
 
 class Evaluation(unittest.TestCase):
@@ -65,10 +83,28 @@ class Evaluation(unittest.TestCase):
         rows[0]['at'], rows[2]['at'] = '2026-11-18T15:00:00+00:00', '2026-11-20T23:00:00+00:00'
         said = wc.evaluate(rows)['recent_comments']
         self.assertEqual([c['date'] for c in said], ['2026-11-20', '2026-11-18'], 'newest first, day only')
-        self.assertEqual(set(said[0]), {'date', 'user_type', 'overall', 'comment'}, 'no route, time, code or prediction')
+        self.assertEqual(set(said[0]), {'date', 'user_type', 'overall', 'comment', 'photos'}, 'no route, time, code or prediction')
+        self.assertEqual(said[0]['photos'], [])
         self.assertEqual((said[1]['comment'], said[1]['overall'], said[1]['user_type']), ('Quiet side streets, lovely.', 4, 'leisure'))
         self.assertNotIn('555', said[0]['comment']); self.assertLessEqual(len(said[0]['comment']), wc.COMMENT_SHOWN_CHARS)
         self.assertEqual(wc.evaluate([check({'overall': 3})])['recent_comments'], [])
+
+    def test_photo_only_comment_shows_up_and_feed_is_budgeted(self):
+        jpeg = 'data:image/jpeg;base64,' + 'AB01+/' * 20 + '=='
+        photo_only = check({'overall': 5}, photos=[jpeg])
+        self.assertIsNone(photo_only['comment'])
+        e = wc.evaluate([photo_only, check({'overall': 3})])
+        self.assertEqual(len(e['recent_comments']), 1, 'a photo with no text still counts as something to show')
+        self.assertEqual(e['recent_comments'][0]['photos'], [jpeg])
+        self.assertEqual(e['recent_comments'][0]['comment'], '')
+        self.assertEqual(e['photos'], 1)
+        # more photo-bearing rows than PHOTOS_IN_FEED: only the first that many carry their photo in this response
+        rows = [check({'overall': 5}, photos=[jpeg]) for _ in range(wc.PHOTOS_IN_FEED + 2)]
+        for i, r in enumerate(rows):
+            r['at'] = f'2026-11-{10 + i:02d}T20:00:00+00:00'   # distinct, increasing timestamps: stable newest-first order
+        said = wc.evaluate(rows)['recent_comments']
+        self.assertEqual(sum(1 for c in said if c['photos']), wc.PHOTOS_IN_FEED)
+        self.assertTrue(all(c['photos'] for c in said[:wc.PHOTOS_IN_FEED]), 'the newest ones get the budget')
 
     def test_predicted_vs_perceived(self):
         # five walks: predicted Quiet 20, 40, 60, 80, 100 and ratings that rise with it

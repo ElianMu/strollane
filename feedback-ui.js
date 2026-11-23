@@ -105,6 +105,51 @@ function walkCheckPriorities(){
  const out={};for(const d of DIMENSIONS){const n=d.name;if(planner.origins[n]!=='default')out[n]={weight:Math.round(planner.weights[n]??50),direction:planner.directions[n]==='low'?'low':'high'};}
  return out;
 }
+const WALK_PHOTOS_MAX=3,WALK_PHOTO_MAX_CHARS=200000,WALK_PHOTO_MAX_DIM=1024;
+/** A photo file, read, scaled to at most WALK_PHOTO_MAX_DIM on its long edge and re-encoded as a JPEG data URL
+    (a canvas re-encode carries no EXIF, so this also removes any embedded location on its own, not as an extra
+    step). Quality steps down if the result is still over the server's per-photo limit; gives up after a few tries
+    rather than sending something oversized. */
+function walkPhotoRead(file){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onerror=()=>reject(new Error('unreadable'));
+  reader.onload=()=>{
+   const img=new Image();
+   img.onerror=()=>reject(new Error('not an image'));
+   img.onload=()=>{
+    let w=img.naturalWidth,h=img.naturalHeight;
+    if(!w||!h)return reject(new Error('not an image'));
+    const longEdge=Math.max(w,h);
+    if(longEdge>WALK_PHOTO_MAX_DIM){const scale=WALK_PHOTO_MAX_DIM/longEdge;w=Math.round(w*scale);h=Math.round(h*scale);}
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    let url='';for(const q of [0.72,0.5,0.35]){url=canvas.toDataURL('image/jpeg',q);if(url.length<=WALK_PHOTO_MAX_CHARS)break;}
+    if(url.length>WALK_PHOTO_MAX_CHARS)return reject(new Error('too large even after resizing'));
+    resolve(url);
+   };
+   img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+function walkCheckPhotosBox(){
+ return `<div class="walk-check-photos" data-k="photos">
+  <input type="file" accept="image/*" multiple data-k="photo-input" class="hidden" aria-label="Add photos, up to ${WALK_PHOTOS_MAX}">
+  <button type="button" class="walk-check-photo-add" data-k="photo-add">+ Add photos<small>up to ${WALK_PHOTOS_MAX}</small></button>
+ </div>
+ <small class="walk-check-hint walk-check-photo-note">Your comment and photos are shown to other walkers. Photos are resized and their location data removed.</small>`;
+}
+function walkCheckRenderPhotos(box,st){
+ const row=box.querySelector('[data-k="photos"]'),add=row.querySelector('[data-k="photo-add"]');
+ row.querySelectorAll('.walk-check-photo').forEach(x=>x.remove());
+ st.photos.forEach((url,i)=>{
+  const fig=document.createElement('span');fig.className='walk-check-photo';
+  fig.innerHTML=`<img src="${esc(url)}" alt=""><button type="button" data-remove="${i}" aria-label="Remove photo ${i+1}">×</button>`;
+  row.insertBefore(fig,add);
+ });
+ add.classList.toggle('hidden',st.photos.length>=WALK_PHOTOS_MAX);
+}
 function walkScale(key){return `<span class="walk-check-scale" role="group">${[1,2,3,4,5].map(k=>`<button type="button" data-rate="${esc(key)}" data-v="${k}" aria-pressed="false">${k}</button>`).join('')}</span>`;}
 function walkStars(key,label){return `<span class="walk-stars" role="group" aria-label="${esc(label)}">${[1,2,3,4,5].map(k=>`<button type="button" data-rate="${esc(key)}" data-v="${k}" aria-pressed="false" aria-label="${k} of 5">★</button>`).join('')}</span>`;}
 function walkCheckBox(r){
@@ -115,6 +160,7 @@ function walkCheckBox(r){
   <div class="walk-check-main">${walkStars('overall','Overall, how satisfied are you with this walk?')}</div>
   <div class="walk-check-q walk-check-match"><span>Did it match what you asked for?</span><span class="walk-check-scale">${WALK_MATCH.map(([v,l])=>`<button type="button" data-rate="match" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</span></div>
   <textarea class="walk-check-comment" data-k="comment" maxlength="500" rows="2" placeholder="Add a comment (optional, public)" aria-label="Comment, optional and shown to other walkers"></textarea>
+  ${walkCheckPhotosBox()}
   <button type="button" class="walk-check-send" data-k="send" disabled>Send rating</button>
   <details class="walk-check-more"><summary>More detail (optional)</summary>
    <small class="walk-check-type">Walk type: ${esc(WALK_TYPE_LABEL[type])}${Object.keys(pri).length?' · '+esc(Object.keys(pri).join(', ')):''}</small>
@@ -131,14 +177,28 @@ function walkCheckPayload(r,st,code,comment){
  const dims={};for(const [k,v] of Object.entries(st.rate))if(k.startsWith('dim:'))dims[k.slice(4)]=v;
  return {user_type:walkCheckType(),priorities:walkCheckPriorities(),
   ratings:{overall:st.rate.overall??null,match:st.rate.match??null,quiet:st.rate.quiet??null,green:st.rate.green??null},dimension_ratings:dims,
-  comment:comment||null,worth_detour:st.worth,study_code:code||null,compared_with_shortest:code?st.compared:null,
+  comment:comment||null,photos:st.photos,worth_detour:st.worth,study_code:code||null,compared_with_shortest:code?st.compared:null,
   route_id:r.route_id,route_signature:r.route_signature,score_version:r.score_version,network_version:r.network_version,distance_m:r.distance_m,detour_pct:r.detour_percentage,
   route_snapshot:{route_id:r.route_id,network_version:r.network_version,route_signature:r.route_signature,ordered_edge_ids:r.ordered_edge_ids}};
 }
 function wireWalkCheck(root,r){
  const box=root.querySelector('.walk-check');if(!box)return;
- const st={rate:{},worth:(Number(r.detour_percentage)||0)<1?'no-detour':null,compared:null};
+ const st={rate:{},worth:(Number(r.detour_percentage)||0)<1?'no-detour':null,compared:null,photos:[]};
  const send=box.querySelector('[data-k="send"]'),status=box.querySelector('[data-k="walk-check-status"]');
+ const photoInput=box.querySelector('[data-k="photo-input"]'),photoAdd=box.querySelector('[data-k="photo-add"]'),photoRow=box.querySelector('[data-k="photos"]');
+ photoAdd?.addEventListener('click',()=>photoInput.click());
+ photoInput?.addEventListener('change',async()=>{
+  const files=[...photoInput.files].slice(0,WALK_PHOTOS_MAX-st.photos.length);photoInput.value='';
+  for(const f of files){
+   try{st.photos.push(await walkPhotoRead(f));}
+   catch(e){if(typeof toast==='function')toast('Could not use that photo: '+e.message);}
+  }
+  walkCheckRenderPhotos(box,st);
+ });
+ photoRow?.addEventListener('click',e=>{
+  const rm=e.target.closest('[data-remove]');if(!rm)return;
+  st.photos.splice(Number(rm.dataset.remove),1);walkCheckRenderPhotos(box,st);
+ });
  box.querySelectorAll('[data-rate]').forEach(b=>b.addEventListener('click',()=>{
   st.rate[b.dataset.rate]=Number(b.dataset.v);
   box.querySelectorAll('[data-rate]').forEach(x=>{if(x.dataset.rate===b.dataset.rate){x.setAttribute('aria-pressed',String(x===b));
@@ -201,7 +261,7 @@ function walkerSaysComments(d,type,all=false){
  if(!list.length)return d?.n?'<p class="walker-says-empty">No comments yet.</p>':'';
  const day=s=>{const t=new Date(s+'T12:00:00Z');return isNaN(t)?s:t.toLocaleDateString(undefined,{month:'short',day:'numeric'});};
  const shown=all?list:list.slice(0,3);
- return `<ul class="walker-comments">${shown.map(c=>`<li><p>${esc(c.comment)}</p><small>${c.overall?`<span class="wc-stars" aria-label="${c.overall} of 5">${walkStarText(c.overall)}</span> · `:''}${esc(WALK_TYPE_LABEL[c.user_type]||'')} · ${esc(day(c.date))}</small></li>`).join('')}</ul>
+ return `<ul class="walker-comments">${shown.map(c=>`<li>${c.comment?`<p>${esc(c.comment)}</p>`:''}${(c.photos||[]).map(p=>`<img class="wc-photo" src="${esc(p)}" alt="" loading="lazy">`).join('')}<small>${c.overall?`<span class="wc-stars" aria-label="${c.overall} of 5">${walkStarText(c.overall)}</span> · `:''}${esc(WALK_TYPE_LABEL[c.user_type]||'')} · ${esc(day(c.date))}</small></li>`).join('')}</ul>
   ${!all&&list.length>3?`<button type="button" class="walker-comments-more" data-k="more-comments">${list.length-3} more comment${list.length-3===1?'':'s'}</button>`:''}`;
 }
 function walkerSaysStreets(segs,r){

@@ -1394,6 +1394,13 @@ button,a,summary,select,input,label,[role="button"],.rp-bar,.rp-top,.nav-overlay
 .walk-check-match .walk-check-scale{display:flex}
 .walk-check-match .walk-check-scale button{flex:1}
 .walk-check-comment{display:block;width:100%;margin-top:12px;min-height:56px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);padding:9px 11px;font-size:16px;line-height:1.35}
+.walk-check-photos{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.walk-check-photo{position:relative;width:60px;height:60px;border-radius:10px;overflow:hidden;flex:none}
+.walk-check-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.walk-check-photo button{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;border:0;background:color-mix(in srgb,var(--g00) 60%,transparent);color:var(--gff);font-size:12px;line-height:1;padding:0}
+.walk-check-photo-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:60px;height:60px;border:1px dashed var(--line-strong);border-radius:10px;background:transparent;color:var(--muted);font-size:10.5px;font-weight:600;text-align:center;flex:none}
+.walk-check-photo-add small{font-size:8.5px;font-weight:500;color:var(--subtle)}
+.walk-check-photo-note{margin-top:8px}
 .walk-check .walk-check-send{display:block;width:100%;height:46px;margin-top:10px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:600}
 .walk-check-more{margin-top:10px}
 .walk-check-more>summary{cursor:pointer;font-size:12px;color:var(--muted)}
@@ -1407,6 +1414,7 @@ button,a,summary,select,input,label,[role="button"],.rp-bar,.rp-top,.nav-overlay
 .walker-comments{list-style:none;margin:8px 0 0;padding:0}
 .walker-comments li{padding:8px 0;border-top:1px solid var(--line)}
 .walker-comments p{margin:0 0 3px;font-size:13px;line-height:1.45;color:var(--text)}
+.wc-photo{display:block;max-width:220px;width:100%;max-height:160px;object-fit:cover;border-radius:10px;margin:4px 0 6px}
 .walker-comments small{font-size:11px;color:var(--muted)}
 .wc-stars{letter-spacing:1px;color:var(--text)}
 .walker-comments-more{background:none;border:0;padding:6px 0 0;font-size:12px;font-weight:600;color:var(--text);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -1559,6 +1567,7 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
  body .walk-check-scale button[aria-pressed=true]{background:var(--ds-ink);color:var(--ds-on-ink)}
  body .walk-check-comment{border:0;background:var(--ds-fill);border-radius:12px}
  body .walk-check-comment:focus{background:var(--bg-panel);box-shadow:0 0 0 1.5px var(--ds-ink)}
+ body .walk-check-photo-add{border:0;background:var(--ds-fill);border-radius:12px}
  body .walk-check-send{border:0;background:var(--ds-ink);color:var(--ds-on-ink);border-radius:14px}
  body .modal-overlay .modal{border:0;border-radius:20px;box-shadow:var(--ds-float)}
 

@@ -806,7 +806,10 @@ class Handler(SimpleHTTPRequestHandler):
             try:
                 if not book.enabled:
                     self.send_json(503, {'error': 'Walk checks are not configured on this server (FEEDBACK_GITHUB_TOKEN).', 'code': 'feedback_disabled'}); return
-                doc = read_json(self, 60000)
+                # 60,000 before photos (feedback-ui.js, routing/walkcheck.py PHOTOS_MAX=3 / PHOTO_MAX_CHARS=220,000):
+                # raised enough for 3 resized photos plus the rest of the record; wc.make_check enforces the real,
+                # tighter per-photo and per-request caps, so this is only the outer transport-level sanity limit.
+                doc = read_json(self, 760_000)
                 predicted = None
                 if isinstance(doc, dict):
                     try:  # the prediction is recomputed here from the route, never taken from the client
