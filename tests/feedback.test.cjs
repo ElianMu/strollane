@@ -49,6 +49,27 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'feedback-u
  assert(!wrote.includes('Too long')&&wrote.includes('2 more comments')&&wrote.includes('★★★★★'));
  assert(run('walkerSaysComments(evalD,"leisure",true)').includes('Too long'),'all of them on request');
  assert(run('walkerSaysComments({n:2,recent_comments:[]},"leisure")').includes('No comments yet'));
+ // One comment in full: the walker and day read above what they wrote, the like and reply chips below it.
+ {const one=run('walkerSaysComments({n:1,recent_comments:[{id:"c1",date:"2026-11-20",user_type:"tourist",overall:5,comment:"Lovely",photos:[],likes:5,replies:[{text:"Agreed",date:"2026-11-21"}]}]},"tourist")');
+  assert(one.indexOf('Tourist')<one.indexOf('Lovely'),'the walker and day read above the comment');
+  assert(one.indexOf('Lovely')<one.indexOf('data-like='),'the like and reply chips sit under the comment');
+  assert(one.includes('>5</span>')&&one.includes('Reply · 1')&&one.includes('Agreed'),'like count, reply count, and the reply itself');}
+ // The dialog's own feed: heading, average, comments. Nothing said yet means no empty heading.
+ const feed=run('walkerSaysFeed(evalD,"leisure")');
+ assert(feed.includes('What other walkers said')&&feed.includes('6 rated walks')&&feed.includes('Busy but fine'));
+ assert(!feed.includes('walker-says-feed hidden'),'with comments, the feed is shown');
+ assert(run('walkerSaysFeed({n:0},"leisure")').includes('walker-says-feed hidden'),'no comments: no empty heading in the dialog');
+ assert.equal(run('walkerSaysMean({n:6,ratings:{overall:{mean:4.5}}})'),'★ 4.5 · 6 rated walks');
+ // The rating dialog itself holds both: the walker's own form, then what other walkers said (PR #53 shipped the
+ // likes and replies into a section the dialog never rendered).
+ {run('walkerSays.evaluation=evalD');
+  const content={innerHTML:'',querySelector:()=>null};
+  ctx.document={getElementById:id=>({modalOverlay:{classList:{remove(){}},querySelector:()=>null},modalOverline:{},modalTitle:{},modalContent:content}[id])};
+  run('openWalkRating(r2)');
+  run('walkerSays.evaluation=null');   // the later checks read it as a fresh page would
+  assert(content.innerHTML.includes('class="walk-check"'),'the walker rates the walk');
+  assert(content.innerHTML.includes('walker-says-feed')&&content.innerHTML.includes('Busy but fine'),'and reads what other walkers said, in the same dialog');
+  assert(content.innerHTML.indexOf('class="walk-check"')<content.innerHTML.indexOf('walker-says-feed'),'own rating first, others below');}
  ctx.r3={edges:[{matched_segments:[{segment_id:'QN-1',street_name:'31 Ave'}]},{matched_segments:[{segment_id:'QN-2',street_name:'Steinway St'}]}]};
  assert.equal(run('JSON.stringify(routeSegmentIds(r3))'),'["QN-1","QN-2"]');
  const st=run("walkerSaysStreets({'QN-1':{quiet:{n:4,worse:3,better:1,status:'applied',delta:-6.5}}},r3)");

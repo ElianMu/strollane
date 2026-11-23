@@ -56,7 +56,7 @@ const I18N_ZH = {
  '1 not at all · 5 very. Only the first is required.': '1 完全不 · 5 非常。只有第一题必答。', 'The other dimensions you asked for:': '你选的其他维度：',
  'Send': '发送', 'This one': '这一条', 'The other one': '另一条', 'No difference': '没有差别', 'Yes': '是', 'No': '否',
  'You have arrived. How was the walk? Rate it under “Why this route”.': '你已到达。这段路走得怎么样？请在"为什么是这条路线"里打分。',
- 'What walkers said': '其他步行者怎么说', 'All results': '全部结果', 'I walked this – rate it now': '我走完了，马上评价', 'How was your walk?': '这段路走得怎么样？',
+ 'What walkers said': '其他步行者怎么说', 'What other walkers said': '其他步行者怎么说', 'All results': '全部结果', 'I walked this – rate it now': '我走完了，马上评价', 'How was your walk?': '这段路走得怎么样？',
  'Rate this walk (optional)': '给这段路打分（可选）', 'Choose a route first.': '请先选择一条路线。', 'No walker has rated a walk yet.': '还没有步行者评价过。',
  'Streets on this route walkers reported:': '这条路线上被步行者反馈过的街道：',
  'WALKER FEEDBACK': '步行者反馈', 'All results ↗': '全部结果 ↗', 'Create a walk to see what walkers said about it. After you walk it, rate it here.': '生成一条路线，就能看到其他步行者的评价；走完后在这里打分。',
@@ -243,7 +243,7 @@ const I18N_ZH_PATTERNS = [
  [/^Checking menus for (.+)…$/, (_, a) => `正在核对菜单上有没有${typeof i18nLabel === 'function' ? i18nLabel(a) : a}…`], [/^Checking menus…$/, '正在核对菜单…'],
  [/^(-?[\d.,]+) km$/, '$1 公里'], [/^(-?[\d.,]+) mi$/, '$1 英里'],
  // walker ratings and comments (feedback-ui.js)
- [/^(\d+) rated walks? · matched the request ([\d.]+|—) \/ 5$/, '$1 次评分 · 与要求相符 $2 / 5'], [/^(\d+) more comments?$/, '还有 $1 条评论'], [/^Reply · (\d+)$/, '回复 · $1'],
+ [/^(\d+) rated walks? · matched the request ([\d.]+|—) \/ 5$/, '$1 次评分 · 与要求相符 $2 / 5'], [/^★ ([\d.]+|—) · (\d+) rated walks?$/, '★ $1 · $2 次评分'], [/^(\d+) more comments?$/, '还有 $1 条评论'], [/^Reply · (\d+)$/, '回复 · $1'],
  [/^(Tourist|Curious Local|Leisure Walker|Your own priorities) walks \((\d+)\): ★ ([\d.]+|—)$/, (_, t, n, v) => `${{'Tourist': '游客', 'Curious Local': '好奇的本地人', 'Leisure Walker': '休闲散步者', 'Your own priorities': '自选偏好'}[t]}路线（${n}）：★ ${v}`],
  // navigation card
  [/^Then: (.+)$/, (_, a) => `然后：${a}`], [/^Next stop: (.+?)(?: · \+(\d+))?$/, (_, a, n) => `下一站：${i18nPlaceName(a) || a}${n ? ` · 另有 ${n} 站` : ''}`],
