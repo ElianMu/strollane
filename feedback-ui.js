@@ -188,11 +188,16 @@ function wireWalkCheck(root,r){
  const photoInput=box.querySelector('[data-k="photo-input"]'),photoAdd=box.querySelector('[data-k="photo-add"]'),photoRow=box.querySelector('[data-k="photos"]');
  photoAdd?.addEventListener('click',()=>photoInput.click());
  photoInput?.addEventListener('change',async()=>{
+  // disabled for the duration: picking again before this batch finishes resizing could otherwise push past
+  // WALK_PHOTOS_MAX (each change event only caps against the count it sees when it starts)
+  photoAdd.disabled=true;
   const files=[...photoInput.files].slice(0,WALK_PHOTOS_MAX-st.photos.length);photoInput.value='';
   for(const f of files){
    try{st.photos.push(await walkPhotoRead(f));}
    catch(e){if(typeof toast==='function')toast('Could not use that photo: '+e.message);}
   }
+  st.photos.length=Math.min(st.photos.length,WALK_PHOTOS_MAX);
+  photoAdd.disabled=false;
   walkCheckRenderPhotos(box,st);
  });
  photoRow?.addEventListener('click',e=>{
