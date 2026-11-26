@@ -343,10 +343,19 @@ function walkerSaysMean(d){
     with their likes and replies. The results panel shows the fuller walkerSaysBox (the streets walkers reported, the
     button to rate this walk); neither belongs next to the form the walker is filling in right now. */
 function walkerSaysFeed(d,type){
- const comments=d?walkerSaysComments(d,type):'';
- return `<section class="walker-says-feed${comments?'':' hidden'}" aria-label="What other walkers said">
+ return `<section class="walker-says-feed" aria-label="What other walkers said">
   <div class="walker-says-head"><strong>What other walkers said</strong><span class="walker-says-mean" data-k="walker-says-mean">${walkerSaysMean(d)}</span></div>
-  <div data-k="walker-comments">${comments}</div></section>`;
+  <div data-k="walker-comments">${walkerSaysFeedBody(d,type)}</div></section>`;
+}
+/** The feed stays on screen with nothing in it: hiding it told the walker the section does not exist, when the truth
+    is that nobody has rated a walk yet — or that this site cannot store one. Both are worth saying plainly. */
+function walkerSaysFeedBody(d,type){
+ if(!d)return '<small class="walker-status">Loading what walkers said…</small>';
+ const written=walkerSaysComments(d,type);
+ if(written)return written;
+ return `<p class="walker-says-empty">${d.enabled===false
+  ? 'No walk has been rated here yet: this site is not storing ratings at the moment.'
+  : 'No walk has been rated here yet. Yours would be the first.'}</p>`;
 }
 function wireWalkerFeed(root){
  const box=root.querySelector('.walker-says-feed');if(!box)return;
@@ -354,11 +363,11 @@ function wireWalkerFeed(root){
  wireWalkerComments(comments);
  const show=d=>{
   const mean=box.querySelector('[data-k="walker-says-mean"]');if(mean)mean.textContent=walkerSaysMean(d);
-  comments.innerHTML=d?walkerSaysComments(d,walkCheckType()):'';
-  box.classList.toggle('hidden',!comments.innerHTML.trim());
+  comments.innerHTML=d?walkerSaysFeedBody(d,walkCheckType())
+   :'<p class="walker-says-empty">What other walkers said could not be loaded just now.</p>';   // the load failed, not "nothing yet"
   if(typeof i18nApply==='function')i18nApply(box);
  };
- loadWalkerEvaluation().then(d=>{if(d)show(d);});
+ loadWalkerEvaluation().then(show);
  return show;   // wireWalkCheck calls this again once the walker's own rating is saved
 }
 /** The rate area under the walk options: the walkers' average, what they wrote, the streets they reported on this

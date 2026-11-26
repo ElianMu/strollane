@@ -57,8 +57,11 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'feedback-u
  // The dialog's own feed: heading, average, comments. Nothing said yet means no empty heading.
  const feed=run('walkerSaysFeed(evalD,"leisure")');
  assert(feed.includes('What other walkers said')&&feed.includes('6 rated walks')&&feed.includes('Busy but fine'));
- assert(!feed.includes('walker-says-feed hidden'),'with comments, the feed is shown');
- assert(run('walkerSaysFeed({n:0},"leisure")').includes('walker-says-feed hidden'),'no comments: no empty heading in the dialog');
+ // Nothing rated yet still shows the section and says so: hiding it told the walker the feature was not there.
+ {const empty=run('walkerSaysFeed({n:0,enabled:true},"leisure")');
+  assert(!empty.includes('hidden')&&empty.includes('What other walkers said'),'the section stays on screen');
+  assert(empty.includes('Yours would be the first'),'and invites the walker to be the first');
+  assert(run('walkerSaysFeed({n:0,enabled:false},"leisure")').includes('not storing ratings'),'a site that cannot store a rating says so, and does not invite one');}
  assert.equal(run('walkerSaysMean({n:6,ratings:{overall:{mean:4.5}}})'),'★ 4.5 · 6 rated walks');
  // The rating dialog itself holds both: the walker's own form, then what other walkers said (PR #53 shipped the
  // likes and replies into a section the dialog never rendered).
