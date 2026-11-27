@@ -944,7 +944,7 @@ async function autoLocateStart(){
 function downloadGeoJSON(name,fc){const blob=new Blob([JSON.stringify(fc,null,2)],{type:'application/geo+json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
 const modalOverlay=$('modalOverlay');
 function openModal(kind){
-  modalOverlay.classList.remove('hidden');if($('modalOverline'))$('modalOverline').textContent='PROJECT NOTES / TRANSPARENCY';const c=$('modalContent');$('modalTitle').textContent=kind==='export'?'Explore this data in Kepler.gl.':kind==='data'?'The 12 Urban Data Domains.':'What is real, and what comes next.';
+  modalOverlay.classList.remove('hidden','modal-sheet');if($('modalOverline'))$('modalOverline').textContent='PROJECT NOTES / TRANSPARENCY';const c=$('modalContent');$('modalTitle').textContent=kind==='export'?'Explore this data in Kepler.gl.':kind==='data'?'The 12 Urban Data Domains.':'What is real, and what comes next.';
   if(kind==='export'){
     state.datasets.experience={type:'FeatureCollection',features:experienceFeatures()};
     const items=[['experience','Computed sections (NULL validated scores)'],['streets','Manhattan NYC centerlines (all pages)'],['trees','2015 tree records (current view)'],['lpc','LPC polygons (current view)']];
@@ -963,7 +963,7 @@ function openModal(kind){
 function renderMethodology(){
   return `<p><strong>Two layers, one score definition.</strong> Experience scores are measured on NYC LION street segments (Explore Urban Data). Routing uses the OpenStreetMap pedestrian graph; each OSM edge takes the scores of the LION segments it matches (by distance, direction, street name and level), or is measured directly with the same indicator code when no reliable match exists (crossings, park paths, bridges).</p><p><strong>Scores</strong> are 0–100 percentile ranks among Manhattan street segments, not calibrated measurements. Missing data is N/A, never zero. Each dimension's sub-indicators, units, methods and sources are listed in the Street Segment Inspector in Explore Urban Data.</p><p><strong>Route score</strong> per dimension = Σ(length × score) / Σ(scored length) over the route's OSM edges, with coverage = scored length ÷ route length. <strong>Ranking</strong> = weighted experience (your preferences; low-coverage dimensions pulled toward neutral 50) − 0.4 × detour %. Routes over the time or detour limit are not recommended.</p><h3>12 dimensions</h3><ol>${DIMENSIONS.map(d=>`<li><strong>${esc(d.name)}</strong> — ${esc(d.desc)}</li>`).join('')}</ol>`;
 }
-function closeModal(){modalOverlay.classList.add('hidden')}
+function closeModal(){modalOverlay.classList.add('hidden');modalOverlay.classList.remove('modal-sheet')}
 function setupControls(){
   renderPreferenceSummary();updateLegend();checkInterpreter();renderPOIs();updateWhyRoute();
   $('searchStart').value='';$('searchEnd').value='';

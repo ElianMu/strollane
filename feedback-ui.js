@@ -239,6 +239,7 @@ function openWalkRating(r){
  c.innerHTML=walkCheckBox(r)+walkerSaysFeed(walkerSays.evaluation,walkCheckType());
  wireWalkCheck(c,r,wireWalkerFeed(c));
  overlay.classList.remove('hidden');
+ overlay.classList.add('modal-sheet');   // on a phone the rating fills the screen rather than floating as a card
  // the dialog itself takes focus, not the first star: a screen reader still announces the dialog and Tab reaches the
  // stars, without a focus ring sitting on a control the walker has not chosen yet
  const dialog=overlay.querySelector('[role="dialog"]');

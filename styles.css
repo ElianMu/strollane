@@ -1584,6 +1584,11 @@ button,a,select,summary,label,input,textarea,[role=button]{touch-action:manipula
  body .walk-check-photo-add{border:0;background:var(--ds-fill);border-radius:12px}
  body .walk-check-send{border:0;background:var(--ds-ink);color:var(--ds-on-ink);border-radius:14px}
  body .modal-overlay .modal{border:0;border-radius:20px;box-shadow:var(--ds-float);padding:24px 20px}
+ /* the rating fills the phone screen instead of floating as a card (openWalkRating adds .modal-sheet) */
+ body .modal-overlay.modal-sheet{padding:0;backdrop-filter:none;background:var(--bg)}
+ body .modal-overlay.modal-sheet .modal{width:100%;max-width:none;height:100dvh;max-height:none;border-radius:0;box-shadow:none;
+  padding:26px 20px calc(28px + env(safe-area-inset-bottom))}
+ body .modal-overlay.modal-sheet .modal-close{top:18px;right:14px;font-size:22px}
 
  /* navigation: the turn is the loudest thing on screen; status sits above the bottom card, clear of the instruction */
  body .nav-overlay .nav-top,body .nav-overlay .nav-bottom{border:0;border-radius:20px;box-shadow:var(--ds-float)}
