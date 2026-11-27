@@ -67,8 +67,10 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'feedback-u
  // likes and replies into a section the dialog never rendered).
  {run('walkerSays.evaluation=evalD');
   const content={innerHTML:'',querySelector:()=>null};
-  ctx.document={getElementById:id=>({modalOverlay:{classList:{remove(){}},querySelector:()=>null},modalOverline:{},modalTitle:{},modalContent:content}[id])};
+  const overlayClasses=new Set();
+  ctx.document={getElementById:id=>({modalOverlay:{classList:{add:c=>overlayClasses.add(c),remove:c=>overlayClasses.delete(c)},querySelector:()=>null},modalOverline:{},modalTitle:{},modalContent:content}[id])};
   run('openWalkRating(r2)');
+  assert(overlayClasses.has('modal-sheet'),'on a phone the rating fills the screen instead of floating as a card');
   run('walkerSays.evaluation=null');   // the later checks read it as a fresh page would
   assert(content.innerHTML.includes('class="walk-check"'),'the walker rates the walk');
   assert(content.innerHTML.includes('walker-says-feed')&&content.innerHTML.includes('Busy but fine'),'and reads what other walkers said, in the same dialog');
